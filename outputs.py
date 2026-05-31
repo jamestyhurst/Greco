@@ -34,6 +34,90 @@ BOARD_TIERS = {
 }
 
 
+# --------------------------------------------------------------------------
+# Report naming + output location
+# --------------------------------------------------------------------------
+def time_control_category(tc: str) -> str:
+    """Map a PGN TimeControl tag to a general category for the filename.
+
+    Returns "Bullet", "Blitz", "Rapid", "Classical", "Daily", or "" (unknown).
+    Uses a lichess-style estimate (base + 40*increment) so that, e.g., 180+2
+    reads as Blitz rather than Bullet.
+    """
+    if not tc or tc in ("?", "-"):
+        return ""
+    if "/" in tc:  # correspondence, e.g. "1/259200"
+        return "Daily"
+    try:
+        if "+" in tc:
+            base_s, inc_s = tc.split("+", 1)
+            base, inc = int(base_s), int(inc_s)
+        else:
+            base, inc = int(tc), 0
+    except (ValueError, TypeError):
+        return ""
+    if base >= 86400:
+        return "Daily"
+    estimate = base + 40 * inc
+    if estimate < 180:
+        return "Bullet"
+    if estimate < 600:
+        return "Blitz"
+    if estimate < 3600:
+        return "Rapid"
+    return "Classical"
+
+
+def _year_from_headers(headers: dict) -> str:
+    """Pull a 4-digit year from Date / UTCDate / EventDate, or '' if unknown."""
+    for key in ("Date", "UTCDate", "EventDate"):
+        value = headers.get(key) or ""
+        m = re.match(r"(\d{4})", value)
+        if m and m.group(1) != "0000":
+            return m.group(1)
+    return ""
+
+
+def _safe_filename(name: str) -> str:
+    """Make a string safe as a Windows filename (keeps spaces, commas, '.')."""
+    name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name)
+    name = re.sub(r"\s+", " ", name).strip().rstrip(".")
+    return name or "game"
+
+
+def report_basename(game: GameAnalysis) -> str:
+    """Build an informational report filename stem:
+    'White vs. Black, Category, Year' (category/year omitted if unknown)."""
+    h = game.headers
+    white = (h.get("White") or "White").strip() or "White"
+    black = (h.get("Black") or "Black").strip() or "Black"
+    parts = [f"{white} vs. {black}"]
+    category = time_control_category(h.get("TimeControl", ""))
+    if category:
+        parts.append(category)
+    year = _year_from_headers(h)
+    if year:
+        parts.append(year)
+    return _safe_filename(", ".join(parts))
+
+
+def default_reports_dir() -> Path:
+    r"""Where the GUI saves reports: E:\Chess\Reports if the E: drive is
+    connected, otherwise ~/Documents/Greco Reports. Creates the folder."""
+    candidates = [Path("E:/Chess/Reports"), Path.home() / "Documents" / "Greco Reports"]
+    for path in candidates:
+        try:
+            if path.drive and not Path(path.drive + "/").exists():
+                continue  # drive (e.g. E:) not mounted right now
+            path.mkdir(parents=True, exist_ok=True)
+            return path
+        except Exception:
+            continue
+    fallback = Path.home() / "Greco Reports"
+    fallback.mkdir(parents=True, exist_ok=True)
+    return fallback
+
+
 def format_move_list(game: GameAnalysis) -> str:
     """Return the game's mainline as '1. e4 e5 2. Nf3 Nc6 ...' wrapped to ~70 cols."""
     tokens: List[str] = []

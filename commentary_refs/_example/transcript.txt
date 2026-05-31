@@ -1,0 +1,17 @@
+This folder is an EXAMPLE / TEMPLATE, and Greco IGNORES it (its name starts
+with "_"). Nothing in here is ever sent to Claude. Use it only as a guide.
+
+To add a real reference:
+  1. Make a NEW folder next to this one, e.g. "agadmator-opera-game"
+     (any name, but don't start it with "_" or ".").
+  2. Paste the commentator's transcript into a file called transcript.txt
+     inside that new folder — just the spoken words from the video.
+  3. (Recommended) Save the game's PGN as game.pgn in the same folder.
+  4. (Optional) Add a meta.json like the one in this example folder.
+
+Greco reads transcript.txt to learn the commentator's STYLE — how they pace
+the story, build suspense, explain a position, and react when something
+exciting happens. It will NOT take any chess facts, moves, or claims from it.
+
+Aim for a few hundred to a few thousand words of real commentary. Timestamps
+(like "0:42") are fine to leave in; you don't need to clean them out.

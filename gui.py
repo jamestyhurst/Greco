@@ -28,12 +28,15 @@ from importers import load_pgn
 from analyzer import analyze_pgn
 from triage import annotate_with_tiers
 from narrator import generate_narrative
-from outputs import assemble_report, markdown_to_html
+from outputs import assemble_report, markdown_to_html, report_basename, default_reports_dir
 
 
 SPEED_LABELS = {"Fast (0.5s/move)": 0.5, "Normal (0.8s/move)": 0.8, "Deep (1.5s/move)": 1.5}
 USE_CASES = ["companion", "coaching", "commentary"]
 SIDES = ["White", "Black", "Neither"]
+
+# Preferred place to look for PGNs (the E: library), with a sensible fallback.
+PGN_LIBRARY = r"E:\Chess\PGNs"
 
 
 def _safe_folder_name(name: str) -> str:
@@ -59,6 +62,8 @@ class GrecoGUI:
         self.root = root
         self.q: "queue.Queue" = queue.Queue()
         self.running = False
+        self._last_html = None   # path of the most recent report (for the buttons)
+        self._last_dir = None
         root.title("Greco — Chess Game Analyzer")
         root.geometry("760x640")
         root.minsize(640, 560)
@@ -129,6 +134,18 @@ class GrecoGUI:
         self.status_var = tk.StringVar(value="Ready.")
         ttk.Label(main, textvariable=self.status_var, foreground="#2b6cb0").pack(anchor="w", padx=8)
 
+        # --- Post-run actions (enabled once a report has been produced) ---
+        actionrow = ttk.Frame(main)
+        actionrow.pack(fill="x", **pad)
+        self.open_report_btn = ttk.Button(
+            actionrow, text="Open report", command=self._open_report, state="disabled"
+        )
+        self.open_report_btn.pack(side="left")
+        self.open_folder_btn = ttk.Button(
+            actionrow, text="Open report folder", command=self._open_folder, state="disabled"
+        )
+        self.open_folder_btn.pack(side="left", padx=6)
+
         # --- Log / live narrative ---
         self.log = scrolledtext.ScrolledText(main, height=14, wrap="word", font=("Consolas", 9))
         self.log.pack(fill="both", expand=True, padx=8, pady=(4, 8))
@@ -136,8 +153,10 @@ class GrecoGUI:
 
     # ---------- input helpers ----------
     def _browse_pgn(self):
+        initial = PGN_LIBRARY if os.path.isdir(PGN_LIBRARY) else str(Path.home())
         path = filedialog.askopenfilename(
             title="Choose a PGN file",
+            initialdir=initial,
             filetypes=[("PGN files", "*.pgn"), ("All files", "*.*")],
         )
         if path:
@@ -156,6 +175,21 @@ class GrecoGUI:
         self.log.insert("end", text)
         self.log.see("end")
         self.log.configure(state="disabled")
+
+    # ---------- post-run actions ----------
+    def _open_report(self):
+        if self._last_html:
+            try:
+                webbrowser.open(Path(self._last_html).as_uri())
+            except Exception:
+                messagebox.showinfo("Greco", f"Report:\n{self._last_html}")
+
+    def _open_folder(self):
+        if self._last_dir:
+            try:
+                os.startfile(self._last_dir)  # Windows: reveal in File Explorer
+            except Exception:
+                messagebox.showinfo("Greco", f"Report folder:\n{self._last_dir}")
 
     # ---------- run ----------
     def _on_analyze(self):
@@ -177,6 +211,8 @@ class GrecoGUI:
 
         self.running = True
         self.analyze_btn.configure(state="disabled")
+        self.open_report_btn.configure(state="disabled")
+        self.open_folder_btn.configure(state="disabled")
         self.progress.configure(mode="indeterminate")
         self.progress.start(12)
         self.status_var.set("Starting…")
@@ -224,13 +260,11 @@ class GrecoGUI:
                 user_note=p["note"],
                 live_stream_to=_QueueWriter(self.q),
             )
-            # Name the output folder "White vs Black" under Documents/Greco Reports.
-            white = game.headers.get("White", "White")
-            black = game.headers.get("Black", "Black")
-            out_dir = (
-                Path.home() / "Documents" / "Greco Reports" / _safe_folder_name(f"{white} vs {black}")
-            )
-            md_path = out_dir / "report.md"
+            # Name the report informatively ("White vs. Black, Blitz, 2024") and
+            # save it under the E: reports library (falls back to Documents).
+            base = report_basename(game)
+            out_dir = default_reports_dir() / base
+            md_path = out_dir / f"{base}.md"
             self.q.put(("status", "Rendering boards and assembling the report…"))
             assemble_report(
                 game,
@@ -283,7 +317,11 @@ class GrecoGUI:
 
     def _finish_ok(self, html_path: str):
         self._reset_controls()
-        self.status_var.set(f"Done — opening report: {html_path}")
+        self._last_html = html_path
+        self._last_dir = str(Path(html_path).parent)
+        self.open_report_btn.configure(state="normal")
+        self.open_folder_btn.configure(state="normal")
+        self.status_var.set("Done — report opened in your browser.")
         self._log(f"\n\n✅ Report saved to:\n{html_path}\nOpening in your browser…\n")
         try:
             webbrowser.open(Path(html_path).as_uri())

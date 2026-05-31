@@ -233,7 +233,19 @@ VOICE_ADDENDA = {
 
 def _build_system_prompt(use_case: str) -> str:
     addendum = VOICE_ADDENDA.get(use_case, VOICE_COMPANION)
-    return SYSTEM_PROMPT_BASE + "\n\n" + addendum
+    prompt = SYSTEM_PROMPT_BASE + "\n\n" + addendum
+    # Optional: learn voice/craft from real commentator transcripts the user has
+    # added under commentary_refs/. Style-only — the loader and prompt forbid
+    # importing any board facts from them. Fail-safe: never break a run.
+    try:
+        from commentary import load_commentary_references
+
+        references = load_commentary_references()
+    except Exception:
+        references = ""
+    if references:
+        prompt += "\n\n" + references
+    return prompt
 
 
 def _format_eval(cp: Optional[int], mate: Optional[int]) -> str:
