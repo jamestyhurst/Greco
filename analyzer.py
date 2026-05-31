@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import io
 import os
+import subprocess
 import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
@@ -25,10 +26,15 @@ def open_engine(engine_path: str, retries: int = 3, timeout: float = 20.0):
     On a busy machine the UCI handshake can exceed python-chess's default 10s and
     raise TimeoutError; retrying clears the occasional transient failure.
     """
+    # Hide Stockfish's console window on Windows (CREATE_NO_WINDOW) so the engine
+    # subprocess doesn't pop up a black window when Greco runs from the GUI / .exe.
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     last_exc = None
     for attempt in range(retries):
         try:
-            return chess.engine.SimpleEngine.popen_uci(engine_path, timeout=timeout)
+            return chess.engine.SimpleEngine.popen_uci(
+                engine_path, timeout=timeout, creationflags=creationflags
+            )
         except Exception as exc:  # TimeoutError, EngineTerminatedError, etc.
             last_exc = exc
             time.sleep(1.0)
