@@ -1,68 +1,99 @@
 # -*- coding: utf-8 -*-
-"""Generate Greco's app icon.
-
-A medieval-style chess KING (♚) in ivory on a gold-rimmed wine-red medallion —
-clearly chess, with an old/heraldic, regal feel (an homage to Greco's 1600s era).
-Writes assets/greco.ico (multi-size: 16-256) and assets/greco.png (256).
+"""Generate Greco's app icon — tuned to stay CRISP at small sizes (the taskbar and
+window title bar use 16-32 px). Each size is rendered on its own with the king
+filling most of the frame (bold, high contrast), supersampled then downscaled, and
+the .ico is assembled from those distinct per-size bitmaps (PNG-in-ICO). Also writes
+assets/icon_preview.png (small sizes zoomed) so the result can be eyeballed.
 
 Re-run with:  python assets/make_icon.py
 """
+import io
+import struct
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
 OUT = Path(__file__).resolve().parent
-S = 1024  # render large, then downscale for crispness
-
-# Medieval palette: antique gold, wine red, ivory.
-GOLD = (198, 158, 56, 255)
-GOLD_HI = (230, 198, 112, 255)
-WINE = (114, 26, 36, 255)
-WINE_DK = (70, 14, 22, 255)
-IVORY = (244, 235, 208, 255)
-SHADOW = (35, 8, 12, 150)
-
+GOLD = (201, 162, 58, 255)
+WINE = (122, 28, 38, 255)
+IVORY = (245, 237, 212, 255)
 KING = "♚"  # ♚ BLACK CHESS KING (solid silhouette)
-FONT_PATH = r"C:\Windows\Fonts\seguisym.ttf"
+FONT = r"C:\Windows\Fonts\seguisym.ttf"
+SIZES = [256, 128, 64, 48, 32, 24, 16]
 
 
-def centered_glyph(size, glyph, font, fill, dx=0, dy=0):
-    """Return an RGBA layer with `glyph` centered by its INK bounds (not font metrics)."""
-    probe = Image.new("RGBA", size, (0, 0, 0, 0))
+def _centered(box, glyph, font, fill):
+    """A `box`x`box` RGBA layer with the glyph centered by its INK bounds."""
+    probe = Image.new("RGBA", (box, box), (0, 0, 0, 0))
     ImageDraw.Draw(probe).text((0, 0), glyph, font=font, fill=fill, anchor="lt")
-    bbox = probe.getbbox()
-    if not bbox:
+    bb = probe.getbbox()
+    if not bb:
         return probe
-    gw, gh = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    px = (size[0] - gw) // 2 - bbox[0] + dx
-    py = (size[1] - gh) // 2 - bbox[1] + dy
-    out = Image.new("RGBA", size, (0, 0, 0, 0))
-    ImageDraw.Draw(out).text((px, py), glyph, font=font, fill=fill, anchor="lt")
+    gw, gh = bb[2] - bb[0], bb[3] - bb[1]
+    out = Image.new("RGBA", (box, box), (0, 0, 0, 0))
+    ImageDraw.Draw(out).text(((box - gw) // 2 - bb[0], (box - gh) // 2 - bb[1]),
+                             glyph, font=font, fill=fill, anchor="lt")
     return out
 
 
-img = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-d = ImageDraw.Draw(img)
-c = S / 2
+def render(size, ss=4):
+    """Render one icon bitmap at `size` px (supersampled by `ss`)."""
+    R = size * ss
+    img = Image.new("RGBA", (R, R), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    c, rad = R / 2.0, R * 0.49
+    rim = max(float(ss), R * 0.05)
+    d.ellipse([c - rad, c - rad, c + rad, c + rad], fill=GOLD)                       # gold rim
+    d.ellipse([c - rad + rim, c - rad + rim, c + rad - rim, c + rad - rim], fill=WINE)  # wine field
+    # King sized so its INK fills ~0.74 of the frame (big and clear).
+    target = R * 0.74
+    fsize = int(R * 0.92)
+    font = ImageFont.truetype(FONT, fsize)
+    layer = _centered(R, KING, font, IVORY)
+    bb = layer.getbbox()
+    if bb:
+        ink_h = bb[3] - bb[1]
+        if ink_h:  # rescale font so the ink hits the target height
+            font = ImageFont.truetype(FONT, max(8, int(fsize * target / ink_h)))
+            layer = _centered(R, KING, font, IVORY)
+    img.alpha_composite(layer)
+    return img.resize((size, size), Image.LANCZOS)
 
-# Medallion: gold disk -> lighter gold -> wine field, leaving a gold rim.
-for r, col in ((0.480, GOLD), (0.455, GOLD_HI), (0.430, WINE)):
-    d.ellipse([c - S * r, c - S * r, c + S * r, c + S * r], fill=col)
-# Thin dark inner ring for depth.
-rf = 0.430
-d.ellipse([c - S * rf, c - S * rf, c + S * rf, c + S * rf],
-          outline=WINE_DK, width=int(S * 0.013))
 
-font = ImageFont.truetype(FONT_PATH, int(S * 0.60))
-# Drop shadow, then the ivory king.
-img.alpha_composite(centered_glyph((S, S), KING, font, SHADOW, dx=int(S * 0.012), dy=int(S * 0.02)))
-img.alpha_composite(centered_glyph((S, S), KING, font, IVORY, dy=int(S * 0.005)))
+def build_ico(images, path):
+    """Assemble a PNG-in-ICO from distinct per-size RGBA images."""
+    blobs = []
+    for im in images:
+        b = io.BytesIO()
+        im.save(b, format="PNG")
+        blobs.append(b.getvalue())
+    out = io.BytesIO()
+    out.write(struct.pack("<HHH", 0, 1, len(images)))
+    offset = 6 + len(images) * 16
+    for im, blob in zip(images, blobs):
+        w = 0 if im.width >= 256 else im.width
+        h = 0 if im.height >= 256 else im.height
+        out.write(struct.pack("<BBBBHHII", w, h, 0, 0, 1, 32, len(blob), offset))
+        offset += len(blob)
+    for blob in blobs:
+        out.write(blob)
+    Path(path).write_bytes(out.getvalue())
 
-png = OUT / "greco.png"
-img.resize((256, 256), Image.LANCZOS).save(png)
 
-ico = OUT / "greco.ico"
-img.save(ico, sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)])
+rendered = {s: render(s) for s in SIZES}
+build_ico([rendered[s] for s in SIZES], OUT / "greco.ico")
+rendered[256].save(OUT / "greco.png")
 
-print("wrote:", png)
-print("wrote:", ico)
+# Preview: small sizes zoomed with NEAREST so the real pixels are visible.
+show, zoom, pad = [16, 24, 32, 48, 64], 9, 12
+mw = sum(s * zoom for s in show) + pad * (len(show) + 1)
+mh = max(s * zoom for s in show) + pad * 2
+prev = Image.new("RGBA", (mw, mh), (105, 105, 105, 255))
+x = pad
+for s in show:
+    big = rendered[s].resize((s * zoom, s * zoom), Image.NEAREST)
+    prev.alpha_composite(big, (x, pad))
+    x += s * zoom + pad
+prev.convert("RGB").save(OUT / "icon_preview.png")
+
+print("wrote greco.ico (sizes %s), greco.png, icon_preview.png" % SIZES)

@@ -7,10 +7,17 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added
+- **Standalone `Greco.exe`** (PyInstaller, `--windowed` = no console window, Greco
+  icon embedded; all dependencies bundled). Built and deployed with `build_exe.bat`
+  to **`C:\Users\Public\Greco`** — an **ASCII path is required**: the non-ASCII
+  username in `C:\Users\<unicode>\…` makes the frozen Tcl/Tk fail to find its own
+  files, so the app must run from a path with no non-ASCII characters. The desktop
+  shortcut now launches this `.exe`.
+- **Crisper app icon**: each icon size is rendered individually (king fills the frame)
+  so it stays clear at 16–32 px instead of looking fuzzy.
+
 ### Planned
-- **Standalone `Greco.exe`** (via PyInstaller): one double-click to run, no console
-  window, no separate Python install required, Greco icon embedded. This replaces the
-  `.bat` / `.vbs` launcher scripts.
 - **Settings panel** in the GUI: edit the Stockfish path, API key, model, and output
   folder from inside the window (no environment variables needed).
 - Bulk-gather more commentary references (Agadmator + SammyChess).

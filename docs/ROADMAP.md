@@ -30,6 +30,17 @@ engine-backed, AI-narrated report. Versioning is [Semantic](https://semver.org/)
 
 3. **Polish** — drag-and-drop a PGN, a recent-games list, one-click "Save as PDF".
 
+## Feature wishlist (not yet scheduled — quick-prompt these when you have tokens)
+- **Interactive PGN viewer inside the HTML report** — forward/back buttons that step
+  through the recorded game on a board, the way chess.com / chessgames.com do.
+  *Feasible:* embed a small self-contained JavaScript board + PGN viewer in the report
+  HTML (the report stays a single shareable file).
+- **"Read aloud" (TTS) inside the HTML report** — a play button that narrates the report
+  in the browser. *Yes, this is possible:* the browser's built-in Web Speech API
+  (`speechSynthesis`) speaks text with no extra files or server, so the report stays
+  self-contained. (Greco already has desktop TTS via `tts.py`; this would be the
+  in-browser version.)
+
 ## Later ideas
 - Distribute Greco to other computers (the `.exe` makes this possible).
 - A larger, curated commentary-reference library (bulk Agadmator + SammyChess).
