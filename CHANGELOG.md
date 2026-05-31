@@ -16,6 +16,16 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
   shortcut now launches this `.exe`.
 - **Crisper app icon**: each icon size is rendered individually (king fills the frame)
   so it stays clear at 16–32 px instead of looking fuzzy.
+- **Game finders** (`tools/find_games.py`): download PGNs from Chess.com (your own
+  games) or PGN Mentor (master/OTB games), filtered by time class / result / opening.
+- **No Stockfish console window** pops up during analysis anymore.
+- **Reports save to `Documents\Greco Reports` (C:) by default again** (override with
+  the `GRECO_REPORTS_DIR` environment variable).
+- **Voice refinements**: honour relationship/addressing instructions from the note
+  (e.g. write a report *to* your dad, calling him "you" and you "your son" instead of
+  "White"/"Black"); scale the LANGUAGE to the reader (plain descriptions over raw
+  coordinates for beginners); a Daily / correspondence voice; and Companion mode can
+  be a warm keepsake rather than a Stockfish data-dump when the note asks for it.
 
 ### Planned
 - **Settings panel** in the GUI: edit the Stockfish path, API key, model, and output
