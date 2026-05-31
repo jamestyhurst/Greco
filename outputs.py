@@ -15,6 +15,7 @@ toggleable.
 from __future__ import annotations
 
 import base64
+import os
 import re
 from pathlib import Path
 from typing import List, Optional
@@ -102,20 +103,19 @@ def report_basename(game: GameAnalysis) -> str:
 
 
 def default_reports_dir() -> Path:
-    r"""Where the GUI saves reports: E:\Chess\Reports if the E: drive is
-    connected, otherwise ~/Documents/Greco Reports. Creates the folder."""
-    candidates = [Path("E:/Chess/Reports"), Path.home() / "Documents" / "Greco Reports"]
-    for path in candidates:
-        try:
-            if path.drive and not Path(path.drive + "/").exists():
-                continue  # drive (e.g. E:) not mounted right now
-            path.mkdir(parents=True, exist_ok=True)
-            return path
-        except Exception:
-            continue
-    fallback = Path.home() / "Greco Reports"
-    fallback.mkdir(parents=True, exist_ok=True)
-    return fallback
+    r"""Where reports are saved. Default: the user's Documents\Greco Reports (on
+    C:) — this is the shareable-product default. An in-house setup can redirect
+    reports anywhere (e.g. an external drive) by setting the GRECO_REPORTS_DIR
+    environment variable."""
+    override = os.environ.get("GRECO_REPORTS_DIR")
+    base = Path(override) if override else (Path.home() / "Documents" / "Greco Reports")
+    try:
+        base.mkdir(parents=True, exist_ok=True)
+        return base
+    except Exception:
+        fallback = Path.home() / "Greco Reports"
+        fallback.mkdir(parents=True, exist_ok=True)
+        return fallback
 
 
 def format_move_list(game: GameAnalysis) -> str:

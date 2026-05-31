@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 """Greco game finder — download chess game PGNs matching a description.
 
-Currently supports Chess.com via its public API (no login needed). Master/OTB
-sources (PGN Mentor, lichess) can be added the same way.
+Two sources:
+  chesscom   — a Chess.com player's own games (public API), filter by time class
+  pgnmentor  — a master's games (PGN Mentor collection), filter by result/category
 
 Examples:
-    python tools/find_games.py JamesTortoise --time-class rapid --max 20
-    python tools/find_games.py JamesTortoise --result loss --color white --max 10
-    python tools/find_games.py someUser --eco B02 --max 15        # Alekhine's Defense
-    python tools/find_games.py someUser --since 2025 --out "E:\\Chess\\PGNs\\found"
+  python tools/find_games.py chesscom JamesTortoise --time-class rapid --max 20
+  python tools/find_games.py chesscom JamesTortoise --color white --result loss
+  python tools/find_games.py pgnmentor Carlsen --category classical --result loss --max 10
+  python tools/find_games.py pgnmentor Kasparov --eco C45 --max 15
 
-SSL note: this machine's certifi bundle is missing a root the network presents,
-so we load the Windows certificate store into the SSL context (same workaround as
+SSL note: this machine's certifi bundle is missing a root the network presents, so
+we load the Windows certificate store into the SSL context (same workaround as
 narrator.py / fetch_transcript.py).
 """
 import argparse
+import io
 import re
 import ssl
-import sys
+import zipfile
 from pathlib import Path
 
 import requests
@@ -26,8 +28,10 @@ from requests.adapters import HTTPAdapter
 UA = "Greco-game-finder/0.1 (personal chess analysis tool)"
 DEFAULT_OUT = r"E:\Chess\PGNs\found"
 DRAW_RESULTS = {"agreed", "repetition", "stalemate", "insufficient", "50move", "timevsinsufficient"}
+FAST_KEYWORDS = ("blitz", "rapid", "bullet", "blindfold", "online", "internet", "armageddon", "speed")
 
 
+# ---------------------------------------------------------------- net / helpers
 def _win_ssl_context() -> ssl.SSLContext:
     ctx = ssl.create_default_context()
     ctx.load_default_certs()
@@ -58,7 +62,7 @@ class _WinCertAdapter(HTTPAdapter):
 def _session() -> requests.Session:
     s = requests.Session()
     s.mount("https://", _WinCertAdapter())
-    s.headers.update({"User-Agent": UA, "Accept": "application/json"})
+    s.headers.update({"User-Agent": UA})
     return s
 
 
@@ -67,8 +71,68 @@ def _tag(pgn: str, name: str) -> str:
     return m.group(1) if m else ""
 
 
-def _classify(game: dict, user: str):
-    """Return (color, outcome, opponent_name) for `user`, or None if not in game."""
+def _safe(name: str) -> str:
+    return re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name).strip().rstrip(".") or "game"
+
+
+def _is_online(site: str) -> bool:
+    s = site.lower()
+    if any(k in s for k in ("chess.com", "lichess", "playchess", "online", "internet", "icc")):
+        return True
+    return bool(re.search(r"\bint\b", s))   # "...INT" suffix = internet (but not "Saint")
+
+
+def _tc_category(tc: str) -> str:
+    """Category from a TimeControl tag, or '' if unknown."""
+    if not tc or tc in ("?", "-"):
+        return ""
+    if "/" in tc:
+        return "classical"               # move-based, e.g. "40/7200" = classical
+    try:
+        if "+" in tc:
+            base, inc = tc.split("+", 1)
+            base, inc = int(base), int(inc)
+        else:
+            base, inc = int(tc), 0
+    except (ValueError, TypeError):
+        return ""
+    est = base + 40 * inc
+    if est >= 3600:
+        return "classical"
+    if est >= 600:
+        return "rapid"
+    if est >= 180:
+        return "blitz"
+    return "bullet"
+
+
+def _classify_category(event: str, site: str, tc: str) -> str:
+    ev = (event + " " + site).lower()
+    if "bullet" in ev:
+        return "bullet"
+    if "blitz" in ev or "titled tue" in ev or "titled tuesday" in ev:
+        return "blitz"
+    if any(k in ev for k in ("rapid", "blindfold", "armageddon", "speed chess")):
+        return "rapid"
+    # Modern rapid/blitz events that read like classical tournaments but aren't,
+    # and (in PGN Mentor data) usually carry no rapid/blitz keyword or TimeControl.
+    if any(h in ev for h in (
+        "esports world cup", "clutch", "champions chess tour", "world rapid", "world blitz",
+        "freestyle", "meltwater", "aimchess", "chessable masters", "carlsen invitational",
+        "skilling", "airthings", "julius baer", "lindores", "new in chess classic",
+        "tour final", "play-in", "ftx crypto", "global chess league", "cct ", "cct final",
+        " gcl ", " gcl", "gcl ", "speed chess", "speedchess", "titled", "rapidchess",
+    )):
+        return "rapid"
+    by_tc = _tc_category(tc)
+    if by_tc:
+        return by_tc
+    # No explicit signal: online games are essentially never classical.
+    return "rapid" if _is_online(site) else "classical"
+
+
+# ------------------------------------------------------------------- Chess.com
+def _classify_chesscom(game: dict, user: str):
     u = user.lower()
     white, black = game.get("white", {}), game.get("black", {})
     if white.get("username", "").lower() == u:
@@ -82,38 +146,32 @@ def _classify(game: dict, user: str):
     return color, outcome, opp.get("username", "?")
 
 
-def _safe(name: str) -> str:
-    return re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name).strip().rstrip(".") or "game"
-
-
 def fetch_chesscom(username, time_class=None, color=None, result=None, eco=None,
                    since=None, max_games=20, out_dir=DEFAULT_OUT):
     s = _session()
-    arch_url = f"https://api.chess.com/pub/player/{username}/games/archives"
-    resp = s.get(arch_url, timeout=30)
+    resp = s.get(f"https://api.chess.com/pub/player/{username}/games/archives", timeout=30)
     if resp.status_code == 404:
         print(f"No Chess.com player named '{username}'.")
         return []
     resp.raise_for_status()
-    months = resp.json().get("archives", [])  # oldest -> newest
+    months = resp.json().get("archives", [])
     if since:
         months = [m for m in months if int(m.rsplit("/", 2)[-2]) >= int(since)]
-
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     saved = []
-    for month_url in reversed(months):           # newest month first
+    for month_url in reversed(months):
         if len(saved) >= max_games:
             break
         r = s.get(month_url, timeout=60)
         if r.status_code != 200:
             continue
-        for g in reversed(r.json().get("games", [])):   # newest game first
+        for g in reversed(r.json().get("games", [])):
             if len(saved) >= max_games:
                 break
             if time_class and g.get("time_class") != time_class:
                 continue
-            cls = _classify(g, username)
+            cls = _classify_chesscom(g, username)
             if not cls:
                 continue
             c, outcome, opp = cls
@@ -124,33 +182,108 @@ def fetch_chesscom(username, time_class=None, color=None, result=None, eco=None,
             pgn = g.get("pgn", "")
             if not pgn:
                 continue
-            if eco:
-                hay = (_tag(pgn, "ECO") + " " + _tag(pgn, "ECOUrl")).lower()
-                if eco.lower() not in hay:
-                    continue
+            if eco and eco.lower() not in (_tag(pgn, "ECO") + " " + _tag(pgn, "ECOUrl")).lower():
+                continue
             date = (_tag(pgn, "UTCDate") or _tag(pgn, "Date")).replace(".", "-")
-            white, black = _tag(pgn, "White"), _tag(pgn, "Black")
-            tc = g.get("time_class", "?")
-            fname = _safe(f"{date} {white} vs {black} ({tc}, {username} {outcome})") + ".pgn"
-            path = out / fname
-            path.write_text(pgn, encoding="utf-8")
+            fname = _safe(f"{date} {_tag(pgn,'White')} vs {_tag(pgn,'Black')} "
+                          f"({g.get('time_class','?')}, {username} {outcome})") + ".pgn"
+            (out / fname).write_text(pgn, encoding="utf-8")
             saved.append(fname)
     return saved
 
 
+# ------------------------------------------------------------------- PGN Mentor
+def _otb_outcome(player, white, black, result):
+    p = player.lower()
+    if p in white.lower():
+        is_white = True
+    elif p in black.lower():
+        is_white = False
+    else:
+        return None
+    if result == "1/2-1/2":
+        return "draw"
+    if result == "1-0":
+        return "win" if is_white else "loss"
+    if result == "0-1":
+        return "loss" if is_white else "win"
+    return None
+
+
+def fetch_pgnmentor(player, category=None, result=None, eco=None,
+                    max_games=20, out_dir=DEFAULT_OUT):
+    s = _session()
+    url = f"https://www.pgnmentor.com/players/{player}.zip"
+    r = s.get(url, timeout=120)
+    if r.status_code == 404:
+        print(f"No PGN Mentor collection for '{player}'. Use the name as it appears at "
+              f"pgnmentor.com/files.html (often the surname, e.g. Carlsen, Kasparov, Nakamura).")
+        return []
+    r.raise_for_status()
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    pgn_name = next((n for n in z.namelist() if n.lower().endswith(".pgn")), None)
+    if not pgn_name:
+        print("That collection had no .pgn inside.")
+        return []
+    text = z.read(pgn_name).decode("utf-8", "ignore")
+
+    matches = []
+    for gtext in re.split(r"(?=\[Event )", text):   # split into individual games
+        if not gtext.strip():
+            continue
+        white, black, res = _tag(gtext, "White"), _tag(gtext, "Black"), _tag(gtext, "Result")
+        outcome = _otb_outcome(player, white, black, res)
+        if outcome is None or (result and outcome != result):
+            continue
+        cat = _classify_category(_tag(gtext, "Event"), _tag(gtext, "Site"), _tag(gtext, "TimeControl"))
+        if category and cat != category:
+            continue
+        if eco and eco.lower() not in _tag(gtext, "ECO").lower():
+            continue
+        matches.append((_tag(gtext, "Date"), white, black, cat, outcome, gtext))
+
+    matches.sort(key=lambda m: m[0], reverse=True)   # most recent first
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    saved = []
+    for date, white, black, cat, outcome, gtext in matches[:max_games]:
+        fname = _safe(f"{date.replace('.', '-')} {white} vs {black} ({cat}, {player} {outcome})") + ".pgn"
+        (out / fname).write_text(gtext.strip() + "\n", encoding="utf-8")
+        saved.append(fname)
+    print(f"(scanned the collection: {len(matches)} game(s) matched the filters)")
+    return saved
+
+
+# --------------------------------------------------------------------- CLI
 def main():
-    ap = argparse.ArgumentParser(description="Find & download chess PGNs (Chess.com).")
-    ap.add_argument("username", help="Chess.com username")
-    ap.add_argument("--time-class", choices=["bullet", "blitz", "rapid", "daily"])
-    ap.add_argument("--color", choices=["white", "black"])
-    ap.add_argument("--result", choices=["win", "loss", "draw"])
-    ap.add_argument("--eco", help="match ECO code or opening name (e.g. B02, Alekhine)")
-    ap.add_argument("--since", type=int, help="only games from this year onward")
-    ap.add_argument("--max", type=int, default=20, dest="max_games")
-    ap.add_argument("--out", default=DEFAULT_OUT, help=f"output folder (default {DEFAULT_OUT})")
+    ap = argparse.ArgumentParser(description="Find & download chess game PGNs for Greco.")
+    sub = ap.add_subparsers(dest="source", required=True)
+
+    cc = sub.add_parser("chesscom", help="a Chess.com player's own games")
+    cc.add_argument("username")
+    cc.add_argument("--time-class", choices=["bullet", "blitz", "rapid", "daily"])
+    cc.add_argument("--color", choices=["white", "black"])
+    cc.add_argument("--result", choices=["win", "loss", "draw"])
+    cc.add_argument("--eco", help="match ECO code or opening name (e.g. B02, Alekhine)")
+    cc.add_argument("--since", type=int, help="only games from this year onward")
+    cc.add_argument("--max", type=int, default=20, dest="max_games")
+    cc.add_argument("--out", default=DEFAULT_OUT)
+
+    pm = sub.add_parser("pgnmentor", help="a master's games (PGN Mentor collection)")
+    pm.add_argument("player", help="collection name, e.g. Carlsen, Kasparov, Nakamura")
+    pm.add_argument("--category", choices=["classical", "rapid", "blitz", "bullet"])
+    pm.add_argument("--result", choices=["win", "loss", "draw"])
+    pm.add_argument("--eco", help="match ECO code (e.g. C45, B02)")
+    pm.add_argument("--max", type=int, default=20, dest="max_games")
+    pm.add_argument("--out", default=DEFAULT_OUT)
+
     a = ap.parse_args()
-    saved = fetch_chesscom(a.username, a.time_class, a.color, a.result, a.eco,
-                           a.since, a.max_games, a.out)
+    if a.source == "chesscom":
+        saved = fetch_chesscom(a.username, a.time_class, a.color, a.result, a.eco,
+                               a.since, a.max_games, a.out)
+    else:
+        saved = fetch_pgnmentor(a.player, a.category, a.result, a.eco, a.max_games, a.out)
+
     print(f"\nSaved {len(saved)} game(s) to {a.out}")
     for f in saved:
         print("  ", f)
