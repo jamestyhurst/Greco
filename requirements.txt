@@ -1,0 +1,5 @@
+python-chess>=1.999
+anthropic>=0.40.0
+httpx>=0.25.0
+matplotlib>=3.5
+markdown>=3.4

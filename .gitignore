@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Greco generated audio
+*.wav
+
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+.vscode/
+
+# One-off recovery scripts
+_recover_gui.py
+_dump_tail.py
+gui.recovered.py
