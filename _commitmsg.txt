@@ -1,0 +1,16 @@
+Add medieval king icon, desktop shortcut, and automatic PGN sync
+
+- assets/greco.ico + greco.png: a medieval chess king on a gold-rimmed wine
+  medallion (assets/make_icon.py; Pillow + Segoe UI Symbol glyph).
+- sync_pgns.bat: additive robocopy of chess PGNs from the C: library to
+  E:\Chess\PGNs (pure-ASCII via %USERPROFILE%; preserves structure; safe if E:
+  is unplugged; never deletes).
+- Greco.vbs: windowed launcher (no console) that syncs PGNs, then starts the GUI.
+- assets/make_shortcuts.ps1: creates the Desktop "Greco" shortcut (icon +
+  windowed launcher) and a Startup "Greco PGN Sync" shortcut (logon sync). Uses
+  the Unicode-safe IShellLinkW/IPersistFile COM because WScript.Shell mangles the
+  Chinese-username path through the system ANSI codepage and fails to save.
+- Auto-sync note: Windows Task Scheduler registration needs admin (blocked), so
+  syncing runs at logon (Startup shortcut) and on every GUI launch instead.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
