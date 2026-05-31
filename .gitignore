@@ -13,7 +13,9 @@ Thumbs.db
 .DS_Store
 .vscode/
 
-# One-off recovery scripts
+# One-off / scratch scripts
 _recover_gui.py
 _dump_tail.py
 gui.recovered.py
+_verify.py
+_commitmsg.txt
