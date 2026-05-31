@@ -17,8 +17,10 @@ facts from them. Every fact about your game still comes only from the engine.
    descriptive, e.g. `agadmator-opera-game` (avoid starting the name with `_`).
 4. Inside that new folder, save the transcript as a plain text file named
    **`transcript.txt`** (just the spoken words — timestamps are fine to leave in).
-5. *(Recommended)* Save the **PGN** of the game being discussed as **`game.pgn`**
-   in the same folder. This tells Greco which game the commentary goes with.
+5. *(Recommended)* Save the game's **PGN** in the same folder, named
+   `01 White vs Black.pgn`. If the video covers several games, save one PGN per
+   game, numbered (`01 …`, `02 …`) in the order shown. This tells Greco which
+   game(s) the commentary goes with.
 6. *(Optional)* Add a **`meta.json`** describing it (see `_example/meta.json`).
 
 That's it. The next time you run Greco, it will read these automatically.
@@ -27,11 +29,17 @@ That's it. The next time you run Greco, it will read these automatically.
 
 ```
 commentary_refs/
-    agadmator-opera-game/
-        transcript.txt     (required — the commentator's words)
-        game.pgn           (optional — the game they're discussing)
-        meta.json          (optional — title / commentator / source URL)
+    <one subfolder per video>/
+        transcript.txt           (required — the commentator's words)
+        01 White vs Black.pgn    (the game(s) covered, NUMBERED in the order
+        02 White vs Black.pgn     they appear in the video — one PGN per game)
+        meta.json                (optional — title / commentator / source URL)
 ```
+
+**One subfolder per video.** If a video covers several games (common for
+"best of" compilations), include one PGN per game, named with a two-digit order
+prefix (`01 …`, `02 …`) that matches the order the games are shown in the video.
+A single-game video just has one PGN (`01 …`).
 
 ## Good to know
 

@@ -80,10 +80,19 @@ def _collect(max_refs: int, max_chars_each: int) -> List[Tuple[str, str, str, st
             except Exception:
                 pass
 
-        game_label = ""
-        pgn = sub / "game.pgn"
-        if pgn.is_file():
-            game_label = _pgn_label(pgn)
+        # One subfolder per video; it may hold several PGNs named in the order
+        # the games appear in the video (e.g. "01 White vs Black.pgn"). Sorted
+        # by filename so the numeric prefixes preserve presentation order.
+        pgn_paths = sorted(sub.glob("*.pgn"))
+        labels = [lab for lab in (_pgn_label(p) for p in pgn_paths) if lab]
+        if len(labels) == 1:
+            game_label = labels[0]
+        elif len(labels) > 1:
+            game_label = "%d games, in presentation order: %s" % (
+                len(labels), "; ".join(labels)
+            )
+        else:
+            game_label = ""
 
         out.append((title, commentator, game_label, transcript[:max_chars_each]))
         if len(out) >= max_refs:

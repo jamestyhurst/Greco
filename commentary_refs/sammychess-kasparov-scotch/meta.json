@@ -1,6 +1,14 @@
 {
-  "title": "Garry Kasparov's Spectacular Scotch Game (multi-game Short)",
-  "commentator": "SammyChess",
+  "title": "Garry Kasparov's Spectacular Scotch Game (5-game compilation)",
+  "commentator": "SammyChess (@SammyChess1)",
   "source_url": "https://www.youtube.com/watch?v=iBv5llNG4No",
-  "notes": "SammyChess's signature style: a punchy, fast-paced Short covering several Kasparov Scotch games in quick succession (lead opponent: Jan Timman). Energetic, superlative-driven, pattern-focused delivery — a deliberate contrast to Agadmator's calm long-form storytelling. No single game.pgn here because the video is a multi-game compilation; the value is the VOICE. Auto-caption transcript (some words garbled by speech recognition)."
+  "channel_verified": "youtube.com/@SammyChess1 (confirmed via YouTube oEmbed author_url)",
+  "games_in_order": [
+    "01 Kasparov vs Jan Timman, Corus (Wijk aan Zee) 2000",
+    "02 Kasparov vs Michael Adams, Sarajevo 1999",
+    "03 Kasparov vs Artur Yusupov (Jussupow), Horgen 1994",
+    "04 Kasparov vs Ivan Sokolov, Yerevan Olympiad 1996",
+    "05 Kasparov vs Wolfgang Unzicker, Zurich (Korchnoi Birthday) 2001"
+  ],
+  "notes": "SammyChess's punchy, fast, superlative-driven delivery covering five Kasparov Scotch wins in order (a deliberate contrast to Agadmator's calm storytelling). The matching PGNs are numbered to that presentation order. Auto-caption transcript, so some names are garbled: 'Yan Teimman' = Timman, 'Yvon Sakalov' = Ivan Sokolov, 'Wolf Gang Ununzer' = Unzicker. Caveat: Kasparov has two Adams Scotch wins in the database; #02 is the 1999 Sarajevo game — the video's exact Adams game couldn't be 100% confirmed from the auto-caption (swap to the 2000 KasparovChess rapid if it turns out to be that one)."
 }

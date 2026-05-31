@@ -8,4 +8,4 @@ sh.CurrentDirectory = greco
 ' Sync chess PGNs C: -> E: in the background (hidden, don't wait; safe if E: is absent).
 sh.Run """" & greco & "\sync_pgns.bat""", 0, False
 ' Launch the GUI.
-sh.Run "cmd /c set PYTHONUTF8=1 && pythonw gui.py", 0, False
+sh.Run "cmd /c set PYTHONUTF8=1 && pythonw """ & greco & "\gui.py""", 0, False
