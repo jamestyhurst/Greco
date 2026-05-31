@@ -44,3 +44,32 @@ commentary_refs/
   each). Add as many as you like; it rotates through them in alphabetical order.
 - The more *varied* and *high-quality* your references, the better — a couple of
   great transcripts beat ten mediocre ones.
+
+## Automated fetching (what Claude set up)
+
+Two references are already seeded:
+- **`agadmator-opera-game/`** — Agadmator narrating Morphy's Opera Game (full
+  transcript + the game's PGN + metadata). A calm, long-form storytelling sample.
+- **`sammychess-kasparov-scotch/`** — SammyChess's fast, energetic Kasparov-Scotch
+  video (transcript + metadata). It's a multi-game compilation, so there's no
+  single matching PGN — the value here is the *voice*.
+
+Claude can gather more automatically. The helper `_tools/fetch_transcript.py`
+downloads a video's transcript (text only — it never downloads the video) via the
+`youtube-transcript-api` library:
+
+```powershell
+set PYTHONUTF8=1
+python commentary_refs\_tools\fetch_transcript.py <video_id_or_url> <out.txt>
+```
+
+One-time install of the library (uses this machine's pip workaround):
+
+```powershell
+set PYTHONUTF8=1
+python -m pip install --user --trusted-host pypi.org --trusted-host files.pythonhosted.org youtube-transcript-api
+```
+
+Easiest of all: just give Claude a YouTube link (or say "get a few more Agadmator
+and SammyChess videos") and it will create the folder, fetch the transcript, and
+attach a matching PGN whenever the video covers a single identifiable game.
