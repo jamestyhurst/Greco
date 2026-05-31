@@ -48,10 +48,10 @@ $greco = Split-Path -Parent $PSScriptRoot          # ...\greco\assets -> ...\gre
 $desktop = [Environment]::GetFolderPath('Desktop')
 $startup = [Environment]::GetFolderPath('Startup')
 
-# Desktop shortcut: launch the GUI via run_greco.bat (reliable; shows a console).
-# (Greco.vbs is the future no-console launcher, for when we package the app.)
+# Desktop shortcut: launch the GUI windowed via Greco.vbs (NO console window).
+# (run_greco.bat is kept as a console-visible debug launcher.)
 [GrecoShortcut.Lnk]::Create((Join-Path $desktop 'Greco.lnk'),
-  "$greco\run_greco.bat", "",
+  "$env:WINDIR\System32\wscript.exe", ('"' + "$greco\Greco.vbs" + '"'),
   $greco, "$greco\assets\greco.ico", 0, "Greco - Chess Game Analyzer", 1)
 
 # Startup shortcut: sync chess PGNs C: -> E: at every logon (minimized).

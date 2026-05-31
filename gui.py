@@ -38,6 +38,9 @@ SIDES = ["White", "Black", "Neither"]
 # Preferred place to look for PGNs (the E: library), with a sensible fallback.
 PGN_LIBRARY = r"E:\Chess\PGNs"
 
+# Greco app icon (window title bar + taskbar).
+ICON_PATH = Path(__file__).resolve().parent / "assets" / "greco.ico"
+
 
 def _safe_folder_name(name: str) -> str:
     return re.sub(r'[<>:"/\\|?*]', "_", name).strip() or "game"
@@ -336,10 +339,40 @@ class GrecoGUI:
 
 
 def main():
+    # Tell Windows this is its own app (a distinct AppUserModelID) so the taskbar
+    # shows the Greco icon instead of grouping under the generic Python icon.
+    try:
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Greco.ChessAnalyzer.1")
+    except Exception:
+        pass
+
     root = tk.Tk()
+    try:
+        root.iconbitmap(default=str(ICON_PATH))  # Greco logo: title bar + taskbar
+    except Exception:
+        pass
     GrecoGUI(root)
     root.mainloop()
 
 
 if __name__ == "__main__":
-    main()
+    # Launched windowed (pythonw, no console), so make startup failures visible:
+    # log them to a file and show a dialog instead of dying silently.
+    try:
+        main()
+    except Exception:
+        import traceback
+        _err = traceback.format_exc()
+        try:
+            (Path(__file__).resolve().parent / "greco_startup_error.log").write_text(
+                _err, encoding="utf-8"
+            )
+        except Exception:
+            pass
+        try:
+            from tkinter import messagebox
+            messagebox.showerror("Greco failed to start", _err)
+        except Exception:
+            pass
+        raise

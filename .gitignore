@@ -5,8 +5,9 @@ __pycache__/
 .venv/
 venv/
 
-# Greco generated audio
+# Greco generated audio + logs
 *.wav
+*.log
 
 # OS / editor cruft
 Thumbs.db
