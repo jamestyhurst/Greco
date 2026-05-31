@@ -1,11 +1,13 @@
-' Greco launcher — used by the desktop shortcut.
-' (1) Refreshes the E: PGN library, then (2) starts the GUI with UTF-8 mode and
-' NO console window. Pure-ASCII on purpose (paths come from %USERPROFILE% / PATH),
-' so the Chinese-username path is never mis-encoded.
+' Greco launcher — refreshes the E: PGN library, then starts the GUI with UTF-8
+' mode and NO console window. Optional (the desktop shortcut currently uses
+' run_greco.bat). Pure-ASCII; paths come from %USERPROFILE% / PATH.
 Set sh = CreateObject("WScript.Shell")
 greco = sh.ExpandEnvironmentStrings("%USERPROFILE%") & "\Documents\greco"
 sh.CurrentDirectory = greco
-' Sync chess PGNs C: -> E: in the background (hidden, don't wait; safe if E: is absent).
+' Set UTF-8 mode cleanly in the process environment. (Doing this inline as
+' "cmd /c set PYTHONUTF8=1 && pythonw ..." captured a trailing space -> "1 ",
+' which crashes Python on startup. This avoids that.)
+Dim env : Set env = sh.Environment("PROCESS")
+env("PYTHONUTF8") = "1"
 sh.Run """" & greco & "\sync_pgns.bat""", 0, False
-' Launch the GUI.
-sh.Run "cmd /c set PYTHONUTF8=1 && pythonw """ & greco & "\gui.py""", 0, False
+sh.Run "pythonw """ & greco & "\gui.py""", 0, False

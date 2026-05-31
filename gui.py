@@ -29,6 +29,7 @@ from analyzer import analyze_pgn
 from triage import annotate_with_tiers
 from narrator import generate_narrative
 from outputs import assemble_report, markdown_to_html, report_basename, default_reports_dir
+from version import __version__
 
 
 SPEED_LABELS = {"Fast (0.5s/move)": 0.5, "Normal (0.8s/move)": 0.8, "Deep (1.5s/move)": 1.5}
@@ -67,7 +68,7 @@ class GrecoGUI:
         self.running = False
         self._last_html = None   # path of the most recent report (for the buttons)
         self._last_dir = None
-        root.title("Greco — Chess Game Analyzer")
+        root.title(f"Greco {__version__} — Chess Game Analyzer")
         root.geometry("760x640")
         root.minsize(640, 560)
 
