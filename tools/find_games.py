@@ -254,6 +254,53 @@ def fetch_pgnmentor(player, category=None, result=None, eco=None,
     return saved
 
 
+# ------------------------------------------------------------------- Similar
+def _time_class_from_tc(tc: str):
+    if not tc or tc in ("?", "-"):
+        return None
+    if "/" in tc:
+        return "daily"
+    try:
+        base = int(tc.split("+")[0])
+    except ValueError:
+        return None
+    if base >= 86400:
+        return "daily"
+    if base >= 600:
+        return "rapid"
+    if base >= 180:
+        return "blitz"
+    return "bullet"
+
+
+def _prune(out_dir, cap):
+    """Keep only the newest `cap` .pgn files in out_dir (a rotating pool)."""
+    if not cap or cap <= 0:
+        return
+    files = sorted(Path(out_dir).glob("*.pgn"), key=lambda p: p.stat().st_mtime, reverse=True)
+    for p in files[cap:]:
+        try:
+            p.unlink()
+        except OSError:
+            pass
+
+
+def fetch_similar(pgn_path, max_games=2, out_dir=DEFAULT_OUT):
+    """Given a game's PGN, pull a few *similar* games — same Chess.com player and
+    time class — so a developer's test pool keeps refilling itself."""
+    text = Path(pgn_path).read_text(encoding="utf-8", errors="ignore")
+    tclass = _time_class_from_tc(_tag(text, "TimeControl"))
+    for player in (_tag(text, "White"), _tag(text, "Black")):
+        if not player or player == "?":
+            continue
+        saved = fetch_chesscom(player, time_class=tclass, max_games=max_games, out_dir=out_dir)
+        if saved:
+            print(f"(similar: recent {tclass or 'any'}-time-class games by {player})")
+            return saved
+    print("Couldn't resolve a Chess.com player from this PGN to find a similar game.")
+    return []
+
+
 # --------------------------------------------------------------------- CLI
 def main():
     ap = argparse.ArgumentParser(description="Find & download chess game PGNs for Greco.")
@@ -268,6 +315,7 @@ def main():
     cc.add_argument("--since", type=int, help="only games from this year onward")
     cc.add_argument("--max", type=int, default=20, dest="max_games")
     cc.add_argument("--out", default=DEFAULT_OUT)
+    cc.add_argument("--cap", type=int, default=0, help="after saving, keep only the newest N .pgn in --out")
 
     pm = sub.add_parser("pgnmentor", help="a master's games (PGN Mentor collection)")
     pm.add_argument("player", help="collection name, e.g. Carlsen, Kasparov, Nakamura")
@@ -276,15 +324,25 @@ def main():
     pm.add_argument("--eco", help="match ECO code (e.g. C45, B02)")
     pm.add_argument("--max", type=int, default=20, dest="max_games")
     pm.add_argument("--out", default=DEFAULT_OUT)
+    pm.add_argument("--cap", type=int, default=0, help="after saving, keep only the newest N .pgn in --out")
+
+    sm = sub.add_parser("similar", help="pull games similar to a given PGN (same player + time class)")
+    sm.add_argument("pgn_path", help="path to the .pgn of the game just analysed")
+    sm.add_argument("--max", type=int, default=2, dest="max_games")
+    sm.add_argument("--out", default=DEFAULT_OUT)
+    sm.add_argument("--cap", type=int, default=40, help="keep only the newest N .pgn in --out (rotating test pool)")
 
     a = ap.parse_args()
     if a.source == "chesscom":
         saved = fetch_chesscom(a.username, a.time_class, a.color, a.result, a.eco,
                                a.since, a.max_games, a.out)
-    else:
+    elif a.source == "pgnmentor":
         saved = fetch_pgnmentor(a.player, a.category, a.result, a.eco, a.max_games, a.out)
+    else:
+        saved = fetch_similar(a.pgn_path, a.max_games, a.out)
 
-    print(f"\nSaved {len(saved)} game(s) to {a.out}")
+    _prune(a.out, a.cap)
+    print(f"\nSaved {len(saved)} game(s) to {a.out}" + (f"  (folder capped at {a.cap})" if a.cap else ""))
     for f in saved:
         print("  ", f)
     if not saved:
