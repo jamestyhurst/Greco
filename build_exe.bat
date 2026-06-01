@@ -12,7 +12,7 @@ set PYTHONUTF8=1
 cd /d "%~dp0"
 
 echo Building Greco.exe (this takes a few minutes)...
-python -m PyInstaller --noconfirm --windowed --name Greco --icon "assets\greco.ico" --add-data "assets;assets" --add-data "openings;openings" --add-data "commentary_refs;commentary_refs" --collect-submodules markdown --collect-all anthropic gui.py
+python -m PyInstaller --noconfirm --windowed --name Greco --icon "assets\greco.ico" --add-data "assets;assets" --add-data "openings;openings" --add-data "commentary_refs;commentary_refs" --collect-submodules markdown --collect-all anthropic --hidden-import tools.find_games gui.py
 if errorlevel 1 ( echo. & echo BUILD FAILED. & pause & exit /b 1 )
 
 echo Deploying to C:\Users\Public\Greco ...

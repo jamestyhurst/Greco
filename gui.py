@@ -281,8 +281,22 @@ class GrecoGUI:
             )
             html_path = markdown_to_html(md_path)
             self.q.put(("done", str(html_path)))
+            # Developer-only (GRECO_DEV): quietly refill the test pool with a
+            # similar game so the developer never runs out of games to test on.
+            if os.environ.get("GRECO_DEV"):
+                threading.Thread(target=self._dev_fetch_similar,
+                                 args=(p["pgn_path"],), daemon=True).start()
         except Exception as exc:
             self.q.put(("error", f"{exc}\n\n{traceback.format_exc()}"))
+
+    def _dev_fetch_similar(self, pgn_path):
+        """Developer mode only: pull one similar game so the test pool refills.
+        Silent and best-effort — never affects a normal run."""
+        try:
+            from tools.find_games import fetch_similar
+            fetch_similar(pgn_path, max_games=1)
+        except Exception:
+            pass
 
     def _poll(self):
         try:

@@ -10,6 +10,28 @@ engine-backed, AI-narrated report. Versioning is [Semantic](https://semver.org/)
 - Branded icon (title bar + taskbar), informative report names, E:-drive output and
   PGN sync, commentary-learning, local git + E: backup.
 
+## Backlog — priority queue (pull "work orders" from here)
+
+Ordered by priority. Sizes are rough: **S** = a prompt tweak / small edit;
+**M** = a feature + an exe rebuild; **L** = a big feature or refactor. Work top-down;
+each item is committed when done, so a partial batch is still saved progress.
+
+| # | Task | Size | Status |
+|---|------|------|--------|
+| 1 | Settings panel in the GUI (engine path / API key / model / output folder) | M | todo |
+| 2 | `reference/` knowledge folder — openly-licensed openings/tactics/endgames, wired into the narrator (CC0 / CC-BY-SA only) | M | todo |
+| 3 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | todo |
+| 4 | Tighten the OTB classical-vs-rapid classifier (or use a curated source) | S | todo |
+| 5 | Interactive PGN viewer embedded in the report HTML | L | todo |
+| 6 | "Read aloud" in the report HTML (Web Speech API) | M | todo |
+| 7 | Polish: one-click "Save as PDF", drag-and-drop a PGN, recent-games list | M | todo |
+| 8 | Private GitHub repo for phone ↔ laptop (you authenticate) | S | todo |
+
+**Recently shipped** (newest first): developer auto-`similar` hook + folder cap;
+voice refinements (relationship framing, reader-level language, Daily voice, keepsake
+mode, timid first moves, winning-a-piece ≠ a trade); standalone `Greco.exe`; game
+finders (Chess.com + PGN Mentor); commentary-learning; report naming; versioning + docs.
+
 ## Toward v1.0 — "feels like real software"
 
 1. **Standalone executable (`Greco.exe`)** — *next up.* Bundle Python + Greco with
