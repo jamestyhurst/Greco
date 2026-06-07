@@ -1,0 +1,26 @@
+[Event "Budapest"]
+[Site "Budapest HUN"]
+[Date "1921.09.15"]
+[Round "9"]
+[White "Endre Steiner"]
+[Black "Alexander Alekhine"]
+[Result "0-1"]
+[ECO "B03"]
+[Opening "Alekhine Defense"]
+[Annotator "TortoiseChess"]
+
+{The opening's namesake winning with it during the very tournament that introduced
+it to master play (Budapest, 1921). Alekhine lets White build the big center, picks
+it apart with piece pressure, and converts a long endgame. The historical root of the
+whole defense.}
+1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. Bg5 dxe5 5. dxe5 Nc6 6. Bb5 Bf5 7. Nf3 Ndb4
+8. Na3 Qxd1+ 9. Rxd1 Nxc2+ 10. Nxc2 Bxc2 11. Rc1 Be4 12. Nd4 Bxg2 13. Rg1 O-O-O
+14. Nxc6 Bxc6 15. Bxc6 bxc6 16. Rxc6 Rd5 17. Bf4 e6 18. Ke2 Bc5 19. b4 Bxb4
+20. Rxg7 Rd7 21. Be3 a5 22. Rc4 h5 23. Rh4 Bc3 24. Rg5 Rd5 25. f4 f6
+26. Rgxh5 Rxh5 27. Rxh5 fxe5 28. fxe5 Bxe5 29. Rh7 Rb5 30. Kf3 Rb2 31. Rh5 Bxh2
+32. Rxa5 Bd6 33. Ke4 Kd7 34. Bd4 Rd2 35. Be3 Re2 36. Kd3 Re1 37. Bd4 Rc1
+38. Be3 Rd1+ 39. Ke4 Re1 40. Kd3 e5 41. Bf2 Rf1 42. Be3 Ke6 43. Ke4 Rh1
+44. Bf2 Rh2 45. Be3 Rh4+ 46. Kd3 Bb4 47. Ra7 c5 48. a3 c4+ 49. Ke2 Bd6
+50. Ra8 Rh2+ 51. Kd1 Rh3 52. Kd2 Kd5 53. Rd8 c3+ 54. Ke2 Ke4 55. Rxd6 Rxe3+
+56. Kf2 Rd3 57. Rc6 Rd2+ 58. Ke1 Kd3 59. Rd6+ Kc2 60. Re6 Rd5 61. Ke2 Kb2
+62. Rc6 c2 0-1

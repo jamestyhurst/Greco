@@ -1,0 +1,53 @@
+[Event "Let\\'s Play!"]
+[Site "Chess.com"]
+[Date "2025.10.05"]
+[Round "?"]
+[White "redwood1978"]
+[Black "JamesTortoise"]
+[Result "0-1"]
+[TimeControl "1/259200"]
+[WhiteElo "349"]
+[BlackElo "1038"]
+[Termination "JamesTortoise won by checkmate"]
+[ECO "A00"]
+[EndDate "2025.11.10"]
+[Link "https://www.chess.com/game/daily/873112817"]
+
+1. e3 {[%clk 0:06:02][%timestamp 3620]} 1... Nf6 {[%clk 0:28:20][%timestamp
+17000]} 2. Bd3 {[%clk 21:43:10][%timestamp 781900]} 2... Nc6 {[%clk
+1:04:58][%timestamp 38980]} 3. Nf3 {[%clk 6:33:37][%timestamp 236170]} 3... b6
+{[%clk 0:06:59][%timestamp 4190]} 4. O-O {[%clk 64:25:13][%timestamp 2319130]}
+4... Bb7 {[%clk 1:17:00][%timestamp 46200]} 5. Nc3 {[%clk 18:59:20][%timestamp
+683600]} 5... g6 {[%clk 0:40:41][%timestamp 24410]} 6. b3 {[%clk
+8:54:33][%timestamp 320730]} 6... Bg7 {[%clk 0:16:37][%timestamp 9970]} 7. Bb5
+{[%clk 14:20:52][%timestamp 516520]} 7... a6 {[%clk 0:02:26][%timestamp 1460]}
+8. Bc4 {[%clk 1:11:46][%timestamp 43060]} 8... O-O {[%clk 0:02:42][%timestamp
+1620]} 9. Ng5 {[%clk 69:04:44][%timestamp 2486840]} 9... Ne5 {[%clk
+2:56:16][%timestamp 105760]} 10. d4 {[%clk 66:26:48][%timestamp 2392080]} 10...
+Nxc4 {[%clk 0:01:48][%timestamp 1080]} 11. bxc4 {[%clk 2:44:52][%timestamp
+98920]} 11... h6 {[%clk 2:01:58][%timestamp 73180]} 12. Nge4 {[%clk
+33:50:01][%timestamp 1218010]} 12... Nxe4 {[%clk 1:58:07][%timestamp 70870]} 13.
+Ne2 {[%clk 64:06:33][%timestamp 2307930]} 13... c5 {[%clk 4:41:09][%timestamp
+168690]} 14. Ba3 {[%clk 14:56:24][%timestamp 537840]} 14... cxd4 {[%clk
+0:38:12][%timestamp 22920]} 15. exd4 {[%clk 1:18:38][%timestamp 47180]} 15...
+Rc8 {[%clk 3:44:05][%timestamp 134450]} 16. Qd3 {[%clk 71:49:39][%timestamp
+2585790]} 16... Rc7 {[%clk 6:24:54][%timestamp 230940]} 17. Rab1 {[%clk
+18:31:23][%timestamp 666830]} 17... Rc8 {[%clk 0:47:30][%timestamp 28500]} 18.
+f3 {[%clk 26:17:48][%timestamp 946680]} 18... Ng5 {[%clk 0:52:08][%timestamp
+31280]} 19. c5 {[%clk 38:21:09][%timestamp 1380690]} 19... b5 {[%clk
+4:19:32][%timestamp 155720]} 20. Nf4 {[%clk 0:16:55][%timestamp 10150]} 20...
+Kh7 {[%clk 0:01:34][%timestamp 940]} 21. Rbe1 {[%clk 64:38:17][%timestamp
+2326970]} 21... e6 {[%clk 5:24:35][%timestamp 194750]} 22. Re5 {[%clk
+0:17:57][%timestamp 10770]} 22... Bxe5 {[%clk 24:29:08][%timestamp 881480]} 23.
+Nxg6 {[%clk 1:56:25][%timestamp 69850]} 23... fxg6 {[%clk 1:23:05][%timestamp
+49850]} 24. Re1 {[%clk 42:18:35][%timestamp 1523150]} 24... Bg7 {[%clk
+1:20:09][%timestamp 48090]} 25. c6 {[%clk 7:12:30][%timestamp 259500]} 25...
+Rxc6 {[%clk 0:45:42][%timestamp 27420]} 26. Re5 {[%clk 2:46:34][%timestamp
+99940]} 26... Rf7 {[%clk 5:42:33][%timestamp 205530]} 27. Qe4 {[%clk
+59:30:58][%timestamp 2142580]} 27... Nxe4 {[%clk 2:27:03][%timestamp 88230]} 28.
+fxe4 {[%clk 43:48:45][%timestamp 1577250]} 28... Rxc2 {[%clk 1:09:59][%timestamp
+41990]} 29. Bc5 {[%clk 1:08:17][%timestamp 40970]} 29... Rxa2 {[%clk
+12:40:48][%timestamp 456480]} 30. d5 {[%clk 11:05:47][%timestamp 399470]} 30...
+Ra1# {[%clk 0:04:14][%timestamp 2540][%c_effect
+h7;square;h7;type;Winner;animated;true;keyPressed;undefined;persistent;true,g1;square;g1;type;CheckmateWhite;animated;true;keyPressed;undefined;persistent;true]}
+0-1

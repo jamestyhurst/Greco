@@ -1,0 +1,15 @@
+[Event "Live Chess"]
+[Site "Chess.com"]
+[Date "2026.05.17"]
+[Round "-"]
+[White "JamesTortoise"]
+[Black "IBorisenkov"]
+[Result "0-1"]
+[ECO "D20"]
+[WhiteElo "856"]
+[BlackElo "894"]
+[TimeControl "900+10"]
+[Termination "IBorisenkov won by resignation"]
+[Link "https://www.chess.com/game/live/168856633228"]
+
+1. Nf3 Nc6 2. d4 d5 3. c4 dxc4 4. e4 Bg4 5. Bxc4 Bxf3 6. gxf3 Qxd4 7. Qxd4 Nxd4 8. Nd2 Nc2+ 0-1

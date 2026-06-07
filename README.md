@@ -1,188 +1,146 @@
+<div align="center">
+
+<img src="assets/greco.png" alt="Greco" width="140" />
+
 # Greco
 
-*A chess analyst that thinks like a player and writes like a critic.*
+**A chess analyst that thinks like a player and writes like a critic.**
 
-Named for Gioachino Greco (c. 1600–1634), the Italian master whose annotated games are considered the first chess literature.
+Paste a game. Get a human-readable story of how it was won and lost — engine-accurate, move by move.
 
-Paste any PGN (or a Lichess URL) and Greco returns an analysis that combines:
+[![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Engine](https://img.shields.io/badge/Engine-Stockfish-769656)](https://stockfishchess.org/)
+[![Narration](https://img.shields.io/badge/Narration-Claude-D97757)](https://www.anthropic.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/version-0.1.0-orange.svg)](CHANGELOG.md)
 
-- **Stockfish engine evaluation** — best moves, centipawn loss, mistake classification
-- **Claude's narrative writing** — a flowing prose account of the game
-- **Psychological inference** — why each player may have made or missed the best move
-- **Board diagrams** — at every deep-commentary moment
-- **Eval graph** — the engine's verdict plotted across the game
+</div>
 
-Every move in the game is acknowledged, but commentary depth varies according to a triage that weighs move quality, game phase, eval swings, and any player context you provide.
+---
 
-## What Greco is for
+Greco pairs the **Stockfish** engine with **Claude** to turn a raw PGN into a flowing,
+illustrated game annotation — the kind a strong coach might write, not a wall of
+centipawn numbers. It is named for **Gioachino Greco** (c. 1600–1634), the Italian
+master whose annotated games are considered the first chess literature.
 
-Greco supports three use cases, switched with `--use-case`:
+Every move is engine-evaluated; commentary depth is then *triaged* so the writing lingers
+on the turning points and moves briskly through the quiet ones. The result is a report
+with board diagrams, an evaluation graph, and prose that explains **why** — including the
+human psychology behind a missed or brilliant move.
+
+## See it in action
+
+These are real reports Greco produced. The Markdown versions render right here on GitHub —
+**click to read a full annotated game:**
+
+| Game | What it shows |
+|---|---|
+| 🏆 [**Spassky vs. Fischer**, 1972 World Championship](sample-reports/Boris%20Spassky%20vs.%20Robert%20James%20Fischer%2C%201972/Boris%20Spassky%20vs.%20Robert%20James%20Fischer%2C%201972.md) | One of the most famous endgames ever played, narrated end to end |
+| ♟️ [**Volokitin vs. Ivanchuk**, Aerosvit 2006](sample-reports/Andrei%20Volokitin%20vs%20Vassily%20Ivanchuk/report.md) | A razor-sharp Alekhine Defense |
+| 👤 [**redwood1978 vs. JamesTortoise**, Daily 2025](sample-reports/redwood1978%20vs.%20JamesTortoise%2C%20Daily%2C%202025/redwood1978%20vs.%20JamesTortoise%2C%20Daily%2C%202025.md) | A real amateur game in *companion* voice |
+
+Each report also ships a **self-contained `.html`** (every diagram embedded — open in any
+browser, or print to PDF) alongside the Markdown. Browse them all in
+[`sample-reports/`](sample-reports/).
+
+<div align="center">
+
+*Every report includes an engine-evaluation graph of the whole game:*
+
+<img src="sample-reports/Andrei%20Volokitin%20vs%20Vassily%20Ivanchuk/report_assets/eval.png" alt="Evaluation graph" width="640" />
+
+</div>
+
+## Three ways to read a game
+
+Greco writes in three voices, switched with `--use-case`:
 
 | Mode | Voice | Best for |
 |---|---|---|
-| `companion` (default) | A chess commentator spectating *your* game and talking you through it as you watch — honest and knowledgeable, not a cheerleader | "Look at this cool game I played!" |
-| `coaching` | Diagnostic; closes with "patterns to work on" | "Help me play better next time" |
-| `commentary` | YouTube-style script (styled after Agadmator, Finegold, SammyChess & Chess Giant) with `[SCENE BREAK]` markers | "I'm writing a video about this game" |
+| `companion` *(default)* | A commentator spectating *your* game — honest and knowledgeable, not a cheerleader | *"Look at this game I played!"* |
+| `coaching` | Diagnostic; closes with concrete "patterns to work on" | *"Help me play better next time"* |
+| `commentary` | YouTube-style script with `[SCENE BREAK]` markers | *"I'm writing a video about this game"* |
 
-If you don't pass `--use-case`, Greco asks at startup.
+## Accurate by construction
 
-## Prerequisites
+The model never guesses about the board. Greco computes the ground truth in
+`analyzer.py` and hands it to Claude, so the writing describes the *actual* position —
+not chess clichés:
 
-1. **Python 3.8+**
-2. **Stockfish** chess engine binary
-   - Download from [stockfishchess.org/download](https://stockfishchess.org/download/)
-   - Unzip and remember the full path to `stockfish.exe`
-3. **Anthropic API key** — create one at [console.anthropic.com](https://console.anthropic.com/)
+- **Material tracking** — every move carries the running material balance and what it captured.
+- **Real tactics** — forks, pins, and double attacks are detected from the board, not invented.
+- **Recapture precision** — "recapture" only when the opponent just captured on that square.
+- **No phantom features** — files are called open/half-open only when they truly are.
 
-## Setup
+> **Core principle — *data-back, never prompt-stuff*:** the engine supplies the facts;
+> the model supplies language and psychology. That division is what keeps Greco honest.
+> See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-### 1. Install Python dependencies
+## How it works
 
-> If your Windows username contains non-ASCII characters and pip throws a `UnicodeEncodeError`, set `PYTHONUTF8=1` and add `--trusted-host` flags for pypi.
-
-```powershell
-$env:PYTHONUTF8="1"
-python -m pip install --user `
-    --trusted-host pypi.org `
-    --trusted-host pypi.python.org `
-    --trusted-host files.pythonhosted.org `
-    -r requirements.txt
+```
+PGN source → Stockfish evaluation → commentary triage → Claude narration → assembled report
+  importers        analyzer             triage            narrator         outputs + renderers
 ```
 
-### 2. Set environment variables
+A thin GUI (`gui.py`) and CLI (`main.py`) are the only front-ends — **all** analysis lives
+in the pipeline modules, so both share identical behavior. Full module map in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Quick start
 
 ```powershell
-[Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-...", "User")
-[Environment]::SetEnvironmentVariable("STOCKFISH_PATH", "C:\path\to\stockfish.exe", "User")
-# Open a new PowerShell window so the variables are loaded.
+# 1. Install dependencies
+python -m pip install -r requirements.txt
+
+# 2. Point Greco at Stockfish and your Anthropic key (never hardcoded)
+[Environment]::SetEnvironmentVariable("STOCKFISH_PATH",   "C:\path\to\stockfish.exe", "User")
+[Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-...",               "User")
+
+# 3a. Desktop app — browse to a PGN, pick a style, click Analyze
+python gui.py
+
+# 3b. ...or the command line
+python main.py --pgn-file "sample-games/Spassky vs Fischer - 1972 WC Game 13 (Alekhine Defense).pgn" --use-case commentary
 ```
 
-## Usage
+You'll need **Python 3.8+**, the free [Stockfish](https://stockfishchess.org/download/)
+binary, and an [Anthropic API key](https://console.anthropic.com/). A 40-move game costs
+roughly **$0.05–$0.15** and under a minute.
 
-### Desktop app (easiest — no command line)
+📖 **Full usage** — every flag, Lichess import, audio narration, HTML/PDF output — is in
+[`docs/USAGE.md`](docs/USAGE.md).
 
-Double-click **`run_greco.bat`** (or run `python gui.py`). A window opens where you:
-1. Browse to a PGN file,
-2. pick a report style (companion / coaching / commentary) and which side you played,
-3. click **Analyze game**.
+## Tech stack
 
-Greco runs Stockfish + Claude in the background (with a progress bar), then opens the finished HTML report in your browser. Reports are saved to `Documents\Greco Reports\<White> vs <Black>\`. The Stockfish path and API key auto-fill from your environment variables; you can also paste them into the window.
-
-### Command line
-
-### Quick start
-
-```powershell
-python main.py --pgn-file examples\morphy_opera.pgn --output examples\morphy.md
-```
-
-### A game you played
-
-```powershell
-python main.py --pgn-file my_game.pgn `
-    --user-is white `
-    --use-case companion `
-    --user-note "I'm proud of the queen sacrifice at move 24" `
-    --output reports\my_game.md
-```
-
-### A Lichess URL
-
-```powershell
-python main.py --pgn-url https://lichess.org/abc12def --output reports\lichess.md
-```
-
-### Coaching report on the same game
-
-```powershell
-python main.py --pgn-file my_game.pgn --user-is white --use-case coaching --output reports\my_game_coaching.md
-```
-
-### YouTube commentary script
-
-```powershell
-python main.py --pgn-file my_game.pgn --use-case commentary --user-note "Hook the audience with the queen sacrifice" --output scripts\my_game.md
-```
-
-### HTML report (single self-contained file)
-
-```powershell
-python main.py --pgn-file my_game.pgn --format html --output reports\my_game.md
-# writes reports\my_game.md and reports\my_game.html
-```
-
-The `.html` embeds every board diagram and the eval graph directly in the file — open it in any browser and all images show with no links to click, and you can move or email the single file freely.
-
-**Want a PDF?** Open the `.html` in your browser and press `Ctrl+P` → "Save as PDF". Every image is embedded, so they all travel into the PDF. (No extra software needed.)
-
-### Hear it read aloud
-
-```powershell
-# Read aloud as soon as the report is ready:
-python main.py --pgn-file my_game.pgn --speak
-
-# Or save narration to an audio file (uncompressed WAV — ~50 MB for a full game):
-python main.py --pgn-file my_game.pgn --audio reports\my_game.wav
-```
-
-Uses the Windows built-in speech engine — no install, no internet. (WAV files are large; audio is opt-in so it never bloats your drive unless you ask for it.)
-
-## Accuracy: grounded in the real board
-
-Greco feeds the model engine ground truth so it describes the *actual* position, not chess clichés:
-
-- **Material tracking** — every move carries the running material balance and what it captured, so explanations are grounded in who's up or down.
-- **Recapture precision** — "recapture" is used only when the opponent just captured on that square; a move that takes a *pushed* pawn is a plain capture.
-- **Real threats** — forks and double attacks are detected from the board (e.g. "knight on e6 attacks the king on g7 and the queen on c7 — royal fork") rather than guessed.
-- **No invented features** — files are only called open/half-open when they actually are.
-
-### All useful flags
-
-| Flag | Purpose |
+| | |
 |---|---|
-| `--pgn-file PATH` | Local PGN file |
-| `--pgn-url URL` | Lichess URL or 8-character game ID |
-| `--pgn TEXT` | Raw PGN text on the command line |
-| `--source X` | Auto-detect (path, URL, or PGN text) |
-| `--user-is white\|black\|neither` | Tag yourself for second-person address (board is also flipped for Black) |
-| `--use-case companion\|coaching\|commentary` | Voice (interactive prompt if omitted) |
-| `--user-note "..."` | A personal note Greco will respond to directly |
-| `--white-context "..."` | Free-form context about White |
-| `--black-context "..."` | Free-form context about Black |
-| `--boards-at off\|tier3\|tier2\|all` | Which moves get board diagrams (default tier3) |
-| `--no-eval-graph` | Skip the eval-graph PNG |
-| `--format md\|html\|both` | Output format (default both). The HTML is **self-contained** — boards and eval graph are embedded, no links to open |
-| `--speak` | Read the narrative aloud when finished (Windows built-in voice) |
-| `--audio PATH.wav` | Save the spoken narrative to a `.wav` file |
-| `--voice-rate N` | Speech speed, -10 (slow) to 10 (fast); default 0 |
-| `--depth N` | Engine search depth (default 18) |
-| `--time-per-move S` | Seconds per position (overrides --depth) |
-| `--multipv N` | Top-N candidate moves (default 3) |
-| `--model MODEL` | Claude model (default `claude-sonnet-4-6`; try `claude-opus-4-7`) |
-| `--max-tokens N` | Max output tokens (default 8000) |
-| `--output PATH` | Where to write the report; creates a sibling `<stem>_assets/` folder for images |
-| `--save-analysis PATH` | Dump the raw engine analysis as JSON |
+| **Language** | Python 3.8+ |
+| **Engine** | Stockfish (via `python-chess` UCI) |
+| **Narration** | Claude (Anthropic API, streaming) |
+| **Rendering** | `python-chess` SVG boards · `matplotlib` eval graphs |
+| **Front-ends** | Tkinter desktop GUI · argparse CLI |
+| **Output** | Markdown · self-contained HTML · optional Windows TTS audio |
 
-## How it works (modules)
+## Repository layout
 
-| File | Role |
-|---|---|
-| `importers.py` | Loads PGN from a file, Lichess URL, or raw text |
-| `analyzer.py` | Drives Stockfish over every position; records best move, centipawn loss, alternatives, phase |
-| `triage.py` | Assigns commentary tier 0–3 per move using classification, eval swings, forced-move detection, player context |
-| `narrator.py` | Single streaming Claude call. Three voice modes (companion / coaching / commentary), each with a distinct system prompt |
-| `renderers.py` | SVG boards (via python-chess) and PNG eval graphs (via matplotlib) |
-| `outputs.py` | Assembles the final Markdown: header + move list + eval graph + narrative with board images inserted at the right move headers. Optional HTML wrap. |
-| `main.py` | CLI orchestrator |
-
-## Cost / time guidance
-
-- Engine analysis of a 40-move game at `--time-per-move 0.8` and 4 CPU threads: ~45 seconds.
-- One Claude Sonnet call: roughly 3–10K input tokens, 3–8K output tokens, ~$0.05–$0.15 per game.
-- Opus (`--model claude-opus-4-7`) is noticeably more expensive but writes more vivid prose.
+```
+greco/
+├── importers · analyzer · triage · narrator · outputs · renderers   # the pipeline
+├── openings · commentary · tts                                       # supporting modules
+├── gui.py · main.py                                                  # front-ends
+├── docs/            ARCHITECTURE · USAGE · ROADMAP · product-vs-in-house
+├── sample-games/    example PGNs (famous games + real amateur play)
+├── sample-reports/  full reports Greco generated, Markdown + HTML
+└── examples/        smaller worked examples
+```
 
 ## Roadmap
 
-- Chess.com per-game URL import (currently only Lichess; for Chess.com, download the PGN manually)
-- Print-friendly stylesheet for the HTML output
-- Batch mode for multiple PGNs in a folder
+Chess.com per-game import, a print-friendly HTML stylesheet, and batch analysis of a whole
+folder. Tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+## License
+
+[MIT](LICENSE) © James Tyhurst. Stockfish and the Anthropic API are each governed by their
+own licenses/terms.

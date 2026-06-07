@@ -1,0 +1,35 @@
+[Event "Let\\'s Play!"]
+[Site "Chess.com"]
+[Date "2026.03.30"]
+[Round "?"]
+[White "redwood1978"]
+[Black "JamesTortoise"]
+[Result "0-1"]
+[TimeControl "1/259200"]
+[WhiteElo "524"]
+[BlackElo "1064"]
+[Termination "JamesTortoise won by checkmate"]
+[ECO "A00"]
+[EndDate "2026.04.15"]
+[Link "https://www.chess.com/game/daily/951769255"]
+
+1. d3 {[%clk 0:00:00.1][%timestamp 1]} 1... Nc6 {[%clk 0:00:11][%timestamp 110]}
+2. Be3 {[%clk 13:06:02][%timestamp 471620]} 2... d5 {[%clk 0:08:06][%timestamp
+4860]} 3. Nc3 {[%clk 6:21:45][%timestamp 229050]} 3... e5 {[%clk
+1:02:39][%timestamp 37590]} 4. Nf3 {[%clk 64:12:31][%timestamp 2311510]} 4...
+Bg4 {[%clk 3:14:14][%timestamp 116540]} 5. h3 {[%clk 3:21:51][%timestamp
+121110]} 5... Bh5 {[%clk 4:54:27][%timestamp 176670]} 6. Bg5 {[%clk
+37:23:13][%timestamp 1345930]} 6... Nf6 {[%clk 5:08:49][%timestamp 185290]} 7.
+g4 {[%clk 45:43:47][%timestamp 1646270]} 7... Bg6 {[%clk 7:22:16][%timestamp
+265360]} 8. h4 {[%clk 64:23:27][%timestamp 2318070]} 8... Nxg4 {[%clk
+5:36:01][%timestamp 201610]} 9. Bxd8 {[%clk 51:52:49][%timestamp 1867690]} 9...
+Rxd8 {[%clk 0:18:05][%timestamp 10850]} 10. Ng5 {[%clk 11:07:03][%timestamp
+400230]} 10... Be7 {[%clk 0:06:39][%timestamp 3990]} 11. Nxd5 {[%clk
+2:44:14][%timestamp 98540]} 11... Rxd5 {[%clk 5:36:43][%timestamp 202030]} 12.
+e4 {[%clk 18:53:56][%timestamp 680360]} 12... Rb5 {[%clk 0:25:52][%timestamp
+15520]} 13. b3 {[%clk 0:25:04][%timestamp 15040]} 13... O-O {[%clk
+0:04:06][%timestamp 2460]} 14. c4 {[%clk 19:54:06][%timestamp 716460]} 14...
+Bb4+ {[%clk 1:00:18][%timestamp 36180]} 15. Ke2 {[%clk 0:27:41][%timestamp
+16610]} 15... Nd4# {[%clk 3:41:10][%timestamp 132700][%c_effect
+g8;square;g8;type;Winner;animated;true;keyPressed;undefined;persistent;true,e2;square;e2;type;CheckmateWhite;animated;true;keyPressed;undefined;persistent;true]}
+0-1

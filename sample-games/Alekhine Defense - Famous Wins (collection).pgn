@@ -1,0 +1,145 @@
+[Event "Budapest"]
+[Site "Budapest HUN"]
+[Date "1921.09.15"]
+[Round "9"]
+[White "Endre Steiner"]
+[Black "Alexander Alekhine"]
+[Result "0-1"]
+[ECO "B03"]
+[Opening "Alekhine Defense"]
+[Annotator "TortoiseChess collection"]
+
+{The opening's namesake winning with it during the very tournament that introduced
+it to master play (Budapest, 1921). Alekhine lets White build the big center, picks
+it apart with piece pressure, and converts a long endgame. The historical root of the
+whole defense.}
+1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. Bg5 dxe5 5. dxe5 Nc6 6. Bb5 Bf5 7. Nf3 Ndb4
+8. Na3 Qxd1+ 9. Rxd1 Nxc2+ 10. Nxc2 Bxc2 11. Rc1 Be4 12. Nd4 Bxg2 13. Rg1 O-O-O
+14. Nxc6 Bxc6 15. Bxc6 bxc6 16. Rxc6 Rd5 17. Bf4 e6 18. Ke2 Bc5 19. b4 Bxb4
+20. Rxg7 Rd7 21. Be3 a5 22. Rc4 h5 23. Rh4 Bc3 24. Rg5 Rd5 25. f4 f6
+26. Rgxh5 Rxh5 27. Rxh5 fxe5 28. fxe5 Bxe5 29. Rh7 Rb5 30. Kf3 Rb2 31. Rh5 Bxh2
+32. Rxa5 Bd6 33. Ke4 Kd7 34. Bd4 Rd2 35. Be3 Re2 36. Kd3 Re1 37. Bd4 Rc1
+38. Be3 Rd1+ 39. Ke4 Re1 40. Kd3 e5 41. Bf2 Rf1 42. Be3 Ke6 43. Ke4 Rh1
+44. Bf2 Rh2 45. Be3 Rh4+ 46. Kd3 Bb4 47. Ra7 c5 48. a3 c4+ 49. Ke2 Bd6
+50. Ra8 Rh2+ 51. Kd1 Rh3 52. Kd2 Kd5 53. Rd8 c3+ 54. Ke2 Ke4 55. Rxd6 Rxe3+
+56. Kf2 Rd3 57. Rc6 Rd2+ 58. Ke1 Kd3 59. Rd6+ Kc2 60. Re6 Rd5 61. Ke2 Kb2
+62. Rc6 c2 0-1
+
+[Event "USSR Championship"]
+[Site "Tbilisi URS"]
+[Date "1959.02.08"]
+[Round "18"]
+[White "Rashid Nezhmetdinov"]
+[Black "Boris Spassky"]
+[Result "0-1"]
+[ECO "B02"]
+[Opening "Alekhine Defense, Two Knights / Exchange of Knights"]
+[Annotator "TortoiseChess collection"]
+
+{A young Spassky outplays the legendary attacking artist Nezhmetdinov on his own
+turf. Queens come off early (7.Qxd8+), and Spassky simply grinds the resulting
+endgame, finishing with a clean king-walk: a reminder that the Alekhine is a winning
+weapon, not just a provocation.}
+1. e4 Nf6 2. e5 Nd5 3. Nc3 Nxc3 4. dxc3 Nc6 5. Nf3 d6 6. Bc4 dxe5 7. Qxd8+ Nxd8
+8. Nxe5 f6 9. Nd3 e5 10. O-O Be6 11. Bb3 Bd6 12. Re1 g5 13. Be3 Kf7 14. f3 Nc6
+15. Nf2 Rhd8 16. Ne4 Ne7 17. c4 Nf5 18. Bxg5 Be7 19. Bd2 a5 20. a4 Nd4 21. Bc3 c5
+22. Bxd4 cxd4 23. c5 Rac8 24. f4 Bxb3 25. cxb3 Bxc5 26. fxe5 fxe5 27. Rf1+ Ke6
+28. Rf3 d3 29. Kf1 Rd4 30. Ng5+ Kd5 31. Rd1 h6 32. Nh3 e4 33. Rf5+ Ke6 34. g4 Bd6
+35. Kf2 Rd5 36. Nf4+ Bxf4 37. Rxf4 Rc2+ 38. Kg3 Ke5 39. h4 Rg2+ 40. Kxg2 Kxf4 0-1
+
+[Event "Sousse Interzonal"]
+[Site "Sousse TUN"]
+[Date "1967.11.01"]
+[Round "13"]
+[White "Duncan Suttles"]
+[Black "Viktor Korchnoi"]
+[Result "0-1"]
+[ECO "B03"]
+[Opening "Alekhine Defense, Exchange Variation"]
+[Annotator "TortoiseChess collection"]
+
+{Korchnoi meets White's kingside pawn-storm with ice-cold counterattack. He grabs
+material, ignores the threats to his own king, and drives his queen deep into White's
+position, ending with 41...Qh1+ and resignation in the face of unavoidable mate.}
+1. e4 Nf6 2. e5 Nd5 3. c4 Nb6 4. d4 d6 5. exd6 exd6 6. Nc3 Be7 7. Be3 Nc6 8. Rc1 O-O
+9. h4 Bf6 10. g4 Re8 11. Be2 Bxg4 12. Bxg4 Nxc4 13. Nd5 Nxe3 14. Nxe3 Nxd4 15. Kf1 c6
+16. Nh3 Qb6 17. Qd3 d5 18. Kg2 a5 19. Ng5 g6 20. Rh3 Qb5 21. Qb1 Re5 22. f4 Re7
+23. h5 Ne2 24. Nxh7 Nxf4+ 25. Kh1 Qxb2 26. hxg6 Nxh3 27. gxf7+ Kh8 28. Nxf6 Nf2+
+29. Kg2 Qxf6 30. Rh1+ Nxh1 31. Qxh1+ Kg7 32. Nf5+ Kf8 33. Nxe7 Kxe7 34. Bh5 Rh8
+35. Qe1+ Kf8 36. Qg3 Qg7 37. Bg6 Qb2+ 38. Kg1 Qa1+ 39. Kg2 Qxa2+ 40. Kg1 Qa1+
+41. Kg2 Qh1+ 0-1
+
+[Event "Larsen - Tal 3rd Place Candidates Playoff"]
+[Site "Eersel NED"]
+[Date "1969.03.23"]
+[Round "8"]
+[White "Mikhail Tal"]
+[Black "Bent Larsen"]
+[Result "0-1"]
+[ECO "B04"]
+[Opening "Alekhine Defense, Modern Variation"]
+[Annotator "TortoiseChess collection"]
+
+{Two titans. Larsen takes on the great attacking genius Tal and meets fire with fire
+through wild complications, surviving Tal's knight raid on c7/a8 and emerging on top
+to win the endgame. Proof the defense holds up against the most dangerous attacker
+of the era.}
+1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. Nf3 Nc6 5. c4 Nb6 6. e6 fxe6 7. h4 e5 8. d5 Nd4
+9. Nxd4 exd4 10. Bd3 Qd7 11. Bg5 h6 12. Bd2 Qg4 13. Be2 Qe4 14. O-O Bf5 15. Na3 Qxh4
+16. Nb5 d3 17. Nxc7+ Kd8 18. Nxa8 dxe2 19. Qxe2 Nxa8 20. c5 Qe4 21. Qb5 Qxd5 22. Ba5+ b6
+23. Rfd1 Qe5 24. a4 Bd7 25. cxb6 axb6 26. Bxb6+ Ke8 27. Qa6 Nxb6 28. Qxb6 g5 29. Re1 Qf4
+30. a5 Bg7 31. Qb8+ Kf7 32. Qb3+ e6 33. Qb7 Ke7 34. Re4 Qd2 35. Rae1 Be5 36. a6 Qxb2
+37. Rb4 Qa2 38. a7 Bc3 39. Rbb1 Bxe1 40. Rxe1 Rf8 41. Qb6 Qd5 42. Rc1 Rc8 43. Rxc8 Bxc8
+44. Qc7+ Bd7 45. f3 g4 46. Kf2 gxf3 47. gxf3 e5 48. Kg3 h5 49. Qc1 h4 50. Kxh4 Qxf3 0-1
+
+[Event "World Championship Match"]
+[Site "Reykjavik ISL"]
+[Date "1972.08.10"]
+[Round "13"]
+[White "Boris Spassky"]
+[Black "Robert James Fischer"]
+[Result "0-1"]
+[ECO "B04"]
+[Opening "Alekhine Defense: Modern, Alburt Variation"]
+[Annotator "TortoiseChess collection"]
+
+{The most famous Alekhine's Defense ever played. Fischer springs 1...Nf6 on the
+reigning World Champion in a title match, and after 74 ferocious moves his three
+connected passed pawns overwhelm Spassky's piece. The win many credit with breaking
+the match open.}
+1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. Nf3 g6 5. Bc4 Nb6 6. Bb3 Bg7 7. Nbd2 O-O
+8. h3 a5 9. a4 dxe5 10. dxe5 Na6 11. O-O Nc5 12. Qe2 Qe8 13. Ne4 Nbxa4
+14. Bxa4 Nxa4 15. Re1 Nb6 16. Bd2 a4 17. Bg5 h6 18. Bh4 Bf5 19. g4 Be6
+20. Nd4 Bc4 21. Qd2 Qd7 22. Rad1 Rfe8 23. f4 Bd5 24. Nc5 Qc8 25. Qc3 e6
+26. Kh2 Nd7 27. Nd3 c5 28. Nb5 Qc6 29. Nd6 Qxd6 30. exd6 Bxc3 31. bxc3 f6
+32. g5 hxg5 33. fxg5 f5 34. Bg3 Kf7 35. Ne5+ Nxe5 36. Bxe5 b5 37. Rf1 Rh8
+38. Bf6 a3 39. Rf4 a2 40. c4 Bxc4 41. d7 Bd5 42. Kg3 Ra3+ 43. c3 Rha8
+44. Rh4 e5 45. Rh7+ Ke6 46. Re7+ Kd6 47. Rxe5 Rxc3+ 48. Kf2 Rc2+ 49. Ke1 Kxd7
+50. Rexd5+ Kc6 51. Rd6+ Kb7 52. Rd7+ Ka6 53. R7d2 Rxd2 54. Kxd2 b4 55. h4 Kb5
+56. h5 c4 57. Ra1 gxh5 58. g6 h4 59. g7 h3 60. Be7 Rg8 61. Bf8 h2 62. Kc2 Kc6
+63. Rd1 b3+ 64. Kc3 h1=Q 65. Rxh1 Kd5 66. Kb2 f4 67. Rd1+ Ke4 68. Rc1 Kd3
+69. Rd1+ Ke2 70. Rc1 f3 71. Bc5 Rxg7 72. Rxc4 Rd7 73. Re4+ Kf1 74. Bd4 f2 0-1
+
+[Event "Aerosvit GM Tournament"]
+[Site "Foros UKR"]
+[Date "2006.06.25"]
+[Round "8"]
+[White "Andrei Volokitin"]
+[Black "Vassily Ivanchuk"]
+[Result "0-1"]
+[ECO "B03"]
+[Opening "Alekhine Defense, Exchange Variation"]
+[Annotator "TortoiseChess collection"]
+
+{A modern super-GM showcase (Volokitin 2660, Ivanchuk 2731). Ivanchuk handles the
+Exchange Variation with deep maneuvering, reroutes his knights onto strong squares,
+and slowly squeezes until White's position collapses. The Alekhine alive and well in
+the 2700 era.}
+1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. c4 Nb6 5. exd6 exd6 6. Nc3 Be7 7. h3 O-O
+8. Nf3 Bf6 9. Be2 Be6 10. d5 Bxc3+ 11. bxc3 Bd7 12. O-O Na6 13. Bg5 f6 14. Be3 Nc5
+15. Re1 Re8 16. Bf1 Re7 17. Nd4 Qf8 18. Nb5 Bxb5 19. cxb5 Rae8 20. a4 f5
+21. a5 f4 22. Bd2 Rxe1 23. Bxe1 Nbd7 24. f3 Qf6 25. Rc1 b6 26. axb6 axb6
+27. Bf2 h6 28. Bd4 Qg5 29. c4 Nf6 30. Ra1 Nh5 31. Ra7 Qe7 32. Qc2 Ng3 33. Ra1 Qg5
+34. Kh2 Kf7 35. Kg1 Nd7 36. Kh2 Ne5 37. Bf2 Ng6 38. Bd3 Nh4 39. Ra7 Re7 40. Ra8 Ngf5
+41. Bf1 Ne3 42. Bxe3 fxe3 43. Qe2 Nf5 44. Ra2 Qf4+ 45. Kg1 Qd4 46. Kh2 Qe5+
+47. f4 Qxf4+ 48. Kg1 Ng3 49. Qd3 Re4 50. Be2 Rd4 51. Qb1 Rd2 0-1
