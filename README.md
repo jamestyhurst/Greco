@@ -137,8 +137,14 @@ greco/
 
 ## Roadmap
 
-Chess.com per-game import, a print-friendly HTML stylesheet, and batch analysis of a whole
-folder. Tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Settings panel, interactive PGN viewer in the HTML report, and polish (drag-and-drop,
+recent-games list, PDF export). Tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+Content curation — discovering new PGNs and gathering commentary transcripts — is
+**outsourced to a Claude coworker agent** that deposits files into the directories Greco
+already watches. Greco stays purely reactive; the agent handles the logistics. See the
+[Coworker agent section](docs/ROADMAP.md#coworker-agent--outsourced-content-curation) in
+the roadmap.
 
 ## License
 
