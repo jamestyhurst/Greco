@@ -7,6 +7,21 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-06-09
+
+### Fixed
+- **OTB classical-vs-rapid classifier tightened** (roadmap task #4):
+  - `outputs.py` `time_control_category`: move-based PGN TCs like `"40/7200"` were
+    incorrectly labelled "Daily" because any `/` triggered the correspondence branch.
+    Now parses `moves/seconds` and only returns "Daily" when time-per-move ≥ 1 day;
+    OTB time controls (e.g. `40/7200`, `40/5400`) correctly return "Classical".
+  - `tools/find_games.py` `_tc_category`: same logic applied — `"1/259200"` (true
+    correspondence) now returns `""` (unknown) rather than `"classical"`, preventing
+    it from polluting the OTB fallback chain.
+  - `_classify_category` rapid-event keyword list expanded with additional PGN Mentor
+    event names that carry no TimeControl tag but are not classical OTB
+    (Grand Chess Tour legs, SuperUnited, Pro Chess League, FIDE Online, Chess24, etc.).
+
 ### Added
 - **Standalone `Greco.exe`** (PyInstaller, `--windowed` = no console window, Greco
   icon embedded; all dependencies bundled). Built and deployed with `build_exe.bat`

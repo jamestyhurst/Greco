@@ -21,7 +21,7 @@ each item is committed when done, so a partial batch is still saved progress.
 | 1 | Settings panel in the GUI (engine path / API key / model / output folder) | M | todo |
 | 2 | `reference/` knowledge folder — openly-licensed openings/tactics/endgames, wired into the narrator (CC0 / CC-BY-SA only) | M | todo |
 | 3 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | todo |
-| 4 | Tighten the OTB classical-vs-rapid classifier (or use a curated source) | S | todo |
+| 4 | Tighten the OTB classical-vs-rapid classifier (or use a curated source) | S | done |
 | 5 | Interactive PGN viewer embedded in the report HTML | L | todo |
 | 6 | "Read aloud" in the report HTML (Web Speech API) | M | todo |
 | 7 | Polish: one-click "Save as PDF", drag-and-drop a PGN, recent-games list | M | todo |

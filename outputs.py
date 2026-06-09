@@ -47,8 +47,17 @@ def time_control_category(tc: str) -> str:
     """
     if not tc or tc in ("?", "-"):
         return ""
-    if "/" in tc:  # correspondence, e.g. "1/259200"
-        return "Daily"
+    if "/" in tc:
+        # Move-based TC: "moves/seconds[:moves2/seconds2…]"
+        # Correspondence games have a very large time-per-move (≥1 day); OTB
+        # classical games like "40/7200" have a short one.
+        try:
+            moves_s, secs_s = tc.split("/", 1)[0].strip(), tc.split("/", 1)[1].split(":")[0].strip()
+            if int(secs_s) / max(int(moves_s), 1) >= 86400:
+                return "Daily"
+            return "Classical"
+        except (ValueError, IndexError):
+            return "Classical"
     try:
         if "+" in tc:
             base_s, inc_s = tc.split("+", 1)

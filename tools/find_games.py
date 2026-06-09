@@ -87,7 +87,14 @@ def _tc_category(tc: str) -> str:
     if not tc or tc in ("?", "-"):
         return ""
     if "/" in tc:
-        return "classical"               # move-based, e.g. "40/7200" = classical
+        # Move-based TC: "moves/seconds" — correspondence if time-per-move ≥ 1 day.
+        try:
+            moves_s, secs_s = tc.split("/", 1)[0].strip(), tc.split("/", 1)[1].split(":")[0].strip()
+            if int(secs_s) / max(int(moves_s), 1) >= 86400:
+                return ""   # correspondence — not a speed category
+            return "classical"
+        except (ValueError, IndexError):
+            return "classical"
     try:
         if "+" in tc:
             base, inc = tc.split("+", 1)
@@ -122,6 +129,10 @@ def _classify_category(event: str, site: str, tc: str) -> str:
         "skilling", "airthings", "julius baer", "lindores", "new in chess classic",
         "tour final", "play-in", "ftx crypto", "global chess league", "cct ", "cct final",
         " gcl ", " gcl", "gcl ", "speed chess", "speedchess", "titled", "rapidchess",
+        # Additional rapid/online events that PGN Mentor indexes without a TC tag:
+        "superunited", "grand chess tour", "chess.com rapid", "chess.com blitz",
+        "pro chess league", "chess olympiad online", "fide online", "nations cup",
+        "chess24", "chessify", "chess league", "pro league",
     )):
         return "rapid"
     by_tc = _tc_category(tc)
