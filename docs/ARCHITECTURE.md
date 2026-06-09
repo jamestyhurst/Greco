@@ -36,6 +36,20 @@ what keeps Greco accurate. Commentary references follow the same rule: they teac
 - Stockfish path and the Anthropic API key come from environment variables
   (`STOCKFISH_PATH`, `ANTHROPIC_API_KEY`).
 
+## Coworker agent (external)
+
+A separate Claude agent handles all **content curation** — finding, fetching, and
+depositing new files — so Greco itself stays purely reactive:
+
+- **PGNs** → drops into `sample-games/` (or a configured input folder); `importers.py`
+  loads them on demand.
+- **Commentary transcripts** → drops into `commentary_refs/<name>/transcript.txt`;
+  `commentary.py` picks them up at analysis time automatically.
+
+Greco never watches directories, polls APIs, or schedules fetches. That is the agent's
+job. The interface between them is just the filesystem — two folders, the format already
+expected.
+
 ## Launchers (current)
 - `run_greco.bat` — console-visible launcher (reliable); the desktop shortcut uses this.
 - `Greco.vbs` — no-console launcher (`pythonw`); optional, headed for replacement by a

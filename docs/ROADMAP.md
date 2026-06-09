@@ -20,7 +20,7 @@ each item is committed when done, so a partial batch is still saved progress.
 |---|------|------|--------|
 | 1 | Settings panel in the GUI (engine path / API key / model / output folder) | M | todo |
 | 2 | `reference/` knowledge folder — openly-licensed openings/tactics/endgames, wired into the narrator (CC0 / CC-BY-SA only) | M | todo |
-| 3 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | todo |
+| 3 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | → coworker agent |
 | 4 | Tighten the OTB classical-vs-rapid classifier (or use a curated source) | S | todo |
 | 5 | Interactive PGN viewer embedded in the report HTML | L | todo |
 | 6 | "Read aloud" in the report HTML (Web Speech API) | M | todo |
@@ -63,9 +63,24 @@ finders (Chess.com + PGN Mentor); commentary-learning; report naming; versioning
   self-contained. (Greco already has desktop TTS via `tts.py`; this would be the
   in-browser version.)
 
+## Coworker agent — outsourced content curation
+
+Finding and fetching new PGNs and commentary transcripts is a logistics problem, not an
+analysis problem. That work is **delegated to a Claude coworker agent** that runs
+separately and deposits files where Greco already looks:
+
+| What the agent does | Where it drops files |
+|---|---|
+| Discover and download new PGN games (Lichess, PGN Mentor, Chess.com archives, etc.) | `sample-games/` (or a configured input folder) |
+| Fetch and clean commentary transcripts (Agadmator, SammyChess, YouTube, etc.) | `commentary_refs/<name>/transcript.txt` (the format `commentary.py` already expects) |
+
+Greco stays **purely reactive** — it processes whatever is in those directories. No
+file-watching, no schedulers, no hard-coded scrapers inside Greco itself. The agent
+makes the judgment calls (quality, relevance, ELO range, opening coverage) so Greco
+doesn't have to.
+
 ## Later ideas
 - Distribute Greco to other computers (the `.exe` makes this possible).
-- A larger, curated commentary-reference library (bulk Agadmator + SammyChess).
 
 ## Working conventions
 - **Versioning:** bump PATCH for fixes, MINOR for new features, MAJOR for big/breaking
