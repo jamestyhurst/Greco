@@ -84,24 +84,41 @@ right. `year` is the **original publication year** (it drives the legal check).
 - If you cannot confirm a work is pre-1931 (or a confirmed public-domain
   translation), **do not add it.** Note the exclusion in `MANIFEST.md` instead.
 
-## 5. After adding files
+## 5. A helper for Project Gutenberg
+
+For Gutenberg books, you don't have to clean by hand — use the helper, which
+downloads the plain text, strips the Gutenberg header/footer/license and diagram
+markers, and writes `text.txt` + `meta.json` for you:
+
+```
+python tools/fetch_gutenberg.py --id 33870 --bucket chess_principles \
+    --slug capablanca-chess-fundamentals \
+    --title "Chess Fundamentals" --author "Jose Raul Capablanca" --year 1921
+```
+
+It **refuses** any work dated after 1930. For Internet Archive / other sources,
+clean the text by hand per §2 and write the two files yourself.
+
+## 6. After adding files
 
 1. Add a row to `MANIFEST.md` (title, author, year, language, PD basis, source).
-2. Run `python knowledge.py --status` from the `greco/` folder to confirm the new
+2. Check the book off in `SHOPPING_LIST.md` (`[x]` + the date).
+3. Run `python knowledge.py --status` from the `greco/` folder to confirm the new
    book is listed and the chunk count went up. (Greco also rebuilds the index
    automatically whenever the texts change, so this step is just verification.)
 
-## 6. Candidate first acquisitions (all public domain)
+## 7. What to acquire — see `SHOPPING_LIST.md`
 
-| Title | Author | Year | Bucket | Note |
-|---|---|---|---|---|
-| Common Sense in Chess | Emanuel Lasker | 1896 | chess_principles | English original — clean |
-| Chess Fundamentals | José Raúl Capablanca | 1921 | chess_principles | English original — clean |
-| My System | Aron Nimzowitsch | 1925 | chess_principles | German original PD; verify any English translation's date |
-| Modern Ideas in Chess | Richard Réti | 1923 | chess_principles | German original PD; same caveat |
-| Handbuch des Schachspiels | Bilguer / von der Lasa | 19th c. | opening_theory | Earliest major opening encyclopedia — firmly PD |
+The full, prioritised target list (with sources and Gutenberg IDs) lives in
+**`SHOPPING_LIST.md`** — work from there.
 
-> The two `greco-seed-*` folders currently present hold short, Greco-authored
-> placeholder notes (CC0) so the retrieval system works before any real books are
-> added. They are safe to leave or delete; once the masters above are in, you can
-> remove the seed folders and rebuild.
+**Priority, in one line:** lead with **deep opening theory** and **annotated master
+games**, not general-principles books. An A/B test (2026-06-13) showed the narration
+model already knows general principles and says them in its own words with or without
+the corpus, so general-advice books add little; concrete opening theory and specific
+game analysis are the gap the corpus actually fills.
+
+> The two `greco-seed-*` folders hold short, Greco-authored placeholder notes (CC0)
+> so retrieval works before real books are added. Safe to leave or delete; once the
+> corpus has real opening-theory and game books, you can remove the seed folders and
+> rebuild. (Capablanca's *Chess Fundamentals* is already in, as a worked example.)

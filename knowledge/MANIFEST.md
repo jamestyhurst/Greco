@@ -13,6 +13,7 @@ See `README.md` for the full deposit protocol.
 
 | Slug | Title | Author | Year | Lang | Bucket | PD basis | Translation status | Source |
 |---|---|---|---|---|---|---|---|---|
+| `capablanca-chess-fundamentals` | Chess Fundamentals | José Raúl Capablanca | 1921 | en | chess_principles | First published 1921; US copyright expired (pre-1931) | Original English — safe for verbatim quoting | [Gutenberg #33870](https://www.gutenberg.org/ebooks/33870) |
 | `greco-seed-principles` | Chess Principles (Greco reference notes) | Greco project | 2026 | en | chess_principles | Original work, released CC0 by the Greco project | Original English | — (seed placeholder) |
 | `greco-seed-openings` | Opening Principles (Greco reference notes) | Greco project | 2026 | en | opening_theory | Original work, released CC0 by the Greco project | Original English | — (seed placeholder) |
 
@@ -21,15 +22,12 @@ See `README.md` for the full deposit protocol.
 > before the real public-domain books are acquired. Delete them once the masters
 > below are in (and rebuild with `python knowledge.py`).
 
-## Acquisition queue (confirmed public domain — not yet added)
+## Acquisition queue
 
-| Title | Author | Year | Bucket | Legal note |
-|---|---|---|---|---|
-| Common Sense in Chess | Emanuel Lasker | 1896 | chess_principles | English original; clean for verbatim use |
-| Chess Fundamentals | José Raúl Capablanca | 1921 | chess_principles | English original; clean |
-| My System | Aron Nimzowitsch | 1925 | chess_principles | German original PD; a modern English translation is **not** PD — use a pre-1930 translation or the German |
-| Modern Ideas in Chess | Richard Réti | 1923 | chess_principles | German original PD; same translation caveat |
-| Handbuch des Schachspiels | Bilguer / von der Lasa | 19th c. | opening_theory | Earliest major opening encyclopedia; firmly PD |
+The prioritised list of what to acquire (with sources, Gutenberg IDs, and the
+"opening-theory-first" priority guidance) lives in **`SHOPPING_LIST.md`** — that is
+the wishlist; this file is the registry of what's already in. When you acquire a book,
+add its row to the table above and check it off in `SHOPPING_LIST.md`.
 
 ## Excluded (record anything you considered but could not clear)
 

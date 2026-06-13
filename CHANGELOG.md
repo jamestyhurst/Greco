@@ -34,6 +34,35 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
     error, the report is produced exactly as before.
   - `python knowledge.py --status` lists what is indexed (verify a deposit);
     `python knowledge.py --query "<terms>"` previews matching passages.
+  - **Index quality:** non-prose chunks (game scores in descriptive notation,
+    diagram markers) are filtered out at index time, so retrieval returns only
+    quotable teaching prose; an `INDEX_VERSION` forces a rebuild when this logic
+    changes even if the texts are untouched.
+  - **First real book + acquisition tooling:** Capablanca's *Chess Fundamentals*
+    (1921, Gutenberg #33870) is now in the corpus as a worked example.
+    `tools/fetch_gutenberg.py` downloads a Gutenberg book, strips its
+    header/footer/license, and deposits it cleaned (refuses anything dated after
+    1930). `knowledge/SHOPPING_LIST.md` is a prioritised, updateable acquisition
+    wishlist (sources + Gutenberg IDs) for an agent to work from.
+  - **A/B harness + finding:** `tools/knowledge_ab_test.py` generates a report
+    with the corpus OFF vs ON for the same game (toggled by a new `with_knowledge`
+    parameter on the narrator). Testing on Fischer–Andersson (Siegen 1970) showed
+    the wiring works but a frontier model already knows general chess principles
+    and rarely quotes an injected general-principles corpus — so acquisition is
+    now steered toward **deep opening theory and annotated games** (content the
+    model lacks) over general-advice books. Reliable verbatim quoting will likely
+    need a deterministic "featured passage" mechanism (noted for later).
+
+### Fixed
+- **TLS/SSL connectivity on the Python 3.14 venv** (`narrator._make_http_client`).
+  After the interpreter upgrade, all Anthropic API calls failed with
+  `CERTIFICATE_VERIFY_FAILED: Basic Constraints of CA cert not marked critical`:
+  this network re-signs HTTPS through a middlebox whose CA the OS trusts but whose
+  Basic Constraints OpenSSL 3.x (Python 3.11+) rejects, while the old Python 3.8
+  OpenSSL tolerated it. Fixed by verifying via the OS-native trust store
+  (`truststore` → Windows SChannel), with the previous certifi+Windows-store
+  context kept as a fallback. Added `truststore` to `requirements.txt`. This
+  unblocks every Greco API call on the upgraded interpreter, not just the A/B test.
 
 ### Infrastructure
 - **Python 3.14.6 venv** — Greco's virtual environment rebuilt on Python 3.14.6 (64-bit,

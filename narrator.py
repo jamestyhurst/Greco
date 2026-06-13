@@ -39,26 +39,51 @@ def _piece_placement(fen: str) -> str:
 
 def _make_http_client() -> httpx.Client:
     """
-    Build an httpx client whose SSL context trusts the host OS's certificate
-    store in addition to certifi's bundle. Needed on older Python builds where
-    httpx's default certifi bundle is missing roots that the OS does trust.
+    Build an httpx client that verifies TLS using the operating system's NATIVE
+    trust store, via the `truststore` package.
+
+    Why this matters here: this machine's network re-signs HTTPS through a
+    corporate/AV middlebox whose CA lives in the Windows certificate store but
+    has its Basic Constraints extension not marked "critical". OpenSSL 3.x (which
+    ships with Python 3.11+ — so our Python 3.14 venv) rejects that cert as
+    malformed, while Windows' own verifier (SChannel) accepts it. The old Python
+    3.8 build used an OpenSSL that also tolerated it, which is why this only broke
+    after the interpreter upgrade. `truststore` delegates verification to SChannel
+    on Windows (and to the native store on macOS/Linux), so the chain validates
+    exactly as the OS would — the correct, secure fix, and one that also works
+    unchanged on a clean cloud host where there is no interception.
+
+    Fallback: if `truststore` isn't installed, build a context from certifi plus
+    whatever Windows roots load cleanly (the pre-upgrade behaviour).
     """
+    timeout = httpx.Timeout(600.0)
+    try:
+        import truststore
+
+        ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        return httpx.Client(verify=ctx, timeout=timeout)
+    except Exception:
+        pass  # fall back to the manual context below
+
     ctx = ssl.create_default_context()
-    ctx.load_default_certs()  # pulls Windows / macOS / Linux system roots
-    if hasattr(ssl, "enum_certificates"):  # Windows only
-        for store_name in ("ROOT", "CA"):
-            try:
-                for cert, encoding, _trust in ssl.enum_certificates(store_name):
-                    if encoding == "x509_asn":
-                        try:
-                            ctx.load_verify_locations(
-                                cadata=ssl.DER_cert_to_PEM_cert(cert)
-                            )
-                        except ssl.SSLError:
-                            pass
-            except (OSError, FileNotFoundError):
-                pass
-    return httpx.Client(verify=ctx, timeout=httpx.Timeout(600.0))
+    try:
+        ctx.load_default_certs()  # pulls Windows / macOS / Linux system roots
+        if hasattr(ssl, "enum_certificates"):  # Windows only
+            for store_name in ("ROOT", "CA"):
+                try:
+                    for cert, encoding, _trust in ssl.enum_certificates(store_name):
+                        if encoding == "x509_asn":
+                            try:
+                                ctx.load_verify_locations(
+                                    cadata=ssl.DER_cert_to_PEM_cert(cert)
+                                )
+                            except ssl.SSLError:
+                                pass
+                except (OSError, FileNotFoundError):
+                    pass
+    except Exception:
+        pass
+    return httpx.Client(verify=ctx, timeout=timeout)
 
 
 SYSTEM_PROMPT_BASE = """You are a chess writer and amateur psychologist. You analyze chess games by combining engine analysis with literary narration and grounded psychological inference.
@@ -124,7 +149,7 @@ Greco's deeper purpose is to illuminate the *human* layer that engines can't —
 
 ## Opening theory, human reasoning, and teaching the reader
 
-**You may be given a "Classical chess literature" section in the user message — use it well, but sparingly.** When this game's themes match the public-domain books in Greco's reference corpus, that section will contain verbatim passages from masters (e.g. Capablanca, Lasker), each labelled with its source. Unlike the commentary *style* transcripts — which are voice-only and must never be quoted or mined for facts — these classical passages MAY be quoted or paraphrased **with attribution** ("As Capablanca observed, …") when one genuinely deepens a point about a move or position. They supply timeless *principles*, never facts about the current game: the engine data remains the sole source of board truth, you must never fabricate or extend a quote beyond the text given, and you should cite at most once or twice in an entire report, only where it adds real insight. If no such section appears, write exactly as you otherwise would.
+**You may be given a "Classical chess literature" section in the user message — use it well, but sparingly.** When this game's themes match the public-domain books in Greco's reference corpus, that section will contain verbatim passages from masters (e.g. Capablanca, Lasker), each labelled with its source. Unlike the commentary *style* transcripts — which are voice-only and must never be quoted or mined for facts — these classical passages MAY be quoted or paraphrased **with attribution** ("As Capablanca observed, …") when one genuinely deepens a point about a move or position. They supply timeless *principles*, never facts about the current game: the engine data remains the sole source of board truth, and you must never fabricate or extend a quote beyond the text given. When a passage genuinely fits a moment, quote it directly and with attribution — a short run of the author's exact words in quotation marks ("As Capablanca writes, …"), since the master's own phrasing is the point. Aim for one to three such quotations in a full report, where they sharpen a real lesson, and skip them where none fit. If no such section appears, write exactly as you otherwise would.
 
 **Respect opening theory ("book" moves), and name the opening correctly.** In the opening, recognize established theory — use your opening knowledge together with the ECO/Opening metadata AND any "Opening theory reference" supplied in the user message (treat that reference as authoritative for names and variations). **Identify the opening by the player's FIRST move and actual move order, NOT by a structure it later transposes into.** 1.e4 Nf6 is Alekhine's Defence (and 2...d5 lines are the Scandinavian Variation of the Alekhine) — so even if the position later resembles a French, call it "Alekhine's Defence, which transposes into a French-type structure," not "a French Defence." If a move matches established theory for the opening actually being played, it IS a book move — say so and do not flag it as an inaccuracy just because the engine has a marginal preference. Do NOT nag about small engine preferences over sound theory; reserve criticism for genuine errors (real material loss or a concrete tactic missed). If the player's note states an intended opening or plan, treat their theory moves as deliberate and correct within that plan.
 
@@ -451,6 +476,7 @@ def build_user_prompt(
     tiers: List[int],
     user_context: Dict[str, object],
     user_note: Optional[str] = None,
+    with_knowledge: bool = True,
 ) -> str:
     headers = game.headers
     opening_reference = _load_opening_reference()
@@ -510,17 +536,18 @@ def build_user_prompt(
     # anything goes wrong, in which case the section is simply omitted and the
     # narrator behaves exactly as it did before the corpus existed.
     knowledge_block = ""
-    try:
-        from knowledge import load_knowledge_for_game
+    if with_knowledge:
+        try:
+            from knowledge import load_knowledge_for_game
 
-        opening_name_for_retrieval = (
-            opening_id["name"] if opening_id else (headers.get("Opening") or None)
-        )
-        knowledge_block = load_knowledge_for_game(
-            game, opening_name=opening_name_for_retrieval
-        )
-    except Exception:
-        knowledge_block = ""
+            opening_name_for_retrieval = (
+                opening_id["name"] if opening_id else (headers.get("Opening") or None)
+            )
+            knowledge_block = load_knowledge_for_game(
+                game, opening_name=opening_name_for_retrieval
+            )
+        except Exception:
+            knowledge_block = ""
     knowledge_section = f"\n{knowledge_block}\n" if knowledge_block else ""
 
     # Work out how the game actually ended, so the narrator never implies a
@@ -596,6 +623,7 @@ def generate_narrative(
     user_note: Optional[str] = None,
     with_style_guide: bool = True,
     with_references: bool = True,
+    with_knowledge: bool = True,
 ) -> str:
     """
     Generate the narrative via streaming. If `live_stream_to` is a file-like
@@ -610,7 +638,9 @@ def generate_narrative(
         api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
         http_client=_make_http_client(),
     )
-    user_prompt = build_user_prompt(game, tiers, user_context, user_note=user_note)
+    user_prompt = build_user_prompt(
+        game, tiers, user_context, user_note=user_note, with_knowledge=with_knowledge
+    )
     system_prompt = _build_system_prompt(
         use_case, with_style_guide=with_style_guide, with_references=with_references
     )

@@ -3,3 +3,7 @@ anthropic>=0.40.0
 httpx>=0.25.0
 matplotlib>=3.5
 markdown>=3.4
+# Verify TLS via the OS-native trust store (Windows SChannel / macOS / Linux).
+# Needed on Python 3.11+ (OpenSSL 3.x) behind a TLS-intercepting proxy whose CA
+# the OS trusts but OpenSSL rejects; harmless on a clean host. See narrator._make_http_client.
+truststore>=0.9

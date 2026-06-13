@@ -59,6 +59,10 @@ KNOWLEDGE_DIR = Path(__file__).resolve().parent / "knowledge"
 DB_PATH = KNOWLEDGE_DIR / "knowledge.db"
 BUCKETS = ("opening_theory", "chess_principles")
 
+# Bump when the indexing/cleaning logic changes (not just the texts), so the
+# staleness check forces a rebuild even when the source files are untouched.
+INDEX_VERSION = "2"
+
 # Chunking: passages of roughly this many words, so a retrieved excerpt is big
 # enough to carry a real idea but small enough to quote. A little overlap keeps a
 # thought from being sliced in half at a boundary.
@@ -184,6 +188,38 @@ def chunk_text(text: str, target_words: int = TARGET_WORDS,
     return chunks
 
 
+# Old chess books interleave teaching PROSE with game scores (move lists) and
+# diagram markers. Only the prose is quotable; a chunk that is mostly notation
+# matches theme queries on incidental words and pollutes retrieval (e.g. a chunk
+# of "1. K-R1! P-N5 2. ..." matching "king"). These helpers strip editorial
+# markers and keep only prose-dense chunks at index time.
+_ARTIFACT_RE = re.compile(r"\[[^\]]{0,80}\]")   # [Illustration: ...], [123], etc.
+_PROSE_WORD_RE = re.compile(r"[a-z]{4,}")       # a 4+ letter lowercase run ~ a real word
+_MOVE_NUM_RE = re.compile(r"\b\d{1,3}\.")        # "12." — a numbered move
+
+
+def _clean_chunk(text: str) -> str:
+    """Strip editorial/diagram markers and tidy whitespace in a chunk."""
+    text = _ARTIFACT_RE.sub("", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def _is_quotable_prose(text: str) -> bool:
+    """True if a chunk is mostly teaching prose (worth quoting), not a game score
+    or a diagram fragment."""
+    prose_words = len(_PROSE_WORD_RE.findall(text.lower()))
+    move_nums = len(_MOVE_NUM_RE.findall(text))
+    if prose_words < 40:        # too short/sparse to be a useful quotation
+        return False
+    if move_nums >= 8:          # a paragraph dense with numbered moves = a game score
+        return False
+    if move_nums > prose_words / 8:  # notation outweighs prose
+        return False
+    return True
+
+
 def _corpus_fingerprint() -> str:
     """A string that changes whenever any text.txt is added, edited, or removed —
     used to decide when the index must be rebuilt."""
@@ -195,7 +231,7 @@ def _corpus_fingerprint() -> str:
             parts.append(f"{bucket}/{book_dir.name}:{st.st_size}:{int(st.st_mtime)}")
         except OSError:
             continue
-    return "|".join(sorted(parts))
+    return f"v{INDEX_VERSION}|" + "|".join(sorted(parts))
 
 
 # --------------------------------------------------------------------------- #
@@ -255,13 +291,18 @@ def build_index() -> int:
             if len(raw) < _MIN_TEXT_CHARS:
                 continue  # stub / placeholder
             meta = _read_meta(book_dir, bucket)
-            for idx, chunk in enumerate(chunk_text(raw)):
+            kept = 0
+            for chunk in chunk_text(raw):
+                cleaned = _clean_chunk(chunk)
+                if not _is_quotable_prose(cleaned):
+                    continue  # skip game scores, diagrams, sparse fragments
                 conn.execute(
                     "INSERT INTO chunks (text, book_id, title, author, year, bucket, chunk_index)"
                     " VALUES (?,?,?,?,?,?,?)",
-                    (chunk, meta["book_id"], meta["title"], meta["author"],
-                     meta["year"], meta["bucket"], idx),
+                    (cleaned, meta["book_id"], meta["title"], meta["author"],
+                     meta["year"], meta["bucket"], kept),
                 )
+                kept += 1
                 total += 1
 
         conn.execute(
@@ -534,9 +575,13 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
         "paraphrase these **with attribution** when one genuinely illuminates a move "
         "or position — e.g. \"As Capablanca put it, …\". They teach *principles*, not "
         "facts about this game: never use a passage to assert a board fact (the engine "
-        "data above remains the sole source of board truth), never fabricate or extend "
-        "a quote, and do not force a citation where it doesn't fit. Use at most one or "
-        "two across the whole report, only where they add real insight.\n\n"
+        "data above remains the sole source of board truth), and never fabricate or "
+        "extend a quote beyond the text given. When a passage genuinely fits a moment "
+        "in the game, quote it **directly and with attribution** — a short run of the "
+        "author's own words in quotation marks (e.g. As Capablanca writes, \"...\") — "
+        "since a master's exact phrasing is the point, and a loose paraphrase loses it. "
+        "Aim for one to three such quotations across a full report, placed where they "
+        "sharpen a real lesson, and skip them where none fit.\n\n"
         f"{joined}"
     )
 
