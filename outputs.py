@@ -739,3 +739,73 @@ def markdown_to_html(
 """
     html_path.write_text(html, encoding="utf-8")
     return html_path
+
+
+# --------------------------------------------------------------------------
+# Shareable export — bundle a finished report into ONE emailable HTML file
+# --------------------------------------------------------------------------
+# A finished report is a *folder*: the self-contained `<name>.html`, the source
+# `<name>.md`, and a `<name>_assets/` folder of board SVGs + the eval PNG. That
+# multi-file folder is the right internal working format, but it is confusing to
+# share — a non-technical recipient can't tell which file to open. This export
+# produces a single, clearly-labelled `<name> (shareable).html` with everything
+# inlined, so it can be attached to an email as one file. It never touches the
+# originals (an export product, not a replacement).
+
+def _resolve_report_html(report) -> Path:
+    """Find the main report `.html` from a report folder, an `.html`, or an `.md`.
+
+    Skips any previously-generated `(shareable)` export so re-running is safe.
+    """
+    report = Path(report)
+    if report.is_dir():
+        candidates = sorted(
+            p for p in report.glob("*.html") if "(shareable)" not in p.stem
+        )
+        if not candidates:
+            raise FileNotFoundError(f"No report .html found in folder: {report}")
+        named = report / f"{report.name}.html"  # prefer '<folder>.html'
+        return named if named.exists() else candidates[0]
+    suffix = report.suffix.lower()
+    if suffix == ".html":
+        return report
+    if suffix == ".md":
+        sibling = report.with_suffix(".html")
+        if sibling.exists():
+            return sibling
+        raise FileNotFoundError(
+            f"No .html next to {report.name}; generate the report's HTML first."
+        )
+    raise ValueError(f"Unsupported report path (need a folder, .html, or .md): {report}")
+
+
+def export_shareable_html(report, dest_dir: Optional[Path] = None) -> Path:
+    """Bundle a finished Greco report into ONE self-contained, emailable HTML file.
+
+    `report` may be the report folder, its `.html`, or its `.md`. Writes
+    ``<stem> (shareable).html`` next to the source (or in `dest_dir`) — a clearly
+    labelled EXPORT that never overwrites the working files. Every board SVG, the
+    eval-graph PNG, the page CSS and the interactive replay viewer are inlined, so
+    the single file opens correctly on any machine and survives being emailed.
+
+    Returns the path to the written export file.
+
+    Implementation note: this reuses ``_inline_image_assets`` over the existing
+    HTML. That pass is *idempotent* — already-embedded ``data:`` URIs and remote
+    URLs are left untouched — so a report already built self-contained
+    (``embed_assets=True``) passes through unchanged, while one that still points
+    at sidecar files gets fixed here. The CSS is always emitted inline by
+    ``markdown_to_html``, so there is no external stylesheet to chase.
+    """
+    src_html = _resolve_report_html(report)
+    base_dir = src_html.parent
+    html = src_html.read_text(encoding="utf-8")
+
+    # Guarantee self-containment regardless of how the source HTML was produced.
+    html = _inline_image_assets(html, base_dir)
+
+    out_dir = Path(dest_dir) if dest_dir else base_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{src_html.stem} (shareable).html"
+    out_path.write_text(html, encoding="utf-8")
+    return out_path

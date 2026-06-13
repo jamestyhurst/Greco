@@ -7,6 +7,20 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-06-13
+
+### Added
+- **Shareable single-file HTML export.** A new **"Export for email (single file)"**
+  button in the desktop GUI (enabled once a report is ready) bundles the finished
+  report into one self-contained `… (shareable).html` — every board, the eval graph,
+  the CSS and the interactive replay viewer inlined — so it can be attached to an
+  email as a single file. It is an **export product**: written next to the report with
+  a clear `(shareable)` name, and it never replaces the working `.html` / `.md` /
+  `_assets` files. Implemented as `outputs.export_shareable_html()` in the shared core
+  (so the web front-end can reuse it); it runs the existing idempotent asset inliner,
+  which also repairs any report that wasn't already self-contained. Verified on a real
+  report: 0 external references in the output, originals left intact.
+
 ## [0.3.1] — 2026-06-13
 
 ### Fixed

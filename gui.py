@@ -32,7 +32,7 @@ from importers import load_pgn
 from analyzer import analyze_pgn
 from triage import annotate_with_tiers
 from narrator import generate_narrative
-from outputs import assemble_report, markdown_to_html, report_basename, default_reports_dir
+from outputs import assemble_report, markdown_to_html, report_basename, default_reports_dir, export_shareable_html
 from version import __version__
 
 
@@ -250,6 +250,11 @@ class GrecoGUI:
             actionrow, text="Open report folder", command=self._open_folder, state="disabled"
         )
         self.open_folder_btn.pack(side="left", padx=6)
+        self.export_btn = ttk.Button(
+            actionrow, text="Export for email (single file)",
+            command=self._export_shareable, state="disabled",
+        )
+        self.export_btn.pack(side="left", padx=6)
 
         # --- Log / live narrative ---
         self.log = scrolledtext.ScrolledText(main, height=14, wrap="word", font=("Consolas", 9))
@@ -301,6 +306,32 @@ class GrecoGUI:
             except Exception:
                 messagebox.showinfo("Greco", f"Report folder:\n{self._last_dir}")
 
+    def _export_shareable(self):
+        """Bundle the finished report into ONE self-contained .html for emailing.
+
+        Reuses outputs.export_shareable_html (the shared core), so the desktop and
+        web front-ends produce identical export files. The export sits next to the
+        report, clearly named '<name> (shareable).html'; the originals are untouched.
+        """
+        if not self._last_html:
+            return
+        try:
+            out = export_shareable_html(self._last_html)
+        except Exception as exc:
+            messagebox.showerror("Greco", f"Could not create the shareable file:\n{exc}")
+            return
+        self._log(f"\n\U0001F4E4 Shareable single-file report:\n{out}\n")
+        try:
+            os.startfile(str(out.parent))  # open the folder so the file is easy to attach
+        except Exception:
+            pass
+        messagebox.showinfo(
+            "Greco",
+            "Created a single self-contained HTML you can email as one attachment:\n\n"
+            f"{out.name}\n\n"
+            "It's in the report folder that just opened — drag it straight into an email.",
+        )
+
     # ---------- run ----------
     def _on_analyze(self):
         if self.running:
@@ -337,6 +368,7 @@ class GrecoGUI:
         self.analyze_btn.configure(state="disabled")
         self.open_report_btn.configure(state="disabled")
         self.open_folder_btn.configure(state="disabled")
+        self.export_btn.configure(state="disabled")
         self.progress.configure(mode="indeterminate")
         self.progress.start(12)
         self.status_var.set("Starting…")
@@ -463,6 +495,7 @@ class GrecoGUI:
         self._last_dir = str(Path(html_path).parent)
         self.open_report_btn.configure(state="normal")
         self.open_folder_btn.configure(state="normal")
+        self.export_btn.configure(state="normal")
         self.status_var.set("Done — report opened in your browser.")
         self._log(f"\n\n✅ Report saved to:\n{html_path}\nOpening in Chrome…\n")
         try:
