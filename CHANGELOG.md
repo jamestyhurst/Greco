@@ -7,6 +7,32 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-06-13
+
+### Fixed
+- **Desktop launchers were dead after the Python 3.14 upgrade** (`Greco.vbs`,
+  `run_greco.bat`, `run_greco_web.bat`). All three invoked a bare `python` / `pythonw`,
+  which — once Python 3.14 was installed in `C:\Program Files\Python314` and took first
+  place on `PATH` — resolved to the **base** interpreter instead of the project `venv`.
+  Greco's dependencies live only in the `venv` (`include-system-site-packages = false`),
+  so `gui.py` died instantly on `import httpx`: the desktop icon (run via `pythonw`, no
+  console) failed **silently**, and `run_greco.bat` flashed a `ModuleNotFoundError`. Each
+  launcher now calls the venv interpreter explicitly (`venv\Scripts\python(w).exe`) and
+  shows a clear error (console line / message box) instead of failing silently if the venv
+  is ever missing. The desktop-icon wiring itself (`wscript.exe → Greco.vbs`, confirmed by
+  `verify_icon.ps1`) was correct and unchanged — the bug was inside the launcher scripts.
+  Verified end-to-end by launching the real icon path (`wscript Greco.vbs`) and confirming
+  the GUI starts under `venv\Scripts\pythonw.exe`.
+
+### Added
+- **Greco Web now runs.** Flask is pinned in `requirements.txt` and installed in the venv, so
+  `run_greco_web.bat` → <http://127.0.0.1:5000> serves the browser version of Greco (verified
+  returning HTTP 200 locally). The desktop app and CLI are unchanged.
+- **`config.example.json`** — a placeholder config template for fresh setups. The real
+  `config.json` (which holds the Anthropic API key) remains gitignored and untracked.
+- **`scripts/bump_version.py`** and Conventional-Commits versioning rules in `CLAUDE.md` —
+  version numbers and tags are now computed from the Git commit history with no external tools.
+
 ## [0.3.0] — 2026-06-13
 
 ### Added
