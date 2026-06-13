@@ -124,6 +124,8 @@ Greco's deeper purpose is to illuminate the *human* layer that engines can't —
 
 ## Opening theory, human reasoning, and teaching the reader
 
+**You may be given a "Classical chess literature" section in the user message — use it well, but sparingly.** When this game's themes match the public-domain books in Greco's reference corpus, that section will contain verbatim passages from masters (e.g. Capablanca, Lasker), each labelled with its source. Unlike the commentary *style* transcripts — which are voice-only and must never be quoted or mined for facts — these classical passages MAY be quoted or paraphrased **with attribution** ("As Capablanca observed, …") when one genuinely deepens a point about a move or position. They supply timeless *principles*, never facts about the current game: the engine data remains the sole source of board truth, you must never fabricate or extend a quote beyond the text given, and you should cite at most once or twice in an entire report, only where it adds real insight. If no such section appears, write exactly as you otherwise would.
+
 **Respect opening theory ("book" moves), and name the opening correctly.** In the opening, recognize established theory — use your opening knowledge together with the ECO/Opening metadata AND any "Opening theory reference" supplied in the user message (treat that reference as authoritative for names and variations). **Identify the opening by the player's FIRST move and actual move order, NOT by a structure it later transposes into.** 1.e4 Nf6 is Alekhine's Defence (and 2...d5 lines are the Scandinavian Variation of the Alekhine) — so even if the position later resembles a French, call it "Alekhine's Defence, which transposes into a French-type structure," not "a French Defence." If a move matches established theory for the opening actually being played, it IS a book move — say so and do not flag it as an inaccuracy just because the engine has a marginal preference. Do NOT nag about small engine preferences over sound theory; reserve criticism for genuine errors (real material loss or a concrete tactic missed). If the player's note states an intended opening or plan, treat their theory moves as deliberate and correct within that plan.
 
 **Call out a timid move that is just a meeker version of a stronger standard move — gently, but directly.** When a player picks the passive sibling of a normal central move — e.g. **1. e3 instead of 1. e4**, or **1. d3 instead of 1. d4** — say so plainly (you can keep it casual): it touches the same file but advances only one square, conceding the chance to claim the full centre and a free tempo, so it is a slightly weaker, more passive way to play the same idea. Do NOT do this to principled openings that merely look modest — sound hypermodern systems (1. Nf3, 1. c4 English, 1. b3 / 1. b4, 1. g3, the King's Indian Attack, and the like) deliberately control the centre from a distance, and established book lines are deliberate choices; those are not timid and must not be scolded. The test: is the move simply a smaller version of a bigger move the player could just as easily have made (timid — name it), or a coherent system with its own ideas (fine — respect it)?
@@ -211,13 +213,15 @@ VOICE_COMMENTARY = """## Voice for this report: COMMENTARY (YouTube video script
 Write as if narrating a chess YouTube video for a general audience, ready to be read aloud with minimal editing.
 
 ### Style touchstones
-Channel your delivery after a blend of four well-known chess commentators. Aim for the *spirit* of each — don't impersonate or quote them verbatim:
+Your voice is defined by the **Greco house voice** spec above and reinforced by the real commentator **transcripts included near the end of this prompt**. Study them and **match their rhythm, pacing, sentence-length variation, and phrasing patterns closely** — that blended cadence IS the voice you write in, not a vague inspiration. Channel a blend of:
 
 - **Agadmator (Antonio Radić)** — the narrative spine. Set the scene like a story: who the players are, what's at stake, the character of the opening. Calm, warm, reverent toward beautiful chess. Invite the viewer to participate ("feel free to pause here and see if you can find it"). Let a great move breathe before you explain it.
 - **GM Benjamin Finegold** — the dry, deadpan wit and the teaching. Deliver instructive aphorisms when they fit ("never play f3", "knights on the rim are dim", "when you don't know what to do, improve your worst-placed piece", "you can't win a game if you resign"). Gently ribbing, blunt about bad moves, never mean. Deadpan humor over hype.
 - **SammyChess** & **Chess Giant** — the energy spikes. When a tactic lands or the position explodes, let the excitement crest. Short, punchy, hype lines at the climactic moments. Keep the casual viewer entertained and leaning forward.
 
-The synthesis: a calm story that periodically erupts into excitement, seasoned with dry one-liners and a genuine teaching instinct. Storyteller most of the time; hype-man at the decisive moments; wry instructor throughout.
+The synthesis: a calm story that periodically erupts into excitement, seasoned with dry one-liners and a genuine teaching instinct. Storyteller most of the time; hype-man at the decisive moments; wry instructor throughout. **Lean into this cadence deliberately** — someone who watches these channels should feel the resemblance in the rhythm and delivery.
+
+**The one inviolable limit:** match how they *talk*, never what they *claim*. Never invent, borrow, or quote a chess fact, move, evaluation, line, or result from any transcript — every fact comes solely from the engine data in the user message. Absorb the delivery; write the chess fresh.
 
 ### Mechanics
 - Present tense throughout ("Black slides the bishop to g4...").
@@ -238,20 +242,51 @@ VOICE_ADDENDA = {
 }
 
 
-def _build_system_prompt(use_case: str) -> str:
+def _build_system_prompt(
+    use_case: str, *, with_style_guide: bool = True, with_references: bool = True
+) -> str:
     addendum = VOICE_ADDENDA.get(use_case, VOICE_COMPANION)
     prompt = SYSTEM_PROMPT_BASE + "\n\n" + addendum
-    # Optional: learn voice/craft from real commentator transcripts the user has
-    # added under commentary_refs/. Style-only — the loader and prompt forbid
-    # importing any board facts from them. Fail-safe: never break a run.
-    try:
-        from commentary import load_commentary_references
 
-        references = load_commentary_references()
-    except Exception:
-        references = ""
-    if references:
-        prompt += "\n\n" + references
+    # The Greco house-voice spec (commentary_refs/GRECO_STYLE.md) — an explicit,
+    # author-controlled style guide. It is the most reliable lever on the voice,
+    # so it goes in first; the transcript examples below reinforce it.
+    if with_style_guide:
+        try:
+            from commentary import load_style_guide
+
+            guide = load_style_guide()
+        except Exception:
+            guide = ""
+        if guide:
+            prompt += "\n\n" + guide
+            try:
+                import sys as _sys
+                print("  style: house voice spec (GRECO_STYLE.md) loaded", file=_sys.stderr)
+            except Exception:
+                pass
+
+    # Optional: also learn voice/craft from real commentator transcripts under
+    # commentary_refs/. Style-only — the loader and prompt forbid importing any
+    # board facts from them. Fail-safe: never break a run.
+    if with_references:
+        try:
+            from commentary import load_commentary_references
+
+            references = load_commentary_references()
+        except Exception:
+            references = ""
+        if references:
+            prompt += "\n\n" + references
+            # Visibility: confirm, each run, that commentary_refs/ is shaping the
+            # voice. Shows in the CLI / run_greco.bat console (GUI is windowed).
+            try:
+                import sys as _sys
+                n = references.count('Reference: "')
+                print(f"  style: {n} transcript reference(s) loaded from commentary_refs/",
+                      file=_sys.stderr)
+            except Exception:
+                pass
     return prompt
 
 
@@ -469,6 +504,25 @@ def build_user_prompt(
 
     moves_data = [_move_to_dict(m, t) for m, t in zip(game.moves, tiers)]
 
+    # Retrieve verbatim passages from the public-domain knowledge corpus that
+    # speak to THIS game's themes (its opening, plus the tactics/structures the
+    # engine detected). Fully fail-safe: returns "" when the corpus is empty or
+    # anything goes wrong, in which case the section is simply omitted and the
+    # narrator behaves exactly as it did before the corpus existed.
+    knowledge_block = ""
+    try:
+        from knowledge import load_knowledge_for_game
+
+        opening_name_for_retrieval = (
+            opening_id["name"] if opening_id else (headers.get("Opening") or None)
+        )
+        knowledge_block = load_knowledge_for_game(
+            game, opening_name=opening_name_for_retrieval
+        )
+    except Exception:
+        knowledge_block = ""
+    knowledge_section = f"\n{knowledge_block}\n" if knowledge_block else ""
+
     # Work out how the game actually ended, so the narrator never implies a
     # checkmate that didn't happen.
     last_san = game.moves[-1].san if game.moves else ""
@@ -512,7 +566,7 @@ def build_user_prompt(
 
 ## Opening theory reference (naming principles & variations)
 {opening_reference if opening_reference else "(No opening reference file loaded.)"}
-
+{knowledge_section}
 ## Player context
 {chr(10).join(context_lines) if context_lines else "(No player context provided — speculate cautiously, based on the moves alone.)"}
 {user_note_block}
@@ -540,18 +594,26 @@ def generate_narrative(
     live_stream_to=None,
     use_case: str = "companion",
     user_note: Optional[str] = None,
+    with_style_guide: bool = True,
+    with_references: bool = True,
 ) -> str:
     """
     Generate the narrative via streaming. If `live_stream_to` is a file-like
     object (e.g. sys.stderr), each chunk is written there as it arrives so the
     user can watch the narrative being composed in real time.
+
+    `with_style_guide` / `with_references` toggle the two style sources
+    (GRECO_STYLE.md and the commentary_refs transcripts). They default to on;
+    the A/B test harness flips them to measure each source's effect.
     """
     client = Anthropic(
         api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"),
         http_client=_make_http_client(),
     )
     user_prompt = build_user_prompt(game, tiers, user_context, user_note=user_note)
-    system_prompt = _build_system_prompt(use_case)
+    system_prompt = _build_system_prompt(
+        use_case, with_style_guide=with_style_guide, with_references=with_references
+    )
 
     text_parts: List[str] = []
     with client.messages.stream(

@@ -1,0 +1,121 @@
+Chess Principles — Greco Reference Notes
+
+These are short, original notes on enduring chess principles, written for the
+Greco project and released into the public domain (CC0). They exist so Greco's
+retrieval layer has correct material to work with before the classical
+public-domain books are added. They may be quoted freely.
+
+
+On development and the opening.
+
+The opening is a race to mobilize your forces. Bring out your knights and bishops
+toward the center before you commit your queen or launch a pawn storm. A piece
+that still sits on its starting square is a piece that is not yet playing the
+game. Do not move the same piece twice in the opening without a concrete reason,
+because every wasted tempo is a move your opponent spends developing while you
+stand still. Castle early: a king left in the center is a target, and the rook
+you connect by castling is a piece brought to life.
+
+
+On the center.
+
+Control of the central squares — e4, d4, e5, d5 — is control of the board,
+because a piece in the center radiates influence in every direction while a piece
+on the rim reaches only half as far. A knight on the edge of the board attacks
+fewer squares than a knight in the middle; this is the grain of truth behind the
+old saying that a knight on the rim is dim. Claim the center with pawns when you
+can, and support those pawns with pieces.
+
+
+On king safety.
+
+Most attacks succeed because the defender neglected the safety of the king.
+Castle before you open lines, not after. When you have castled, be slow to push
+the pawns in front of your king, because each pawn you advance is a hook the
+opponent can grab and a hole he can occupy. If you must weaken the king's shelter,
+be sure you are getting something concrete in return.
+
+
+On the sacrifice.
+
+A sacrifice is the deliberate surrender of material for something you judge to be
+worth more — an attack, a fork, a passed pawn, a mating net. The soundness of a
+sacrifice is not decided by whether it looks brave but by whether the
+consequences can be calculated to a favorable end. The mark of a strong player is
+the willingness to give up material when vision says the resulting position is
+winning, and the discipline to decline a sacrifice that is mere hope dressed up as
+courage. Count first, then leap.
+
+
+On the fork and the double attack.
+
+The double attack is the engine of chess tactics: one move that creates two
+threats, so that the opponent can answer only one. A knight is the natural forking
+piece because it strikes in a pattern no other piece can block or see coming, but
+pawns, bishops, rooks, and queens all fork as well. The pattern to train your eye
+for is two enemy pieces a single knight-move apart from a square you can reach, or
+two valuable pieces on the same line a pawn can split. Watch your own pieces for
+the same geometry, for a fork you allow is as real as one you find.
+
+
+On the pin and the skewer.
+
+A pin freezes a piece because moving it would expose a more valuable piece behind
+it; a skewer is the same geometry in reverse, forcing the valuable piece to move
+and abandon the one behind. Both only win material when the line is real — when
+the piece in front truly cannot move without loss. Pieces merely sharing a rank,
+file, or diagonal are not pinned; check whether the capture actually wins before
+you trust the pin. A pin against the king is absolute, for the king may never
+legally step into capture.
+
+
+On pawn structure and the doubled pawn.
+
+Pawns cannot move backward, so every pawn move is permanent and every pawn
+weakness is a debt that may come due many moves later. Doubled pawns — two pawns
+of one color on the same file — cannot defend each other and often cannot advance,
+yet the half-open file they create can be worth more than the structural damage if
+your rooks use it. An isolated pawn, with no friendly pawn on either neighboring
+file, must be guarded by pieces rather than pawns; it is both a weakness to
+besiege and, because of the open lines around it, a source of activity for its
+owner. Judge a structure by what it enables, not only by what it looks like.
+
+
+On the open file and the seventh rank.
+
+Rooks are long-range pieces that do nothing behind their own pawns and everything
+on an open file. Seize an open file with a rook, double your rooks upon it if you
+can, and aim to reach the seventh rank, where a rook attacks the enemy pawns from
+behind and pens in the enemy king. A rook on the seventh is often worth a pawn or
+more of pure activity, because it makes threats faster than the defender can meet
+them.
+
+
+On the endgame and the activity of the king.
+
+The endgame inverts one rule of the opening and middlegame: the king, hidden away
+while the queens are on, becomes a fighting piece once they leave the board. Bring
+the king toward the center and toward the action; a passive king in the endgame is
+a piece down. In rook endings, activity outweighs a pawn more often than not — an
+active rook behind a passed pawn, and a king marching to support its own passer,
+will frequently save or win a position that a materialist count calls lost. Place
+the rook behind the passed pawn, whether it is yours or your opponent's.
+
+
+On the passed pawn.
+
+A passed pawn — one with no enemy pawn ahead of it on its file or the files beside
+it — is a candidate to promote, and the threat of promotion grows with every
+square it advances. A passed pawn must be pushed, the saying goes, because a
+runner on the seventh rank ties down enemy pieces that would rather be elsewhere.
+But push it with support; a passed pawn that outruns its own pieces is merely a
+target. The endgame is, very often, the story of who can make a passed pawn first.
+
+
+On the two bishops.
+
+A pair of bishops, working together on light and dark squares, covers the whole
+board and grows stronger as the position opens and pawns come off. When you hold
+the two bishops, seek to open lines; when you face them, keep the position closed
+and look to trade one of them for a knight. The advantage of the two bishops is
+small but durable, the kind of edge that decides a quiet game.

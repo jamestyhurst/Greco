@@ -1,0 +1,89 @@
+Opening Principles and Named Openings — Greco Reference Notes
+
+Short, original notes on opening play and the character of a few classical
+openings, written for the Greco project and released into the public domain (CC0).
+They exist so Greco's retrieval layer has correct opening material before the
+classical public-domain opening books are added. They may be quoted freely.
+
+
+The aims of the opening.
+
+Every sound opening serves the same three aims: develop the pieces quickly, fight
+for the center, and bring the king to safety by castling. The named openings are
+simply the well-charted roads by which strong players have pursued those aims for
+centuries. Knowing an opening's name matters less than understanding its ideas —
+which pawn breaks it is built around, which pieces want which squares, and what
+kind of middlegame it is steering toward.
+
+
+The Italian Game (1.e4 e5 2.Nf3 Nc3 3.Bc4).
+
+One of the oldest openings, the Italian develops a knight and a bishop toward the
+center and eyes the sensitive f7 square. It is a natural classical setup: claim
+the center with the king's pawn, develop with threats, and castle. The Giuoco
+Piano — the "quiet game" — is its slow, maneuvering branch, while the Evans Gambit
+offers a pawn to rip the center open. The Italian teaches the beginner's virtues
+better than almost any other opening: rapid development and pressure on the
+weakest point in the enemy camp.
+
+
+The Ruy Lopez, or Spanish Opening (1.e4 e5 2.Nf3 Nc6 3.Bb5).
+
+The Spanish bishop pins nothing yet but pressures the knight that defends Black's
+center pawn, and the resulting struggle over the e5 point has filled more theory
+than any other king-pawn opening. White builds slowly, often retreating the
+bishop and maneuvering the queen's knight to the kingside, while Black must solve
+the problem of his slightly cramped position. It is the great strategic battlefield
+of classical chess, prized for richness rather than for any quick knockout.
+
+
+The Sicilian Defense (1.e4 c5).
+
+The Sicilian answers the king's pawn not with symmetry but with an unbalancing
+flank pawn, fighting for the center from the side and inviting a sharp, double-edged
+game. Black accepts a half-open c-file and long-term counterplay in exchange for
+ceding some space, and the resulting positions are among the most combative in
+chess. It is the choice of the player who wants to win with the black pieces, not
+merely to equalize.
+
+
+The French Defense (1.e4 e6).
+
+The French builds a solid pawn chain and strikes at White's center with the move
+d5, accepting a slightly cramped but resilient position. Its one well-known burden
+is the queen's bishop, hemmed in behind its own pawns, and much of Black's
+middlegame skill lies in freeing or trading that piece. The French rewards
+patience and a feel for pawn chains: play on the side where your chain points, and
+break at its base.
+
+
+The Alekhine's Defense (1.e4 Nf6).
+
+The Alekhine invites White to chase the knight with pawns, deliberately letting
+White build a broad pawn center in the belief that it can later be undermined and
+turned into a weakness. It is named for the player's actual first move and move
+order, not for any structure it later resembles, and a position that comes to look
+like a French through some other path is still the opening that was actually
+played. It is a hypermodern idea: let the opponent occupy the center, then attack
+what he has built.
+
+
+The Queen's Gambit (1.d4 d5 2.c4).
+
+Not truly a gambit, since the offered c-pawn cannot be safely held, the Queen's
+Gambit fights for the center by offering to trade a flank pawn for a central one.
+Declining it with e6 leads to the solid, classical main lines; accepting it gives
+the pawn back for development. It is the cornerstone of queen-pawn play and a
+model of how to fight for the center without the sharp races of the king-pawn
+openings.
+
+
+On book moves and when to trust them.
+
+A move that follows established theory for the opening actually being played is a
+book move, and it should not be second-guessed merely because an engine shows a
+marginal preference for something else. Theory is the distilled experience of
+strong players, and in the opening it is usually a safer guide to the resulting
+middlegame than a raw evaluation a fraction of a pawn higher. Reserve criticism of
+opening play for genuine errors — a real loss of material or a concrete tactic
+missed — not for honest deviations within sound theory.

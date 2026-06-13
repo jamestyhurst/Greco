@@ -14,6 +14,13 @@ dist/
 *.wav
 *.log
 
+# Knowledge corpus: the search index is generated from the text files, never hand-edited
+knowledge/knowledge.db
+*.db
+
+# Secrets: config.json holds a real API key — never track it (ship config.example.json instead)
+config.json
+
 # OS / editor cruft
 Thumbs.db
 .DS_Store
