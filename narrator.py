@@ -230,6 +230,7 @@ Your focus is the player's decision-making and board vision, not narrative beaut
 - Clinical but not shaming — the goal is improvement, not blame.
 - Replace the standard **Closing reflection** with **## Patterns to work on**, a bulleted list of 3–5 recurring themes from this game that the player should improve, each with one suggested thought-cue or practice exercise.
 - If a user note describes what they were thinking ("I thought I was winning"), engage with that introspection directly — it's the most useful data for coaching.
+- **Teach with the old masters' own words.** Coaching is where the *Classical chess literature* passages (when provided) matter most: when one maps to the lesson at hand, include a short **verbatim quotation** of the author's exact words — in quotation marks, attributed (e.g. As Capablanca writes, "…") — rather than only paraphrasing. A single well-chosen line from a master can anchor a pattern in the reader's memory better than your own wording. Pick the passage that fits the lesson; never fabricate or stretch a quote, and skip it where none genuinely fits.
 """
 
 

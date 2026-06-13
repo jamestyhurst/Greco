@@ -103,6 +103,24 @@ sorted placement); developer auto-`similar` hook + folder cap; voice refinements
 moves, winning-a-piece ≠ a trade); standalone `Greco.exe`; game finders (Chess.com + PGN
 Mentor); commentary-learning; report naming; versioning + docs.
 
+## Greco Coach — the teaching vision (knowledge corpus, backlog #10)
+
+**Vision:** *Greco Coach is an LLM + Stockfish-powered chess teacher/tutor that is
+restricted to quoting and reading books published before `current_year − 95` (the
+public-domain line), yet still learns, applies, and shares the knowledge of the old
+masters — bridging the gap between supercomputers and human understanding.*
+
+The `knowledge/` corpus is the spine of this: a curated library of public-domain chess
+texts the narrator retrieves from at analysis time (see backlog #10 and
+`knowledge/README.md`). The pre-95-year restriction is a deliberate feature, not a
+limitation — it grounds Greco in the enduring, freely-shareable wisdom of the classical
+masters. Verbatim quotation of those masters is most desired in **Coaching** mode, where
+a master's own line can anchor a lesson; the capability is wired in and most reliable
+there. (An A/B test, 2026-06-13, found a frontier model already *knows* general
+principles and applies them in its own words even without the corpus — which is itself
+aligned with "learn, apply, and share" — so the corpus's sharpest value is deep opening
+theory and concrete analysis the model lacks, plus optional verbatim quoting.)
+
 ## Toward v1.0 — "feels like real software"
 
 The v1.0 bar is now **Greco Online running hosted, with accounts** — a stranger could open
@@ -121,6 +139,15 @@ updates are instant and every user is on the same version.
   backlog #11.
 - Desktop distribution of the `.exe` to other computers — possible, but secondary to
   hosting Greco online.
+- **Deterministic "featured passage" (knowledge corpus luxury feature).** To *guarantee*
+  a verbatim master quote appears, have Greco retrieve the best-matching passage and
+  insert it into the report itself (a formatted block-quote with attribution) in
+  `outputs.py`, independent of the model's choice — instead of relying on the narrator to
+  quote. A nice-to-have for the Greco Coach vision, not core; alters report format, so
+  it's a deliberate product decision for later.
+- **Corpus content priority (from the 2026-06-13 A/B test):** acquire **deep opening
+  theory and annotated master games** first (content the model is unreliable on); treat
+  general-principles books as low-priority. Tracked in `knowledge/SHOPPING_LIST.md`.
 
 ## Working conventions
 - **Versioning:** bump PATCH for fixes, MINOR for new features, MAJOR for big/breaking

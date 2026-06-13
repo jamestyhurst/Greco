@@ -20,7 +20,14 @@ Two signals are printed, but THE .md FILES ARE THE REAL EVIDENCE — read them:
 Usage:
     set PYTHONUTF8=1
     python tools\\knowledge_ab_test.py --pgn "path\\to\\game.pgn"
-    python tools\\knowledge_ab_test.py --pgn game.pgn --use-case commentary --depth 16
+    python tools\\knowledge_ab_test.py --pgn game.pgn --use-case coaching --depth 16
+
+To save tokens, run it on Sonnet (config.json defaults the model to whatever the GUI
+saved — often Opus). Coaching is the voice where the corpus is most used:
+    python tools\\knowledge_ab_test.py --pgn game.pgn --use-case coaching --model claude-sonnet-4-6
+
+This script makes its OWN API calls with a self-contained prompt — it does NOT inherit
+the Claude Code session's context, so it's cheap to run even from a fresh, small session.
 """
 from __future__ import annotations
 
