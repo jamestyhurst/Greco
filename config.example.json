@@ -1,0 +1,6 @@
+{
+  "stockfish_path": "C:\\Program Files\\stockfish\\stockfish-windows-x86-64-avx2.exe",
+  "api_key": "sk-ant-REPLACE-WITH-YOUR-OWN-ANTHROPIC-API-KEY",
+  "model": "claude-opus-4-8",
+  "reports_dir": "C:\\Users\\YourName\\Documents\\Greco Reports"
+}

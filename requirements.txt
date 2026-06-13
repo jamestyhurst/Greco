@@ -7,3 +7,6 @@ markdown>=3.4
 # Needed on Python 3.11+ (OpenSSL 3.x) behind a TLS-intercepting proxy whose CA
 # the OS trusts but OpenSSL rejects; harmless on a clean host. See narrator._make_http_client.
 truststore>=0.9
+
+# Greco Web — local browser version (run_greco_web.bat / webapp.py)
+flask>=3.0
