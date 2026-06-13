@@ -38,3 +38,11 @@ on. Concept-by-concept map: `software-skills-you-can-learn-from-greco.md`.
    Dev Log entry. Push to GitHub after each self-contained unit of completed work. If a push
    is deferred, log it in Notion so the phone doesn't assume GitHub is current.
    Full protocol: `sync-doctrine.md` (in `Developer Notes (Greco)\`, loaded via `Documents\CLAUDE.md`).
+8. **Developer Notes derivatives must never be pushed to GitHub.** Files in
+   `Documents\Developer Notes (Greco)\` hold private business strategy (StayPlus client
+   context, personal roadmap) and are kept *outside* the repo by design — they never appear
+   in `git status`. However, copies or derivatives can land in the working tree. Any such
+   file must be in `.gitignore` before it is ever staged. Current gitignored derivatives:
+   `Greco_Development_Guide_and_StayPlus_Readiness.md`, `software-skills-you-can-learn-from-greco.md`.
+   If you add a new planning doc to the repo root, add it to `.gitignore` immediately and
+   verify with `git status` before committing.

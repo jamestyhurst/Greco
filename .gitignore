@@ -37,7 +37,11 @@ _commitmsg.txt
 _style_ab_out/
 _ab_out*/
 
-# Personal planning / private dev docs (not for public repo)
+# Developer Notes derivatives — copies or derivatives of files from
+# Documents\Developer Notes (Greco)\ that landed in the repo working tree.
+# Those files contain private business strategy (StayPlus client context) and
+# must NEVER be pushed to GitHub. Add any new derivative here immediately;
+# verify with `git status` before committing any new planning docs.
 Greco_Development_Guide_and_StayPlus_Readiness.md
 software-skills-you-can-learn-from-greco.md
 
