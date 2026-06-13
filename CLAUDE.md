@@ -59,6 +59,12 @@ typed by hand each session. Designed from the Notion "Greco" page; it deliberate
 external tools** (git-cliff/Rust were dropped — auto-installing software trips this machine's
 antivirus). Pure Python + git only, run manually during a session (never as a background task).
 
+> **One command — `python scripts\ship.py`** — does it all when a unit is finished AND verified:
+> refuses on a dirty tree, smoke-imports the core modules, runs the secret scan, bumps + tags the
+> version from your Conventional Commits, and pushes `main` + tags. `--dry-run` previews without
+> pushing. It does **not** write Notion — add the Dev Log entry yourself afterward (step 5).
+> The steps below are what `ship.py` automates (and what to do by hand if it ever can't run).
+
 **1. Conventional Commits — always.** Every commit subject is `<type>: <description>` (also
 `type(scope):` or `type!:`). Never freeform.
 
