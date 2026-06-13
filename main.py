@@ -314,7 +314,7 @@ def main() -> int:
     print(f"Wrote Markdown report to {md_path}", file=sys.stderr)
 
     if args.format in ("html", "both"):
-        html_path = markdown_to_html(md_path)
+        html_path = markdown_to_html(md_path, game=game, flipped=flipped_for_black)
         print(f"Wrote HTML report to {html_path}", file=sys.stderr)
 
     return 0

@@ -51,7 +51,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
@@ -105,6 +105,8 @@ class Passage:
     bucket: str
     book_id: str
     chunk_index: int
+    matched_theme: str = ""
+    matched_phrases: List[str] = field(default_factory=list)
 
     def attribution(self) -> str:
         bits = [b for b in (self.author, self.title) if b]
@@ -112,6 +114,38 @@ class Passage:
         if self.year:
             head += f" ({self.year})"
         return head
+
+
+def _extract_key_sentences(text: str, query_words: List[str],
+                           max_sentences: int = 2, max_words: int = 55) -> str:
+    """
+    Return the 1-2 sentences from `text` most likely to be quotable — scored by
+    how many query vocabulary words they contain. Falls back to the first sentence.
+    Keeps the output short enough (~55 words) for the narrator to quote cleanly
+    rather than having to cut a 380-word block mid-thought.
+    """
+    raw = re.split(r"(?<=[.!?])\s+", text.strip())
+    sentences = [s.strip() for s in raw if s.strip()]
+    if not sentences:
+        return text.strip()
+
+    query_set = {w.lower() for w in query_words if len(w) > 3}
+    scored = []
+    for s in sentences:
+        words = re.findall(r"[a-z']+", s.lower())
+        score = sum(1 for w in words if w in query_set)
+        scored.append((score, s))
+    scored.sort(key=lambda x: -x[0])
+
+    picked: List[str] = []
+    total_words = 0
+    for _, sent in scored[:max_sentences]:
+        wc = len(sent.split())
+        if total_words + wc > max_words and picked:
+            break
+        picked.append(sent)
+        total_words += wc
+    return " ".join(picked) if picked else sentences[0]
 
 
 # --------------------------------------------------------------------------- #
@@ -444,15 +478,18 @@ def retrieve(themes: Sequence[str], opening_name: Optional[str] = None,
     if not DB_PATH.exists():
         return []
 
-    queries: List[List[str]] = []
+    # Each entry is (theme_label, phrases) so retrieved passages can be tagged
+    # with the theme that caused them to be retrieved — used later for phase-gating.
+    tagged_queries: List[tuple] = []
     if opening_name:
-        # Query the full name and its component words (drops commas/accents safely).
-        queries.append([opening_name] + _WORD_RE.findall(opening_name))
+        tagged_queries.append(
+            ("opening", [opening_name] + _WORD_RE.findall(opening_name))
+        )
     for theme in themes:
         phrases = THEME_QUERIES.get(theme)
         if phrases:
-            queries.append(phrases)
-    if not queries:
+            tagged_queries.append((theme, list(phrases)))
+    if not tagged_queries:
         return []
 
     results: List[Passage] = []
@@ -465,7 +502,7 @@ def retrieve(themes: Sequence[str], opening_name: Optional[str] = None,
         if not _has_rows(conn):
             return []
         # Pass 1: one passage per query, in priority order.
-        for phrases in queries:
+        for theme_label, phrases in tagged_queries:
             if len(results) >= top_k:
                 break
             for row in _search(conn, phrases, per_query):
@@ -473,11 +510,14 @@ def retrieve(themes: Sequence[str], opening_name: Optional[str] = None,
                 if key in seen:
                     continue
                 seen.add(key)
-                results.append(_row_to_passage(row))
+                p = _row_to_passage(row)
+                p.matched_theme = theme_label
+                p.matched_phrases = phrases
+                results.append(p)
                 break
         # Pass 2: fill remaining slots, allowing more from each query.
         if len(results) < top_k:
-            for phrases in queries:
+            for theme_label, phrases in tagged_queries:
                 if len(results) >= top_k:
                     break
                 for row in _search(conn, phrases, per_query + 3):
@@ -485,7 +525,10 @@ def retrieve(themes: Sequence[str], opening_name: Optional[str] = None,
                     if key in seen:
                         continue
                     seen.add(key)
-                    results.append(_row_to_passage(row))
+                    p = _row_to_passage(row)
+                    p.matched_theme = theme_label
+                    p.matched_phrases = phrases
+                    results.append(p)
                     if len(results) >= top_k:
                         break
     finally:
@@ -536,6 +579,16 @@ def themes_from_game(game) -> List[str]:
 # --------------------------------------------------------------------------- #
 # The narrator-facing entry point
 # --------------------------------------------------------------------------- #
+def _is_human_authored(p: "Passage") -> bool:
+    """True only for passages from a named human author — not Greco seed texts."""
+    author = (p.author or "").strip().lower()
+    if not author:
+        return False
+    if author == "greco project":
+        return False
+    return True
+
+
 def load_knowledge_for_game(game, opening_name: Optional[str] = None,
                             max_passages: int = 4, max_chars: int = 6000) -> str:
     """
@@ -544,11 +597,16 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
     corpus is empty or nothing matches — in which case the narrator behaves
     exactly as it did before the corpus existed.
 
+    Only passages from named human authors (e.g. Capablanca) are injected.
+    Greco seed texts are excluded so the narrator is never tempted to attribute
+    quotes to "Greco" or unnamed internal notes.
+
     This is the ONLY function the narrator needs to call. It is fully fail-safe.
     """
     try:
         themes = themes_from_game(game)
-        passages = retrieve(themes, opening_name=opening_name, top_k=max_passages)
+        all_passages = retrieve(themes, opening_name=opening_name, top_k=max_passages)
+        passages = [p for p in all_passages if _is_human_authored(p)]
     except Exception:
         return ""
     if not passages:
@@ -557,8 +615,51 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
     blocks: List[str] = []
     total = 0
     for p in passages:
-        excerpt = p.text.strip()
-        block = f'[{p.attribution()}]\n"{excerpt}"'
+        theme = p.matched_theme or "general"
+
+        # Short, quotable excerpt — the 1-2 most relevant sentences (≤55 words).
+        key_sentence = _extract_key_sentences(
+            p.text,
+            p.matched_phrases if p.matched_phrases else p.text.split()[:8],
+            max_sentences=2,
+            max_words=55,
+        )
+
+        # Phase/tactic gate: tells the narrator when it is and isn't appropriate
+        # to apply this passage.
+        if theme == "endgame":
+            gate = (
+                "• PHASE GATE: cite this only at moves in the endgame phase — "
+                "not in the opening or middlegame.\n"
+            )
+        elif theme == "opening":
+            gate = (
+                "• PHASE GATE: cite this only during the opening — "
+                "not in the middlegame or endgame.\n"
+            )
+        elif theme == "sacrifice":
+            gate = (
+                "• TACTIC GATE: cite this only at a move where a sacrifice or "
+                "combination was played — not at quiet positional moves.\n"
+            )
+        else:
+            gate = ""
+
+        block = (
+            f"[{p.attribution()} | retrieved-for: {theme}]\n\n"
+            f"QUOTABLE EXCERPT (≤55 words — use these exact words if you quote):\n"
+            f'"{key_sentence}"\n\n'
+            f"POSITION VALIDATION — read before citing:\n"
+            f'• This passage was retrieved on the "{theme}" theme. Before quoting, '
+            f"confirm the specific move you are annotating genuinely exhibits this theme.\n"
+            f"• If the passage's concrete claim does not match the position details "
+            f"(e.g. the quote says 'defend pawns' but the position involves defending "
+            f"pieces, not pawns), skip this passage entirely — do not cite or paraphrase it.\n"
+            f"{gate}"
+            f"\nFULL PASSAGE (background context only — do not quote from this section; "
+            f"quote only from QUOTABLE EXCERPT above):\n"
+            f'"{p.text.strip()}"'
+        )
         if total + len(block) > max_chars and blocks:
             break
         blocks.append(block)
@@ -566,22 +667,18 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
     if not blocks:
         return ""
 
-    joined = "\n\n".join(blocks)
+    joined = "\n\n---\n\n".join(blocks)
     return (
-        "## Classical chess literature (VERBATIM public-domain passages)\n"
-        "These are exact excerpts from public-domain chess books, retrieved because "
-        "they speak to themes present in THIS game (the opening, or a tactic/structure "
-        "the engine detected). Unlike the style transcripts, you MAY quote or "
-        "paraphrase these **with attribution** when one genuinely illuminates a move "
-        "or position — e.g. \"As Capablanca put it, …\". They teach *principles*, not "
-        "facts about this game: never use a passage to assert a board fact (the engine "
-        "data above remains the sole source of board truth), and never fabricate or "
-        "extend a quote beyond the text given. When a passage genuinely fits a moment "
-        "in the game, quote it **directly and with attribution** — a short run of the "
-        "author's own words in quotation marks (e.g. As Capablanca writes, \"...\") — "
-        "since a master's exact phrasing is the point, and a loose paraphrase loses it. "
-        "Aim for one to three such quotations across a full report, placed where they "
-        "sharpen a real lesson, and skip them where none fit.\n\n"
+        "## Classical chess literature (public-domain passages)\n"
+        "Each entry below has three parts:\n"
+        "  1. QUOTABLE EXCERPT — 1-2 sentences (≤55 words). "
+        "If you quote, use these exact words.\n"
+        "  2. POSITION VALIDATION — a gate you MUST check before citing. "
+        "If the position's specifics do not match the passage's claim, skip it.\n"
+        "  3. FULL PASSAGE — background only; do not quote directly from it.\n\n"
+        "Attribution rule: cite only named historical masters (Capablanca, Lasker, "
+        "Nimzowitsch, etc.). Aim for 1-3 quotations per report, where they "
+        "genuinely sharpen a lesson. Silence is correct when no passage fits cleanly.\n\n"
         f"{joined}"
     )
 

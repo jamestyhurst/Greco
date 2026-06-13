@@ -29,7 +29,36 @@ from typing import List, Tuple
 
 REFS_DIR = Path(__file__).resolve().parent / "commentary_refs"
 
+# Author-written house-voice spec (an explicit style guide, distinct from the
+# transcript examples). This is the most reliable, tunable lever on the voice.
+STYLE_GUIDE_PATH = REFS_DIR / "GRECO_STYLE.md"
+
 _MIN_TRANSCRIPT_CHARS = 200
+
+
+def load_style_guide(max_chars: int = 12000) -> str:
+    """Return the Greco house-voice style guide (commentary_refs/GRECO_STYLE.md),
+    wrapped for the system prompt, or '' if it is missing/empty.
+
+    Unlike the transcript references (which the model must learn from indirectly),
+    this is an explicit, author-controlled instruction set — so it is the most
+    reliable and verifiable way to steer Greco's voice."""
+    try:
+        text = STYLE_GUIDE_PATH.read_text(encoding="utf-8").strip()
+    except Exception:
+        return ""
+    if not text:
+        return ""
+    if len(text) > max_chars:
+        text = text[:max_chars].rstrip() + "\n\n…(style guide truncated)"
+    return (
+        "## Greco house voice — AUTHORITATIVE STYLE SPEC\n"
+        "This is the definitive guide to how your commentary should sound; follow it "
+        "closely. It governs VOICE ONLY — pacing, tone, structure, when to get excited. "
+        "Every chess FACT (evaluations, best moves, threats, who is winning) still comes "
+        "solely from the engine ground-truth in the user message; never take a claim from "
+        "any style source.\n\n" + text
+    )
 
 
 def _pgn_label(pgn_path: Path) -> str:
@@ -69,6 +98,8 @@ def _collect(max_refs: int, max_chars_each: int) -> List[Tuple[str, str, str, st
             continue
         if len(transcript) < _MIN_TRANSCRIPT_CHARS:
             continue  # template / stub
+        if transcript.upper().startswith("PLACEHOLDER"):
+            continue  # unfilled scaffold (e.g. a fetch_transcript.py stub not yet filled)
 
         title, commentator = sub.name, ""
         meta = sub / "meta.json"

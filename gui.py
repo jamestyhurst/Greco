@@ -13,13 +13,17 @@ Run it with:   python gui.py     (or double-click run_greco.bat)
 
 from __future__ import annotations
 
+import json
 import os
 import queue
 import re
+import shutil
+import subprocess
 import threading
 import traceback
 import webbrowser
 from pathlib import Path
+from typing import Optional
 
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext, ttk
@@ -35,12 +39,82 @@ from version import __version__
 SPEED_LABELS = {"Fast (0.5s/move)": 0.5, "Normal (0.8s/move)": 0.8, "Deep (1.5s/move)": 1.5}
 USE_CASES = ["companion", "coaching", "commentary"]
 SIDES = ["White", "Black", "Neither"]
+MODELS = ["claude-sonnet-4-6", "claude-opus-4-8", "claude-fable-5"]
 
 # Preferred place to look for PGNs (the E: library), with a sensible fallback.
 PGN_LIBRARY = r"E:\Chess\PGNs"
 
 # Greco app icon (window title bar + taskbar).
 ICON_PATH = Path(__file__).resolve().parent / "assets" / "greco.ico"
+
+# Persistent settings file — stores engine path, API key, model, reports folder.
+CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
+
+
+def load_config() -> dict:
+    try:
+        return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def save_config(cfg: dict) -> None:
+    try:
+        CONFIG_PATH.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _find_chrome() -> Optional[str]:
+    """Locate chrome.exe — checks PATH, the standard install folders, and the
+    'App Paths' registry. Returns the full path, or None if Chrome isn't found."""
+    exe = shutil.which("chrome")
+    if exe:
+        return exe
+    candidates = [
+        Path(os.environ.get("PROGRAMFILES", r"C:\Program Files")) / "Google" / "Chrome" / "Application" / "chrome.exe",
+        Path(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)")) / "Google" / "Chrome" / "Application" / "chrome.exe",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Google" / "Chrome" / "Application" / "chrome.exe",
+    ]
+    for c in candidates:
+        try:
+            if c.is_file():
+                return str(c)
+        except OSError:
+            pass
+    try:
+        import winreg
+        for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+            try:
+                with winreg.OpenKey(
+                    hive, r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe"
+                ) as key:
+                    val, _ = winreg.QueryValueEx(key, None)
+                if val and Path(val).is_file():
+                    return val
+            except OSError:
+                continue
+    except Exception:
+        pass
+    return None
+
+
+def open_report_in_browser(path: str) -> None:
+    """Open the finished HTML report, preferring Chrome.
+
+    Chrome is launched with the file path passed directly as an argument, which
+    is robust for this machine's non-ASCII profile path (no file:// URI encoding
+    to trip over). Falls back to the system default browser if Chrome is absent.
+    """
+    p = Path(path)
+    chrome = _find_chrome()
+    if chrome:
+        try:
+            subprocess.Popen([chrome, str(p)])
+            return
+        except Exception:
+            pass  # fall through to the default browser
+    webbrowser.open(p.as_uri())
 
 
 def _safe_folder_name(name: str) -> str:
@@ -69,8 +143,10 @@ class GrecoGUI:
         self._last_html = None   # path of the most recent report (for the buttons)
         self._last_dir = None
         root.title(f"Greco {__version__} — Chess Game Analyzer")
-        root.geometry("760x640")
-        root.minsize(640, 560)
+        root.geometry("760x700")
+        root.minsize(640, 600)
+
+        cfg = load_config()
 
         pad = {"padx": 8, "pady": 4}
         main = ttk.Frame(root, padding=10)
@@ -113,20 +189,45 @@ class GrecoGUI:
         self.note_var = tk.StringVar()
         ttk.Entry(noterow, textvariable=self.note_var).pack(side="left", fill="x", expand=True, padx=6)
 
-        # --- Advanced (engine path + API key, prefilled from environment) ---
-        adv = ttk.LabelFrame(main, text="Setup (auto-filled from your environment)", padding=8)
+        # --- Setup (persistent config, falls back to environment variables) ---
+        adv = ttk.LabelFrame(main, text="Setup", padding=8)
         adv.pack(fill="x", **pad)
+
+        LW = 16  # label column width (chars) — keeps entry fields aligned
+
         erow = ttk.Frame(adv)
         erow.pack(fill="x", pady=2)
-        ttk.Label(erow, text="Stockfish path:").pack(side="left")
-        self.engine_var = tk.StringVar(value=os.environ.get("STOCKFISH_PATH", ""))
+        ttk.Label(erow, text="Stockfish path:", width=LW, anchor="w").pack(side="left")
+        self.engine_var = tk.StringVar(
+            value=cfg.get("stockfish_path") or os.environ.get("STOCKFISH_PATH", "")
+        )
         ttk.Entry(erow, textvariable=self.engine_var).pack(side="left", fill="x", expand=True, padx=6)
         ttk.Button(erow, text="Browse…", command=self._browse_engine).pack(side="left")
+
         krow = ttk.Frame(adv)
         krow.pack(fill="x", pady=2)
-        ttk.Label(krow, text="Anthropic API key:").pack(side="left")
-        self.key_var = tk.StringVar(value=os.environ.get("ANTHROPIC_API_KEY", ""))
+        ttk.Label(krow, text="Anthropic API key:", width=LW, anchor="w").pack(side="left")
+        self.key_var = tk.StringVar(
+            value=cfg.get("api_key") or os.environ.get("ANTHROPIC_API_KEY", "")
+        )
         ttk.Entry(krow, textvariable=self.key_var, show="•").pack(side="left", fill="x", expand=True, padx=6)
+
+        mrow = ttk.Frame(adv)
+        mrow.pack(fill="x", pady=2)
+        ttk.Label(mrow, text="Model:", width=LW, anchor="w").pack(side="left")
+        self.model_var = tk.StringVar(value=cfg.get("model", MODELS[0]))
+        ttk.Combobox(
+            mrow, textvariable=self.model_var, values=MODELS, state="readonly", width=24
+        ).pack(side="left", padx=6)
+
+        rrow = ttk.Frame(adv)
+        rrow.pack(fill="x", pady=2)
+        ttk.Label(rrow, text="Reports folder:", width=LW, anchor="w").pack(side="left")
+        self.reports_var = tk.StringVar(
+            value=cfg.get("reports_dir") or os.environ.get("GRECO_REPORTS_DIR", "")
+        )
+        ttk.Entry(rrow, textvariable=self.reports_var).pack(side="left", fill="x", expand=True, padx=6)
+        ttk.Button(rrow, text="Browse…", command=self._browse_reports).pack(side="left")
 
         # --- Run ---
         runrow = ttk.Frame(main)
@@ -174,6 +275,11 @@ class GrecoGUI:
         if path:
             self.engine_var.set(path)
 
+    def _browse_reports(self):
+        path = filedialog.askdirectory(title="Choose reports output folder")
+        if path:
+            self.reports_var.set(path)
+
     def _log(self, text: str):
         self.log.configure(state="normal")
         self.log.insert("end", text)
@@ -184,7 +290,7 @@ class GrecoGUI:
     def _open_report(self):
         if self._last_html:
             try:
-                webbrowser.open(Path(self._last_html).as_uri())
+                open_report_in_browser(self._last_html)
             except Exception:
                 messagebox.showinfo("Greco", f"Report:\n{self._last_html}")
 
@@ -211,7 +317,21 @@ class GrecoGUI:
         if not key:
             messagebox.showerror("Greco", "Please enter your Anthropic API key.")
             return
-        os.environ["ANTHROPIC_API_KEY"] = key  # for this session
+
+        model = self.model_var.get().strip() or MODELS[0]
+        reports_dir = self.reports_var.get().strip()
+
+        # Persist settings so they survive restarts.
+        save_config({
+            "stockfish_path": engine,
+            "api_key": key,
+            "model": model,
+            "reports_dir": reports_dir,
+        })
+
+        os.environ["ANTHROPIC_API_KEY"] = key
+        if reports_dir:
+            os.environ["GRECO_REPORTS_DIR"] = reports_dir
 
         self.running = True
         self.analyze_btn.configure(state="disabled")
@@ -232,6 +352,7 @@ class GrecoGUI:
             "user_is": side if side in ("white", "black") else "neither",
             "note": self.note_var.get().strip() or None,
             "time_limit": SPEED_LABELS.get(self.speed_var.get(), 0.8),
+            "model": model,
         }
         threading.Thread(target=self._worker, args=(params,), daemon=True).start()
         self.root.after(100, self._poll)
@@ -255,13 +376,14 @@ class GrecoGUI:
             }
             self.q.put(("status", "Assigning commentary tiers…"))
             tiers = annotate_with_tiers(game, user_context)
-            self.q.put(("status", f"Writing the report with Claude ({p['use_case']} voice)…"))
+            self.q.put(("status", f"Writing the report ({p['use_case']} voice, {p['model']})…"))
             narrative = generate_narrative(
                 game,
                 tiers,
                 user_context,
                 use_case=p["use_case"],
                 user_note=p["note"],
+                model=p["model"],
                 live_stream_to=_QueueWriter(self.q),
             )
             # Name the report informatively ("White vs. Black, Blitz, 2024") and
@@ -279,7 +401,9 @@ class GrecoGUI:
                 render_eval_graph=True,
                 flipped_for_black=(p["user_is"] == "black"),
             )
-            html_path = markdown_to_html(md_path)
+            html_path = markdown_to_html(
+                md_path, game=game, flipped=(p["user_is"] == "black")
+            )
             self.q.put(("done", str(html_path)))
             # Developer-only (GRECO_DEV): quietly refill the test pool with a
             # similar game so the developer never runs out of games to test on.
@@ -340,9 +464,9 @@ class GrecoGUI:
         self.open_report_btn.configure(state="normal")
         self.open_folder_btn.configure(state="normal")
         self.status_var.set("Done — report opened in your browser.")
-        self._log(f"\n\n✅ Report saved to:\n{html_path}\nOpening in your browser…\n")
+        self._log(f"\n\n✅ Report saved to:\n{html_path}\nOpening in Chrome…\n")
         try:
-            webbrowser.open(Path(html_path).as_uri())
+            open_report_in_browser(html_path)
         except Exception:
             messagebox.showinfo("Greco", f"Report saved to:\n{html_path}")
 

@@ -6,15 +6,21 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.2.0
+## Where we are — v0.3.0
 - Working Tkinter GUI over the full pipeline (importers → analyzer → triage → narrator
   → outputs).
 - Branded icon (title bar + taskbar), informative report names, E:-drive output and
   PGN sync, commentary-learning, local git + E: backup.
 - **Settings panel**: Stockfish path, API key, model selector, reports folder — all
   persisted to `config.json`; no environment variables needed after first run.
-- **SVG chronological ordering**: board images now appear in strict ply order in HTML
-  reports; filenames prefixed with ply number; `data-ply` attributes on all figures.
+- **SVG chronological ordering**: board images woven into the narrative in strict ply
+  order; filenames prefixed with ply number; `data-ply` attributes on all figures.
+- **Interactive PGN viewer**: every HTML report embeds a self-contained click-through
+  replay board (keyboard navigation, move list with badges, eval display, flip button).
+- **Greco Online Phase 1**: `webapp.py` + `run_greco_web.bat` — full pipeline via browser
+  on localhost; same output as the desktop app.
+- **Knowledge corpus (RAG)**: public-domain chess books (Capablanca) retrieved at
+  analysis time; narrator quotes with attribution; verbatim proven in A/B tests.
 - **Standalone `Greco.exe`**: double-click launch, no console, no separate Python
   install, icon embedded. (This was the old v1.0 target — it shipped, and now serves as
   the local launcher while the focus shifts online; see *Superseded vision* below.)
@@ -77,14 +83,14 @@ each item is committed when done, so a partial batch is still saved progress.
 
 | # | Task | Size | Status |
 |---|------|------|--------|
-| 1 | **Greco Online · Phase 1** — web server over the pipeline: browser upload → report (localhost) — `webapp.py` + `run_greco_web.bat` (Flask; additive, desktop app untouched) | L | **in progress** |
+| 1 | **Greco Online · Phase 1** — web server over the pipeline: browser upload → report (localhost) — `webapp.py` + `run_greco_web.bat` (Flask; additive, desktop app untouched) | L | **done** |
 | 2 | **Greco Online · Phase 2** — async analysis jobs + status page (Queued → Analyzing → Done) | M | todo |
 | 3 | **Greco Online · Phase 3** — accounts + roles (login, per-user games, admin) | L | todo |
 | 4 | **Greco Online · Phase 4** — database (SQLite locally → PostgreSQL hosted) | M | todo |
 | 5 | **Greco Online · Phase 5** — phone-friendly UI + dashboard + CSV/PDF export | M | todo |
 | 6 | **Greco Online · Phase 6** — account auto-import + "report ready" email | M | todo |
 | 7 | **Greco Online · Phase 7** — deploy (Render/Railway, domain, HTTPS) | M | todo |
-| 8 | Interactive PGN viewer in the report HTML — *front-end layer of Greco Online* — **Opus-tier** (self-contained JS board + move navigation) | L | todo |
+| 8 | Interactive PGN viewer in the report HTML — *front-end layer of Greco Online* — self-contained JS board + move navigation, keyboard controls, color-coded move list, eval display, flip button | L | **done** |
 | 9 | "Read aloud" in the report HTML — *front-end layer of Greco Online* — Web Speech API (`speechSynthesis`), no extra files | M | todo |
 | 10 | `knowledge/` corpus — public-domain chess books retrieved (RAG, SQLite FTS5) and wired into the narrator; themes detected from engine ground truth. **Infrastructure built & verified (`knowledge.py`); awaiting content** (deposit per `knowledge/README.md`). | M | **infra done · content todo** |
 | 11 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | todo |
@@ -139,12 +145,35 @@ updates are instant and every user is on the same version.
   backlog #11.
 - Desktop distribution of the `.exe` to other computers — possible, but secondary to
   hosting Greco online.
-- **Deterministic "featured passage" (knowledge corpus luxury feature).** To *guarantee*
-  a verbatim master quote appears, have Greco retrieve the best-matching passage and
-  insert it into the report itself (a formatted block-quote with attribution) in
-  `outputs.py`, independent of the model's choice — instead of relying on the narrator to
-  quote. A nice-to-have for the Greco Coach vision, not core; alters report format, so
-  it's a deliberate product decision for later.
+- **Deterministic "featured passage" (knowledge corpus luxury feature) — two variants.**
+  *Variant A (meta.json pre-vetting):* let the book depositor mark one sentence in each
+  text as the canonical quotable line (`"featured_sentence": "…"` in `meta.json`); if a
+  chunk contains that sentence, `_extract_key_sentences` always picks it, giving a
+  predictable, human-vetted quote target. *Variant B (outputs.py mechanical insertion):*
+  retrieve the best-matching passage and embed it as a formatted block-quote with
+  attribution directly in the HTML report in `outputs.py`, independent of the model's
+  choice — a guarantee that a master's words appear regardless of narrator discretion.
+  Both are Greco Coach nice-to-haves, not core; Variant B alters report format, so it is
+  a deliberate product decision for later.
+- **Move-level retrieval (higher precision, higher cost).** Currently `knowledge.py`
+  retrieves once per game. A per-move variant would query the corpus again for each
+  tier 2/3 move, using only that move's specific detected features and phase. Cost: N FTS
+  queries per report (cheap because SQLite FTS5 is local). Payoff: passages are matched to
+  the exact move they'll annotate rather than the whole game. Worth doing once the corpus
+  has enough books for per-move queries to return meaningfully different results than a
+  per-game query.
+- **Negative filtering against the game's detected features.** If a passage's
+  `matched_theme` is e.g. `"doubled_pawns"` but the game's detected theme list (from
+  `themes_from_game()`) does not include `"doubled_pawns"`, the passage was only retrieved
+  as a second-pass filler and likely mismatches the game. Add a hard filter in
+  `load_knowledge_for_game()` that drops any filler passage whose theme is absent from the
+  game's genuine detected features — catches theme drift before it reaches the narrator.
+- **Auditable chain-of-thought validation in the report.** Tell the narrator to emit one
+  bracketed verification line each time it uses a corpus quote, e.g.
+  `[Verified: Andersson's rooks were defending pieces, matching "overloaded defender".]`
+  This line appears in the raw Markdown report and is visible during A/B testing, making
+  it straightforward to check whether the position-validation step actually ran and what
+  conclusion the narrator reached. Cost: ~15 words per quote used.
 - **Corpus content priority (from the 2026-06-13 A/B test):** acquire **deep opening
   theory and annotated master games** first (content the model is unreliable on); treat
   general-principles books as low-priority. Tracked in `knowledge/SHOPPING_LIST.md`.

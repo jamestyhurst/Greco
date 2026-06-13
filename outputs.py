@@ -15,6 +15,7 @@ toggleable.
 from __future__ import annotations
 
 import base64
+import json
 import os
 import re
 from pathlib import Path
@@ -186,7 +187,8 @@ def _move_san_to_filename_part(san: str) -> str:
 
 def _board_filename(move: MoveAnalysis) -> str:
     side_marker = "w" if move.side == "White" else "b"
-    return f"move_{move.move_number:03d}{side_marker}_{_move_san_to_filename_part(move.san)}.svg"
+    # ply prefix (zero-padded) guarantees natural filesystem sort order matches game order.
+    return f"ply{move.ply:03d}_m{move.move_number:02d}{side_marker}_{_move_san_to_filename_part(move.san)}.svg"
 
 
 def _insert_image_after_move_header(
@@ -232,6 +234,35 @@ def _insert_image_after_move_header(
     if n:
         return new_md, True
     return markdown, False
+
+
+def _insert_unanchored_boards(body: str, items: "List[tuple]") -> str:
+    """Weave boards that had no narrative anchor into the body in ply (game) order.
+
+    Each item is ``(ply, label, classification, image_rel_path)``. A board is
+    placed just before the first board already in the body whose ply is greater,
+    so the whole run of board figures reads in chronological order; a board later
+    than every inline board is appended at the end. This replaces the older
+    behaviour of collecting unanchored boards in an "Additional positions" block
+    above the narrative, which pushed late-game positions to the top of the report.
+    """
+    if not items:
+        return body
+    img_re = re.compile(r"!\[[^\]]*\]\([^)]*ply(\d+)[^)]*\)")
+    for ply, label, classification, rel in sorted(items, key=lambda it: it[0]):
+        snippet = f"**{label}** ({classification})\n\n![Position after {label}]({rel})\n"
+        insert_at = None
+        for m in img_re.finditer(body):
+            if int(m.group(1)) > ply:
+                insert_at = m.start()
+                break
+        if insert_at is None:
+            body = body.rstrip("\n") + "\n\n" + snippet
+        else:
+            line_start = body.rfind("\n", 0, insert_at)
+            pos = line_start + 1 if line_start != -1 else 0
+            body = body[:pos] + snippet + "\n" + body[pos:]
+    return body
 
 
 def assemble_report(
@@ -307,16 +338,18 @@ def assemble_report(
             if not inserted:
                 unanchored.append((move, rel))
 
-    # Safety net: any board that couldn't be anchored to a move header is
-    # collected into a "Key positions" section so it's never silently dropped.
+    # Boards the narrator gave no anchorable header to (periodic snapshots, or
+    # notable moves discussed only in prose) are woven INTO the narrative at their
+    # chronological position -- so every board figure reads in ply order -- instead
+    # of being dumped in a block above the narrative, where late-game positions
+    # used to surface before the game had even begun.
     if unanchored:
-        lines = ["\n\n---\n\n## Other key positions\n"]
+        items = []
         for move, rel in unanchored:
             dots = "." if move.side == "White" else "..."
             label = f"{move.move_number}{dots} {move.san}"
-            lines.append(f"\n**{label}** ({move.classification})\n")
-            lines.append(f"\n![Position after {label}]({rel})\n")
-        body = body + "".join(lines)
+            items.append((move.ply, label, move.classification, rel))
+        body = _insert_unanchored_boards(body, items)
 
     assembled = f"{header}\n{eval_section}\n---\n\n{body}\n"
     output_md.write_text(assembled, encoding="utf-8")
@@ -358,7 +391,11 @@ def _inline_image_assets(html_body: str, base_dir: Path) -> str:
             svg = re.sub(r"<!DOCTYPE.*?>", "", svg, flags=re.DOTALL)
             svg = svg.strip()
             caption = f"<figcaption>{alt}</figcaption>" if alt else ""
-            return f'<figure class="board">{svg}{caption}</figure>'
+            # data-ply encodes the move's half-move index so tools/CSS can verify
+            # or re-sort board figures by game order.
+            ply_m = re.search(r"ply(\d+)_", asset_path.name)
+            ply_attr = f' data-ply="{int(ply_m.group(1))}"' if ply_m else ""
+            return f'<figure class="board"{ply_attr}>{svg}{caption}</figure>'
 
         # Raster image -> base64 data URI.
         mime = {
@@ -374,8 +411,262 @@ def _inline_image_assets(html_body: str, base_dir: Path) -> str:
     return img_re.sub(_replace, html_body)
 
 
+# --------------------------------------------------------------------------
+# Interactive PGN viewer (click-through replay board)
+# --------------------------------------------------------------------------
+# The replay board is rendered client-side from a small per-ply data array
+# (FENs are precomputed by the analyzer, so no chess logic is needed in JS).
+# The 12 piece graphics are reused from python-chess's own SVG set so the
+# replay board is visually identical to the inline static boards. Everything
+# is inlined — the HTML stays self-contained (no CDN, works offline/emailed).
+
+def _piece_defs_svg() -> str:
+    """A hidden <svg><defs> holding the 12 chess pieces, each wrapped with a
+    stable id ('gv-P', 'gv-k', ...) so the board JS can place them via <use>.
+    python-chess's own ids ('white-pawn' etc.) are renamed to avoid clashing
+    with the ids inside the inline static board SVGs elsewhere in the page."""
+    import chess.svg  # lazy: only needed when a viewer is built
+
+    parts = []
+    for key, group in chess.svg.PIECES.items():
+        inner = re.sub(r'id="(white|black)-', r'id="gvp-\1-', group)
+        parts.append(f'<g id="gv-{key}">{inner}</g>')
+    defs = "".join(parts)
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" '
+        'style="position:absolute;width:0;height:0;overflow:hidden" '
+        f'aria-hidden="true"><defs>{defs}</defs></svg>'
+    )
+
+
+def _viewer_eval_text(cp: Optional[int], mate: Optional[int]) -> str:
+    """Compact, White-positive eval badge (lichess style): '+1.24', '-0.50',
+    'M5' (White mates), '-M3' (Black mates), '' at checkmate."""
+    if mate is not None:
+        if mate == 0:
+            return ""
+        return f"M{mate}" if mate > 0 else f"-M{abs(mate)}"
+    if cp is None:
+        return "0.00"
+    pawns = cp / 100.0
+    return f"+{pawns:.2f}" if pawns >= 0 else f"{pawns:.2f}"
+
+
+_VIEWER_JS = r"""
+(function(){
+  var el = document.getElementById('greco-viewer-data');
+  if(!el) return;
+  var DATA = JSON.parse(el.textContent);
+  var PLIES = DATA.plies, flip = !!DATA.flip, idx = 0;
+  var M = 18, SZ = 45, BOARD = SZ * 8;
+  var LIGHT = '#ffce9e', DARK = '#d18b47', HL = '#cdd16a';
+  var boardSvg = document.getElementById('gv-board');
+  var statusEl = document.getElementById('gv-status');
+  var movesEl  = document.getElementById('gv-moves');
+
+  function sqXY(file, rank){
+    var col  = flip ? 7 - file : file;
+    var srow = flip ? rank : 7 - rank;
+    return [M + col * SZ, 2 + srow * SZ];
+  }
+  function parsePlacement(fen){
+    var rows = fen.split(' ')[0].split('/'), pcs = [];
+    for(var ri = 0; ri < 8; ri++){
+      var rank = 7 - ri, file = 0, row = rows[ri] || '';
+      for(var ci = 0; ci < row.length; ci++){
+        var c = row[ci];
+        if(c >= '1' && c <= '8'){ file += parseInt(c, 10); }
+        else { pcs.push({ch: c, file: file, rank: rank}); file++; }
+      }
+    }
+    return pcs;
+  }
+  function renderBoard(fen, uci){
+    var p = [];
+    for(var f = 0; f < 8; f++){
+      for(var r = 0; r < 8; r++){
+        var xy = sqXY(f, r), light = ((f + r) % 2) === 1;
+        p.push('<rect x="'+xy[0]+'" y="'+xy[1]+'" width="'+SZ+'" height="'+SZ+'" fill="'+(light?LIGHT:DARK)+'"/>');
+      }
+    }
+    if(uci && uci.length >= 4){
+      var sqs = [uci.slice(0,2), uci.slice(2,4)];
+      for(var s = 0; s < sqs.length; s++){
+        var ff = sqs[s].charCodeAt(0) - 97, rr = parseInt(sqs[s][1], 10) - 1;
+        if(ff >= 0 && ff < 8 && rr >= 0 && rr < 8){
+          var h = sqXY(ff, rr);
+          p.push('<rect x="'+h[0]+'" y="'+h[1]+'" width="'+SZ+'" height="'+SZ+'" fill="'+HL+'"/>');
+        }
+      }
+    }
+    var pcs = parsePlacement(fen);
+    for(var i = 0; i < pcs.length; i++){
+      var xy2 = sqXY(pcs[i].file, pcs[i].rank), ref = '#gv-' + pcs[i].ch;
+      p.push('<use href="'+ref+'" xlink:href="'+ref+'" x="'+xy2[0]+'" y="'+xy2[1]+'"/>');
+    }
+    var files = 'abcdefgh', ranks = '12345678';
+    for(var k = 0; k < 8; k++){
+      var fc = flip ? files[7-k] : files[k];
+      p.push('<text class="gv-coord" x="'+(M + k*SZ + SZ/2)+'" y="'+(2 + BOARD + 13)+'" text-anchor="middle">'+fc+'</text>');
+      var rc = flip ? ranks[k] : ranks[7-k];
+      p.push('<text class="gv-coord" x="9" y="'+(2 + k*SZ + SZ/2 + 4)+'" text-anchor="middle">'+rc+'</text>');
+    }
+    boardSvg.innerHTML = p.join('');
+  }
+
+  function moveLabel(pl){ return pl.n + (pl.s === 'W' ? '.' : '…') + ' ' + pl.san; }
+  function badge(pl){
+    if(pl.br) return '<span class="gv-badge gv-brilliant">Brilliant !!</span>';
+    if(pl.cls === 'blunder')    return '<span class="gv-badge gv-blunder">Blunder ??</span>';
+    if(pl.cls === 'mistake')    return '<span class="gv-badge gv-mistake">Mistake ?</span>';
+    if(pl.cls === 'inaccuracy') return '<span class="gv-badge gv-inaccuracy">Inaccuracy ?!</span>';
+    return '';
+  }
+  function updateStatus(){
+    var pl = PLIES[idx];
+    if(idx === 0){ statusEl.innerHTML = '<span class="gv-movelabel">Start position</span>'; return; }
+    var ev = pl.ev ? '<span class="gv-eval">'+pl.ev+'</span>' : '';
+    statusEl.innerHTML = '<span class="gv-movelabel">'+moveLabel(pl)+'</span> '+ev+' '+badge(pl);
+  }
+  function buildMoves(){
+    var html = '';
+    for(var i = 1; i < PLIES.length; i++){
+      var pl = PLIES[i], cls = 'gv-move';
+      if(pl.s === 'W') html += '<span class="gv-num">'+pl.n+'.</span>';
+      if(pl.br) cls += ' gv-mv-brilliant';
+      else if(pl.cls === 'blunder')    cls += ' gv-mv-blunder';
+      else if(pl.cls === 'mistake')    cls += ' gv-mv-mistake';
+      else if(pl.cls === 'inaccuracy') cls += ' gv-mv-inaccuracy';
+      html += '<span class="'+cls+'" data-idx="'+i+'">'+pl.san+'</span> ';
+    }
+    movesEl.innerHTML = html;
+    movesEl.addEventListener('click', function(e){
+      var t = e.target.closest ? e.target.closest('.gv-move') : null;
+      if(t) go(parseInt(t.getAttribute('data-idx'), 10));
+    });
+  }
+  function highlightMove(){
+    var prev = movesEl.querySelector('.gv-move.active');
+    if(prev) prev.classList.remove('active');
+    if(idx > 0){
+      var cur = movesEl.querySelector('.gv-move[data-idx="'+idx+'"]');
+      if(cur){ cur.classList.add('active'); cur.scrollIntoView({block: 'nearest'}); }
+    }
+  }
+  function go(i){
+    idx = Math.max(0, Math.min(PLIES.length - 1, i));
+    var pl = PLIES[idx];
+    renderBoard(pl.fen, pl.uci);
+    updateStatus();
+    highlightMove();
+  }
+  document.getElementById('gv-start').onclick = function(){ go(0); };
+  document.getElementById('gv-prev').onclick  = function(){ go(idx - 1); };
+  document.getElementById('gv-next').onclick  = function(){ go(idx + 1); };
+  document.getElementById('gv-end').onclick   = function(){ go(PLIES.length - 1); };
+  document.getElementById('gv-flip').onclick  = function(){ flip = !flip; renderBoard(PLIES[idx].fen, PLIES[idx].uci); };
+  document.addEventListener('keydown', function(e){
+    if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target && e.target.tagName || '')) return;
+    if(e.key === 'ArrowLeft'){ go(idx - 1); e.preventDefault(); }
+    else if(e.key === 'ArrowRight'){ go(idx + 1); e.preventDefault(); }
+    else if(e.key === 'Home'){ go(0); }
+    else if(e.key === 'End'){ go(PLIES.length - 1); }
+  });
+  buildMoves();
+  go(0);
+})();
+"""
+
+
+_VIEWER_CSS = """
+    .greco-viewer { margin: 1.5rem 0 2rem; }
+    .greco-viewer h2 { margin-bottom: 0.6rem; }
+    .gv-wrap { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+    .gv-board-col { flex: 0 0 auto; }
+    .gv-board { width: 360px; max-width: 92vw; height: auto; display: block;
+                border: 1px solid #cbb89a; border-radius: 4px; }
+    .gv-coord { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #6b5942; }
+    .gv-controls { display: flex; gap: 0.3rem; margin: 0.5rem 0; flex-wrap: wrap; }
+    .gv-controls button { font-size: 1rem; line-height: 1; padding: 0.35rem 0.6rem; cursor: pointer;
+        border: 1px solid #bbb; border-radius: 4px; background: #f7f7f7; color: #222; }
+    .gv-controls button:hover { background: #ececec; }
+    .gv-status { min-height: 1.7em; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    .gv-movelabel { font-weight: 600; }
+    .gv-eval { font-family: 'Consolas','Menlo',monospace; background: #eef2f7; color: #2b6cb0;
+        padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; }
+    .gv-badge { font-size: 0.78rem; padding: 0.05rem 0.4rem; border-radius: 3px; margin-left: 0.3rem; color: #fff; }
+    .gv-brilliant { background: #1abc9c; } .gv-blunder { background: #c0392b; }
+    .gv-mistake { background: #e67e22; } .gv-inaccuracy { background: #c9a227; }
+    .gv-moves { flex: 1 1 240px; min-width: 220px; max-height: 372px; overflow-y: auto;
+        font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.95; padding: 0.3rem 0.5rem;
+        border: 1px solid #e3e3e3; border-radius: 4px; background: #fafafa; }
+    .gv-num { color: #999; margin-right: 0.15rem; }
+    .gv-move { cursor: pointer; padding: 0.02rem 0.2rem; border-radius: 3px; }
+    .gv-move:hover { background: #e7eef7; }
+    .gv-move.active { background: #2b6cb0; color: #fff; }
+    .gv-mv-blunder { color: #c0392b; } .gv-mv-mistake { color: #e67e22; }
+    .gv-mv-inaccuracy { color: #b8901f; } .gv-mv-brilliant { color: #129e83; font-weight: 600; }
+    .gv-move.active.gv-mv-blunder, .gv-move.active.gv-mv-mistake,
+    .gv-move.active.gv-mv-inaccuracy, .gv-move.active.gv-mv-brilliant { color: #fff; }
+    .gv-hint { font-size: 0.82rem; color: #777; margin-top: 0.4rem; }
+    @media print { .gv-controls, .gv-hint { display: none; } .gv-moves { max-height: none; } }
+"""
+
+
+def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
+    """Return a self-contained <section> with the click-through replay board.
+    Returns '' when there are no moves to show."""
+    if not game.moves:
+        return ""
+
+    start_fen = game.moves[0].fen_before
+    plies = [{"san": "", "fen": start_fen, "uci": "", "n": 0, "s": "", "ev": "", "cls": "", "br": False}]
+    for m in game.moves:
+        plies.append({
+            "san": m.san,
+            "fen": m.fen_after,
+            "uci": m.uci or "",
+            "n": m.move_number,
+            "s": "W" if m.side == "White" else "B",
+            "ev": _viewer_eval_text(m.eval_after_cp, m.mate_after),
+            "cls": m.classification,
+            "br": bool(getattr(m, "is_brilliant", False)),
+        })
+
+    payload = json.dumps({"flip": bool(flipped), "plies": plies}, ensure_ascii=True)
+    # Defensive: never let a value end the <script> block early.
+    payload = payload.replace("</", "<\\/")
+
+    return f"""<section class="greco-viewer">
+<h2>Replay the game</h2>
+<div class="gv-wrap">
+<div class="gv-board-col">
+<svg id="gv-board" class="gv-board" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+<div class="gv-controls">
+<button id="gv-start" type="button" title="Start (Home)">&#9198;</button>
+<button id="gv-prev" type="button" title="Previous (Left arrow)">&#9664;</button>
+<button id="gv-next" type="button" title="Next (Right arrow)">&#9654;</button>
+<button id="gv-end" type="button" title="End (End)">&#9197;</button>
+<button id="gv-flip" type="button" title="Flip board">&#8645; Flip</button>
+</div>
+<div id="gv-status" class="gv-status"></div>
+</div>
+<div id="gv-moves" class="gv-moves"></div>
+</div>
+<p class="gv-hint">Click any move, use the buttons, or press &larr; / &rarr; (Home / End to jump).</p>
+{_piece_defs_svg()}
+<script type="application/json" id="greco-viewer-data">{payload}</script>
+<script>{_VIEWER_JS}</script>
+</section>
+"""
+
+
 def markdown_to_html(
-    md_path: Path, html_path: Optional[Path] = None, embed_assets: bool = True
+    md_path: Path,
+    html_path: Optional[Path] = None,
+    embed_assets: bool = True,
+    game: Optional[GameAnalysis] = None,
+    flipped: bool = False,
 ) -> Path:
     """
     Convert an assembled Markdown report to a single self-contained HTML file
@@ -385,6 +676,10 @@ def markdown_to_html(
     are inlined directly into the HTML, so the file stands alone — no links to
     open, no sibling folder required. You can email it, move it, or print it to
     PDF (Ctrl+P -> Save as PDF) and every image travels with it.
+
+    When `game` is provided, an interactive click-through replay board is
+    embedded near the top (after the eval graph). `flipped` orients it for
+    Black. The viewer is also fully self-contained.
     """
     import markdown as md_lib  # lazy import
 
@@ -397,6 +692,20 @@ def markdown_to_html(
 
     if embed_assets:
         html_body = _inline_image_assets(html_body, md_path.parent)
+
+    # Interactive replay board: insert just before the first <hr> (the divider
+    # between the header/eval-graph matter and the narrative). Falls back to
+    # prepending if no divider is present.
+    viewer_css = ""
+    if game is not None and game.moves:
+        viewer_html = build_pgn_viewer(game, flipped=flipped)
+        if viewer_html:
+            viewer_css = _VIEWER_CSS
+            hr_at = html_body.find("<hr")
+            if hr_at != -1:
+                html_body = html_body[:hr_at] + viewer_html + "\n" + html_body[hr_at:]
+            else:
+                html_body = viewer_html + "\n" + html_body
 
     if html_path is None:
         html_path = md_path.with_suffix(".html")
@@ -414,7 +723,7 @@ def markdown_to_html(
     figure { margin: 1.2rem auto; text-align: center; }
     figure.board svg { width: 360px; max-width: 90%; height: auto; }
     figcaption { font-size: 0.85rem; color: #666; font-style: italic; margin-top: 0.3rem; }
-    """
+    """ + viewer_css
 
     html = f"""<!doctype html>
 <html lang="en">

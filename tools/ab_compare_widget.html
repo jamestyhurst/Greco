@@ -1,0 +1,125 @@
+<!--
+  Greco A/B comparison widget — for use with Claude Code's show_widget tool.
+
+  USAGE (in a Claude Code session):
+    1. Read this file.
+    2. Replace every {{PLACEHOLDER}} with live data from C_spotlight.md or the
+       knowledge_ab_test.py console output.
+    3. Pass the filled HTML to show_widget (title="ab_corpus_comparison").
+
+  PLACEHOLDERS
+    {{GAME_TITLE}}          e.g. "Fischer–Andersson 1970 — coaching voice"
+    {{MODEL_LINE}}          e.g. "Sonnet 4.6 · depth 14 · equivalence-checked"
+    {{A_VERBATIM}}          verbatim 8-gram count for arm A (usually 0)
+    {{B_VERBATIM}}          verbatim 8-gram count for arm B
+    {{A_ATTR}}              explicit-attribution count for arm A
+    {{B_ATTR}}              explicit-attribution count for arm B
+    {{A_PRINCIPLE}}         principle-language count for arm A
+    {{B_PRINCIPLE}}         principle-language count for arm B
+
+    {{ATTR_ROWS_HTML}}      PLY-MATCHED attribution rows. For every move in
+                            C_spotlight.md's "Attribution sentences (ply-matched)"
+                            table, emit one <tr> using the template below. A dash
+                            cell (arm had no attribution) uses the "absent" variant.
+
+                            PRESENT cell (arm DID attribute at this move):
+                              <td style="font-size:12px;padding:6px 8px;vertical-align:top;
+                                  border-bottom:0.5px solid var(--color-border-tertiary)">
+                                <span class="ab-pill" style="background:#E1F5EE;color:#085041">
+                                  B</span>  ← or "A" + gray pill for arm A
+                                <br>
+                                <em style="font-size:11px;color:var(--color-text-secondary)">
+                                  source: training data</em>  ← or "verbatim corpus hit"
+                                <br>
+                                <span style="font-family:var(--font-serif);font-size:13px">
+                                  "quote text here"</span>
+                              </td>
+
+                            ABSENT cell:
+                              <td style="font-size:12px;padding:6px 8px;color:var(--color-text-tertiary);
+                                  vertical-align:top;border-bottom:0.5px solid var(--color-border-tertiary)">
+                                —
+                              </td>
+
+                            Wrap all rows in:
+                              <table style="width:100%;border-collapse:collapse">
+                                <thead><tr>
+                                  <th style="font-size:11px;text-align:left;padding:4px 8px;
+                                      color:var(--color-text-secondary);border-bottom:0.5px solid
+                                      var(--color-border-tertiary)">Move</th>
+                                  <th ...>A — corpus off</th>
+                                  <th ...>B — corpus on</th>
+                                </tr></thead>
+                                <tbody>{{rows}}</tbody>
+                              </table>
+
+    {{SECTION_LABEL}}       name of the pattern/closing section being compared
+                            e.g. "Knight-activity bullet — closing patterns (same section, both arms)"
+    {{A_PATTERN_BOLD}}      bolded opening phrase of the pattern bullet (arm A)
+    {{A_PATTERN_BODY}}      rest of the body text (arm A)
+    {{A_PATTERN_NOTE}}      note under arm A's pattern (quality/source of citation)
+    {{B_PATTERN_BOLD}}      bolded opening phrase of the pattern bullet (arm B)
+    {{B_PATTERN_BODY}}      rest of the body text (arm B); wrap the corpus passage in
+                            <span style="background:#E1F5EE;padding:1px 3px;border-radius:3px;color:#085041">…</span>
+    {{B_PATTERN_NOTE}}      note under arm B's pattern
+    {{EQUIVALENCE_NOTE}}    one-sentence equivalence summary at the bottom
+
+  NOTES
+    - The style block is intentionally short; everything else uses inline styles.
+    - Teal (#5DCAA5 border, #E1F5EE bg, #085041 text) marks the corpus-ON arm throughout.
+    - Gray (#B4B2A9 border, #F1EFE8 bg, #5F5E5A text) marks the baseline arm.
+    - Do not add gradients, shadows, or dark outer backgrounds — the host supplies the bg.
+-->
+<style>
+.ab-metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;flex:1}
+.ab-col{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;background:var(--color-background-primary);flex:1;min-width:0}
+.ab-col-b{border-color:#5DCAA5;border-width:1.5px}
+.ab-pill{font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:8px}
+</style>
+
+<div style="padding:1rem 0;font-family:var(--font-sans)">
+
+<h2 class="sr-only">A/B comparison: knowledge corpus OFF vs ON, {{GAME_TITLE}}</h2>
+
+<p style="font-size:15px;font-weight:500;margin:0 0 4px;color:var(--color-text-primary)">{{GAME_TITLE}}</p>
+<p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 16px">{{MODEL_LINE}}</p>
+
+<div style="display:flex;gap:10px;margin-bottom:20px">
+  <div class="ab-metric">
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 4px">Verbatim corpus 8-grams</p>
+    <p style="margin:0;font-size:20px;font-weight:500"><span style="color:#888780">{{A_VERBATIM}}</span> <span style="font-size:13px;color:var(--color-text-tertiary)">→</span> <span style="color:#1D9E75">{{B_VERBATIM}}</span></p>
+  </div>
+  <div class="ab-metric">
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 4px">Explicit attributions</p>
+    <p style="margin:0;font-size:20px;font-weight:500"><span style="color:#888780">{{A_ATTR}}</span> <span style="font-size:13px;color:var(--color-text-tertiary)">→</span> <span style="color:#1D9E75">{{B_ATTR}}</span></p>
+  </div>
+  <div class="ab-metric">
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 4px">Principle language</p>
+    <p style="margin:0;font-size:20px;font-weight:500"><span style="color:#888780">{{A_PRINCIPLE}}</span> <span style="font-size:13px;color:var(--color-text-tertiary)">→</span> <span style="color:#1D9E75">{{B_PRINCIPLE}}</span></p>
+  </div>
+</div>
+
+<p style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px">Attribution sentences — ply-matched</p>
+
+{{ATTR_ROWS_HTML}}
+
+<p style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px">{{SECTION_LABEL}}</p>
+
+<div style="display:flex;gap:12px;margin-bottom:20px">
+  <div class="ab-col">
+    <span class="ab-pill" style="background:#F1EFE8;color:#5F5E5A">A — corpus off</span>
+    <p style="font-size:13px;line-height:1.65;margin:6px 0 0;color:var(--color-text-primary)"><strong>{{A_PATTERN_BOLD}}</strong> {{A_PATTERN_BODY}}</p>
+    <p style="font-size:11px;color:var(--color-text-tertiary);margin:6px 0 0">{{A_PATTERN_NOTE}}</p>
+  </div>
+  <div class="ab-col ab-col-b">
+    <span class="ab-pill" style="background:#E1F5EE;color:#085041">B — corpus on</span>
+    <p style="font-size:13px;line-height:1.65;margin:6px 0 0;color:var(--color-text-primary)"><strong>{{B_PATTERN_BOLD}}</strong> {{B_PATTERN_BODY}}</p>
+    <p style="font-size:11px;color:#0F6E56;margin:6px 0 0;font-weight:500">✓ {{B_PATTERN_NOTE}}</p>
+  </div>
+</div>
+
+<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;font-size:12px;color:var(--color-text-secondary);line-height:1.6">
+  <span style="font-weight:500;color:var(--color-text-primary)">Equivalence check passed.</span> {{EQUIVALENCE_NOTE}}
+</div>
+
+</div>

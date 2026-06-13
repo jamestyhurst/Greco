@@ -32,3 +32,14 @@ _dump_tail.py
 gui.recovered.py
 _verify.py
 _commitmsg.txt
+
+# A/B test output folders (generated on demand; not part of the repo)
+_style_ab_out/
+_ab_out*/
+
+# Personal planning / private dev docs (not for public repo)
+Greco_Development_Guide_and_StayPlus_Readiness.md
+software-skills-you-can-learn-from-greco.md
+
+# Desktop shortcut backups
+*.lnk.old-exe-backup

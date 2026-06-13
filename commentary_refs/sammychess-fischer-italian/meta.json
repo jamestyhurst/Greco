@@ -1,0 +1,17 @@
+{
+  "title": "Bobby Fischer's Brilliant Italian Game (6-game compilation)",
+  "commentator": "SammyChess (@SammyChess1)",
+  "source_url": "https://www.youtube.com/watch?v=MNW3krc1PYA",
+  "video_id": "MNW3krc1PYA",
+  "channel_verified": "youtube.com/@SammyChess1 — author confirmed as 'SammyChess' on the transcript source",
+  "pgn_coverage": "complete — all 6 games identified and verified move-by-move against the narration (PGNs pulled from chessgames.com)",
+  "games_in_order": [
+    "01 Fischer vs Reuben Fine, New York 1963 — Evans Gambit (C52). Famous offhand game ('A Fine Line').",
+    "02 Fischer vs Denis Allan, Montreal clock simul, 24 Feb 1964 — Two Knights, Fritz Variation (C57). SammyChess calls this opponent 'unknown'; identified via the exact Fritz line (chessgames gid 1044207).",
+    "03 Fischer vs Alex Janushkowsky, Davis clock simul, 16 Apr 1964 — Evans Gambit (C52). Auto-caption renders the name 'Dr. Janiskowski'.",
+    "04 Fischer vs Erik Delwin Osbun, Davis clock simul, 16 Apr 1964 — Evans Gambit, Waller Attack (C52).",
+    "05 Fischer vs Arthur Bisguier, New York State Open, Poughkeepsie, 2 Sep 1963 — Two Knights, Steinitz / 9.Nh3 (C59).",
+    "06 Fischer vs Ojars Celle, Davis clock simul, 16 Apr 1964 — Evans Gambit, Anderssen Var (C51). 'Tour de Force', game 50 of 'My 60 Memorable Games'."
+  ],
+  "notes": "SammyChess's signature fast, dense, purpose-per-move delivery with a 'Can you find white's best move?' puzzle beat before each finish — a deliberate contrast to Agadmator's calm storytelling. Six Fischer Evans Gambit / Two Knights games in presentation order, ALL with verified PGNs. Games 02/03/04/06 are from Fischer's 1964 simultaneous-exhibition tour (Davis, 16 Apr for 03/04/06; Montreal, 24 Feb for 02). Auto-caption garbles some names: 'Ruben Fine' = Reuben Fine, 'the doctor Janiskowski' = Alex Janushkowsky, 'Bisguire' = Bisguier, 'Oar Cell' = Ojars Celle. Learn the VOICE and pacing, never the chess facts (those come from the engine)."
+}

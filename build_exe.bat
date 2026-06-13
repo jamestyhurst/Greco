@@ -19,6 +19,11 @@ echo Deploying to C:\Users\Public\Greco ...
 robocopy "dist\Greco" "C:\Users\Public\Greco" /MIR /NFL /NDL /NJH /NJS /NP >nul
 
 echo.
-echo Done. Greco is installed at:  C:\Users\Public\Greco\Greco.exe
-echo (The desktop shortcut points there.)
+echo Done. Distributable exe is at:  C:\Users\Public\Greco\Greco.exe
+echo This .exe is for SHARING ONLY (giving Greco to someone without Python).
+echo Your desktop icon runs the LIVE SOURCE via Greco.vbs, so it always
+echo reflects your latest code -- building this exe does NOT change it.
+echo.
+echo Re-asserting that the desktop icon points at the live source...
+powershell -ExecutionPolicy Bypass -File "%~dp0verify_icon.ps1"
 pause

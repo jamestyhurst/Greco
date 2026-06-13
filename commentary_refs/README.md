@@ -55,12 +55,28 @@ A single-game video just has one PGN (`01 …`).
 
 ## Automated fetching (what Claude set up)
 
-Two references are already seeded:
+Four references are seeded (all with full, real transcripts):
 - **`agadmator-opera-game/`** — Agadmator narrating Morphy's Opera Game (full
   transcript + the game's PGN + metadata). A calm, long-form storytelling sample.
 - **`sammychess-kasparov-scotch/`** — SammyChess's fast, energetic Kasparov-Scotch
-  video (transcript + metadata). It's a multi-game compilation, so there's no
-  single matching PGN — the value here is the *voice*.
+  video (transcript + metadata). A multi-game compilation, so there's no single
+  matching PGN — the value here is the *voice*.
+- **`agadmator-kasparov-immortal/`** — Agadmator's "Garry Kasparov's Immortal Game"
+  (Kasparov vs Topalov, 1999): full transcript + the verified PGN + metadata.
+  Another calm-storytelling sample, on a sharper attacking game.
+- **`sammychess-fischer-italian/`** — SammyChess's punchy "Bobby Fischer's Brilliant
+  Italian Game" (six Evans Gambit / Two Knights games). Full transcript + metadata +
+  **all six verified PGNs** (`01`–`06`), each checked move-by-move against the narration
+  (Fine, Allan, Janushkowsky, Osbun, Bisguier, Celle).
+
+See also **`GRECO_STYLE.md`** (top level) — a blended style guide distilled from the
+Agadmator + SammyChess voices that defines how Greco's *own* commentary should sound
+(pacing, tension, when to get excited). Voice only; chess facts still come from the engine.
+
+And **`WORKFLOW.md`** (top level) — the rules + step-by-step method for adding references:
+James's preferences (real transcripts only, complete PGN coverage per video before moving
+on, style-not-facts) and the proven how-to (transcript fetching, channel verification,
+pulling verified PGNs from chessgames). Read it before adding the next video.
 
 Claude can gather more automatically. The helper `_tools/fetch_transcript.py`
 downloads a video's transcript (text only — it never downloads the video) via the
