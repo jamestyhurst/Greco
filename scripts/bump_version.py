@@ -155,9 +155,11 @@ def main() -> None:
     if git("status", "--porcelain"):
         sys.exit("Working tree is not clean. Commit or stash your changes first, then re-run --apply.")
 
-    text = VERSION_FILE.read_text(encoding="utf-8")
-    text = re.sub(r'(__version__\s*=\s*["\'])[0-9.]+(["\'])', rf"\g<1>{new_str}\g<2>", text)
-    VERSION_FILE.write_text(text, encoding="utf-8")
+    # Edit in place via bytes so the file's existing line endings are preserved.
+    # (read_text/write_text would rewrite LF as CRLF on Windows and churn the whole file.)
+    src = VERSION_FILE.read_bytes().decode("utf-8")
+    src = re.sub(r'(__version__\s*=\s*["\'])[0-9.]+(["\'])', rf"\g<1>{new_str}\g<2>", src)
+    VERSION_FILE.write_bytes(src.encode("utf-8"))
     git("add", "version.py")
     subprocess.run(["git", "commit", "-m", f"chore: release v{new_str}"], cwd=REPO, check=True)
     subprocess.run(["git", "tag", f"v{new_str}"], cwd=REPO, check=True)
