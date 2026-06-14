@@ -136,6 +136,64 @@ class _QueueWriter:
 
 
 class GrecoGUI:
+    # Wine / ivory / gold palette, taken straight from the app icon
+    # (assets/make_icon.py) so the window matches the desktop + title-bar king.
+    WINE = "#7A1C26"; WINE_DARK = "#5E151D"; IVORY = "#F5EDD4"
+    GOLD = "#C9A23A"; INK = "#3A2A1A"; PARCH = "#FBF6E7"  # INK = sepia, like aged manuscript ink
+
+    def _apply_theme(self) -> None:
+        """Recolour the ttk widgets to the icon's wine/ivory/gold aesthetic. Uses the
+        'clam' theme because it is the built-in ttk theme that actually honours custom
+        colours on Windows (the native theme ignores most of them)."""
+        style = ttk.Style()
+        try:
+            style.theme_use("clam")
+        except tk.TclError:
+            pass
+        W, WD, IV, G, INK, PA = self.WINE, self.WINE_DARK, self.IVORY, self.GOLD, self.INK, self.PARCH
+        self.root.configure(bg=W)
+        # The Combobox dropdown is a classic tk Listbox; colour it via the option DB.
+        self.root.option_add("*TCombobox*Listbox.background", PA)
+        self.root.option_add("*TCombobox*Listbox.foreground", INK)
+        self.root.option_add("*TCombobox*Listbox.selectBackground", W)
+        self.root.option_add("*TCombobox*Listbox.selectForeground", IV)
+        style.configure(".", background=W, foreground=IV)
+        style.configure("TFrame", background=W)
+        style.configure("TLabel", background=W, foreground=IV)
+        style.configure("TLabelframe", background=W, bordercolor=G, relief="solid", borderwidth=1)
+        style.configure("TLabelframe.Label", background=W, foreground=G, font=("Constantia", 11, "bold"))
+        style.configure("TButton", background=IV, foreground=W, bordercolor=G,
+                        focuscolor=G, relief="raised", padding=6)
+        style.map("TButton",
+                  background=[("active", G), ("pressed", WD), ("disabled", WD)],
+                  foreground=[("active", W), ("pressed", IV), ("disabled", "#9A8F78")])
+        style.configure("TEntry", fieldbackground=PA, foreground=INK, bordercolor=G,
+                        insertcolor=INK, relief="flat")
+        style.configure("TCombobox", fieldbackground=PA, foreground=INK, background=IV,
+                        bordercolor=G, arrowcolor=W, relief="flat")
+        style.map("TCombobox", fieldbackground=[("readonly", PA)],
+                  foreground=[("readonly", INK)], arrowcolor=[("active", WD)])
+        style.configure("Horizontal.TProgressbar", background=G, troughcolor=WD, bordercolor=G)
+        # Gold "primary" button for the main Analyze action.
+        style.configure("Primary.TButton", background=G, foreground=W, bordercolor=WD,
+                        font=("Georgia", 10, "bold"), padding=8)
+        style.map("Primary.TButton", background=[("active", IV), ("pressed", WD)],
+                  foreground=[("active", W), ("pressed", IV)])
+
+    def _section(self, parent, glyph: str, title: str) -> ttk.LabelFrame:
+        """A LabelFrame whose header is a large ivory chess piece + a gold title.
+        Rendering the piece big (Segoe UI Symbol has clean, well-spaced chess glyphs)
+        keeps the pawn/knight/rook clearly readable instead of compressing them to a
+        blob the way an 11px header glyph did."""
+        lf = ttk.LabelFrame(parent, padding=8)
+        head = ttk.Frame(lf)
+        ttk.Label(head, text=glyph, font=("Segoe UI Symbol", 18),
+                  foreground=self.IVORY).pack(side="left")
+        ttk.Label(head, text="  " + title, font=("Constantia", 12, "bold"),
+                  foreground=self.GOLD).pack(side="left")
+        lf.configure(labelwidget=head)
+        return lf
+
     def __init__(self, root: tk.Tk):
         self.root = root
         self.q: "queue.Queue" = queue.Queue()
@@ -145,6 +203,11 @@ class GrecoGUI:
         root.title(f"Greco {__version__} — Chess Game Analyzer")
         root.geometry("760x700")
         root.minsize(640, 600)
+        self._apply_theme()
+        try:
+            root.iconbitmap(default=str(ICON_PATH))  # king logo on the title bar + taskbar
+        except Exception:
+            pass
 
         cfg = load_config()
 
@@ -152,15 +215,16 @@ class GrecoGUI:
         main = ttk.Frame(root, padding=10)
         main.pack(fill="both", expand=True)
 
-        ttk.Label(main, text="Greco", font=("Helvetica", 18, "bold")).pack(anchor="w")
+        ttk.Label(main, text="♚  Greco", font=("Gabriola", 30),
+                  foreground=self.IVORY).pack(anchor="w")
         ttk.Label(
             main,
             text="Engine evaluation + AI narration for any chess game.",
-            foreground="#555",
+            foreground="#D8C9A0", font=("Constantia", 11, "italic"),
         ).pack(anchor="w", pady=(0, 8))
 
         # --- Game input ---
-        game_box = ttk.LabelFrame(main, text="Game", padding=8)
+        game_box = self._section(main, "♟", "Game")
         game_box.pack(fill="x", **pad)
         row = ttk.Frame(game_box)
         row.pack(fill="x")
@@ -170,7 +234,7 @@ class GrecoGUI:
         ttk.Button(row, text="Browse…", command=self._browse_pgn).pack(side="left")
 
         # --- Options ---
-        opt = ttk.LabelFrame(main, text="Options", padding=8)
+        opt = self._section(main, "♞", "Options")
         opt.pack(fill="x", **pad)
         grid = ttk.Frame(opt)
         grid.pack(fill="x")
@@ -190,7 +254,7 @@ class GrecoGUI:
         ttk.Entry(noterow, textvariable=self.note_var).pack(side="left", fill="x", expand=True, padx=6)
 
         # --- Setup (persistent config, falls back to environment variables) ---
-        adv = ttk.LabelFrame(main, text="Setup", padding=8)
+        adv = self._section(main, "♜", "Setup")
         adv.pack(fill="x", **pad)
 
         LW = 16  # label column width (chars) — keeps entry fields aligned
@@ -232,12 +296,13 @@ class GrecoGUI:
         # --- Run ---
         runrow = ttk.Frame(main)
         runrow.pack(fill="x", **pad)
-        self.analyze_btn = ttk.Button(runrow, text="Analyze game", command=self._on_analyze)
+        self.analyze_btn = ttk.Button(runrow, text="Analyze game", command=self._on_analyze,
+                                      style="Primary.TButton")
         self.analyze_btn.pack(side="left")
         self.progress = ttk.Progressbar(runrow, mode="determinate", length=260)
         self.progress.pack(side="left", padx=12, fill="x", expand=True)
         self.status_var = tk.StringVar(value="Ready.")
-        ttk.Label(main, textvariable=self.status_var, foreground="#2b6cb0").pack(anchor="w", padx=8)
+        ttk.Label(main, textvariable=self.status_var, foreground=self.GOLD).pack(anchor="w", padx=8)
 
         # --- Post-run actions (enabled once a report has been produced) ---
         actionrow = ttk.Frame(main)
@@ -257,7 +322,12 @@ class GrecoGUI:
         self.export_btn.pack(side="left", padx=6)
 
         # --- Log / live narrative ---
-        self.log = scrolledtext.ScrolledText(main, height=14, wrap="word", font=("Consolas", 9))
+        self.log = scrolledtext.ScrolledText(
+            main, height=14, wrap="word", font=("Constantia", 11),
+            bg=self.PARCH, fg=self.INK, insertbackground=self.INK,
+            selectbackground=self.WINE, selectforeground=self.IVORY,
+            relief="solid", borderwidth=1,
+        )
         self.log.pack(fill="both", expand=True, padx=8, pady=(4, 8))
         self.log.configure(state="disabled")
 
