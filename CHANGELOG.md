@@ -7,6 +7,45 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-06-14
+
+The **Output Fact-Gate** and the **Layer-2 self-test** — the structural answer to the
+"LLM vs. engine" trust problem: compute what the engine can *prove*, let the narrator
+assert only that, and then automatically *audit* the finished report against the facts.
+The mirror image, on the output side, of the existing input validation gate.
+
+### Added
+- **`factgate.py` — the Output Fact-Gate predicate library.** Pure, engine-free code
+  predicates (cheap necessary-condition veto → fuller confirm) that CERTIFY a claim from
+  the board alone: `threatens_mate_in_one`, `is_rook_lift` (the doctrine's worked example —
+  its from/to forward-rank check is what kills the "already on the file" hallucination),
+  `is_outpost`, `is_passed_pawn`, `file_state`, plus `creates_fork` / `sets_up_royal_pin`
+  thin-wrapping the analyzer's detectors so the allow-set can never drift from the fact
+  packet. `certified_claims()` builds the per-ply **allow-set** of proven claim tags,
+  serialised into the fact packet as `certified` (Tier 1+) and enforced by one scoped
+  system-prompt rule: the narrator may assert a fork / pin / rook-lift / outpost /
+  passed-pawn / mate-threat ONLY when its tag is certified for that move.
+- **`factcheck.py` + `tools/verify_report.py` — the Layer-2 claim-verification self-test.**
+  Deterministic, CI-safe contradiction detectors that bind a prose claim to one specific
+  move and fire only on an unambiguous refutation (precision over recall, so a CI gate never
+  cries wolf): `check_geometry` (the "moved onto the g-file" class), `check_piece_square`
+  (vs the `pieces` field), `check_material` (vs the settled material), and `check_variations`
+  (wrapping the existing variation validator). Plus an advisory, key-gated **LLM judge**
+  (`run_llm_judge`) that shows a checker model the fact packet + the prose and asks "does the
+  prose contradict these facts?". The CLI runs the deterministic gate (**exit 1** on a
+  contradiction — a real CI / "let it cook" gate) and the judge only when an API key is
+  present (advisory, never fails the build). It reads a saved analysis
+  (`main.py --save-analysis`), so it needs no engine at check time.
+- `main.py --save-analysis` now stamps the payload with `"schema": 1` for the verifier.
+- Tests: `tests/test_factgate.py` and `tests/test_factcheck.py` — all hermetic (no engine/key).
+
+### Notes
+- Verified end-to-end: the self-test automatically caught the king-on-the-g-file bug
+  (deterministic gate, exit 1), and the live LLM judge produced **no false positives** on a
+  clean report. This is the first substantial build-out of the output-side trust gate; the
+  predicate library and the deterministic detectors are deliberately a starter set
+  (precision-first) to be grown over time.
+
 ## [0.9.0] — 2026-06-14
 
 This release makes Greco able to *show* why a move is bad with real engine lines,

@@ -6,14 +6,17 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.9.0
+## Where we are — v0.10.0
 
 > See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. Highlights since
 > v0.3.0: engine-sourced variation lines the narrator may only quote (never invent),
 > a wasted-tempo coaching concept, player names usable in every voice, a real
 > daily/correspondence register, a guaranteed verbatim "featured passage", GitHub
-> Actions CI, and a large correctness sweep. The bullets below describe the original
-> v0.3.0 baseline they build on.
+> Actions CI, a large correctness sweep, and — the structural answer to the
+> "LLM vs. engine" trust problem — the **Output Fact-Gate** (`factgate.py`: the
+> narrator may assert only claims the engine certified) plus the **Layer-2
+> claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`). The
+> bullets below describe the original v0.3.0 baseline they build on.
 
 ### Baseline (v0.3.0)
 - Working Tkinter GUI over the full pipeline (importers → analyzer → triage → narrator
@@ -125,6 +128,10 @@ was built stays visible.
 | 25 | **Multi-move sacrifice detection** — flag a material-down / eval-up window across plies in code (today the model judges it from the trajectory). | M | todo |
 | 26 | **Auto-strip confabulated variation moves** — promote `find_unverified_variation_moves` from a warning to an enforced edit, once it is trusted not to mangle good prose. | S | todo |
 | 27 | **GUI/web per-player context fields** — let desktop/web users supply structured "White is my dad, an attacker" context (CLI-only via `--white-context` today). | S | todo |
+| 28 | **Output Fact-Gate predicate library** (`factgate.py`) — per-ply allow-set of engine-certified claims (fork, pin, rook-lift, outpost, passed-pawn, mate-threat) + scoped prompt rule. The output-side mirror of the input validation gate. | L | **done** (v0.10.0) |
+| 29 | **Layer-2 claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`) — deterministic CI-safe contradiction checks (exit-1 gate) + an advisory LLM-judge; runs off a saved analysis. | L | **done** (v0.10.0) |
+| 30 | **Grow the predicate library + chess glossary** — more certified claim types; definitions=corpus in `knowledge/`, detection=code predicates (James's output-gate doctrine). | M | todo |
+| 31 | **Wire `verify_report` into the release/CI loop** — run the deterministic gate on a sample report in `ship.py` / CI so a confabulation regression fails the build. | S | todo |
 
 **Folded in / superseded:**
 - *Polish (Save-as-PDF, drag-and-drop a PGN, recent-games list)* — absorbed into Greco
@@ -132,7 +139,10 @@ was built stays visible.
 - *Private GitHub repo for phone ↔ laptop* — **superseded** by Greco Online: once Greco is
   a website, you just open it on your phone, so there's nothing to git-sync.
 
-**Recently shipped** (newest first): **v0.9.0** — engine-sourced variation lines + the
+**Recently shipped** (newest first): **v0.10.0** — the Output Fact-Gate predicate library
++ per-ply allow-set + scoped prompt rule (#28), and the Layer-2 claim-verification self-test
+(deterministic CI gate + advisory LLM-judge + `tools/verify_report.py`) (#29) — verified by
+catching the king-on-g-file bug automatically. **v0.9.0** — engine-sourced variation lines + the
 "only quote provided lines" rule + confabulation validator (#17); wasted-tempo coaching
 concept (#18); player names across all modes + filename fallback (#19); daily/correspondence
 voice detection + humaniser fix (#20); deterministic featured passage (#21); GitHub Actions
