@@ -113,6 +113,44 @@ sorted placement); developer auto-`similar` hook + folder cap; voice refinements
 moves, winning-a-piece ≠ a trade); standalone `Greco.exe`; game finders (Chess.com + PGN
 Mentor); commentary-learning; report naming; versioning + docs.
 
+## Aesthetic backlog — ivory-manuscript / carved-ivory direction (brainstorm)
+
+> Modular ideas for evolving Greco's look toward its two touchstones: **Gioachino Greco's
+> hand-written chess manuscripts** and the **carved ivory medieval pieces of the Age of
+> Empires II intro**. The established palette is the app icon's **wine `#7A1C26` /
+> ivory `#F5EDD4` / gold `#C9A23A`**. Each item is independent — pick any, in any order.
+> Stay anchored to those two touchstones; ideas that drift from "ivory manuscript / carved
+> ivory pieces" are out of scope.
+
+**Shipped so far:** wine/ivory/gold theme on the desktop GUI; calligraphic *Greco* wordmark
+(Gabriola); sepia-ink-on-parchment manuscript narration log; large ivory pawn/knight/rook
+section markers; king logo on the title bar + taskbar.
+
+**Modular ideas (later):**
+- [ ] **Carved-ivory piece *images*** — render dimensional ivory pieces (bevel/shadow, like the
+  king logo) instead of font glyphs, for section markers + accents. Desktop: pre-rendered PNGs
+  (à la `assets/make_icon.py`); web: inline SVG with CSS lighting. Where the "carved" quality
+  really lands.
+- [ ] **In-app king crest** — show the icon's king-in-a-roundel (gold rim, wine field, ivory
+  king) as a top-left logo *inside* the window/page, not only on the title bar.
+- [ ] **Illuminated borders & flourishes** — a thin gold filigree frame; corner motifs
+  (fleur-de-lis or rook crenellations) on panels. Web first (SVG/CSS); desktop as art assets.
+- [ ] **Drop-cap / illuminated initial** on the narration's first letter. Web: CSS
+  `::first-letter`; desktop: a Text tag.
+- [ ] **Parchment texture** on fields, the narration log, and the report background. Web: a
+  tiling image; desktop: limited (flat parchment colour only).
+- [ ] **Period typography pass** — evaluate a blackletter or chancery *Greco* wordmark; on the
+  web, load real period faces (Cinzel / IM Fell English / EB Garamond) for headings + body.
+- [ ] **3-tone wine depth** — deeper inset wine, mid field, gold hairlines, so panels read with
+  dimension rather than flat colour.
+- [ ] **Greco Web parity** — mirror the approved desktop wine/ivory/gold + manuscript look into
+  `web/templates.py` (form + result pages). Richer treatment than desktop is possible here.
+- [ ] **Report (`.html`) theming** — extend the aesthetic into the generated report CSS in
+  `outputs.markdown_to_html` (today's report uses a blue/serif scheme) so the emailed output —
+  including the shareable single-file export — matches the app.
+- [ ] **Ruled manuscript margins** on the narration log (faint vertical rule + indented text),
+  evoking a scribe's page.
+
 ## Greco Coach — the teaching vision (knowledge corpus, backlog #10)
 
 **Vision:** *Greco Coach is an LLM + Stockfish-powered chess teacher/tutor that is
