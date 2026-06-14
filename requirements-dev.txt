@@ -1,0 +1,4 @@
+# Developer / test dependencies — NOT needed to run Greco, only to test it.
+#   venv\Scripts\python -m pip install -r requirements-dev.txt
+-r requirements.txt
+pytest>=8.0

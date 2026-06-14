@@ -144,6 +144,17 @@ python main.py --pgn-file "sample-games/Spassky vs Fischer - 1972 WC Game 13 (Al
 [Anthropic API key](https://console.anthropic.com/). A 40-move game costs roughly **$0.05–$0.15**
 and takes under a minute.
 
+## Testing
+
+```powershell
+venv\Scripts\python -m pip install -r requirements-dev.txt
+venv\Scripts\python -m pytest
+```
+The suite (`tests/`) covers the triage rules engine, report naming and the shareable-HTML
+export, the FastAPI routes (engine + API mocked, so it runs offline and free), the
+knowledge-corpus FTS5 retrieval, and the version-bump automation — 26 tests in ~7s. The
+release helper (`scripts/ship.py`) runs them automatically before every push.
+
 ## Greco Online — where this is going
 
 Greco is being developed toward a **hosted, multi-user web application** — open it in any

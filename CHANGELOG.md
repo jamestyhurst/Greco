@@ -7,6 +7,16 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added
+- **Initial automated test suite** (`tests/`, pytest) — 26 tests covering the triage
+  rules engine (tier assignment), report naming + the shareable-HTML export, the
+  FastAPI routes (`/health`, `/`, `/analyze` with the pipeline mocked, 404s), the
+  knowledge-corpus FTS5 retrieval + theme extraction, and the version-bump automation.
+  Run with `venv\Scripts\python -m pytest`; dev dependency pinned in
+  `requirements-dev.txt`. `scripts/ship.py` now runs the suite as its pre-push gate, so
+  nothing reaches GitHub unless the tests pass. (No version bump — `test:`/`chore:` per
+  the versioning doctrine.)
+
 ## [0.5.0] — 2026-06-13
 
 ### Added
