@@ -45,7 +45,7 @@ REPO = Path(__file__).resolve().parent.parent
 VENV_PY = REPO / "venv" / "Scripts" / "python.exe"
 BUMP = REPO / "scripts" / "bump_version.py"
 # Core modules that must import cleanly before anything ships.
-SMOKE_MODULES = ["version", "importers", "analyzer", "triage", "narrator", "outputs", "gui", "webapp"]
+SMOKE_MODULES = ["version", "importers", "analyzer", "triage", "narrator", "outputs", "gui", "web.main"]
 # A real Anthropic key; placeholders ("sk-ant-REPLACE-...") do not match.
 KEY_RE = re.compile(r"sk-ant-api03-[A-Za-z0-9_-]{20,}")
 

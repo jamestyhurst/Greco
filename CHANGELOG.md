@@ -7,6 +7,30 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-06-13
+
+### Added
+- **FastAPI web backend (Greco Online, Phase 1).** New `web/` package
+  (`web/main.py` app, `web/routers/analysis.py`, `web/config.py`, `web/pipeline.py`,
+  `web/templates.py`) serving the browser version on FastAPI: `POST /analyze`
+  (PGN file upload **or** pasted text), `GET /report/{id}`, `GET /health`, and
+  auto-generated interactive API docs at `/docs`. Pydantic-typed settings, an async
+  endpoint that offloads the blocking Stockfish + Claude pipeline to a threadpool,
+  and a trust-boundary guard on report serving. Reuses the shared pipeline unchanged
+  (no analysis logic in the web layer). Also exposes the shareable export as
+  `GET /report/{id}/shareable`. Verified: `/health`, `/`, `/docs` and 404 handling
+  all respond correctly.
+
+### Changed
+- **`run_greco_web.bat` now launches the FastAPI app** (`python -m web.main`, uvicorn)
+  instead of the Flask server. `requirements.txt` swaps Flask for
+  `fastapi` / `uvicorn[standard]` / `python-multipart` / `jinja2`.
+
+### Removed
+- **`webapp.py` (the interim Flask server)** — replaced by the `web/` FastAPI package.
+  The browser experience and URL (`http://127.0.0.1:5000`) are unchanged; the desktop
+  GUI, CLI and `Greco.exe` are unaffected.
+
 ## [0.4.0] — 2026-06-13
 
 ### Added

@@ -2,7 +2,7 @@
 
 Greco turns a chess PGN into an engine-backed, AI-narrated report
 (`importers → analyzer → triage → narrator → outputs/renderers`; thin Tkinter GUI / CLI /
-local Flask web front-ends over a shared pipeline). Python; Stockfish via `python-chess`;
+local FastAPI web front-end over a shared pipeline). Python; Stockfish via `python-chess`;
 narration via the Anthropic API.
 
 ## Read this before developing

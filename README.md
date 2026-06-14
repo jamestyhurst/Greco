@@ -110,7 +110,7 @@ PGN source → importers → analyzer (Stockfish) → triage → narrator (Claud
 ```
 
 The analysis pipeline is shared by every front-end. Two surfaces exist today — a Tkinter desktop
-GUI and a Flask localhost web server — and both call the exact same pipeline with no divergence.
+GUI and a FastAPI localhost web server — and both call the exact same pipeline with no divergence.
 
 ## Running Greco
 
@@ -124,10 +124,10 @@ after the first run.
 
 ### Browser (Greco Online — Phase 1)
 ```powershell
-python webapp.py
-# then open http://127.0.0.1:5000
+python -m web.main          # or double-click run_greco_web.bat
+# then open http://127.0.0.1:5000   (interactive API docs at /docs)
 ```
-The full pipeline runs behind a local Flask server: upload a PGN in the browser, get the same
+The full pipeline runs behind a local FastAPI server: upload a PGN in the browser, get the same
 self-contained HTML report. The server reads the same `config.json` the desktop GUI writes, binds
 to `127.0.0.1` only, and keeps the API key server-side. See *Greco Online* below.
 
@@ -151,7 +151,7 @@ browser (including a phone), no install. The seven-phase roadmap:
 
 | Phase | What ships | Status |
 |---|---|---|
-| **1 — Localhost web** | Full pipeline via browser on your own machine (`webapp.py`) | ✅ done |
+| **1 — Localhost web** | Full pipeline via browser on your own machine (`web/main.py`, FastAPI + `/docs`) | ✅ done |
 | **2 — Async jobs** | Queued → Analyzing → Done status page; no more page-wait | todo |
 | **3 — Accounts + roles** | Login; per-user game history; admin sees all | todo |
 | **4 — Database** | SQLite → PostgreSQL; persistent, addressable reports | todo |
@@ -172,7 +172,7 @@ in v0.3.0.
 | **Corpus RAG** | SQLite FTS5 full-text search over public-domain chess texts |
 | **Replay board** | Self-contained JavaScript, python-chess SVG pieces, no external deps |
 | **Rendering** | `python-chess` SVG boards · `matplotlib` eval graphs |
-| **Front-ends** | Tkinter desktop GUI · Flask localhost web server · argparse CLI |
+| **Front-ends** | Tkinter desktop GUI · FastAPI localhost web server · argparse CLI |
 | **Output** | Markdown · self-contained HTML (boards, graph, and replay viewer all embedded) |
 
 ## Repository layout
@@ -183,7 +183,7 @@ greco/
 ├── narrator.py · outputs.py                   # narration and report assembly
 ├── knowledge.py + knowledge/                  # corpus RAG layer (FTS5 + texts)
 ├── commentary.py + commentary_refs/           # voice style guide + reference transcripts
-├── gui.py · webapp.py · main.py               # front-ends (desktop / web / CLI)
+├── gui.py · web/ · main.py                    # front-ends (desktop / web / CLI)
 ├── docs/       ARCHITECTURE · USAGE · ROADMAP · product-vs-in-house
 ├── tools/      developer tools (A/B harness, Gutenberg fetcher, style tester)
 ├── sample-games/    example PGNs — famous games + real amateur play

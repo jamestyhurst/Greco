@@ -17,8 +17,8 @@ foundation we're building out from. Versioning is [Semantic](https://semver.org/
   order; filenames prefixed with ply number; `data-ply` attributes on all figures.
 - **Interactive PGN viewer**: every HTML report embeds a self-contained click-through
   replay board (keyboard navigation, move list with badges, eval display, flip button).
-- **Greco Online Phase 1**: `webapp.py` + `run_greco_web.bat` — full pipeline via browser
-  on localhost; same output as the desktop app.
+- **Greco Online Phase 1**: `web/` (FastAPI) + `run_greco_web.bat` — full pipeline via browser
+  on localhost (interactive API docs at `/docs`); same output as the desktop app.
 - **Knowledge corpus (RAG)**: public-domain chess books (Capablanca) retrieved at
   analysis time; narrator quotes with attribution; verbatim proven in A/B tests.
 - **Standalone `Greco.exe`**: double-click launch, no console, no separate Python
@@ -83,7 +83,7 @@ each item is committed when done, so a partial batch is still saved progress.
 
 | # | Task | Size | Status |
 |---|------|------|--------|
-| 1 | **Greco Online · Phase 1** — web server over the pipeline: browser upload → report (localhost) — `webapp.py` + `run_greco_web.bat` (Flask; additive, desktop app untouched) | L | **done** |
+| 1 | **Greco Online · Phase 1** — web server over the pipeline: browser upload → report (localhost) — `web/main.py` + `run_greco_web.bat` (FastAPI; additive, desktop app untouched) | L | **done** |
 | 2 | **Greco Online · Phase 2** — async analysis jobs + status page (Queued → Analyzing → Done) | M | todo |
 | 3 | **Greco Online · Phase 3** — accounts + roles (login, per-user games, admin) | L | todo |
 | 4 | **Greco Online · Phase 4** — database (SQLite locally → PostgreSQL hosted) | M | todo |
@@ -95,9 +95,9 @@ each item is committed when done, so a partial batch is still saved progress.
 | 10 | `knowledge/` corpus — public-domain chess books retrieved (RAG, SQLite FTS5) and wired into the narrator; themes detected from engine ground truth. **Infrastructure built & verified (`knowledge.py`); awaiting content** (deposit per `knowledge/README.md`). | M | **infra done · content todo** |
 | 11 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | todo |
 | 12 | Tighten the OTB classical-vs-rapid classifier (or use a curated source) | S | todo |
-| 13 | **Test suite** — `tests/` directory with `pytest`; cover knowledge retrieval (FTS5 returns correct passages), triage logic (tiers fire correctly), and webapp routes (`/analyze` accepts a PGN, returns HTML). This is the single highest-impact portfolio signal: the absence of tests is visible in the file tree before a reviewer reads any code. Also the StayPlus prerequisite: "how do you know X is correct?" is answered with tests. | M | todo |
+| 13 | **Test suite** — `tests/` directory with `pytest`; cover knowledge retrieval (FTS5 returns correct passages), triage logic (tiers fire correctly), and web routes (`/analyze` accepts a PGN, returns HTML; `/health` is live). This is the single highest-impact portfolio signal: the absence of tests is visible in the file tree before a reviewer reads any code. Also the StayPlus prerequisite: "how do you know X is correct?" is answered with tests. | M | todo |
 | 14 | **GitHub Actions CI** — `.github/workflows/ci.yml` that runs `pytest` on every push and PR, showing a green check mark on all commits. Prerequisite: item #13 must exist first; CI is the automation wrapper (~10-line YAML once tests are in place). | S | todo |
-| 15 | **App screenshots in README** — a `/screenshots/` folder with two images: the Tkinter desktop GUI (settings panel or main window with a game loaded) and the Flask web interface in a browser (upload form + resulting report). Link both from the README Quick Start section. Fastest way to show "this is real software" to someone who hasn't run it. | S | todo |
+| 15 | **App screenshots in README** — a `/screenshots/` folder with two images: the Tkinter desktop GUI (settings panel or main window with a game loaded) and the FastAPI web interface in a browser (upload form + resulting report). Link both from the README Quick Start section. Fastest way to show "this is real software" to someone who hasn't run it. | S | todo |
 | 16 | **Expand knowledge corpus beyond Capablanca** — deposit at least two more public-domain books per `knowledge/README.md` and the SHOPPING_LIST. Good first targets: Nimzowitsch's *My System*, Tarrasch's *The Game of Chess*, or a Euwe game collection. The README and CHANGELOG promise a sophisticated RAG system; a single book doesn't demonstrate it. (Overlaps with #10; this item tracks the portfolio optics specifically — one book is not enough.) | M | todo |
 
 **Folded in / superseded:**
