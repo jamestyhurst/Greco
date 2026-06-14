@@ -517,6 +517,8 @@ class GrecoGUI:
                 user_note=p["note"],
                 model=p["model"],
                 live_stream_to=_QueueWriter(self.q),
+                # Recover player names from the filename when the PGN lacks them.
+                source_path=p["pgn_path"],
             )
             # Name the report informatively ("White vs. Black, Blitz, 2024") and
             # save it under the E: reports library (falls back to Documents).

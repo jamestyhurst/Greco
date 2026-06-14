@@ -14,7 +14,7 @@ import chess
 import httpx
 from anthropic import Anthropic
 
-from analyzer import GameAnalysis, MoveAnalysis
+from analyzer import GameAnalysis, MoveAnalysis, MATE_SCORE
 from openings import identify_opening
 
 
@@ -116,7 +116,7 @@ Constraints that apply in every voice:
 - Never invent biographical claims about real, named players. Use only what is in the provided player context, plus what the moves themselves reveal.
 - For every Tier 3 move, name the engine's preferred move and explain in one or two sentences why it was better.
 - Use SAN throughout. Refer to moves by their number and side (e.g., "Black's 11...cxb5").
-- **Refer to players naturally and with variety** — by their name or username (from the metadata), by their colour ("White", "Black"), or by pronoun. Don't lean on bare pronouns alone; rotate among name/username, colour, and pronoun so it reads like real commentary.
+- **Refer to players naturally and with variety** — by their name or username (from the metadata), by their colour ("White", "Black"), or by pronoun. **When a real name or username is provided, PREFER it over a bare "White"/"Black"** (still mixing in colour and pronoun for variety); fall back to colours only when no name is given. Shorten a long username to a readable short form on later mentions. Don't lean on bare pronouns alone; rotate among name/username, colour, and pronoun so it reads like real commentary. A player's name belongs only in the prose — never inside a move or any identifier.
 - **Default to male pronouns (he/him)** for a player whose gender isn't given. Only use other pronouns if the player context explicitly indicates them. Do not infer gender from a username.
 - When the user has identified themselves as one of the players, address that player in second person ("you") for psychological remarks; address the other player in third person.
 - **Honour the user's framing and addressing instructions from the note, above the generic colour labels.** The note can tell you WHO the report is for and HOW to address the players — e.g. "this is for my dad; I'm his son, playing White." When it does, follow it literally: write the report TO that reader, calling them "you" and naming the relationship ("your son", "your opponent") instead of falling back on "White" and "Black." Relationship and second-person framing from the note OVERRIDE the default colour names — once you have been given names and relationships, use them, and do not keep referring to the people as anonymous "White" and "Black."
@@ -153,6 +153,8 @@ Greco's deeper purpose is to illuminate the *human* layer that engines can't —
 3. If the position passes both checks, quote from the QUOTABLE EXCERPT only (not from the FULL PASSAGE), using the author's exact words in quotation marks ("As Capablanca writes, …").
 The engine data remains the sole source of board truth; a passage supplies a *principle*, never a position fact. Never fabricate or extend a quote beyond the excerpt given. Aim for 1-3 quotations in a full report where they genuinely sharpen a lesson; silence is correct when no passage cleanly fits. If no "Classical chess literature" section appears, write exactly as you otherwise would.
 
+**A FEATURED PASSAGE is non-discretionary.** If the user message contains a "FEATURED PASSAGE" section, it holds ONE pre-formatted, verbatim quotation already attributed to a named master (assembled in code from the source text). Include it once, reproduced exactly as written, at the most fitting move — do not paraphrase, trim, re-word, or re-attribute it. Omit it only if no move in the game genuinely fits its idea. The other "Classical chess literature" passages remain discretionary as above; this single featured quote is the one you should reliably land.
+
 **Attribution must name a specific historical chess master.** Quote or attribute ONLY when the source is a named historical figure such as Capablanca, Lasker, Nimzowitsch, Tarrasch, Steinitz, Réti, or Morphy. Never attribute a quote to "Greco", to "reference notes", to an unnamed source, or to any non-historical author — if a passage lacks a clear human author, draw on its idea but express it entirely in your own words, without citation.
 
 **Respect opening theory ("book" moves), and name the opening correctly.** In the opening, recognize established theory — use your opening knowledge together with the ECO/Opening metadata AND any "Opening theory reference" supplied in the user message (treat that reference as authoritative for names and variations). **Identify the opening by the player's FIRST move and actual move order, NOT by a structure it later transposes into.** 1.e4 Nf6 is Alekhine's Defence (and 2...d5 lines are the Scandinavian Variation of the Alekhine) — so even if the position later resembles a French, call it "Alekhine's Defence, which transposes into a French-type structure," not "a French Defence." If a move matches established theory for the opening actually being played, it IS a book move — say so and do not flag it as an inaccuracy just because the engine has a marginal preference. Do NOT nag about small engine preferences over sound theory; reserve criticism for genuine errors (real material loss or a concrete tactic missed). If the player's note states an intended opening or plan, treat their theory moves as deliberate and correct within that plan.
@@ -170,7 +172,7 @@ The engine data remains the sole source of board truth; a passage supplies a *pr
 **Reason with the concepts a strong human coach uses** — invoke these when they genuinely apply (don't force them):
 - *Opening principles.* Don't develop the queen too early; don't move the same piece twice without reason; develop toward the centre; castle for safety. E.g. an early Qf3 is "the queen coming out early," and it also blocks the f-pawn's own advance — say both.
 - *Piece traffic & escape squares.* Note when a piece blocks its own pawn or another piece, and when a quiet move creates or removes a retreat/luft square for a piece under threat. **Use the `piece_mobility` field — it is ground truth.** When it says a move "opens [square] as a retreat for the [piece]," that is a concrete, important point: e.g. Qe2 vacating f3 hands a g5-knight a flight square and quietly blunts a coming ...h6 — say exactly that. When it says an enemy minor "can be kicked by a pawn and has only one / no safe retreat," tell the reader that piece is trappable and how (which pawn push), because that is often the most forcing idea on the board.
-- *Tempo, initiative & windows of opportunity.* A threat often works only NOW because the opponent's pieces are momentarily awkward; a slower "long-term plan" move can hand the opponent the time to fix the very weakness you could have hit. When a move is the engine's choice because it strikes while the iron is hot (e.g. ...h6 hitting a trapped g5-knight before it can be given a flight square), explain it in exactly those human terms.
+- *Tempo, initiative & windows of opportunity.* A threat often works only NOW because the opponent's pieces are momentarily awkward; a slower "long-term plan" move can hand the opponent the time to fix the very weakness you could have hit. When a move is the engine's choice because it strikes while the iron is hot (e.g. ...h6 hitting a trapped g5-knight before it can be given a flight square), explain it in exactly those human terms. **The flip side is just as real: a threat WASTES a tempo when it only induces a move the opponent already wanted to make — and can even HELP them.** Before crediting a move for "gaining time" or "forcing a reply," check the engine's lines: if the reply it forces is a move the engine also plays in other continuations (it appears in the `variations`/alternatives, or the opponent was heading there anyway), the threat bought nothing. The sharpest case is *helping your opponent develop* — capturing on a square where the opponent happily recaptures onto a BETTER square does their work for them (e.g. ...Kg7 "attacking" f6, met by ...Kxf6, and the g5 break White intended regardless: the king walk gained nothing and centralised White's plan for free). Only raise this when the data supports it — the forced reply must be one the opponent independently wanted, NOT a neutral, only-legal recapture; verify the move genuinely threatens the target first.
 - *Trades & structure.* A player steering for a closed/locked position is right to avoid letting the opponent trade a bishop for a knight, or to keep knights for the coming pawn chains (e.g. ...Nb8 to dodge Bxd7, or routing both knights toward the kingside for a King's Indian plan). Credit trade and retreat decisions in light of the intended pawn structure, not just the engine number.
 - *Prophylaxis & quiet defensive moves.* A developing or quiet move may exist to defend a square or stop a specific enemy break/sacrifice (e.g. ...Re8 over-protecting e6 against a Ne6/dxe6 idea). King moves count too: note when a king step defends specific pawns or squares (e.g. ...Kh7 covering g6 and h6) or makes luft, not just "king to safety." Ask what a quiet move defends or prevents, and say so.
 - *Recapture choice.* Which piece recaptures matters: recapturing with the queen vs. a piece can dodge a tempo-gaining hit (e.g. ...Qxa8 instead of ...Bxa8 to avoid Ra1 hitting the bishop). Note these choices.
@@ -199,7 +201,7 @@ You are given engine ground truth precisely so you never have to guess at the bo
 - **Never invent positional features.** Only call a file open or half-open if it is listed in that move's `open_files` / `half_open_for_white` / `half_open_for_black`. If a file is not listed, it is NOT open — do not say it is. The same applies to any structural claim: if you can't ground it in the data provided, don't assert it. Do not attribute a king's exposure to a file unless that file is actually open/half-open per the data — if a king is loose for other reasons (missing fianchetto bishop, open diagonals, lack of defenders), say *that* concretely instead.
 - **State board facts cleanly and confidently — never narrate uncertainty in the prose.** Do not write things like "wait, actually..." or "let me be precise..." and then correct yourself on the page. Trust the provided ground-truth data; if you are unsure of a fact and it isn't in the data, simply omit the claim rather than thinking out loud about it.
 - **NEVER write internal data field names in the prose.** The JSON keys (`double_attack`, `piece_mobility`, `allows_fork`, `best_pv`, `cp_loss`, `eval_after`, `material`, etc.) are for your reasoning only — they must never appear in the report. Don't write "the double_attack field is explicit" or "the piece_mobility note confirms." Say it naturally: "g3 forks both pieces," "the knight has only one safe square." (Chess terms like "centipawns" are fine; field identifiers are not.)
-- **Identify the REAL threat, concretely.** When a move threatens something, name the exact tactic. If a `double_attack` or `best_move_double_attack` field is present, that is the literal ground truth (e.g. "knight on e6 attacks the king on g7 and the queen on c7 (royal fork)") — use it and name both targets and their squares. The threat is the specific pieces under attack, not a vague notion like "pressure on the file." If no tactical field is given, explain forcing points by walking through the engine's `best_pv` move by move rather than naming a generic motif.
+- **Identify the REAL threat, concretely.** When a move threatens something, name the exact tactic. If a `double_attack` or `best_move_double_attack` field is present, it names the pieces under SIMULTANEOUS attack — the geometry is ground truth (e.g. "knight on e6 attacks the king on g7 and the queen on c7 (royal fork)"), so name both targets and their squares. But a double attack only WINS material when the position bears it out: confirm against the `material` / `eval_after` trajectory before calling it a won piece, and hedge otherwise ("though the fork can be answered by…", "but it is the opponent to move") — a forked piece that is defended, or a fork on the wrong side's move, may win nothing. The threat is the specific pieces under attack, not a vague notion like "pressure on the file." If no tactical field is given, explain forcing points by walking through the engine's `best_pv` move by move rather than naming a generic motif.
 - **"Attacks / strikes / challenges" is LITERAL.** Only say a move attacks, strikes, hits, or challenges a pawn or piece if it physically attacks that exact square. A pawn move "strikes" a pawn only if it could capture it (e.g. ...c5 attacks a d4-pawn; ...exd-type breaks contact it). Moves like ...e6 or ...c6 do NOT attack a central pawn — they *prepare* a break (...d5) or support a future ...c5. Never write that a move "challenges the centre" when it makes no contact with a central pawn. Cleanly separate what a move **attacks** (contact now) from what it **prepares** (a break or plan for later), and from what it **defends or over-protects**.
 - **"Recapture" / "take back" has a precise meaning — applies to EVERY move you describe, played or hypothetical.** A capture counts as a *recapture* only if the opponent's immediately preceding move captured a piece on that exact same square. Test it yourself for any move you're about to call a recapture: did the opponent just capture something on that square? For the move actually played, trust the `recapture` flag; for the engine's preferred move, trust `best_move_is_recapture` when present. A move that captures a pawn which was *pushed* to a square — or that wins any piece the opponent did not just capture — is a plain **capture**, not a recapture. Concrete example: after Black plays `...e4` (a pawn advance), White's `dxe4` is a **capture**, NOT a recapture, because Black did not capture anything on e4. Use "captures", "takes", or "wins the pawn" for those. This rule holds in the closing summary too — do not relax it there.
 - **Ground value judgments in material — read the `material` field, never improvise a tally.** Each move carries `material` (pawns, + = White ahead) and, when it takes something, `captured`. State the count by reading that field and converting to the player's POV (if the user is Black, negate it: `material: -8` means **Black is up 8**). Do NOT invent a running point-count, and NEVER produce a self-contradictory tally (e.g. "+8 points vs −3… netting +1… though it shows +8"). If you're unsure, just say "you're up roughly N points" using the field value. **In a sharp forcing exchange the `material` value swings move to move** (one side grabs the queen, the other grabs it back a move later) — do NOT narrate the volatile intermediate numbers as if final; instead read the `material` value a move or two later, once the sequence settles, and report that net. When a trade nets material, name the result plainly ("you've come out a bishop for a pawn — up about two points").
@@ -207,6 +209,16 @@ You are given engine ground truth precisely so you never have to guess at the bo
 - When you state why an alternative move loses, cite the concrete line or the resulting material/tactic from the data — never a hand-wave.
 - **Don't call a still-winning move a "mistake."** When a move is flagged `still-decisively-winning`, the player kept a winning position (winning by ~3+ before and after) — do NOT label it a mistake, blunder, or even inaccuracy just because the engine had a faster path. Frame it as "fine — just not the quickest," and explain its human purpose (e.g. "...Kf6 defends the g5-pawn") instead of scolding it. A slower route to a won game is a stylistic choice, not an error.
 - **Don't belabor obvious or forced moves.** When a move is clearly forced or obvious (a one-answer recapture the player plainly intended, especially an `only-good-move` recapture), say so in a sentence and move on — do NOT enumerate the losing alternatives at length. Spend your words where the player faced a real decision, not on moves with a single sensible reply.
+
+## Hypothetical lines and variations — quote the engine, never invent
+You will often want to show what *would* happen ("if he takes, then…", "better was…", "this runs into…"). Multi-move chess lines are exactly where a general model invents illegal or wrong moves, so Greco hands you the engine's real lines and forbids any other. This is how the "why was my move bad" question gets a concrete answer instead of a vague one.
+
+- **Tier 2/3 moves carry a `variations` array.** Each entry has a `type` — `best` (the engine's line had the player chosen better: "what to play instead"), `refutation` (the engine's line starting FROM the move actually played: "what your move runs into"), or `alternative` (a sideline) — and a ready-to-quote `line` string with move numbers already inserted, e.g. `25. g5 exg5 26. fxg5`.
+- **THE IRON RULE: every move you write inside a parenthetical variation MUST appear verbatim in that move's `variations` data.** Quote a whole `line`, or a leading prefix of one. Do NOT add a move, reorder moves, merge moves from two different lines, or continue a line past its last given move. If the line you want to show is not in the data, do not write a line — explain the idea in words instead. This is the same discipline as never inventing a fork or an open file: the engine is the only source of moves.
+- **Engine lines are truncated; never extend one.** A `line` (and `best_pv`) stops after a few plies and may end before a combination's payoff. If the winning point is not visible by the end of the supplied line, describe the resulting position generally (the VAGUE-BUT-TRUE rule) rather than inventing further moves, captures, or material tallies.
+- **Format variations distinctly from the game.** Actual game moves are bold (and, when diagrammed, in `### ` headers). A hypothetical line is *italic and inside parentheses*, NEVER bold and never a header — e.g. *(better was 24...Rf8, when 25. g5 exg5 26. fxg5 holds the f6-pawn)*. Bold means it happened; italic-in-parentheses means it did not. Variations are inline prose only — they must never create a `### ` move header.
+- **Pick the line that makes the point.** To show why the played move falls short, quote its `refutation` line ("this runs into …"); to show the improvement, quote the `best` line ("better was …"). The recapture, material, and geometry rules above apply INSIDE variations exactly as on the board — describe a capture in a line as carefully as one in the game.
+- **Generated geometry meets the same bar as `attacks`.** Only assert that a specific square forks two NAMED pieces, or that a piece controls a particular diagonal/rank/file with a target on it, when a `double_attack`, `best_move_double_attack`, or `allows_fork` field states it. For a portable teaching pattern, describe it generally ("a knight reaching that hole could hit two pieces at once") without committing to exact destination squares or named targets, and never claim two squares are a knight's move apart, or a diagonal is clear, from your own reasoning.
 """
 
 
@@ -232,6 +244,7 @@ Your focus is the player's decision-making and board vision, not narrative beaut
 
 - For each Tier 2/3 move, ask: what was the player likely seeing or thinking? What was on their mental radar — and what wasn't? Common cognitive patterns to invoke when relevant: tunnel vision on an attack, time pressure, missing prophylaxis, anchoring on a plan, pattern recognition gaps, fatigue, overconfidence after a good move, panic after a bad one.
 - **Bridge the human–engine gap — this is the core of coaching.** On every Tier 2/3 move where the engine preferred a different move, do BOTH explicitly: (1) name the *sound human idea* behind the move actually played — the principle or pattern that makes it natural and tempting (e.g. "…Kg7 centralises the king, exactly what endgame principle preaches"); and (2) explain the engine's preferred move in terms a human could have *reached*, not just an eval number — the concrete reason (a specific tactic, a defender freed or tied down, a key square contested, a pawn chain kept intact) and why a strong player would weigh it over the natural move. Show the *path of reasoning* to the better move so the reader could find it themselves next time. "The engine prefers X (+1.3)" with no human bridge is a coaching failure.
+- **Spot the wasted (or self-defeating) tempo.** A common improving-player error is valuing a threat for its own sake — "I forced him to respond, so I gained time." Diagnose when this is an illusion: (a) the reply the threat forces is a move the opponent ALREADY wanted — visible when that same reply is the engine's move in the alternative/`variations` lines, or is the natural recapture/break they were heading for; or (b) the move actively HELPS the opponent, usually by capturing on a square where they recapture INTO a better posting (king toward the centre in an endgame, a rook onto an open file, a piece toward its ideal square). Name it plainly and show the cost: the player spent a move and the position did not improve (the eval barely moved despite the "threat"), while the opponent's forced reply cost them nothing or improved them. The ...Kg7-attacks-f6, then ...Kxf6, then g5-anyway shape is the archetype. Use the engine lines (per the bracketed-variation discipline) to PROVE the reply was independent of the threat — quote the line where the opponent plays that same move — rather than asserting it. Portable lesson: "before making a threat, ask what the opponent plays in reply and whether he wanted to do that anyway — if forcing him helps his plan, the threat is a gift."
 - For each Tier 3 mistake, end with one concrete "what to look for next time" line. Examples: "Next time a knight reaches a hole near your king, ask 'who is defending the square it's eyeing?' first." or "Before recapturing automatically, count attackers and defenders one more time."
 - Clinical but not shaming — the goal is improvement, not blame.
 - Replace the standard **Closing reflection** with **## Patterns to work on**, a bulleted list of 3–5 recurring themes from this game that the player should improve, each with one suggested thought-cue or practice exercise.
@@ -337,6 +350,8 @@ def _format_eval(cp: Optional[int], mate: Optional[int]) -> str:
         return f"#{abs(mate)} for {side}"
     if cp is None:
         return "0.00"
+    if abs(cp) >= MATE_SCORE:  # synthesized terminal checkmate (sign = the winner)
+        return "checkmate — White wins" if cp > 0 else "checkmate — Black wins"
     pawns = cp / 100.0
     sign = "+" if pawns >= 0 else ""
     return f"{sign}{pawns:.2f}"
@@ -416,13 +431,35 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
     if move.overloaded_defender:
         d["overloaded_defender"] = move.overloaded_defender
 
-    # Tier 2 and Tier 3 get extra context for the model to chew on.
-    if tier >= 2:
+    # Eval-before and the post-move piece placement are the strongest anti-
+    # hallucination anchors, so emit them for every move that gets real prose
+    # (Tier 1+), not only Tier 2/3 — a Tier-1 "purpose/character" sentence
+    # otherwise has no ground-truth board to check against. Tier 0 is
+    # acknowledge-only, so it is skipped to keep the payload small.
+    if tier >= 1:
         d["eval_before"] = _format_eval(move.eval_before_cp, move.mate_before)
-        d["best_pv"] = move.best_pv_san
         # Ground-truth piece placement AFTER the move, so the model never
         # misremembers where a piece sits (e.g. a knight that left c5 for e4).
         d["pieces"] = _piece_placement(move.fen_after)
+
+    # Tier 2 and Tier 3 get extra context for the model to chew on.
+    if tier >= 2:
+        d["best_pv"] = move.best_pv_san
+        # Engine-sourced lines the narrator may quote in parenthetical variations
+        # — and ONLY these (the closed set the anti-confabulation rule enforces):
+        # the line had the player chosen better ("best"), the line that punishes the
+        # move actually played ("refutation"), and any sidelines ("alternative").
+        # Move numbers are inserted in code, never by the model.
+        variations: List[Dict[str, str]] = []
+        if move.best_line_san:
+            variations.append({"type": "best", "line": move.best_line_san})
+        if move.refutation_line_san:
+            variations.append({"type": "refutation", "line": move.refutation_line_san})
+        for alt in move.top_alternatives[:3]:
+            if alt.get("pv_numbered"):
+                variations.append({"type": "alternative", "line": alt["pv_numbered"]})
+        if variations:
+            d["variations"] = variations
         # Tell the model whether the engine's best move is a capture vs recapture
         # so it describes the alternative accurately.
         if "capture" in move.best_move_san or "x" in move.best_move_san:
@@ -449,17 +486,34 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
 
 
 def _humanize_time_control(tc: str) -> str:
-    """Translate a PGN TimeControl tag like '1800' or '600+5' into plain English."""
+    """Translate a PGN TimeControl tag like '1800', '600+5' or the correspondence
+    form '1/259200' (moves/seconds-per-move) into plain English."""
     if not tc or tc == "?":
         return tc
+    DAY = 86400  # one day in seconds
     try:
+        # Correspondence / Daily form "moves/seconds-per-move", e.g. "1/259200".
+        # int(tc) would raise on the '/', so this MUST be handled first — otherwise
+        # the whole daily voice protocol never fires (the tag passes through raw).
+        if "/" in tc:
+            _, per = tc.split("/", 1)
+            secs = int(per)
+            if secs >= DAY:
+                rounded = int(round(secs / DAY))
+                unit = "day" if rounded == 1 else "days"
+                return f"{tc} (Daily / correspondence — about {rounded} {unit} per move)"
+            return f"{tc} (correspondence)"
         if "+" in tc:
             base, inc = tc.split("+", 1)
             base_sec = int(base)
             inc_sec = int(inc)
+            if base_sec >= DAY:
+                return f"{tc} (Daily / correspondence — a day or more per move)"
             mins = base_sec // 60
             return f"{tc} ({mins} min + {inc_sec} sec increment)"
         base_sec = int(tc)
+        if base_sec >= DAY:  # raw-seconds daily, e.g. '86400' — not 24-hr "classical"
+            return f"{tc} (Daily / correspondence — a day or more per move)"
         mins = base_sec // 60
         if mins >= 60:
             return f"{tc} ({mins // 60} hr classical)"
@@ -470,6 +524,33 @@ def _humanize_time_control(tc: str) -> str:
         return f"{tc} ({base_sec} sec bullet)"
     except (ValueError, TypeError):
         return tc
+
+
+def resolve_player_names(
+    headers: Dict[str, str], source_path: Optional[str] = None
+) -> tuple:
+    """Best display name per side. Resolution order: a real PGN header → names
+    parsed from the source filename → the colour. Pure and deterministic — the
+    model never invents a name, it only uses what this returns. Available in every
+    voice, not just companion."""
+    def _clean(value: Optional[str]) -> str:
+        v = (value or "").strip()
+        return "" if v in ("", "?", "White", "Black") else v
+
+    white = _clean(headers.get("White"))
+    black = _clean(headers.get("Black"))
+    if (not white or not black) and source_path:
+        try:
+            from pathlib import Path
+
+            from importers import parse_players_from_filename
+
+            fw, fb = parse_players_from_filename(Path(source_path))
+            white = white or (fw or "")
+            black = black or (fb or "")
+        except Exception:
+            pass
+    return (white or "White", black or "Black")
 
 
 def _load_opening_reference(max_chars: int = 8000) -> str:
@@ -495,8 +576,14 @@ def build_user_prompt(
     user_context: Dict[str, object],
     user_note: Optional[str] = None,
     with_knowledge: bool = True,
+    source_path: Optional[str] = None,
+    boards_at: str = "tier3",
+    periodic_every: int = 6,
 ) -> str:
     headers = game.headers
+    # Display name per side: real PGN header → filename parse → colour (data-back;
+    # resolved in code, the model only uses what it is given). Works in all voices.
+    white_name, black_name = resolve_player_names(headers, source_path)
     opening_reference = _load_opening_reference()
 
     # Identify the opening by EXACT move order (names by what was actually played).
@@ -526,9 +613,9 @@ def build_user_prompt(
     black_ctx = user_context.get("black_player")
     user_is = user_context.get("user_is")
     if white_ctx:
-        context_lines.append(f"- White ({headers.get('White', '?')}): {white_ctx}")
+        context_lines.append(f"- White ({white_name}): {white_ctx}")
     if black_ctx:
-        context_lines.append(f"- Black ({headers.get('Black', '?')}): {black_ctx}")
+        context_lines.append(f"- Black ({black_name}): {black_ctx}")
     if user_is in ("white", "black"):
         context_lines.append(f"- The user themselves played as **{user_is}** in this game.")
     elif user_is == "neither":
@@ -558,7 +645,10 @@ def build_user_prompt(
     # the moves that get a board — no header/bold duplication, no unanchored boards.
     from outputs import select_diagram_plies  # lazy import: avoids an import cycle
 
-    diagram_plies = select_diagram_plies(game, tiers)
+    # Use the SAME boards_at/periodic_every assemble_report will use, so the headers
+    # the narrator is told to write match exactly the boards that get rendered (no
+    # drift on non-default --boards-at).
+    diagram_plies = select_diagram_plies(game, tiers, boards_at, periodic_every)
     moves_data = [
         _move_to_dict(m, t, m.ply in diagram_plies) for m, t in zip(game.moves, tiers)
     ]
@@ -602,11 +692,32 @@ def build_user_prompt(
             f"checkmate on the board, the game ended by resignation — say so, do not imply mate."
         )
 
+    # Daily / correspondence games get an explicit, unmissable per-game protocol so
+    # the model never offers time-pressure excuses (the system-prompt branch can
+    # otherwise be overlooked). The FACT (daily or not) is decided in code.
+    daily_block = ""
+    try:
+        from outputs import is_daily_game  # lazy import to avoid an import cycle
+
+        if is_daily_game(headers):
+            daily_block = (
+                "\n## Time-control protocol (authoritative for this game)\n"
+                "This is a DAILY / CORRESPONDENCE game: a day or more per move. Apply the "
+                "daily protocol literally — there is NO time pressure, so never explain any "
+                "move as time trouble, rushing, or clock panic. Players could analyse for "
+                "hours and consult opening references, so expect more accurate, more "
+                "booked-up, more positional play; hold inaccuracies and blunders to a higher "
+                "standard and treat a genuine blunder as surprising and hard to excuse, not a "
+                "forgivable speed slip.\n"
+            )
+    except Exception:
+        daily_block = ""
+
     return f"""# Game to analyze
 
 ## Metadata
-- White: {headers.get('White', '?')}
-- Black: {headers.get('Black', '?')}
+- White: {white_name}
+- Black: {black_name}
 - Event: {headers.get('Event', '?')}
 - Date: {headers.get('Date', '?')}
 - Result: {headers.get('Result', '*')}
@@ -617,7 +728,7 @@ def build_user_prompt(
 
 ## How the game ended
 {ending}
-
+{daily_block}
 ## Ratings
 {chr(10).join(rating_lines) if rating_lines else "(No ratings in PGN.)"}
 
@@ -657,6 +768,9 @@ def generate_narrative(
     with_style_guide: bool = True,
     with_references: bool = True,
     with_knowledge: bool = True,
+    source_path: Optional[str] = None,
+    boards_at: str = "tier3",
+    periodic_every: int = 6,
 ) -> str:
     """
     Generate the narrative via streaming. If `live_stream_to` is a file-like
@@ -672,7 +786,9 @@ def generate_narrative(
         http_client=_make_http_client(),
     )
     user_prompt = build_user_prompt(
-        game, tiers, user_context, user_note=user_note, with_knowledge=with_knowledge
+        game, tiers, user_context, user_note=user_note,
+        with_knowledge=with_knowledge, source_path=source_path,
+        boards_at=boards_at, periodic_every=periodic_every,
     )
     system_prompt = _build_system_prompt(
         use_case, with_style_guide=with_style_guide, with_references=with_references

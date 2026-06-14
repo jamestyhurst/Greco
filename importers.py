@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 import ssl
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 import httpx
 
@@ -45,6 +45,44 @@ def _make_http_client() -> httpx.Client:
 def load_from_file(path: Path) -> Tuple[str, str]:
     text = path.read_text(encoding="utf-8")
     return text, f"file: {path}"
+
+
+def parse_players_from_filename(path) -> Tuple[Optional[str], Optional[str]]:
+    """Best-effort recovery of player names from an informative filename.
+
+    Recognises the common shapes the project itself uses, e.g.
+    'Magnus vs Hikaru.pgn', 'A_vs_B.pgn', 'A - B.pgn',
+    '2026-05-19 JamesTortoise vs NinaTitova (Rapid, 1-0).pgn',
+    'redwood1978_vs_JamesTortoise_2025.10.05.pgn'. Returns (white, black), or
+    (None, None) when no confident 'X vs Y' / 'X - Y' separator is found — so a
+    non-matching filename silently falls back to the PGN headers / colours.
+
+    Used only when the PGN lacks White/Black tags; purely additive convenience.
+    """
+    if not path:
+        return (None, None)
+    stem = Path(path).stem
+    s = stem.replace("_", " ").strip()
+    s = re.sub(r"\s*\([^)]*\)\s*$", "", s)              # trailing "(Rapid, 1-0)"
+    s = re.sub(r"^\d{4}[-.]\d{2}[-.]\d{2}\s+", "", s)   # leading "2026-05-19 "
+    # Require an explicit "vs"/"v"/"versus" separator. A bare " - " is intentionally
+    # NOT accepted: it produces false names from ordinary filenames like
+    # "My Game - Draft Copy.pgn", and real exports use "vs" anyway.
+    m = re.search(r"^(.*?)\s+(?:vs\.?|v\.?|versus)\s+(.*)$", s, re.IGNORECASE)
+    if not m:
+        return (None, None)
+
+    def _tidy(name: str) -> str:
+        name = re.split(r"\s*,\s*", name)[0].strip()              # drop ", Blitz, 2024"
+        name = re.sub(r"\s+\d{4}([-.]\d{2}([-.]\d{2})?)?$", "", name).strip()  # trailing date
+        return name
+
+    white, black = _tidy(m.group(1)), _tidy(m.group(2))
+
+    def _ok(n: str) -> bool:
+        return bool(n) and len(n) <= 40 and not n.isdigit()
+
+    return (white, black) if _ok(white) and _ok(black) else (None, None)
 
 
 def load_from_lichess(url_or_id: str) -> Tuple[str, str]:
@@ -93,16 +131,20 @@ def load_pgn(source: str) -> Tuple[str, str]:
     if candidate.exists() and candidate.is_file():
         return load_from_file(candidate)
 
-    # Lichess?
-    if LICHESS_URL_RE.search(source):
-        return load_from_lichess(source)
+    stripped = source.strip()
+    # Does the input look like actual PGN (a tag pair or a numbered move)? If so it
+    # is raw text, NOT a URL — even if a [Site]/[Event] tag mentions chess.com or
+    # lichess. Only route to the URL loaders for a bare URL with no PGN content.
+    looks_like_pgn = ("[" in source) or bool(re.search(r"\d+\.\s", source))
 
-    # Chess.com?
-    if CHESSCOM_URL_RE.search(source):
-        return load_from_chesscom(source)
+    if not looks_like_pgn:
+        if LICHESS_URL_RE.search(stripped):
+            return load_from_lichess(source)
+        if CHESSCOM_URL_RE.search(stripped):
+            return load_from_chesscom(source)
 
     # Raw PGN text (must contain at least a header or a move).
-    if "[" in source or re.search(r"\d+\.\s", source):
+    if looks_like_pgn:
         return source, "inline PGN text"
 
     raise ValueError(

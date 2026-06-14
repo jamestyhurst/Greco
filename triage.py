@@ -30,7 +30,14 @@ BASE_BY_CLASSIFICATION: Dict[str, int] = {
 def _detect_turning_points(game: GameAnalysis, threshold_cp: int = 200) -> List[int]:
     """Plies after which the evaluation swung by at least `threshold_cp`."""
     turning_points: List[int] = []
-    prev = 0
+    # Seed from the actual starting evaluation (eval_before of ply 1) rather than a
+    # literal 0, so a game starting from a non-standard FEN (handicap / puzzle) does
+    # not spuriously flag ply 1 as a turning point.
+    prev = (
+        normalize_cp(game.moves[0].eval_before_cp, game.moves[0].mate_before)
+        if game.moves
+        else 0
+    )
     for move in game.moves:
         current = normalize_cp(move.eval_after_cp, move.mate_after)
         if abs(current - prev) >= threshold_cp:
@@ -99,10 +106,28 @@ def _tier_for_move(
     return tier
 
 
+def _has_named_players(headers: Dict[str, str]) -> bool:
+    """True when the PGN carries real player names (not blank, '?', or the
+    placeholder 'White'/'Black' strings)."""
+    for key in ("White", "Black"):
+        name = (headers.get(key) or "").strip()
+        if name and name not in ("?", "White", "Black"):
+            return True
+    return False
+
+
 def annotate_with_tiers(
     game: GameAnalysis,
     user_context: Dict[str, object],
 ) -> List[int]:
+    # Decouple "a real human name is present" from "free-text bio context was
+    # supplied". The psychology tier-boost should fire for the user's own named
+    # games (run from the GUI/web), not only CLI runs that passed --white-context.
+    # The GUI and web front-ends hardcode player_named=False, so upgrade it here
+    # from the PGN headers — one place that fixes all three front-ends consistently.
+    if not user_context.get("player_named") and _has_named_players(game.headers):
+        user_context = {**user_context, "player_named": True}
+
     turning_plies = set(_detect_turning_points(game))
     tiers: List[int] = []
     prev_phase = None

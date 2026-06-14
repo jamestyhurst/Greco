@@ -6,6 +6,8 @@ renders a page. All the chess work lives in `web.pipeline`.
 """
 from __future__ import annotations
 
+import logging
+import os
 import traceback
 from typing import Optional
 
@@ -71,8 +73,19 @@ async def analyze(
             user_is=user_is, use_case=use_case, model=model, note=note_val,
         )
     except Exception:
+        # Never leak a server traceback to the browser — it can carry internal file
+        # paths, request URLs, or config detail. Log the full trace server-side under
+        # a short id and show the user only that id. The detail is rendered in the
+        # page ONLY when GRECO_DEBUG is set (off by default). Matters once Greco Web
+        # is hosted (Phase 7); harmless to fix now.
+        error_id = os.urandom(4).hex()
+        logging.getLogger("greco.web").exception("Analysis failed [%s]", error_id)
+        detail = traceback.format_exc() if os.environ.get("GRECO_DEBUG") else ""
         return HTMLResponse(
-            render_error("Analysis failed.", traceback.format_exc()),
+            render_error(
+                f"Analysis failed. If this keeps happening, note error id {error_id}.",
+                detail,
+            ),
             status_code=500,
         )
 

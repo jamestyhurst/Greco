@@ -230,6 +230,13 @@ def chunk_text(text: str, target_words: int = TARGET_WORDS,
 _ARTIFACT_RE = re.compile(r"\[[^\]]{0,80}\]")   # [Illustration: ...], [123], etc.
 _PROSE_WORD_RE = re.compile(r"[a-z]{4,}")       # a 4+ letter lowercase run ~ a real word
 _MOVE_NUM_RE = re.compile(r"\b\d{1,3}\.")        # "12." — a numbered move
+# A sentence opening with one of these reads oddly when quoted out of context
+# (a dangling connector or a pronoun with no antecedent) — reject it as a feature.
+_DANGLING_START_RE = re.compile(
+    r"^(but|then|thus|this|therefore|hence|however|so|it|he|she|they|such|these|"
+    r"those|that|yet|and|or|for|nor)\b",
+    re.IGNORECASE,
+)
 
 
 def _clean_chunk(text: str) -> str:
@@ -589,6 +596,91 @@ def _is_human_authored(p: "Passage") -> bool:
     return True
 
 
+def _best_quotable_sentence(text: str, query_words: Sequence[str]) -> str:
+    """Pick ONE clean, self-contained sentence to feature as a guaranteed verbatim
+    quote: highest query-overlap within an ~8-32 word window, rejecting sentences
+    that open with a dangling connector/pronoun or contain move notation/artifacts.
+    Returns '' when nothing clean qualifies — better no featured quote than an
+    awkward one (the design's "avoid awkward forced quotes" guard)."""
+    raw = re.split(r"(?<=[.!?])\s+", (text or "").strip())
+    query_set = {w.lower() for w in query_words if len(w) > 3}
+    best, best_score = "", -1
+    for sentence in raw:
+        s = sentence.strip().strip('"').strip()
+        wc = len(s.split())
+        if wc < 8 or wc > 32:
+            continue
+        if _DANGLING_START_RE.match(s):
+            continue
+        if _MOVE_NUM_RE.search(s) or "[" in s or "]" in s or '"' in s:
+            continue  # skip notation, artifacts, and interior quotes (malformed when re-quoted)
+        words = re.findall(r"[a-z']+", s.lower())
+        score = sum(1 for w in words if w in query_set)
+        if score > best_score:
+            best, best_score = s, score
+    return best
+
+
+def select_featured_passage(passages: Sequence["Passage"]):
+    """From already-retrieved human-authored passages, choose the single best one
+    whose best sentence passes the cleanliness guard — preferring a specific-theme
+    passage over the generic 'development' backstop, then better retrieval rank
+    (passages already arrive best-first). Returns (Passage, sentence) or None."""
+    specific_themes = (
+        "opening", "sacrifice", "fork", "pin", "doubled_pawns",
+        "open_file", "endgame", "king_safety", "isolated_pawn", "passed_pawn",
+    )
+    candidates = []
+    for p in passages:
+        if not _is_human_authored(p):
+            continue
+        sentence = _best_quotable_sentence(
+            p.text, p.matched_phrases or p.text.split()[:8]
+        )
+        if not sentence:
+            continue
+        # 0 sorts before 1 → specific-theme passages are preferred; retrieval order
+        # (best-first) is preserved within each group by the stable sort.
+        specificity = 0 if p.matched_theme in specific_themes else 1
+        candidates.append((specificity, p, sentence))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda c: c[0])
+    _, passage, sentence = candidates[0]
+    return (passage, sentence)
+
+
+def _format_featured_passage(p: "Passage", sentence: str) -> str:
+    """Build the deterministic, pre-attributed FEATURED PASSAGE block. The quote is
+    assembled in code from the real text, so it is correct-by-construction; the
+    model only chooses where it fits and writes the surrounding analysis."""
+    author = p.author or "a master"
+    if p.title and p.year:
+        attribution = f"As {author} writes in {p.title} ({p.year}):"
+    elif p.title:
+        attribution = f"As {author} writes in {p.title}:"
+    else:
+        attribution = f"As {author} writes:"
+
+    theme = p.matched_theme or "general"
+    placement = {
+        "endgame": "a move in the endgame phase",
+        "opening": "a move in the opening",
+        "sacrifice": "a move where a sacrifice or combination was played",
+    }.get(theme, "the move it best illustrates")
+
+    return (
+        "## FEATURED PASSAGE (include this quotation)\n"
+        "Below is ONE verbatim quotation, already attributed and assembled from the "
+        "source text. Reproduce it word-for-word, in quotation marks, at the single "
+        "move it best illustrates; you choose where it fits and write the surrounding "
+        "analysis. Do NOT paraphrase, trim, or re-attribute it. If — and only if — no "
+        "move in this game genuinely fits the idea, you may omit it.\n\n"
+        f'{attribution} "{sentence}"\n\n'
+        f"(Place this near {placement}.)"
+    )
+
+
 def load_knowledge_for_game(game, opening_name: Optional[str] = None,
                             max_passages: int = 4, max_chars: int = 6000) -> str:
     """
@@ -668,7 +760,7 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
         return ""
 
     joined = "\n\n---\n\n".join(blocks)
-    return (
+    literature = (
         "## Classical chess literature (public-domain passages)\n"
         "Each entry below has three parts:\n"
         "  1. QUOTABLE EXCERPT — 1-2 sentences (≤55 words). "
@@ -681,6 +773,21 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
         "genuinely sharpen a lesson. Silence is correct when no passage fits cleanly.\n\n"
         f"{joined}"
     )
+
+    # Deterministic featured passage: pick the single best chunk and hand the model
+    # ONE finished, attributed, verbatim quotation it is told to include — so a quote
+    # reliably reaches the page instead of being smoothed into paraphrase (the A/B
+    # finding). Fail-safe: no clean sentence → no featured section, behaves as before.
+    featured = ""
+    try:
+        selection = select_featured_passage(passages)
+        if selection:
+            fp, sentence = selection
+            featured = _format_featured_passage(fp, sentence) + "\n\n"
+    except Exception:
+        featured = ""
+
+    return featured + literature
 
 
 # --------------------------------------------------------------------------- #

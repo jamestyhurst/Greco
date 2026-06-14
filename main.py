@@ -270,6 +270,13 @@ def main() -> int:
         f"Generating narrative with {args.model} in '{use_case}' voice... (streaming live)\n",
         file=sys.stderr,
     )
+    # If the source was a local file, pass its path so the narrator can recover
+    # player names from the filename when the PGN headers lack them (feature 5).
+    from pathlib import Path as _Path
+    try:
+        source_path = source_string if _Path(source_string).is_file() else None
+    except OSError:
+        source_path = None
     narrative = generate_narrative(
         game,
         tiers,
@@ -279,6 +286,8 @@ def main() -> int:
         live_stream_to=sys.stderr,
         use_case=use_case,
         user_note=args.user_note,
+        source_path=source_path,
+        boards_at=args.boards_at,
     )
 
     # Text-to-speech (works whether or not a report file is written).

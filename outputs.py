@@ -15,6 +15,7 @@ toggleable.
 from __future__ import annotations
 
 import base64
+import html
 import json
 import os
 import re
@@ -48,11 +49,14 @@ def select_diagram_plies(game, tiers, boards_at: str = "tier3", periodic_every: 
     so the opening and quiet stretches are depicted too, not only Tier-2/3 moments.
 
     Note: callers must use the same `boards_at`/`periodic_every` here as at assemble
-    time (all current callers use the defaults), or the two sets would drift.
+    time, or the two sets would drift; `generate_narrative` now threads both through
+    to its narrator call so the narrator's header set always matches the boards
+    `assemble_report` renders.
     """
     tiers_to_render = BOARD_TIERS.get(boards_at, BOARD_TIERS["tier3"])
     plies = {move.ply for move, tier in zip(game.moves, tiers) if tier in tiers_to_render}
-    if periodic_every and periodic_every > 0:
+    # 'off' means genuinely no diagrams — don't OR in the periodic snapshots then.
+    if boards_at != "off" and periodic_every and periodic_every > 0:
         plies |= {move.ply for move in game.moves if move.ply % periodic_every == 0}
     return plies
 
@@ -89,6 +93,20 @@ def time_control_category(tc: str) -> str:
     if estimate < 3600:
         return "Rapid"
     return "Classical"
+
+
+def is_daily_game(headers: dict) -> bool:
+    """True for daily / correspondence games (a day or more per move).
+
+    Reuses the tested `time_control_category` for the TimeControl tag, with an
+    Event/Site keyword backstop for PGNs whose TimeControl is missing or garbled.
+    This is the single source of truth for "is this daily?", shared by the narrator
+    (which injects the daily voice protocol) and the report filename category.
+    """
+    if time_control_category(headers.get("TimeControl", "")) == "Daily":
+        return True
+    text = f"{headers.get('Event', '')} {headers.get('Site', '')}".lower()
+    return bool(re.search(r"\b(daily|correspondence)\b", text))
 
 
 def _year_from_headers(headers: dict) -> str:
@@ -170,22 +188,29 @@ def format_move_list(game: GameAnalysis) -> str:
 
 def build_header(game: GameAnalysis) -> str:
     h = game.headers
-    title = f"{h.get('White', '?')} vs. {h.get('Black', '?')}"
+    # PGN tag values are untrusted (uploaded / pasted) and flow into Markdown that is
+    # rendered with inline-HTML passthrough, so escape them — a crafted tag like
+    # [White "<img src=x onerror=...>"] must not inject HTML into the report (a
+    # stored-XSS guard that matters for the Phase 3+ multi-user web milestone).
+    def esc(value) -> str:
+        return html.escape(str(value))
+
+    title = f"{esc(h.get('White', '?'))} vs. {esc(h.get('Black', '?'))}"
     if h.get("Event") and h["Event"] != "?":
-        title += f" — {h['Event']}"
+        title += f" — {esc(h['Event'])}"
     if h.get("Date") and h["Date"] not in ("?", ""):
-        title += f" ({h['Date']})"
+        title += f" ({esc(h['Date'])})"
 
     metadata_rows = []
     for key in ("White", "Black", "Result", "ECO", "Opening"):
         if h.get(key) and h[key] != "?":
-            metadata_rows.append(f"- **{key}:** {h[key]}")
+            metadata_rows.append(f"- **{key}:** {esc(h[key])}")
     if h.get("TimeControl") and h["TimeControl"] != "?":
-        metadata_rows.append(f"- **TimeControl:** {_humanize_time_control(h['TimeControl'])}")
+        metadata_rows.append(f"- **TimeControl:** {esc(_humanize_time_control(h['TimeControl']))}")
     if h.get("WhiteElo"):
-        metadata_rows.append(f"- **White ELO:** {h['WhiteElo']}")
+        metadata_rows.append(f"- **White ELO:** {esc(h['WhiteElo'])}")
     if h.get("BlackElo"):
-        metadata_rows.append(f"- **Black ELO:** {h['BlackElo']}")
+        metadata_rows.append(f"- **Black ELO:** {esc(h['BlackElo'])}")
 
     move_list = format_move_list(game)
 
@@ -323,6 +348,56 @@ def _strip_orphan_move_headers(md: str) -> str:
     return "\n".join(l for l, k in zip(lines, keep) if k)
 
 
+# A SAN move token: castles, or an optional piece letter + optional disambiguation
+# + optional capture + destination square + optional promotion, with an optional
+# check/mate suffix. Used to police the data-back boundary on written variations.
+_SAN_TOKEN_RE = re.compile(
+    r"\b(?:O-O-O|O-O|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?)[+#]?"
+)
+
+
+def _san_tokens(text: str) -> set:
+    """Set of normalised SAN move tokens in `text` (trailing +/# stripped)."""
+    return {tok.rstrip("+#") for tok in _SAN_TOKEN_RE.findall(text or "")}
+
+
+def find_unverified_variation_moves(report_md: str, game: GameAnalysis) -> List[str]:
+    """Data-back trust boundary for written variations (the 2A safety net).
+
+    The narrator may write hypothetical lines only by quoting the engine-sourced
+    `variations` data. This scans the finished report for move-bearing parenthetical
+    spans and returns any SAN move in them that does NOT appear in this game's
+    engine lines (best line, refutation line, alternatives) or its actual moves —
+    i.e. a move the model invented rather than quoted. Empty list = clean.
+
+    Used by `assemble_report` to emit a non-fatal warning, and exercised directly in
+    tests. (It detects/flags; it deliberately does not mutate the prose, so a clean
+    report is never mangled — auto-stripping is a possible future hardening.)
+    """
+    allowed: set = set()
+    for m in game.moves:
+        allowed |= _san_tokens(m.san)
+        allowed |= _san_tokens(getattr(m, "best_line_san", "") or "")
+        allowed |= _san_tokens(getattr(m, "refutation_line_san", "") or "")
+        for alt in (m.top_alternatives or []):
+            allowed |= _san_tokens(alt.get("pv_numbered", "") or alt.get("pv_san", ""))
+
+    seen: set = set()
+    unverified: List[str] = []
+    for paren in re.findall(r"\(([^)]*)\)", report_md):
+        # Only inspect genuine variation notation: a move number ('25.' or '24...')
+        # immediately followed by the start of a SAN move. This deliberately ignores
+        # decimal evals ('1.5 better') and prose like 'by move 24, the d5 break', so
+        # the warning doesn't cry wolf on ordinary parenthetical asides.
+        if not re.search(r"\d+\.(?:\.\.)?\s*[OKQRBNa-h]", paren):
+            continue
+        for tok in _san_tokens(paren):
+            if tok not in allowed and tok not in seen:
+                seen.add(tok)
+                unverified.append(tok)
+    return unverified
+
+
 def assemble_report(
     game: GameAnalysis,
     tiers: List[int],
@@ -391,6 +466,23 @@ def assemble_report(
     # Headers anchor diagrams only: drop any the narrator put on a non-diagrammed
     # move so there's no header/bold duplication for dramatic-but-undiagrammed moves.
     body = _strip_orphan_move_headers(body)
+
+    # Data-back trust boundary: warn (non-fatally) if any move written inside a
+    # parenthetical variation was not in the engine-sourced lines — i.e. the model
+    # invented it rather than quoting. Surfaces confabulation in the CLI console.
+    try:
+        unverified = find_unverified_variation_moves(body, game)
+        if unverified:
+            import sys
+
+            print(
+                f"  [variation check] {len(unverified)} move(s) in parenthetical "
+                f"variations not found in the engine lines: "
+                f"{', '.join(unverified[:12])}",
+                file=sys.stderr,
+            )
+    except Exception:
+        pass
 
     assembled = f"{header}\n{eval_section}\n---\n\n{body}\n"
     output_md.write_text(assembled, encoding="utf-8")
@@ -777,7 +869,7 @@ def markdown_to_html(
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>{md_path.stem}</title>
+<title>{html.escape(md_path.stem)}</title>
 <style>{css}</style>
 </head>
 <body>
