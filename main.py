@@ -256,6 +256,7 @@ def main() -> int:
         import dataclasses
         import json
         payload = {
+            "schema": 1,  # consumed by tools/verify_report.py; bump if MoveAnalysis changes shape
             "headers": game.headers,
             "result": game.result,
             "final_eval_cp": game.final_eval_cp,
