@@ -7,6 +7,16 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-06-13
+
+### Added
+- **Settable default PGN folder.** A new "Pick PGNs from:" field in the desktop Setup panel
+  controls which folder the PGN file picker opens to, persisted in `config.json` (`pgn_dir`).
+  It defaults to `Documents\Chess Game Files` (the C: source) instead of the E: library —
+  resolved by `default_pgn_dir()` (Chess Game Files → `E:\Chess\PGNs` → home), so the picker
+  lands somewhere sensible even before anything is configured. Browse to change it; it saves
+  with your other settings on Analyze.
+
 ## [0.6.1] — 2026-06-13
 
 ### Fixed

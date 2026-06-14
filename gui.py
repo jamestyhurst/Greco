@@ -51,6 +51,19 @@ ICON_PATH = Path(__file__).resolve().parent / "assets" / "greco.ico"
 CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
 
 
+def default_pgn_dir() -> str:
+    """Best default folder to pick PGNs from: the user's 'Chess Game Files' under
+    Documents (the C: source that sync_pgns.bat copies to E:), then the E: library,
+    then the home folder. Used only when no folder is configured in settings."""
+    for cand in (Path.home() / "Documents" / "Chess Game Files", Path(PGN_LIBRARY)):
+        try:
+            if cand.is_dir():
+                return str(cand)
+        except OSError:
+            pass
+    return str(Path.home())
+
+
 def load_config() -> dict:
     try:
         return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
@@ -293,6 +306,13 @@ class GrecoGUI:
         ttk.Entry(rrow, textvariable=self.reports_var).pack(side="left", fill="x", expand=True, padx=6)
         ttk.Button(rrow, text="Browse…", command=self._browse_reports).pack(side="left")
 
+        prow = ttk.Frame(adv)
+        prow.pack(fill="x", pady=2)
+        ttk.Label(prow, text="Pick PGNs from:", width=LW, anchor="w").pack(side="left")
+        self.pgn_dir_var = tk.StringVar(value=cfg.get("pgn_dir") or default_pgn_dir())
+        ttk.Entry(prow, textvariable=self.pgn_dir_var).pack(side="left", fill="x", expand=True, padx=6)
+        ttk.Button(prow, text="Browse…", command=self._browse_pgn_dir).pack(side="left")
+
         # --- Run ---
         runrow = ttk.Frame(main)
         runrow.pack(fill="x", **pad)
@@ -333,7 +353,8 @@ class GrecoGUI:
 
     # ---------- input helpers ----------
     def _browse_pgn(self):
-        initial = PGN_LIBRARY if os.path.isdir(PGN_LIBRARY) else str(Path.home())
+        chosen = self.pgn_dir_var.get().strip()
+        initial = chosen if os.path.isdir(chosen) else default_pgn_dir()
         path = filedialog.askopenfilename(
             title="Choose a PGN file",
             initialdir=initial,
@@ -341,6 +362,14 @@ class GrecoGUI:
         )
         if path:
             self.pgn_var.set(path)
+
+    def _browse_pgn_dir(self):
+        path = filedialog.askdirectory(
+            title="Choose the default folder to pick PGNs from",
+            initialdir=self.pgn_dir_var.get().strip() or default_pgn_dir(),
+        )
+        if path:
+            self.pgn_dir_var.set(path)
 
     def _browse_engine(self):
         path = filedialog.askopenfilename(
@@ -428,6 +457,7 @@ class GrecoGUI:
             "api_key": key,
             "model": model,
             "reports_dir": reports_dir,
+            "pgn_dir": self.pgn_dir_var.get().strip(),
         })
 
         os.environ["ANTHROPIC_API_KEY"] = key
