@@ -36,6 +36,27 @@ BOARD_TIERS = {
 }
 
 
+def select_diagram_plies(game, tiers, boards_at: str = "tier3", periodic_every: int = 6) -> set:
+    """Decide which plies get a board diagram — and therefore a `### N. SAN` header.
+
+    This is the SINGLE source of truth shared by the narrator (which is told these
+    moves, via `_move_to_dict`'s `diagram` flag, so it writes one header section per
+    diagrammed move) and by `assemble_report` (which renders the boards and anchors
+    them to those headers). Tying headers to this set is what stops both the
+    header/bold duplication and the out-of-order board clumping: a header exists iff
+    a board does. Diagrammed plies = the tier-selected moves PLUS periodic snapshots,
+    so the opening and quiet stretches are depicted too, not only Tier-2/3 moments.
+
+    Note: callers must use the same `boards_at`/`periodic_every` here as at assemble
+    time (all current callers use the defaults), or the two sets would drift.
+    """
+    tiers_to_render = BOARD_TIERS.get(boards_at, BOARD_TIERS["tier3"])
+    plies = {move.ply for move, tier in zip(game.moves, tiers) if tier in tiers_to_render}
+    if periodic_every and periodic_every > 0:
+        plies |= {move.ply for move in game.moves if move.ply % periodic_every == 0}
+    return plies
+
+
 # --------------------------------------------------------------------------
 # Report naming + output location
 # --------------------------------------------------------------------------
@@ -222,50 +243,40 @@ def _insert_image_after_move_header(
         if n:
             return new_md, True
 
-    # Fallback (for opening/prose moves with no dedicated header): anchor to a
-    # BOLDED inline reference of the move, e.g. `**5. d4**` or `**6. g3 6...Qd8**`.
-    # Insert the image after the whole line that contains that bold run.
-    bold_move = rf"\*\*[^*\n]*\b{move_number}\b[^*\n]*{san_escaped}[^*\n]*\*\*"
-    line_pattern = rf"^(.*{bold_move}.*)$"
-    new_md, n = re.subn(
-        line_pattern,
-        rf"\1\n\n![{alt_text}]({image_rel_path})\n",
-        markdown,
-        count=1,
-        flags=re.MULTILINE,
-    )
-    if n:
-        return new_md, True
+    # No `### N. SAN` header exists for this move. The caller (_place_board) handles
+    # that by creating a header at the move's bold mention, so a diagrammed move
+    # always gets a proper section — boards are never left dangling in prose.
     return markdown, False
 
 
-def _insert_unanchored_boards(body: str, items: "List[tuple]") -> str:
-    """Weave boards that had no narrative anchor into the body in ply (game) order.
+def _place_board(body: str, move: MoveAnalysis, image_rel_path: str) -> str:
+    """Put `move`'s board diagram into the report, keeping diagrams in ply order.
 
-    Each item is ``(ply, label, classification, image_rel_path)``. A board is
-    placed just before the first board already in the body whose ply is greater,
-    so the whole run of board figures reads in chronological order; a board later
-    than every inline board is appended at the end. This replaces the older
-    behaviour of collecting unanchored boards in an "Additional positions" block
-    above the narrative, which pushed late-game positions to the top of the report.
+    1. If the narrator gave the move its own `### N. SAN` header, insert the image
+       right after it.
+    2. Otherwise CREATE the header ourselves, just before the move's first bold
+       mention in the prose, so the diagrammed move still gets a clean section.
+    3. As a last resort, append it at the end.
+
+    The caller iterates moves in game order, so diagrams land chronologically and
+    can never clump out of order the way the old unanchored-pile approach did.
     """
-    if not items:
+    body, anchored = _insert_image_after_move_header(body, move, image_rel_path)
+    if anchored:
         return body
-    img_re = re.compile(r"!\[[^\]]*\]\([^)]*ply(\d+)[^)]*\)")
-    for ply, label, classification, rel in sorted(items, key=lambda it: it[0]):
-        snippet = f"**{label}** ({classification})\n\n![Position after {label}]({rel})\n"
-        insert_at = None
-        for m in img_re.finditer(body):
-            if int(m.group(1)) > ply:
-                insert_at = m.start()
-                break
-        if insert_at is None:
-            body = body.rstrip("\n") + "\n\n" + snippet
-        else:
-            line_start = body.rfind("\n", 0, insert_at)
-            pos = line_start + 1 if line_start != -1 else 0
-            body = body[:pos] + snippet + "\n" + body[pos:]
-    return body
+    num = move.move_number
+    dots = ". " if move.side == "White" else "..."
+    header = f"### {num}{dots}{move.san}"
+    alt = f"Position after {num}{'.' if move.side == 'White' else '...'} {move.san}"
+    block = f"{header}\n\n![{alt}]({image_rel_path})\n\n"
+    san_escaped = re.escape(move.san)
+    # First bold mention of this move in the prose, e.g. **24...Kg7** or **24. e3?!**.
+    bold_line = re.compile(rf"(?m)^.*\*\*[^*\n]*\b{num}\b[^*\n]*{san_escaped}[^*\n]*\*\*.*$")
+    m = bold_line.search(body)
+    if m:
+        line_start = body.rfind("\n", 0, m.start()) + 1
+        return body[:line_start] + block + body[line_start:]
+    return body.rstrip("\n") + "\n\n" + block
 
 
 def _collapse_duplicate_headers(md: str) -> str:
@@ -290,6 +301,26 @@ def _collapse_duplicate_headers(md: str) -> str:
             last_header = None  # real content ends the run; blank lines keep it open
         out.append(line)
     return "\n".join(out)
+
+
+def _strip_orphan_move_headers(md: str) -> str:
+    """Drop any `### N. SAN` move header that has no board diagram right after it.
+
+    A `### ` header is purely a diagram anchor. The narrator still occasionally
+    headlines a dramatic *non*-diagrammed move with its own header anyway; this
+    removes those, so the move just reads as bolded prose (with its chess symbol)
+    and there is no header/bold duplication. Section headers (`#`, `##`) and headers
+    that DO anchor a board are kept. Run after boards are placed.
+    """
+    lines = md.split("\n")
+    keep = [True] * len(lines)
+    for i, line in enumerate(lines):
+        if re.match(r"^###\s+\S", line.strip()):
+            if not any("![" in w for w in lines[i + 1 : i + 5]):
+                keep[i] = False
+                if i + 1 < len(lines) and not lines[i + 1].strip():
+                    keep[i + 1] = False  # swallow one trailing blank, avoid a double gap
+    return "\n".join(l for l, k in zip(lines, keep) if k)
 
 
 def assemble_report(
@@ -335,51 +366,31 @@ def assemble_report(
         except Exception as exc:
             eval_section = f"\n> (Eval graph could not be rendered: {exc})\n"
 
-    # Decide which moves get a board: tier-selected moves PLUS periodic snapshots
-    # (every `periodic_every` plies) so the opening and quiet stretches are also
-    # depicted, not just the tactical Tier-2/3 moments.
-    tiers_to_render = BOARD_TIERS.get(boards_at, BOARD_TIERS["tier3"])
-    render_plies = set()
-    for move, tier in zip(game.moves, tiers):
-        if tier in tiers_to_render:
-            render_plies.add(move.ply)
-    if periodic_every and periodic_every > 0:
-        for move in game.moves:
-            if move.ply % periodic_every == 0:
-                render_plies.add(move.ply)
+    # Which moves get a board (= which get a `### N. SAN` header). The narrator was
+    # told this exact set via select_diagram_plies, so each board anchors to its own
+    # header. We iterate in GAME ORDER and _place_board inserts each diagram at its
+    # move's spot (creating the header if the narrator didn't) — so diagrams stay in
+    # chronological order and never clump.
+    render_plies = select_diagram_plies(game, tiers, boards_at, periodic_every)
+    for move in game.moves:
+        if move.ply not in render_plies:
+            continue
+        board_path = boards_dir / _board_filename(move)
+        try:
+            save_board_svg(
+                move.fen_after,
+                board_path,
+                last_move_uci=move.uci,
+                flipped=flipped_for_black,
+            )
+        except Exception:
+            continue
+        rel = board_path.relative_to(output_md.parent).as_posix()
+        body = _place_board(body, move, rel)
 
-    unanchored: List[tuple] = []  # (move, rel_path) for boards with no matching anchor
-    if render_plies:
-        for move in game.moves:
-            if move.ply not in render_plies:
-                continue
-            board_path = boards_dir / _board_filename(move)
-            try:
-                save_board_svg(
-                    move.fen_after,
-                    board_path,
-                    last_move_uci=move.uci,
-                    flipped=flipped_for_black,
-                )
-            except Exception:
-                continue
-            rel = board_path.relative_to(output_md.parent).as_posix()
-            body, inserted = _insert_image_after_move_header(body, move, rel)
-            if not inserted:
-                unanchored.append((move, rel))
-
-    # Boards the narrator gave no anchorable header to (periodic snapshots, or
-    # notable moves discussed only in prose) are woven INTO the narrative at their
-    # chronological position -- so every board figure reads in ply order -- instead
-    # of being dumped in a block above the narrative, where late-game positions
-    # used to surface before the game had even begun.
-    if unanchored:
-        items = []
-        for move, rel in unanchored:
-            dots = "." if move.side == "White" else "..."
-            label = f"{move.move_number}{dots} {move.san}"
-            items.append((move.ply, label, move.classification, rel))
-        body = _insert_unanchored_boards(body, items)
+    # Headers anchor diagrams only: drop any the narrator put on a non-diagrammed
+    # move so there's no header/bold duplication for dramatic-but-undiagrammed moves.
+    body = _strip_orphan_move_headers(body)
 
     assembled = f"{header}\n{eval_section}\n---\n\n{body}\n"
     output_md.write_text(assembled, encoding="utf-8")

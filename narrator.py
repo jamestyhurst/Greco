@@ -105,11 +105,9 @@ Every move in the game must be acknowledged. Each move carries a `commentary_tie
 - **Tier 2** — A short paragraph of strategic analysis with light psychological context.
 - **Tier 3** — Deep dive: the engine's preferred move, why the player might have chosen otherwise, what psychological pressure or pattern may explain the choice.
 
-Use standard headers like `### 14. Qe6` for moves that get Tier ≥ 2 commentary — write each move's header **at most once** (never repeat the same `### N. SAN` line). Tier 0/1 moves can flow as running prose. Every move number from the game must appear.
+**Headers are diagram anchors — use them ONLY for diagrammed moves.** A move gets a `### N. SAN` header **if and only if** its data has `"diagram": true` (those are the moves shown with a board image). Give each diagrammed move its OWN header on its own line — `### N. SAN` for White, `### N...SAN` for Black (e.g. `### 21...Ne5`), including your opponent's moves — appearing **exactly once**, with that move's commentary beneath it. NEVER put a `### ` header on a move whose data does not have `"diagram": true`; those flow as running prose. Every move number from the game must still appear somewhere in the report.
 
-**Bold every move reference in the prose** — e.g. **12. Nxd4**, **22...Nxd2** — so moves always stand out from the surrounding commentary, whether in a header or in running text.
-
-**IMPORTANT — dedicated headers for board diagrams.** Every Tier 2 and Tier 3 move must get its OWN header on its own line, regardless of which side played it — **including your opponent's moves**. Use `### N. SAN` for White and `### N...SAN` for Black (e.g. `### 21...Ne5`). Do NOT fold a Tier 2/3 move into a multi-move grouped header or bury it inside prose, because board diagrams are anchored to these dedicated headers. A blunder by either player is exactly the kind of moment that needs its own header and its own board. Tier 0/1 moves may still be grouped or written as prose.
+**Bold every move reference in the prose** — e.g. **12. Nxd4**, **22...Nxd2**. **Show a move's quality with a standard chess annotation symbol** appended to the move, chosen from its `class`/`flags`: `??` blunder, `?` mistake, `?!` inaccuracy/dubious, `!` a strong or only-good move, `!!` brilliant, `!?` interesting/double-edged — e.g. **24...Kg7?!**, **19. Qxg7+!!**. The symbol — not a header — is how you mark a move as significant; never add a header just to emphasise a non-diagrammed move.
 
 ## Closing reflection
 One or two paragraphs on the game as a whole: decisive moments, what each player seemed to be trying to do, and what the engine's verdict suggests about their psychology or style.
@@ -195,6 +193,7 @@ You are given engine ground truth precisely so you never have to guess at the bo
 - **When a move is hard to explain, go VAGUE-BUT-TRUE, never PRECISE-BUT-FALSE.** Some moves are just weak or aimless, and not every move has a crisp purpose. If you can't identify a concrete, board-supported point, fall back to a safe general description — "a space-gaining push," "queenside expansion," "a slow repositioning" — or simply call it a bad/aimless move and let the eval and what it weakens carry the criticism. A correct vague description always beats an invented specific one (this is how the "b4 kicks the knight" error happens — reaching for a concrete target that isn't there).
 - **Use `doubles_pawns` and `overloaded_defender` when present.** `doubles_pawns` means the move created doubled pawns (often the very reason a recapture was chosen — e.g. allowing hxg5 to saddle White with doubled g-pawns); mention it. `overloaded_defender` names a piece/pawn that is the sole defender of two attacked pieces and can't save both — flag it as the weakness it is, and note when a move exploits or relieves it (e.g. trading off one of the pieces an overworked pawn was holding).
 - **Know where the pieces ARE — use the `pieces` field, never your memory of an earlier square.** Tier 2/3 moves include a `pieces` field listing exactly where every piece sits after the move. NEVER refer to a piece being on a square unless `pieces` confirms it. A piece you saw on c5 ten moves ago may have moved (e.g. a knight that went c5→e4) — do not call it "the c5-knight" if `pieces` shows the knight on e4. When in doubt about any square, consult `pieces`; do not guess from the move's name or an earlier position.
+- **Movement geometry — use the `from` and `to` squares, never guess a piece's path.** Each move's data gives the moving piece's `from` and `to` squares. State movement only from those: never say a piece came from, or went to, a square other than its `from`/`to`. A piece sits on the file and rank of its `to` square — do NOT say it "stepped onto" a file or rank it was already on (compare `from`): a king that plays `Kg7` from g8 was already on the g-file, it did not step onto it. **Pawns attack only the two squares diagonally in front of them — never their own file, never straight ahead.** Never say a pawn attacks, threatens, or pressures a piece standing on the pawn's own file (a g-pawn pushing does not attack a king on g7); a pawn advance creates threats on the two diagonal squares it will control, or by opening lines — describe it that way, not as a head-on threat.
 - **Cite move numbers EXACTLY — read `move_no`, never approximate.** Every move's entry has `move_no` and you write it with the move (e.g. **15. e5**). When you reference a move anywhere — especially in the closing reflection or when pointing back to an earlier moment — use its real number from the data. Do NOT say "around move 13" or attribute an event to the wrong move (e.g. don't say the e5 fork "lands at move 13" when e5 is move 15; move 13 may have been the *enabling* move). If you mean "the blunder on move 13 set up the fork on move 15," say both numbers exactly. Never round, guess, or blur move numbers. Before writing that a move "connects the rooks," "centralises," or accomplishes a goal, confirm it truly does. Do not assign a spatial claim just because it suits the sentence — e.g. Kc3 is MORE central than Kc1, not less. If you cannot find a concrete, board-supported purpose for a move, describe what it does factually and stop — an honest "this just repositions the king" beats an invented rationale.
 - **Never invent a pin or skewer.** Only call something a pin or skewer when it genuinely is one — and prefer to rely on the `tactic_setup` field, which is computed ground truth. Pieces merely sharing a rank/file/diagonal are NOT automatically pinned. A pin or skewer wins material only if the front piece cannot move without exposing a MORE VALUABLE piece behind it to capture. A queen facing an enemy queen that is defended (e.g. by its own king) is just an available queen TRADE, not a winning pin — and watch the direction: it may be the side-to-move's OWN piece that is restricted, not the opponent's. Verify whose piece is actually pinned and whether capturing truly wins material before using the word "pin."
 - **Never invent positional features.** Only call a file open or half-open if it is listed in that move's `open_files` / `half_open_for_white` / `half_open_for_black`. If a file is not listed, it is NOT open — do not say it is. The same applies to any structural claim: if you can't ground it in the data provided, don't assert it. Do not attribute a king's exposure to a file unless that file is actually open/half-open per the data — if a king is loose for other reasons (missing fianchetto bishop, open diagonals, lack of defenders), say *that* concretely instead.
@@ -232,6 +231,7 @@ VOICE_COACHING = """## Voice for this report: COACHING
 Your focus is the player's decision-making and board vision, not narrative beauty. You are diagnostic and constructive.
 
 - For each Tier 2/3 move, ask: what was the player likely seeing or thinking? What was on their mental radar — and what wasn't? Common cognitive patterns to invoke when relevant: tunnel vision on an attack, time pressure, missing prophylaxis, anchoring on a plan, pattern recognition gaps, fatigue, overconfidence after a good move, panic after a bad one.
+- **Bridge the human–engine gap — this is the core of coaching.** On every Tier 2/3 move where the engine preferred a different move, do BOTH explicitly: (1) name the *sound human idea* behind the move actually played — the principle or pattern that makes it natural and tempting (e.g. "…Kg7 centralises the king, exactly what endgame principle preaches"); and (2) explain the engine's preferred move in terms a human could have *reached*, not just an eval number — the concrete reason (a specific tactic, a defender freed or tied down, a key square contested, a pawn chain kept intact) and why a strong player would weigh it over the natural move. Show the *path of reasoning* to the better move so the reader could find it themselves next time. "The engine prefers X (+1.3)" with no human bridge is a coaching failure.
 - For each Tier 3 mistake, end with one concrete "what to look for next time" line. Examples: "Next time a knight reaches a hole near your king, ask 'who is defending the square it's eyeing?' first." or "Before recapturing automatically, count attackers and defenders one more time."
 - Clinical but not shaming — the goal is improvement, not blame.
 - Replace the standard **Closing reflection** with **## Patterns to work on**, a bulleted list of 3–5 recurring themes from this game that the player should improve, each with one suggested thought-cue or practice exercise.
@@ -342,19 +342,23 @@ def _format_eval(cp: Optional[int], mate: Optional[int]) -> str:
     return f"{sign}{pawns:.2f}"
 
 
-def _move_to_dict(move: MoveAnalysis, tier: int) -> Dict[str, object]:
+def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Dict[str, object]:
     """Build a compact dict for the JSON payload to Claude."""
     d: Dict[str, object] = {
         "ply": move.ply,
         "move_no": move.move_number,
         "side": move.side,
         "played": move.san,
+        "from": move.uci[:2] if move.uci else "",
+        "to": move.uci[2:4] if move.uci else "",
         "best": move.best_move_san,
         "cp_loss": move.cp_loss,
         "class": move.classification,
         "phase": move.phase,
         "tier": tier,
     }
+    if diagrammed:
+        d["diagram"] = True  # this move is shown with a board -> it gets a ### header
     flags = []
     if move.is_forced:
         flags.append("forced")
@@ -549,7 +553,15 @@ def build_user_prompt(
         else ""
     )
 
-    moves_data = [_move_to_dict(m, t) for m, t in zip(game.moves, tiers)]
+    # The diagram set is decided in code (single source of truth) and handed to the
+    # narrator as each move's `diagram` flag, so the headers it writes match exactly
+    # the moves that get a board — no header/bold duplication, no unanchored boards.
+    from outputs import select_diagram_plies  # lazy import: avoids an import cycle
+
+    diagram_plies = select_diagram_plies(game, tiers)
+    moves_data = [
+        _move_to_dict(m, t, m.ply in diagram_plies) for m, t in zip(game.moves, tiers)
+    ]
 
     # Retrieve verbatim passages from the public-domain knowledge corpus that
     # speak to THIS game's themes (its opening, plus the tactics/structures the

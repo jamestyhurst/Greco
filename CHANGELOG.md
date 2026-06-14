@@ -7,6 +7,29 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.8.1] — 2026-06-14
+
+### Fixed
+- **Reworked how reports choose headers and board diagrams — fixes the recurring
+  out-of-order / clumped diagrams *and* the header-vs-bold duplication.** A `### N. SAN`
+  header is now strictly a board-diagram anchor. The diagram set is decided in code
+  (`select_diagram_plies`) and handed to the narrator (each move's `diagram` flag), so it
+  writes exactly one header section per diagrammed move and marks every *other* move with a
+  standard chess symbol (`!`, `?`, `?!`, `!!`, …) in bolded prose — never a header. Boards are
+  placed at each move in game order (`_place_board`, which creates the header if the narrator
+  didn't), and a final pass strips any stray header the model put on a non-diagrammed move.
+  Validated on a fresh coaching analysis: 13 diagrams in strict ply order, every header anchors
+  a board, no duplicates.
+- **Geometry hallucinations.** Each move now carries its `from`/`to` squares and the prompt
+  forbids inventing movement or pawn-attack geometry (a pawn attacks only the two diagonal
+  squares — never along its own file). The earlier "king stepped onto the g-file" /
+  "g-pawn threatens the g-file king" errors are gone.
+
+### Changed
+- **Coaching mode now bridges the human–engine gap explicitly.** On a move the engine
+  disagreed with, it names the sound human idea behind the move actually played and explains
+  the engine's choice in human-reachable terms, not just an evaluation delta.
+
 ## [0.8.0] — 2026-06-13
 
 ### Changed

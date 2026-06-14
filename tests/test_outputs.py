@@ -101,3 +101,42 @@ def test_board_anchor_matches_a_quiet_move(make_move):
     )
     assert inserted is True
     assert "![Position after 24. e3](b.svg)" in out
+
+
+def test_select_diagram_plies_tier3_plus_periodic(make_move, make_game):
+    moves = [make_move(ply=i + 1, move_number=i // 2 + 1) for i in range(12)]
+    tiers = [0] * 12
+    tiers[4] = 3  # the move at ply 5 is Tier 3
+    plies = outputs.select_diagram_plies(make_game(moves), tiers)
+    assert 5 in plies                   # the Tier-3 move gets a diagram
+    assert 6 in plies and 12 in plies   # periodic snapshots, every 6 plies
+    assert 1 not in plies               # a quiet, non-periodic move does not
+
+
+def test_place_board_anchors_to_existing_header(make_move):
+    move = make_move(move_number=19, side="White", san="Qxg7+")
+    out = outputs._place_board("### 19. Qxg7+\n\nQueen takes, check.\n", move, "b.svg")
+    assert out.count("### 19. Qxg7+") == 1
+    assert "![Position after 19. Qxg7+](b.svg)" in out
+
+
+def test_place_board_creates_header_for_a_prose_move(make_move):
+    # No header in the prose -> _place_board must create one at the bold mention.
+    move = make_move(move_number=27, side="Black", san="Be6")
+    out = outputs._place_board("…and **27...Be6** improves the bishop.\n", move, "b.svg")
+    assert "### 27...Be6" in out
+    assert "![Position after 27... Be6](b.svg)" in out
+    assert out.index("### 27...Be6") < out.index("**27...Be6**")
+
+
+def test_strip_orphan_move_headers_drops_headerless_diagrams():
+    md = (
+        "### 19. Qxg7+!!\n\n**19. Qxg7+!!** the queen sac.\n\n"           # orphan: no board
+        "### 24...Kg7?\n\n![Position after 24... Kg7](b.svg)\n\n"          # diagrammed: has a board
+        "**24...Kg7?** the mistake.\n"
+    )
+    out = outputs._strip_orphan_move_headers(md)
+    assert "### 19. Qxg7+!!" not in out                    # orphan header removed
+    assert "**19. Qxg7+!!** the queen sac." in out         # ...but its commentary stays
+    assert "### 24...Kg7?" in out                          # diagrammed header kept
+    assert "![Position after 24... Kg7](b.svg)" in out
