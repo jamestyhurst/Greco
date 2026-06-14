@@ -9,9 +9,9 @@ the whole safe release in order and stops at the first problem:
   1. Clean tree    — your tested changes must already be committed (Conventional
                      Commits). ship.py never commits your edits for you; it only
                      releases what is already committed.
-  2. Smoke test    — imports Greco's core modules with the venv interpreter to
-                     catch a broken import before it reaches GitHub (--skip-tests
-                     to bypass).
+  2. Tests         — runs the pytest suite (or, if pytest/tests are absent, an
+                     import smoke test of the core modules) so broken code never
+                     reaches GitHub (--skip-tests to bypass).
   3. Secret scan   — refuses to push if config.json is tracked or a real API-key
                      pattern appears in the commits about to be pushed.
   4. Version bump  — runs scripts/bump_version.py --apply (computes the next
@@ -55,6 +55,10 @@ def py() -> str:
     return str(VENV_PY) if VENV_PY.exists() else sys.executable
 
 
+def _has_module(mod: str) -> bool:
+    return subprocess.run([py(), "-c", f"import {mod}"], cwd=REPO, capture_output=True).returncode == 0
+
+
 def git(*args: str, check: bool = True, capture: bool = True) -> str:
     r = subprocess.run(["git", *args], cwd=REPO, text=True, encoding="utf-8", capture_output=capture)
     if check and r.returncode != 0:
@@ -89,9 +93,15 @@ def main() -> None:
         fail("uncommitted changes. Commit your tested work (Conventional Commits) first, then ship.")
     print("      clean.")
 
-    # 2) Smoke test — import the core modules with the venv interpreter.
+    # 2) Prove it works: run the pytest suite if present, else fall back to an
+    #    import smoke test (catches a broken import at minimum).
     if args.skip_tests:
-        step(2, "Smoke test SKIPPED (--skip-tests).")
+        step(2, "Tests SKIPPED (--skip-tests).")
+    elif (REPO / "tests").is_dir() and _has_module("pytest"):
+        step(2, "Running the test suite (pytest)...")
+        if subprocess.run([py(), "-m", "pytest", "-q"], cwd=REPO,
+                          env={**os.environ, "PYTHONUTF8": "1"}).returncode != 0:
+            fail("tests failed — fix before shipping.")
     else:
         step(2, "Smoke-importing core modules...")
         code = "import importlib,sys;[importlib.import_module(m) for m in sys.argv[1:]];print('imports OK')"
