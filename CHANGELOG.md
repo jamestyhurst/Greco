@@ -7,6 +7,74 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-06-14
+
+This release makes Greco able to *show* why a move is bad with real engine lines,
+adds a tempo-coaching concept, gives every voice the players' real names and a
+proper daily-game register, guarantees one verbatim master quote per report, adds
+CI, and clears a batch of correctness bugs found in a deep multi-agent code sweep.
+
+### Added
+- **Engine-sourced variation lines (the ...Kg7 fix).** The analyzer now keeps the
+  engine's principal variation *from the position after the move actually played*
+  (`MoveAnalysis.refutation_line_san` — "what your move runs into") alongside a
+  deepened best line (`best_line_san`, "what to play instead"), both rendered as
+  move-numbered SAN on the real board (`pv_to_numbered_san`, with a hard legality
+  guard). The narrator serialises these as a `variations` array (Tier 2/3) and a new
+  system-prompt section forbids writing any move not present in that data — so Greco
+  can finally write "*(if 25. g5 then …exg5 26. fxg5)*" with every move guaranteed to
+  come from Stockfish, not the model. `outputs.find_unverified_variation_moves` is a
+  code-level trust boundary that flags any confabulated move in a written line
+  (verified end-to-end: a real coaching run produced zero unverified moves).
+- **Coaching concept: the wasted / self-defeating tempo.** A threat that only induces
+  a move the opponent already wanted (the ...Kg7 → ...Kxf6, then g5-anyway shape) — and
+  the "helping your opponent develop" family — now have explicit prompt treatment,
+  proven from the real engine lines rather than asserted.
+- **Player names across every mode.** Names resolve from the PGN headers, then the
+  filename (`importers.parse_players_from_filename` → `narrator.resolve_player_names`),
+  and the prompt now prefers a real name over "White"/"Black" in all three voices. The
+  psychology tier-boost for a named player's errors now fires from the headers, so GUI
+  and web reports get it too (previously CLI-only).
+- **Deterministic featured passage.** One best-matching public-domain passage is
+  selected and formatted into a finished, attributed, verbatim quotation the narrator
+  is told to include — so a master's words reliably reach the page instead of being
+  smoothed into paraphrase.
+- **GitHub Actions CI** (`.github/workflows/ci.yml`): runs the (engine/key-free)
+  pytest suite on every push and pull request.
+- **Test suite roughly doubled** (now ~86): analyzer geometry + numbered SAN, narrator
+  serialization + prompt rules, importers, the outputs validator + HTML escaping +
+  daily detection, the knowledge featured passage, and triage name-boost + turning
+  points.
+
+### Changed
+- **Daily / correspondence games are now identified to the narrator.** `is_daily_game`
+  (TimeControl `1/259200` or ≥86400s, with an Event/Site backstop) drives an explicit
+  per-game "daily protocol" block, and `_humanize_time_control` finally renders the
+  correspondence format instead of mislabeling it "classical" — so the existing daily
+  voice (no time-pressure excuses) actually activates.
+- Tier 1 moves now receive the `pieces` and `eval_before` ground-truth anchors
+  (previously Tier 2+), removing a hallucination surface on short comments.
+- `best_pv` deepened to 10 plies for multi-move tactics; the prompt forbids continuing
+  a line past where the engine data stops.
+
+### Fixed
+- **Terminal-checkmate evaluation sign**: a game won by checkmate no longer reads as a
+  loss for the winner; the engine is never queried on a game-over board.
+- **`still_winning` clamp** no longer silently downgrades a genuine throw-away to a
+  plain "good" move (it demotes by one severity step and only fully forgives small slips).
+- **`detect_allowed_pawn_fork`** filters to legal pushes (no more "allows a fork" for a
+  pinned pawn), a pinned piece no longer reports an undeliverable fork, and a
+  royal-alignment pin is only claimed when the line is genuinely clear.
+- **Diagram-set drift**: the narrator now computes diagram plies with the same
+  `boards_at`/`periodic_every` as assembly, and `--boards-at off` truly renders none.
+- **HTML safety**: untrusted PGN header values and the report `<title>` are escaped (a
+  stored-XSS guard for the coming multi-user web).
+- **Web** no longer returns a server traceback to the browser (logged server-side under
+  an error id; full detail only when `GRECO_DEBUG` is set).
+- A pasted PGN whose `[Site]` mentions chess.com loads as raw PGN instead of erroring.
+- Game phase is computed on the resulting position; turning-point detection is seeded
+  from the real starting evaluation.
+
 ## [0.8.1] — 2026-06-14
 
 ### Fixed

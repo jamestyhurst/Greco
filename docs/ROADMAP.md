@@ -6,7 +6,16 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.3.0
+## Where we are — v0.9.0
+
+> See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. Highlights since
+> v0.3.0: engine-sourced variation lines the narrator may only quote (never invent),
+> a wasted-tempo coaching concept, player names usable in every voice, a real
+> daily/correspondence register, a guaranteed verbatim "featured passage", GitHub
+> Actions CI, and a large correctness sweep. The bullets below describe the original
+> v0.3.0 baseline they build on.
+
+### Baseline (v0.3.0)
 - Working Tkinter GUI over the full pipeline (importers → analyzer → triage → narrator
   → outputs).
 - Branded icon (title bar + taskbar), informative report names, E:-drive output and
@@ -81,6 +90,12 @@ Ordered by priority. Sizes are rough: **S** = a prompt tweak / small edit;
 **M** = a feature + a rebuild; **L** = a big feature or refactor. Work top-down;
 each item is committed when done, so a partial batch is still saved progress.
 
+**Idea-tracking convention.** Every product idea gets a numbered row here the moment
+it is raised. When it ships **and** is verified (tested), mark it **done** (with the
+version) and move it down to *Recently shipped* — the secondary list — so this queue
+shows only live work. Don't delete a shipped idea; downshift it, so the record of what
+was built stays visible.
+
 | # | Task | Size | Status |
 |---|------|------|--------|
 | 1 | **Greco Online · Phase 1** — web server over the pipeline: browser upload → report (localhost) — `web/main.py` + `run_greco_web.bat` (FastAPI; additive, desktop app untouched) | L | **done** |
@@ -96,9 +111,20 @@ each item is committed when done, so a partial batch is still saved progress.
 | 11 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | todo |
 | 12 | Tighten the OTB classical-vs-rapid classifier (or use a curated source) | S | todo |
 | 13 | **Test suite** — `tests/` directory with `pytest`; cover knowledge retrieval (FTS5 returns correct passages), triage logic (tiers fire correctly), and web routes (`/analyze` accepts a PGN, returns HTML; `/health` is live). This is the single highest-impact portfolio signal: the absence of tests is visible in the file tree before a reviewer reads any code. Also the StayPlus prerequisite: "how do you know X is correct?" is answered with tests. | M | **done** — `tests/` (26 tests; triage, outputs/export, web routes, knowledge FTS5, version automation), gated by `scripts/ship.py` |
-| 14 | **GitHub Actions CI** — `.github/workflows/ci.yml` that runs `pytest` on every push and PR, showing a green check mark on all commits. Prerequisite: item #13 must exist first; CI is the automation wrapper (~10-line YAML once tests are in place). | S | todo |
+| 14 | **GitHub Actions CI** — `.github/workflows/ci.yml` runs `pytest` on every push and PR (installs `python3-tk` + `requirements-dev.txt`; suite is engine/key-free by design). | S | **done** (v0.9.0) |
 | 15 | **App screenshots in README** — a `/screenshots/` folder with two images: the Tkinter desktop GUI (settings panel or main window with a game loaded) and the FastAPI web interface in a browser (upload form + resulting report). Link both from the README Quick Start section. Fastest way to show "this is real software" to someone who hasn't run it. | S | todo |
-| 16 | **Expand knowledge corpus beyond Capablanca** — deposit at least two more public-domain books per `knowledge/README.md` and the SHOPPING_LIST. Good first targets: Nimzowitsch's *My System*, Tarrasch's *The Game of Chess*, or a Euwe game collection. The README and CHANGELOG promise a sophisticated RAG system; a single book doesn't demonstrate it. (Overlaps with #10; this item tracks the portfolio optics specifically — one book is not enough.) | M | todo |
+| 16 | **Expand knowledge corpus beyond Capablanca** — deposit at least two more public-domain books per `knowledge/README.md` and the SHOPPING_LIST. Good first targets: Nimzowitsch's *My System*, Tarrasch's *The Game of Chess*, or a Euwe game collection. (Acquisition is a **Claude Cowork** task — book hunting/cleaning — not a Claude Code one.) | M | todo (→ Cowork) |
+| 17 | **Engine-sourced variation lines** — refutation/best lines as a closed quotable set + the "only quote provided lines" rule + the `find_unverified_variation_moves` validator (the ...Kg7 fix). | L | **done** (v0.9.0) |
+| 18 | **Wasted / self-defeating tempo coaching concept** — threats that induce a move the opponent already wanted; the "helping your opponent develop" family. | S | **done** (v0.9.0) |
+| 19 | **Player names across all modes** — filename fallback + header-derived psychology tier-boost for GUI/web (was CLI-only). | M | **done** (v0.9.0) |
+| 20 | **Daily / correspondence voice** — detect the game and inject the protocol; fix the time-control humaniser. | S | **done** (v0.9.0) |
+| 21 | **Deterministic featured passage** — pick one best chunk and hand the model a finished, attributed, verbatim quote. | M | **done** (v0.9.0) |
+| 22 | **Clickable variations in the replay viewer** — emit per-ply FENs for `variations` so a written line plays out on the board (2A phase 2; the per-ply data is the only missing piece). | M | todo |
+| 23 | **Per-ply material trajectory along engine lines** — annotate captures in `best_pv`/variations so "show the money" is computed, not model-tallied. | M | todo |
+| 24 | **Computed decisive-moments block** — biggest eval swings + first-decisive ply, to ground the closing-summary claims in data rather than recollection. | S | todo |
+| 25 | **Multi-move sacrifice detection** — flag a material-down / eval-up window across plies in code (today the model judges it from the trajectory). | M | todo |
+| 26 | **Auto-strip confabulated variation moves** — promote `find_unverified_variation_moves` from a warning to an enforced edit, once it is trusted not to mangle good prose. | S | todo |
+| 27 | **GUI/web per-player context fields** — let desktop/web users supply structured "White is my dad, an attacker" context (CLI-only via `--white-context` today). | S | todo |
 
 **Folded in / superseded:**
 - *Polish (Save-as-PDF, drag-and-drop a PGN, recent-games list)* — absorbed into Greco
@@ -106,12 +132,18 @@ each item is committed when done, so a partial batch is still saved progress.
 - *Private GitHub repo for phone ↔ laptop* — **superseded** by Greco Online: once Greco is
   a website, you just open it on your phone, so there's nothing to git-sync.
 
-**Recently shipped** (newest first): settings panel (config.json, model selector, reports
-folder picker); SVG chronological ordering (ply-prefixed filenames, data-ply attributes,
-sorted placement); developer auto-`similar` hook + folder cap; voice refinements
-(relationship framing, reader-level language, Daily voice, keepsake mode, timid first
-moves, winning-a-piece ≠ a trade); standalone `Greco.exe`; game finders (Chess.com + PGN
-Mentor); commentary-learning; report naming; versioning + docs.
+**Recently shipped** (newest first): **v0.9.0** — engine-sourced variation lines + the
+"only quote provided lines" rule + confabulation validator (#17); wasted-tempo coaching
+concept (#18); player names across all modes + filename fallback (#19); daily/correspondence
+voice detection + humaniser fix (#20); deterministic featured passage (#21); GitHub Actions
+CI (#14); and a correctness sweep (terminal-mate sign, still-winning clamp, pawn-fork
+legality, pin-aware forks, diagram-set drift, HTML escaping, web traceback redaction).
+Earlier: settings panel (config.json, model selector, reports folder picker); SVG
+chronological ordering (ply-prefixed filenames, data-ply attributes, sorted placement);
+developer auto-`similar` hook + folder cap; voice refinements (relationship framing,
+reader-level language, keepsake mode, timid first moves, winning-a-piece ≠ a trade);
+standalone `Greco.exe`; game finders (Chess.com + PGN Mentor); commentary-learning;
+report naming; versioning + docs.
 
 ## Aesthetic backlog — ivory-manuscript / carved-ivory direction (brainstorm)
 
