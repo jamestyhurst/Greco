@@ -7,6 +7,18 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-06-13
+
+### Fixed
+- **Repeated move headers in reports.** On dramatic Tier-3 moves (the ones that also get a board
+  diagram), the narrator sometimes emitted the same `### N. SAN` anchor header twice in a row, so
+  the move name showed up two or three times around the board. `assemble_report` now collapses
+  any immediately-repeated move header *before* boards are anchored. Also fixed a latent
+  board-anchor bug: the anchor regex used `\b` after the SAN, which fails for moves ending in
+  `+` / `#`, so checks like `17. Nf6+` never anchored to their header and their diagram was
+  mis-placed — now uses `(?!\w)`. The narrator prompt also now says to write each move header at
+  most once. New tests cover the collapse and the check-move anchor.
+
 ## [0.6.0] — 2026-06-13
 
 ### Added

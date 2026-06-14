@@ -105,7 +105,7 @@ Every move in the game must be acknowledged. Each move carries a `commentary_tie
 - **Tier 2** — A short paragraph of strategic analysis with light psychological context.
 - **Tier 3** — Deep dive: the engine's preferred move, why the player might have chosen otherwise, what psychological pressure or pattern may explain the choice.
 
-Use standard headers like `### 14. Qe6` for moves that get Tier ≥ 2 commentary; Tier 0/1 moves can flow as running prose. Every move number from the game must appear.
+Use standard headers like `### 14. Qe6` for moves that get Tier ≥ 2 commentary — write each move's header **at most once** (never repeat the same `### N. SAN` line). Tier 0/1 moves can flow as running prose. Every move number from the game must appear.
 
 **Bold every move reference in the prose** — e.g. **12. Nxd4**, **22...Nxd2** — so moves always stand out from the surrounding commentary, whether in a header or in running text.
 

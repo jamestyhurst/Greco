@@ -201,14 +201,17 @@ def _insert_image_after_move_header(
     """
     move_number = move.move_number
     san_escaped = re.escape(move.san)
+    # `(?!\w)` not `\b`: a SAN can end in a non-word char (`+`, `#`, `=Q`), and `\b`
+    # AFTER such a char fails to match — which used to drop check/mate moves like
+    # "17. Nf6+", sending them down the unanchored path and misplacing their board.
     if move.side == "White":
         patterns = [
-            rf"^(#{{2,4}}\s*{move_number}\.\s*{san_escaped}\b.*)$",
+            rf"^(#{{2,4}}\s*{move_number}\.\s*{san_escaped}(?!\w).*)$",
         ]
     else:
         patterns = [
-            rf"^(#{{2,4}}\s*{move_number}\.{{1,3}}\s*{san_escaped}\b.*)$",
-            rf"^(#{{2,4}}\s*{move_number}\.\.\.\s*{san_escaped}\b.*)$",
+            rf"^(#{{2,4}}\s*{move_number}\.{{1,3}}\s*{san_escaped}(?!\w).*)$",
+            rf"^(#{{2,4}}\s*{move_number}\.\.\.\s*{san_escaped}(?!\w).*)$",
         ]
     alt_text = (
         f"Position after {move_number}{'.' if move.side == 'White' else '...'} {move.san}"
@@ -265,6 +268,30 @@ def _insert_unanchored_boards(body: str, items: "List[tuple]") -> str:
     return body
 
 
+def _collapse_duplicate_headers(md: str) -> str:
+    """Collapse an immediately-repeated move header down to a single one.
+
+    The narrator occasionally emits the same `### N. SAN` anchor header twice in a
+    row — most often on the dramatic Tier-3 moves that also get a board diagram —
+    which then renders as the move name appearing two or three times around the
+    board. Runs of identical `##`–`####` header lines (blank lines between them are
+    fine) are reduced to the first occurrence. Non-consecutive repeats and ordinary
+    text are left untouched.
+    """
+    out: List[str] = []
+    last_header: Optional[str] = None
+    for line in md.split("\n"):
+        stripped = line.strip()
+        if re.match(r"^#{2,4}\s+\S", stripped):
+            if stripped == last_header:
+                continue  # drop the immediate duplicate header
+            last_header = stripped
+        elif stripped:
+            last_header = None  # real content ends the run; blank lines keep it open
+        out.append(line)
+    return "\n".join(out)
+
+
 def assemble_report(
     game: GameAnalysis,
     tiers: List[int],
@@ -293,6 +320,9 @@ def assemble_report(
     body = narrative.lstrip()
     # Safety net: strip any top-level `# Title` Claude added despite the system prompt.
     body = re.sub(r"^#\s+[^\n]+\n+", "", body, count=1)
+    # Safety net: collapse any move header the model emitted twice in a row, before
+    # boards are anchored to those headers.
+    body = _collapse_duplicate_headers(body)
 
     # Eval graph.
     eval_section = ""
