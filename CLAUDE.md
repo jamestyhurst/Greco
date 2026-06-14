@@ -76,6 +76,8 @@ antivirus). Pure Python + git only, run manually during a session (never as a ba
 | `docs` / `refactor` / `test` / `chore` | no behaviour change | none |
 | `type!:` or `BREAKING CHANGE` in the body | incompatible change | MAJOR |
 
+*Aesthetic changes:* a **major** visual overhaul (a full re-theme) can be a `feat` (MINOR); routine recolours, copy edits, and small style tweaks are `micro` (MICRO) — don't inflate cosmetic tweaks to `feat`. Bug fixes are `fix` (PATCH).
+
 **2. 4-digit version** — `MAJOR.MINOR.PATCH.MICRO`, trailing zeros omitted (`0.3.1`, not
 `0.3.1.0`). Single source of truth: `version.py`. Never hand-edit the number.
 
