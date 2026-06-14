@@ -7,7 +7,18 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
-## [0.7.0] — 2026-06-13
+## [0.8.0] — 2026-06-13
+
+### Changed
+- **Greco Web and the generated report now wear the same wine/ivory/gold manuscript theme as
+  the desktop app.** `web/templates.py` (form / result / error pages) recoloured to a wine
+  background, parchment cards, gold buttons + accents, an ivory king wordmark, and a manuscript
+  serif. The report HTML from `outputs.markdown_to_html` — and therefore the emailed single-file
+  export — now renders on a parchment page with wine/gold headings, a gold double-rule under the
+  title, framed board diagrams, and a wine/gold replay viewer (previously a blue/grey scheme).
+  Verified by regenerating a report: it carries the new palette and drops the old `#2b6cb0` blue.
+  (Period web fonts, parchment textures and illuminated borders remain in the roadmap's
+  "Aesthetic backlog" for later.)
 
 ### Added
 - **Settable default PGN folder.** A new "Pick PGNs from:" field in the desktop Setup panel

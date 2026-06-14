@@ -618,22 +618,22 @@ _VIEWER_CSS = """
     .gv-coord { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #6b5942; }
     .gv-controls { display: flex; gap: 0.3rem; margin: 0.5rem 0; flex-wrap: wrap; }
     .gv-controls button { font-size: 1rem; line-height: 1; padding: 0.35rem 0.6rem; cursor: pointer;
-        border: 1px solid #bbb; border-radius: 4px; background: #f7f7f7; color: #222; }
-    .gv-controls button:hover { background: #ececec; }
+        border: 1px solid #c9b78f; border-radius: 4px; background: #f3e9cf; color: #5E151D; }
+    .gv-controls button:hover { background: #e8dcb8; }
     .gv-status { min-height: 1.7em; font-family: 'Helvetica Neue', Arial, sans-serif; }
     .gv-movelabel { font-weight: 600; }
-    .gv-eval { font-family: 'Consolas','Menlo',monospace; background: #eef2f7; color: #2b6cb0;
+    .gv-eval { font-family: 'Consolas','Menlo',monospace; background: #f3e9cf; color: #7A1C26;
         padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; }
     .gv-badge { font-size: 0.78rem; padding: 0.05rem 0.4rem; border-radius: 3px; margin-left: 0.3rem; color: #fff; }
     .gv-brilliant { background: #1abc9c; } .gv-blunder { background: #c0392b; }
     .gv-mistake { background: #e67e22; } .gv-inaccuracy { background: #c9a227; }
     .gv-moves { flex: 1 1 240px; min-width: 220px; max-height: 372px; overflow-y: auto;
         font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.95; padding: 0.3rem 0.5rem;
-        border: 1px solid #e3e3e3; border-radius: 4px; background: #fafafa; }
+        border: 1px solid #e3d2a6; border-radius: 4px; background: #fbf6e7; }
     .gv-num { color: #999; margin-right: 0.15rem; }
     .gv-move { cursor: pointer; padding: 0.02rem 0.2rem; border-radius: 3px; }
-    .gv-move:hover { background: #e7eef7; }
-    .gv-move.active { background: #2b6cb0; color: #fff; }
+    .gv-move:hover { background: #efe6c8; }
+    .gv-move.active { background: #7A1C26; color: #fff; }
     .gv-mv-blunder { color: #c0392b; } .gv-mv-mistake { color: #e67e22; }
     .gv-mv-inaccuracy { color: #b8901f; } .gv-mv-brilliant { color: #129e83; font-weight: 600; }
     .gv-move.active.gv-mv-blunder, .gv-move.active.gv-mv-mistake,
@@ -741,18 +741,25 @@ def markdown_to_html(
         html_path = md_path.with_suffix(".html")
 
     css = """
-    body { font-family: Georgia, 'Times New Roman', serif; max-width: 820px;
-           margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #222; }
-    h1, h2, h3, h4 { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.25; }
-    h1 { border-bottom: 2px solid #2b6cb0; padding-bottom: 0.3rem; }
-    h3 { color: #2b6cb0; margin-top: 1.6rem; }
+    body { font-family: 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+           max-width: 820px; margin: 2rem auto; padding: 0 1.2rem; line-height: 1.6;
+           color: #2e2117; background: #fbf6e7; }
+    h1, h2, h3, h4 { font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+                     line-height: 1.25; color: #5E151D; }
+    h1 { border-bottom: 3px double #C9A23A; padding-bottom: 0.3rem; color: #7A1C26; }
+    h2 { border-bottom: 1px solid #e3d2a6; padding-bottom: 0.2rem; }
+    h3 { color: #7A1C26; margin-top: 1.6rem; }
+    a { color: #7A1C26; }
     code, pre { font-family: 'Consolas', 'Menlo', monospace; }
-    pre { background: #f5f7fa; padding: 0.75rem 1rem; border-radius: 4px; overflow-x: auto; }
-    blockquote { border-left: 3px solid #2b6cb0; padding-left: 1rem; color: #444; }
+    pre { background: #f3e9cf; padding: 0.75rem 1rem; border-radius: 4px; overflow-x: auto;
+          border: 1px solid #e3d2a6; }
+    blockquote { border-left: 3px solid #C9A23A; padding: 0.4rem 1rem; color: #4a3826;
+                 background: #f3e9cf; border-radius: 0 4px 4px 0; }
     img { max-width: 100%; display: block; margin: 1rem auto; }
     figure { margin: 1.2rem auto; text-align: center; }
-    figure.board svg { width: 360px; max-width: 90%; height: auto; }
-    figcaption { font-size: 0.85rem; color: #666; font-style: italic; margin-top: 0.3rem; }
+    figure.board svg { width: 360px; max-width: 90%; height: auto;
+                       border: 1px solid #cbb89a; border-radius: 4px; background: #fff; }
+    figcaption { font-size: 0.85rem; color: #6b5942; font-style: italic; margin-top: 0.3rem; }
     """ + viewer_css
 
     html = f"""<!doctype html>

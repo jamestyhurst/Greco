@@ -12,31 +12,32 @@ from version import __version__
 from web.config import Settings, USE_CASES, MODELS
 
 BASE_CSS = """
-:root{--ink:#1a202c;--muted:#718096;--accent:#2b6cb0;--line:#e2e8f0;--bg:#f7fafc;}
+:root{--wine:#7A1C26;--wine-dark:#5E151D;--ivory:#F5EDD4;--parch:#FBF6E7;--gold:#C9A23A;--ink:#3A2A1A;--muted:#8a7a5c;--line:#d9c7a0;}
 *{box-sizing:border-box;}
-body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;}
+body{margin:0;font-family:'Palatino Linotype',Palatino,Georgia,'Book Antiqua',serif;color:var(--ivory);background:var(--wine);line-height:1.55;}
 .wrap{max-width:640px;margin:0 auto;padding:24px 16px 64px;}
-h1{font-size:1.5rem;margin:0 0 4px;}
-.sub{color:var(--muted);margin:0 0 20px;font-size:.95rem;}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;}
-label{display:block;font-weight:600;margin:14px 0 6px;font-size:.9rem;}
-input[type=file],textarea,select,input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-family:inherit;background:#fff;}
+h1{font-size:1.95rem;margin:0 0 4px;color:var(--ivory);font-weight:700;letter-spacing:.5px;}
+.sub{color:var(--gold);margin:0 0 20px;font-size:.95rem;font-style:italic;}
+.card{background:var(--parch);border:1px solid var(--gold);border-radius:10px;padding:18px;color:var(--ink);box-shadow:0 2px 12px rgba(0,0,0,.28);}
+label{display:block;font-weight:700;margin:14px 0 6px;font-size:.9rem;color:var(--wine-dark);}
+input[type=file],textarea,select,input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-family:inherit;background:#fffdf6;color:var(--ink);}
 textarea{min-height:110px;resize:vertical;font-family:Consolas,monospace;font-size:.85rem;}
 .row{display:flex;gap:12px;flex-wrap:wrap;}
 .row>div{flex:1;min-width:140px;}
 .or{text-align:center;color:var(--muted);margin:10px 0;font-size:.85rem;}
-button{margin-top:20px;width:100%;padding:13px;font-size:1.05rem;font-weight:600;color:#fff;background:var(--accent);border:0;border-radius:8px;cursor:pointer;}
+button{margin-top:20px;width:100%;padding:13px;font-size:1.05rem;font-weight:700;color:var(--wine);background:var(--gold);border:0;border-radius:8px;cursor:pointer;font-family:inherit;}
+button:hover{background:#d9b658;}
 button:disabled{opacity:.6;cursor:progress;}
-.btn{display:block;text-align:center;padding:12px;border-radius:8px;font-weight:600;text-decoration:none;}
-.btn.go{color:#fff;background:var(--accent);}
-.btn.alt{color:var(--accent);background:#fff;border:1px solid var(--accent);}
+.btn{display:block;text-align:center;padding:12px;border-radius:8px;font-weight:700;text-decoration:none;}
+.btn.go{color:var(--wine);background:var(--gold);}
+.btn.alt{color:var(--wine-dark);background:var(--parch);border:1px solid var(--gold);}
 .banner{padding:10px 12px;border-radius:8px;font-size:.9rem;margin-bottom:16px;}
-.ok{background:#f0fff4;border:1px solid #9ae6b4;color:#22543d;}
-.warn{background:#fffaf0;border:1px solid #fbd38d;color:#7b341e;}
+.ok{background:#efe6c8;border:1px solid var(--gold);color:#5b4a1e;}
+.warn{background:#f3d9b0;border:1px solid #b9742a;color:#6b3410;}
 .hint{color:var(--muted);font-size:.82rem;margin-top:6px;}
-.foot{color:var(--muted);font-size:.78rem;margin-top:18px;text-align:center;}
-pre{white-space:pre-wrap;background:#1a202c;color:#e2e8f0;padding:14px;border-radius:8px;font-size:.8rem;overflow:auto;}
-#overlay{display:none;position:fixed;inset:0;background:rgba(247,250,252,.94);align-items:center;justify-content:center;text-align:center;padding:24px;}
+.foot{color:#d8c9a0;font-size:.78rem;margin-top:18px;text-align:center;}
+pre{white-space:pre-wrap;background:var(--wine-dark);color:var(--ivory);padding:14px;border-radius:8px;font-size:.8rem;overflow:auto;}
+#overlay{display:none;position:fixed;inset:0;background:rgba(122,28,38,.95);color:var(--ivory);align-items:center;justify-content:center;text-align:center;padding:24px;}
 #overlay.show{display:flex;}
 """
 
@@ -44,7 +45,7 @@ _FORM = Template("""<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Greco Web {{ version }}</title><style>{{ base_css|safe }}</style></head><body>
 <div class="wrap">
-  <h1>&#9823; Greco Web</h1>
+  <h1>&#9818; Greco Web</h1>
   <p class="sub">Engine-backed, AI-narrated chess reports &mdash; in your browser. v{{ version }}</p>
   {% if ready %}
     <div class="banner ok">Ready &mdash; using your saved settings (model: {{ model }}). Reports save to your Greco Reports folder.</div>
