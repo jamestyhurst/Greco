@@ -52,6 +52,16 @@ on. Concept-by-concept map: `software-skills-you-can-learn-from-greco.md`.
    If you add a new planning doc to the repo root, add it to `.gitignore` immediately and
    verify with `git status` before committing.
 
+## Session handoffs
+
+When ending a session with `/handoff`, save the document to:
+```
+C:\Users\詹天哲\Documents\Handoffs\
+```
+Name the file with the date and a short topic slug, e.g. `2026-06-17-narrator-refactor.md`.
+
+When told to "fetch the handoff" or "load the handoff" at the start of a session, look in that same folder. Read the most recent file unless James names a specific one. Use `pathlib` if constructing the path in code (the username is non-ASCII).
+
 ## Versioning, commits & GitHub sync (automated)
 
 The standing release workflow — it automates version bumps, tags, and pushes so they aren't
