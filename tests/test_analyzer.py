@@ -3,15 +3,21 @@
 Covers the engine-free helpers and the geometry fixes from the v0.9 sweep:
 numbered-SAN variation rendering (2A), the pawn-fork legality filter, the
 pinned-piece fork suppression, and the royal-alignment path-clear check.
+Also covers normalize_cp, detect_phase, and score_to_cp_mate.
 """
 import chess
+import chess.engine
 
 from analyzer import (
+    MATE_SCORE,
     classify_move,
     detect_allowed_pawn_fork,
     detect_double_attack,
     detect_royal_alignment,
+    detect_phase,
+    normalize_cp,
     pv_to_numbered_san,
+    score_to_cp_mate,
 )
 
 
@@ -122,3 +128,86 @@ def test_allowed_pawn_fork_excludes_illegal_push():
     b.set_piece_at(chess.H1, chess.Piece(chess.KING, chess.WHITE))
     b.turn = chess.BLACK
     assert detect_allowed_pawn_fork(b, chess.WHITE) is None
+
+
+# --- normalize_cp -----------------------------------------------------------
+
+def test_normalize_cp_centipawn():
+    assert normalize_cp(50, None) == 50
+    assert normalize_cp(-300, None) == -300
+    assert normalize_cp(0, None) == 0
+
+
+def test_normalize_cp_none_returns_zero():
+    assert normalize_cp(None, None) == 0
+
+
+def test_normalize_cp_mate_positive():
+    result = normalize_cp(None, 3)
+    assert result == MATE_SCORE - 3
+    assert result > 0
+
+
+def test_normalize_cp_mate_negative():
+    result = normalize_cp(None, -2)
+    assert result == -MATE_SCORE + 2
+    assert result < 0
+
+
+def test_normalize_cp_mate_in_zero():
+    # mate=0 means already checkmated (the side to move lost).
+    assert normalize_cp(None, 0) == -MATE_SCORE
+
+
+# --- score_to_cp_mate -------------------------------------------------------
+
+def test_score_to_cp_mate_centipawn():
+    cp, mate = score_to_cp_mate(chess.engine.Cp(75))
+    assert cp == 75
+    assert mate is None
+
+
+def test_score_to_cp_mate_mate():
+    cp, mate = score_to_cp_mate(chess.engine.Mate(2))
+    assert cp is None
+    assert mate == 2
+
+
+# --- detect_phase -----------------------------------------------------------
+
+def _full_board_ply(ply: int) -> chess.Board:
+    """A standard starting board (all pieces present) at the given ply."""
+    b = chess.Board()
+    b.fullmove_number = ply // 2 + 1
+    return b
+
+
+def test_detect_phase_opening():
+    b = chess.Board()  # all pieces present, ply 1
+    assert detect_phase(b, 1) == "opening"
+
+
+def test_detect_phase_endgame_low_material():
+    b = chess.Board(None)
+    b.set_piece_at(chess.E1, chess.Piece(chess.KING, chess.WHITE))
+    b.set_piece_at(chess.E8, chess.Piece(chess.KING, chess.BLACK))
+    b.set_piece_at(chess.A1, chess.Piece(chess.ROOK, chess.WHITE))
+    # total material: 5 — well below the endgame threshold
+    assert detect_phase(b, 50) == "endgame"
+
+
+def test_detect_phase_middlegame():
+    b = chess.Board(None)
+    # Add enough material to stay out of endgame but past opening ply threshold.
+    for sq, piece in [
+        (chess.E1, chess.Piece(chess.KING, chess.WHITE)),
+        (chess.E8, chess.Piece(chess.KING, chess.BLACK)),
+        (chess.D1, chess.Piece(chess.QUEEN, chess.WHITE)),
+        (chess.D8, chess.Piece(chess.QUEEN, chess.BLACK)),
+        (chess.A1, chess.Piece(chess.ROOK, chess.WHITE)),
+        (chess.A8, chess.Piece(chess.ROOK, chess.BLACK)),
+        (chess.C1, chess.Piece(chess.BISHOP, chess.WHITE)),
+        (chess.C8, chess.Piece(chess.BISHOP, chess.BLACK)),
+    ]:
+        b.set_piece_at(sq, piece)
+    assert detect_phase(b, 25) == "middlegame"
