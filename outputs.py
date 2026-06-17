@@ -865,11 +865,12 @@ def markdown_to_html(
     figcaption { font-size: 0.85rem; color: #6b5942; font-style: italic; margin-top: 0.3rem; }
     """ + viewer_css
 
-    html = f"""<!doctype html>
+    page_title = html.escape(md_path.stem)
+    html_doc = f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>{html.escape(md_path.stem)}</title>
+<title>{page_title}</title>
 <style>{css}</style>
 </head>
 <body>
@@ -877,7 +878,7 @@ def markdown_to_html(
 </body>
 </html>
 """
-    html_path.write_text(html, encoding="utf-8")
+    html_path.write_text(html_doc, encoding="utf-8")
     return html_path
 
 
