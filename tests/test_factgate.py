@@ -2003,3 +2003,91 @@ def test_is_prophylaxis_passed_pawn_blockade_flag():
 def test_is_prophylaxis_integration_certified_claims():
     tags = F.certified_claims(_PROP_BOARD_BEFORE, _PROP_MOVE, _PROP_BOARD_AFTER, chess.WHITE)
     assert "prophylaxis" in tags
+
+
+# --- is_bishop_pair ---------------------------------------------------------
+def test_bishop_pair_true_both_vs_one():
+    # White: Bc1, Bf1 (both bishops). Black: Bf8 only (one bishop).
+    board = chess.Board("2r1kb2/8/8/8/8/8/8/2B1KB2 w - - 0 1")
+    ok, ev = F.is_bishop_pair(board, chess.WHITE)
+    assert ok
+    assert "bishop pair" in ev
+
+
+def test_bishop_pair_false_opponent_also_has_pair():
+    # White: Bc1, Bf1. Black: Bc8, Bf8 (two bishops) → enemy=2 → False.
+    board = chess.Board("2b1kb2/8/8/8/8/8/8/2B1KB2 w - - 0 1")
+    ok, _ = F.is_bishop_pair(board, chess.WHITE)
+    assert not ok
+
+
+def test_bishop_pair_false_mover_missing_one_bishop():
+    # White: only Bf1. Black: Bf8 only.
+    board = chess.Board("2r1kb2/8/8/8/8/8/8/4KB2 w - - 0 1")
+    ok, _ = F.is_bishop_pair(board, chess.WHITE)
+    assert not ok
+
+
+def test_bishop_pair_false_for_side_that_has_one():
+    # White has the pair; from Black's perspective: Black has 1, White has 2 → False for Black.
+    board = chess.Board("2r1kb2/8/8/8/8/8/8/2B1KB2 w - - 0 1")
+    ok, _ = F.is_bishop_pair(board, chess.BLACK)
+    assert not ok
+
+
+def test_bishop_pair_in_certified_claims():
+    # Make a quiet move that preserves the bishop-pair structure.
+    board_before = chess.Board("2r1kb2/8/8/8/8/8/8/2B1KB2 w - - 0 1")
+    move = chess.Move.from_uci("e1d1")  # Kd1 — king move, bishop count unchanged
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "bishop_pair" in tags
+
+
+# --- is_rook_on_open_file ---------------------------------------------------
+def test_rook_on_open_file_true_fully_open():
+    # White rook on d1, no pawns on d-file → open.
+    board = chess.Board("4k3/8/8/8/8/8/8/3RK3 w - - 0 1")
+    ok, ev = F.is_rook_on_open_file(board, chess.D1, chess.WHITE)
+    assert ok
+    assert "open d-file" in ev
+
+
+def test_rook_on_open_file_true_half_open():
+    # White rook on d1, Black pawn on d7 only → half-open for White.
+    board = chess.Board("4k3/3p4/8/8/8/8/8/3RK3 w - - 0 1")
+    ok, ev = F.is_rook_on_open_file(board, chess.D1, chess.WHITE)
+    assert ok
+    assert "half-open d-file" in ev
+
+
+def test_rook_on_open_file_false_own_pawn_on_file():
+    # White rook on d1, White pawn on d4 → d-file closed for White.
+    board = chess.Board("4k3/8/8/8/3P4/8/8/3RK3 w - - 0 1")
+    ok, _ = F.is_rook_on_open_file(board, chess.D1, chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_open_file_false_wrong_piece():
+    # Queen on d1, not a rook → False.
+    board = chess.Board("4k3/8/8/8/8/8/8/3QK3 w - - 0 1")
+    ok, _ = F.is_rook_on_open_file(board, chess.D1, chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_open_file_false_wrong_color():
+    # White rook on d1, but asking for Black → False.
+    board = chess.Board("4k3/8/8/8/8/8/8/3RK3 w - - 0 1")
+    ok, _ = F.is_rook_on_open_file(board, chess.D1, chess.BLACK)
+    assert not ok
+
+
+def test_rook_on_open_file_in_certified_claims():
+    # White rook on d1 on a fully open d-file; any quiet White move should certify the tag.
+    board_before = chess.Board("4k3/8/8/8/8/8/8/3RK3 w - - 0 1")
+    move = chess.Move.from_uci("e1f1")  # Kf1 — rook stays on d1
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_on_open_file" in tags

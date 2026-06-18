@@ -1862,6 +1862,52 @@ def is_initiative(
 
 
 # --------------------------------------------------------------------------- #
+# Bishop pair — structural material imbalance.
+# --------------------------------------------------------------------------- #
+def is_bishop_pair(board: chess.Board, color: bool) -> Tuple[bool, str]:
+    """Certifies that `color` has both bishops while the opponent has at most one bishop.
+    The bishop pair is a lasting structural edge: two complementary long-diagonal sliders
+    cover all square colours. Engine-free — pure piece count.
+    """
+    friendly = len(board.pieces(chess.BISHOP, color))
+    enemy = len(board.pieces(chess.BISHOP, not color))
+    if friendly < 2 or enemy > 1:
+        return (False, "")
+    side = "White" if color == chess.WHITE else "Black"
+    opp_desc = "no bishops" if enemy == 0 else "only one bishop"
+    return (
+        True,
+        f"{side} has the bishop pair — two complementary long-diagonal sliders covering "
+        f"both square colours; the opponent has {opp_desc}",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Rook on open / half-open file — standing positional fact.
+# --------------------------------------------------------------------------- #
+def is_rook_on_open_file(
+    board: chess.Board, square: int, color: bool
+) -> Tuple[bool, str]:
+    """Certifies that a rook of `color` on `square` occupies an open or half-open file.
+    Open = no pawns of either colour on the file; half-open = no friendly pawns remain
+    (enemy pawn(s) may still be present). Distinct from `rook_lift` (which certifies the
+    *move* off a home rank) — this certifies the *standing* positional fact of a rook
+    already posted on such a file. Uses file_structure() as the single source of truth.
+    """
+    piece = board.piece_at(square)
+    if piece is None or piece.piece_type != chess.ROOK or piece.color != color:
+        return (False, "")
+    files = file_structure(board)
+    letter = chess.FILE_NAMES[chess.square_file(square)]
+    half_key = "half_open_white" if color == chess.WHITE else "half_open_black"
+    if letter in files["open"]:
+        return (True, f"rook on the open {letter}-file")
+    if letter in files[half_key]:
+        return (True, f"rook on the half-open {letter}-file")
+    return (False, "")
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1895,10 +1941,12 @@ GATED_TAGS = (
     "initiative",
     "space_advantage",
     "prophylaxis",
+    "bishop_pair",
+    "rook_on_open_file",
 )
-# (Open / half-open files are NOT gated here: they already have their own ground-truth
-# packet fields — open_files / half_open_for_white / half_open_for_black — and a
-# dedicated system-prompt rule. Adding them to the allow-set would be dead payload.)
+# (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
+# from the packet-level open_files / half_open_for_white / half_open_for_black fields,
+# which state which files are open. This tag gates the piece-level claim.)
 
 
 def certified_claims(
@@ -2030,5 +2078,15 @@ def certified_claims(
     ph = _safe(lambda: is_prophylaxis(board_before, move, board_after, mover_color))
     if ph is not None:
         tags.add("prophylaxis")
+
+    bpair = _safe(lambda: is_bishop_pair(board_after, mover_color))
+    if bpair and bpair[0]:
+        tags.add("bishop_pair")
+
+    for _rsq in board_after.pieces(chess.ROOK, mover_color):
+        rof = _safe(lambda sq=_rsq: is_rook_on_open_file(board_after, sq, mover_color))
+        if rof and rof[0]:
+            tags.add("rook_on_open_file")
+            break
 
     return tags
