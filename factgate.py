@@ -531,6 +531,199 @@ def file_state(board: chess.Board, file_index: int, color: bool) -> str:
     return ""
 
 
+def is_backward_pawn(
+    board: chess.Board, square: int, color: bool
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies a 'backward pawn': the pawn on `square` of `color` is rear-most relative
+    to its adjacent-file neighbors, its one-step advance (stop square) is enemy-pawn-controlled,
+    and no friendly pawn can be brought up to defend that advance. Pure structural geometry;
+    turn- and pin-independent. Returns (True, evidence_dict) on success, (False, None) on veto.
+    """
+    # VETO 1: must be a pawn of the correct color (also rejects promoted pieces)
+    piece = board.piece_at(square)
+    if piece is None or piece.piece_type != chess.PAWN or piece.color != color:
+        return (False, None)
+
+    enemy = not color
+    f = chess.square_file(square)
+    r = chess.square_rank(square)
+    fwd = 1 if color == chess.WHITE else -1
+    home_rank = 1 if color == chess.WHITE else 6
+
+    # VETO 2: stop square must exist on-board (promotion rank → no stop square)
+    if (color == chess.WHITE and r == 7) or (color == chess.BLACK and r == 0):
+        return (False, None)
+    stop_sq = chess.square(f, r + fwd)
+
+    def _epc(sq: int) -> bool:
+        """True if any enemy pawn geometrically attacks sq (turn/pin-independent)."""
+        for a in board.attackers(enemy, sq):
+            p = board.piece_at(a)
+            if p is not None and p.piece_type == chess.PAWN:
+                return True
+        return False
+
+    adj_files = [af for af in (f - 1, f + 1) if 0 <= af <= 7]
+    adj_file_set = set(adj_files)
+
+    # VETO 4a: not isolated — at least one adjacent file has a friendly pawn
+    friendly_pawn_files = {chess.square_file(sq) for sq in board.pieces(chess.PAWN, color)}
+    if not any(af in friendly_pawn_files for af in adj_files):
+        return (False, None)
+
+    # Classify each neighbor pawn as strictly-ahead or behind-or-level
+    advanced: List[int] = []
+    behind_or_level: List[Tuple[int, int, int]] = []  # (adj_f, rn, nb_sq)
+
+    for nb_sq in board.pieces(chess.PAWN, color):
+        af = chess.square_file(nb_sq)
+        if af not in adj_file_set:
+            continue
+        rn = chess.square_rank(nb_sq)
+        if (color == chess.WHITE and rn > r) or (color == chess.BLACK and rn < r):
+            advanced.append(nb_sq)
+        else:
+            behind_or_level.append((af, rn, nb_sq))
+
+    # VETO 4b: at least one neighbor must be strictly ahead (non-vacuous "fallen behind")
+    if not advanced:
+        return (False, None)
+
+    # VETO 3: no behind-or-level neighbor can reach its support square.
+    # The support square for file af is chess.square(af, r + fwd) — the square BESIDE
+    # the stop square (adjacent file, same rank as the stop square), where a connected
+    # pawn marching alongside the candidate would stand. Only TWO paths can reach it
+    # in one "action": a single step by a LEVEL neighbor (rn == r, advances one square
+    # to r+fwd), or a home-rank double-step when the candidate is exactly one forward
+    # step ahead of the neighbor's home rank (r == home_rank + fwd), so the double
+    # step from home_rank lands on r+fwd = support square.
+    fixed_level_neighbors: List[int] = []
+
+    for af, rn, nb_sq in behind_or_level:
+        sup_sq = chess.square(af, r + fwd)
+        can_support = False
+
+        # Single step: only a level neighbor (rn == r) can reach sup_sq in one step
+        if rn == r:
+            if board.piece_at(sup_sq) is None and not _epc(sup_sq):
+                can_support = True
+
+        # Double step from home rank: leaps to sup_sq when r == home_rank + fwd
+        if not can_support and rn == home_rank and r == home_rank + fwd:
+            inter_sq = chess.square(af, rn + fwd)
+            if (board.piece_at(inter_sq) is None
+                    and board.piece_at(sup_sq) is None
+                    and not _epc(sup_sq)):
+                can_support = True
+
+        if can_support:
+            return (False, None)
+        fixed_level_neighbors.append(nb_sq)
+
+    # CONFIRM 1: stop square is attacked by an enemy pawn (the structural fixative)
+    pawn_controllers = [
+        a for a in board.attackers(enemy, stop_sq)
+        if board.piece_at(a) is not None and board.piece_at(a).piece_type == chess.PAWN
+    ]
+    if not pawn_controllers:
+        return (False, None)
+
+    # CONFIRM 1b: home-rank escape via double-step (replaces the naive home-rank veto)
+    if r == home_rank:
+        leap_sq = chess.square(f, r + 2 * fwd)
+        leap_controlled = any(
+            board.piece_at(a) is not None and board.piece_at(a).piece_type == chess.PAWN
+            for a in board.attackers(enemy, leap_sq)
+        )
+        if (board.piece_at(stop_sq) is None
+                and board.piece_at(leap_sq) is None
+                and not leap_controlled):
+            return (False, None)
+
+    # CONFIRM 3: not a passed pawn (anti-false-positive; provably unreachable after CONFIRM 1)
+    if is_passed_pawn(board, square, color):
+        return (False, None)
+
+    # --- All checks passed — build the evidence bundle ---
+    file_letter = chess.FILE_NAMES[f]
+
+    # Subtype: blocked > half_open > closed
+    stop_occ = board.piece_at(stop_sq)
+    if stop_occ is not None and stop_occ.piece_type == chess.PAWN and stop_occ.color == enemy:
+        subtype = "blocked"
+    else:
+        ahead_on_f = any(
+            chess.square_file(sq) == f and (
+                (color == chess.WHITE and chess.square_rank(sq) > r) or
+                (color == chess.BLACK and chess.square_rank(sq) < r)
+            )
+            for sq in board.pieces(chess.PAWN, enemy)
+        )
+        subtype = "half_open" if not ahead_on_f else "closed"
+
+    is_blocked = (subtype == "blocked")
+
+    fb_occ = board.piece_at(stop_sq)
+    if fb_occ is not None and fb_occ.piece_type == chess.PAWN and fb_occ.color == color:
+        friendly_blocker: Optional[int] = stop_sq
+    else:
+        friendly_blocker = None
+
+    is_doubled = (
+        sum(1 for sq in board.pieces(chess.PAWN, color) if chess.square_file(sq) == f) >= 2
+    )
+    fs = file_state(board, f, color)
+    is_half_open_target = (fs == "half_open_file")
+
+    # Evidence string — names squares, never tag/field names
+    pawn_name = chess.square_name(square)
+    stop_name = chess.square_name(stop_sq)
+    ev = (
+        f"the pawn on {pawn_name} is backward: its advance square {stop_name} "
+        f"is covered by the pawn on {chess.square_name(pawn_controllers[0])}"
+    )
+    if advanced:
+        if len(advanced) == 1:
+            adv_fl = chess.FILE_NAMES[chess.square_file(advanced[0])]
+            ev += (
+                f", and the {adv_fl}-pawn on {chess.square_name(advanced[0])} "
+                f"has already advanced past it and cannot return to support a push"
+            )
+        else:
+            adv_names = " and ".join(chess.square_name(s) for s in advanced)
+            ev += (
+                f", and the pawns on {adv_names} have already advanced past it "
+                f"and cannot return to support a push"
+            )
+    for fl_sq in fixed_level_neighbors:
+        fl_f = chess.square_file(fl_sq)
+        fl_rn = chess.square_rank(fl_sq)
+        if fl_rn == r:
+            ev += (
+                f"; although the {chess.FILE_NAMES[fl_f]}-pawn is level on "
+                f"{chess.square_name(fl_sq)} it cannot reach "
+                f"{chess.square_name(chess.square(fl_f, r + fwd))} to defend the push"
+            )
+    if subtype == "half_open":
+        ev += f"; the half-open {file_letter}-file makes it a target"
+
+    return (True, {
+        "pawn_square": square,
+        "color": color,
+        "stop_square": stop_sq,
+        "enemy_pawn_controllers": pawn_controllers,
+        "advanced_neighbors": advanced,
+        "fixed_level_neighbors": fixed_level_neighbors,
+        "subtype": subtype,
+        "is_blocked": is_blocked,
+        "friendly_blocker": friendly_blocker,
+        "is_doubled": is_doubled,
+        "file_status": fs,
+        "is_half_open_target": is_half_open_target,
+        "evidence": ev,
+    })
+
+
 def creates_battery(
     board_after: chess.Board, move: chess.Move, mover_color: bool
 ) -> Tuple[bool, Optional[str]]:
@@ -695,6 +888,7 @@ GATED_TAGS = (
     "mate_in_one_threat",
     "battery",
     "promotion_threat",
+    "backward_pawn",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -796,5 +990,9 @@ def certified_claims(
     pt = _safe(lambda: threatens_promotion(board_after, mover_color))
     if pt and pt[0]:
         tags.add("promotion_threat")
+
+    bp = _safe(lambda: is_backward_pawn(board_after, move.to_square, mover_color))
+    if bp and bp[0]:
+        tags.add("backward_pawn")
 
     return tags

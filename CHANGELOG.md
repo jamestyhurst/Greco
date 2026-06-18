@@ -7,6 +7,34 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.25.0] — 2026-06-18
+
+### Added
+- **`factgate.is_backward_pawn()`** — certifies a backward pawn: the pawn at
+  `move.to_square` is rear-most relative to its adjacent-file neighbors, its one-step
+  advance square (stop square) is controlled by an enemy pawn, and no friendly pawn can
+  be brought up alongside to support the push. Pure structural geometry; turn- and
+  pin-independent. Key design choices: (1) VETO 3 uses `support_sq = chess.square(adj_f,
+  r + fwd)` — the square BESIDE the stop square where a connected pawn would march, so only
+  a LEVEL neighbor's single step (or a home-rank pawn's double step when the candidate is
+  exactly one rank ahead of its home rank) counts as supportable; (2) CONFIRM 1 uses
+  `board.attackers(enemy, stop_sq)` filtered to pawns, which is turn- and pin-independent by
+  design — no turn-flip copy needed; (3) CONFIRM 1b provides a precise home-rank double-step
+  escape rather than a blanket home-rank veto, correctly catching genuinely backward
+  home-rank pawns while excluding those that can leap over enemy control; (4) CONFIRM 3
+  guards against false positives by reusing `is_passed_pawn` (provably unreachable after
+  CONFIRM 1, but explicit for correctness). Evidence bundle reports `subtype`
+  (`"half_open"` / `"blocked"` / `"closed"`), `fixed_level_neighbors`, `advanced_neighbors`,
+  `friendly_blocker`, and a ready-to-quote `evidence` string naming exact squares.
+- **`"backward_pawn"` added to `GATED_TAGS`**, wired into `certified_claims()` (same
+  `bp and bp[0]` tuple-guard pattern as `is_outpost`), and registered in the narrator
+  whitelist with full guidance on naming the pawn, stop square, advanced neighbors, and
+  fixed level neighbors.
+- 10 new tests covering: classic half-open (Black), blocked subtype, fixed level neighbor,
+  White colour mirror, isolated pawn veto (VETO 4a), no enemy pawn control (CONFIRM 1),
+  supportable level neighbor (VETO 3), home-rank double-step escape (CONFIRM 1b),
+  home-rank leap blocked (certifies), and integration via `certified_claims`. 105 total tests.
+
 ## [0.24.0] — 2026-06-18
 
 ### Added

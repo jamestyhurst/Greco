@@ -819,3 +819,98 @@ def test_discovered_attack_in_certified_claims():
     b, mv, a = _push("4k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1", "e4f6")
     tags = F.certified_claims(b, mv, a, chess.WHITE)
     assert "discovered_attack" in tags
+
+
+# --- is_backward_pawn ---------------------------------------------------------
+
+def test_backward_pawn_half_open_classic_black():
+    # Black d7-d6: Black c5 (strictly ahead), White e4 controls d5, d-file half-open.
+    # Textbook Black backward d6-pawn in e4/c5 structure.
+    b, mv, a = _push("7k/3p4/8/2p5/4P3/8/8/7K b - - 0 1", "d7d6")
+    ok, ev = F.is_backward_pawn(a, mv.to_square, chess.BLACK)
+    assert ok
+    assert "d6" in ev["evidence"]
+    assert "d5" in ev["evidence"]
+    assert "half" in ev["evidence"]
+    assert ev["subtype"] == "half_open"
+
+
+def test_backward_pawn_blocked_subtype():
+    # Black c7-c6: White pawn already on c5 (stop sq directly occupied), White b4 attacks c5,
+    # Black b5 strictly ahead. Certifies as the "blocked" subtype.
+    b, mv, a = _push("7k/2p5/8/1pP5/1P6/8/8/7K b - - 0 1", "c7c6")
+    ok, ev = F.is_backward_pawn(a, mv.to_square, chess.BLACK)
+    assert ok
+    assert ev["is_blocked"] is True
+    assert ev["subtype"] == "blocked"
+
+
+def test_backward_pawn_fixed_level_neighbour():
+    # Black d7-d6: Black c6 level at d6's rank but support sq c5 is occupied by White pawn,
+    # so c6 is fixed. Black e5 is strictly ahead. White e4 controls d5.
+    b, mv, a = _push("7k/3p4/2p5/2P1p3/4P3/8/8/7K b - - 0 1", "d7d6")
+    ok, ev = F.is_backward_pawn(a, mv.to_square, chess.BLACK)
+    assert ok
+    assert len(ev["fixed_level_neighbors"]) == 1
+    assert "c5" in ev["evidence"]     # support square name in evidence
+    assert "level" in ev["evidence"]  # "although the c-pawn is level on c6..."
+
+
+def test_backward_pawn_white_colour_mirror():
+    # White e3-e4: White f5 (strictly ahead), Black f6 controls e5, e-file half-open.
+    # Mirrors the Black test; checks fwd=+1 geometry throughout.
+    b, mv, a = _push("7k/8/5p2/5P2/8/4P3/8/7K w - - 0 1", "e3e4")
+    ok, ev = F.is_backward_pawn(a, mv.to_square, chess.WHITE)
+    assert ok
+    assert "e4" in ev["evidence"]
+    assert "e5" in ev["evidence"]
+
+
+def test_backward_pawn_negative_isolated():
+    # White e3-e4: no White pawns on d- or f-file → isolated, VETO 4a fires.
+    b, mv, a = _push("7k/8/3p4/8/8/4P3/8/7K w - - 0 1", "e3e4")
+    ok, ev = F.is_backward_pawn(a, mv.to_square, chess.WHITE)
+    assert ok is False
+    assert ev is None
+
+
+def test_backward_pawn_negative_no_enemy_pawn_control():
+    # White e3-e4: White f5 (ahead) but no Black pawn controls e5 — CONFIRM 1 fails.
+    b, mv, a = _push("7k/8/8/5P2/8/4P3/8/7K w - - 0 1", "e3e4")
+    ok, ev = F.is_backward_pawn(a, mv.to_square, chess.WHITE)
+    assert ok is False
+    assert ev is None
+
+
+def test_backward_pawn_negative_supportable_level_neighbour():
+    # White d3-d4: White c4 (level, support sq c5 clear), White e5 (ahead, satisfies VETO 4b).
+    # c4 can advance one step to c5 → VETO 3 fires, not backward.
+    b, mv, a = _push("7k/8/8/4P3/2P5/3P4/8/7K w - - 0 1", "d3d4")
+    ok, ev = F.is_backward_pawn(a, mv.to_square, chess.WHITE)
+    assert ok is False
+    assert ev is None
+
+
+def test_backward_pawn_home_rank_double_step_escape():
+    # White e2 at home rank: Black f4 controls e3 (stop sq), but e4 (leap sq) is clear and
+    # uncontrolled — CONFIRM 1b escape applies, not backward.
+    board = chess.Board("7k/8/8/8/5p2/5P2/4P3/K7 w - - 0 1")
+    ok, ev = F.is_backward_pawn(board, chess.E2, chess.WHITE)
+    assert ok is False
+    assert ev is None
+
+
+def test_backward_pawn_home_rank_leap_blocked():
+    # White e2: Black f4 controls e3, Black e4 occupies the leap square — double step blocked,
+    # White f3 strictly ahead, so the e2 pawn IS genuinely backward.
+    board = chess.Board("7k/8/8/8/4pp2/5P2/4P3/K7 w - - 0 1")
+    ok, ev = F.is_backward_pawn(board, chess.E2, chess.WHITE)
+    assert ok
+    assert "e2" in ev["evidence"]
+
+
+def test_backward_pawn_in_certified_claims():
+    # Black d7-d6 (classic half-open structure) → "backward_pawn" appears in the full gate.
+    b, mv, a = _push("7k/3p4/8/2p5/4P3/8/8/7K b - - 0 1", "d7d6")
+    tags = F.certified_claims(b, mv, a, chess.BLACK)
+    assert "backward_pawn" in tags
