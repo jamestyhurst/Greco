@@ -398,6 +398,46 @@ def find_unverified_variation_moves(report_md: str, game: GameAnalysis) -> List[
     return unverified
 
 
+_VARIATION_INTRO_RE = re.compile(r"\d+\.(?:\.\.)?\s*[OKQRBNa-h]")
+
+
+def strip_unverified_variations(report_md: str, game: GameAnalysis) -> str:
+    """Remove parenthetical variation spans that contain engine-unverified moves.
+
+    Promotion from the *detect-and-warn* behaviour of
+    ``find_unverified_variation_moves`` to an *enforce* behaviour: any
+    parenthetical that looks like variation notation and whose moves are not
+    all present in the engine lines for this game is silently deleted from the
+    prose.  Parentheticals that are ordinary asides (no move-number+SAN
+    pattern) are never touched.
+    """
+    if not report_md:
+        return report_md
+
+    # Build the complete allowed-move set (same logic as find_unverified…).
+    allowed: set = set()
+    for m in game.moves:
+        allowed |= _san_tokens(m.san)
+        allowed |= _san_tokens(getattr(m, "best_line_san", "") or "")
+        allowed |= _san_tokens(getattr(m, "refutation_line_san", "") or "")
+        for alt in (m.top_alternatives or []):
+            allowed |= _san_tokens(alt.get("pv_numbered", "") or alt.get("pv_san", ""))
+
+    def _should_strip(paren_content: str) -> bool:
+        if not _VARIATION_INTRO_RE.search(paren_content):
+            return False  # not variation notation — leave it alone
+        for tok in _san_tokens(paren_content):
+            if tok not in allowed:
+                return True
+        return False
+
+    return re.sub(
+        r"\(([^)]*)\)",
+        lambda m: "" if _should_strip(m.group(1)) else m.group(0),
+        report_md,
+    )
+
+
 def assemble_report(
     game: GameAnalysis,
     tiers: List[int],
@@ -467,20 +507,21 @@ def assemble_report(
     # move so there's no header/bold duplication for dramatic-but-undiagrammed moves.
     body = _strip_orphan_move_headers(body)
 
-    # Data-back trust boundary: warn (non-fatally) if any move written inside a
-    # parenthetical variation was not in the engine-sourced lines — i.e. the model
-    # invented it rather than quoting. Surfaces confabulation in the CLI console.
+    # Data-back trust boundary: strip any parenthetical whose variation moves
+    # were not supplied by the engine — the model invented them rather than
+    # quoting. Log the stripped moves so confabulation is visible in the
+    # server/CLI console without blocking the report.
     try:
         unverified = find_unverified_variation_moves(body, game)
         if unverified:
             import sys
-
             print(
-                f"  [variation check] {len(unverified)} move(s) in parenthetical "
-                f"variations not found in the engine lines: "
+                f"  [variation check] stripping {len(unverified)} unverified "
+                f"move(s) from parenthetical variations: "
                 f"{', '.join(unverified[:12])}",
                 file=sys.stderr,
             )
+            body = strip_unverified_variations(body, game)
     except Exception:
         pass
 
@@ -553,23 +594,19 @@ def _inline_image_assets(html_body: str, base_dir: Path) -> str:
 # replay board is visually identical to the inline static boards. Everything
 # is inlined — the HTML stays self-contained (no CDN, works offline/emailed).
 
-def _piece_defs_svg() -> str:
-    """A hidden <svg><defs> holding the 12 chess pieces, each wrapped with a
-    stable id ('gv-P', 'gv-k', ...) so the board JS can place them via <use>.
-    python-chess's own ids ('white-pawn' etc.) are renamed to avoid clashing
-    with the ids inside the inline static board SVGs elsewhere in the page."""
+def _piece_defs_inline() -> str:
+    """Return a <defs> block (no outer SVG wrapper) holding the 12 piece
+    symbols.  Intended to be embedded directly inside <svg id="gv-board"> so
+    that <use href="#gv-P"> elements injected via innerHTML always reference an
+    id in the *same* SVG — cross-SVG innerHTML references don't resolve in
+    Firefox."""
     import chess.svg  # lazy: only needed when a viewer is built
 
     parts = []
     for key, group in chess.svg.PIECES.items():
         inner = re.sub(r'id="(white|black)-', r'id="gvp-\1-', group)
         parts.append(f'<g id="gv-{key}">{inner}</g>')
-    defs = "".join(parts)
-    return (
-        '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" '
-        'style="position:absolute;width:0;height:0;overflow:hidden" '
-        f'aria-hidden="true"><defs>{defs}</defs></svg>'
-    )
+    return f'<defs>{"".join(parts)}</defs>'
 
 
 def _viewer_eval_text(cp: Optional[int], mate: Optional[int]) -> str:
@@ -615,6 +652,7 @@ _VIEWER_JS = r"""
     return pcs;
   }
   function renderBoard(fen, uci){
+    var defs = boardSvg.querySelector('defs');
     var p = [];
     for(var f = 0; f < 8; f++){
       for(var r = 0; r < 8; r++){
@@ -645,6 +683,7 @@ _VIEWER_JS = r"""
       p.push('<text class="gv-coord" x="9" y="'+(2 + k*SZ + SZ/2 + 4)+'" text-anchor="middle">'+rc+'</text>');
     }
     boardSvg.innerHTML = p.join('');
+    if(defs) boardSvg.insertBefore(defs, boardSvg.firstChild);
   }
 
   function moveLabel(pl){ return pl.n + (pl.s === 'W' ? '.' : '…') + ' ' + pl.san; }
@@ -711,6 +750,39 @@ _VIEWER_JS = r"""
 """
 
 
+_READ_ALOUD_SNIPPET = """<style>
+#ra-btn{position:fixed;bottom:24px;right:24px;background:#C9A23A;color:#5E151D;
+  border:none;border-radius:8px;padding:10px 16px;font-size:.88rem;font-weight:700;
+  font-family:inherit;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.28);
+  z-index:9999;transition:background .2s;}
+#ra-btn:hover{background:#d9b658;}
+.ra-hl{background:rgba(201,162,58,.18);border-radius:3px;transition:background .4s;}
+</style>
+<script>(function(){
+  if(!window.speechSynthesis)return;
+  var btn=document.createElement('button');
+  btn.id='ra-btn';btn.textContent='♪ Read aloud';
+  document.body.appendChild(btn);
+  var speaking=false,paras=[],idx=0,cur=null;
+  function hl(el){if(cur)cur.classList.remove('ra-hl');cur=el;if(el){el.classList.add('ra-hl');el.scrollIntoView({behavior:'smooth',block:'nearest'});}}
+  function readNext(){
+    if(!speaking||idx>=paras.length){stop();return;}
+    var p=paras[idx++];hl(p);
+    var u=new SpeechSynthesisUtterance(p.textContent);
+    u.onend=u.onerror=function(){if(speaking)readNext();};
+    speechSynthesis.speak(u);
+  }
+  function start(){
+    speaking=true;idx=0;
+    paras=Array.from(document.querySelectorAll('p')).filter(function(p){
+      return p.textContent.trim().length>30&&!p.closest('.gv-wrap');
+    });
+    btn.textContent='■ Stop';readNext();
+  }
+  function stop(){speaking=false;speechSynthesis.cancel();hl(null);btn.textContent='♪ Read aloud';}
+  btn.addEventListener('click',function(){speaking?stop():start();});
+})();</script>"""
+
 _VIEWER_CSS = """
     .greco-viewer { margin: 1.5rem 0 2rem; }
     .greco-viewer h2 { margin-bottom: 0.6rem; }
@@ -774,7 +846,7 @@ def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
 <h2>Replay the game</h2>
 <div class="gv-wrap">
 <div class="gv-board-col">
-<svg id="gv-board" class="gv-board" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+<svg id="gv-board" class="gv-board" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">{_piece_defs_inline()}</svg>
 <div class="gv-controls">
 <button id="gv-start" type="button" title="Start (Home)">&#9198;</button>
 <button id="gv-prev" type="button" title="Previous (Left arrow)">&#9664;</button>
@@ -787,7 +859,6 @@ def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
 <div id="gv-moves" class="gv-moves"></div>
 </div>
 <p class="gv-hint">Click any move, use the buttons, or press &larr; / &rarr; (Home / End to jump).</p>
-{_piece_defs_svg()}
 <script type="application/json" id="greco-viewer-data">{payload}</script>
 <script>{_VIEWER_JS}</script>
 </section>
@@ -800,6 +871,7 @@ def markdown_to_html(
     embed_assets: bool = True,
     game: Optional[GameAnalysis] = None,
     flipped: bool = False,
+    read_aloud: bool = True,
 ) -> Path:
     """
     Convert an assembled Markdown report to a single self-contained HTML file
@@ -865,7 +937,8 @@ def markdown_to_html(
     figcaption { font-size: 0.85rem; color: #6b5942; font-style: italic; margin-top: 0.3rem; }
     """ + viewer_css
 
-    html = f"""<!doctype html>
+    read_aloud_html = _READ_ALOUD_SNIPPET if read_aloud else ""
+    page = f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -874,10 +947,11 @@ def markdown_to_html(
 </head>
 <body>
 {html_body}
+{read_aloud_html}
 </body>
 </html>
 """
-    html_path.write_text(html, encoding="utf-8")
+    html_path.write_text(page, encoding="utf-8")
     return html_path
 
 

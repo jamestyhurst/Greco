@@ -54,6 +54,10 @@ def run_analysis(
     use_case: str,
     model: str,
     note: Optional[str],
+    audience_level: Optional[str] = None,
+    recipient: Optional[str] = None,
+    white_context: Optional[str] = None,
+    black_context: Optional[str] = None,
 ) -> AnalysisResult:
     """Run the full pipeline on a PGN string and return the registered result.
 
@@ -72,15 +76,16 @@ def run_analysis(
         text, _src = load_pgn(tmp)
         game = analyze_pgn(text, engine_path=engine, time_limit=time_limit)
         user_context = {
-            "white_player": None,
-            "black_player": None,
+            "white_player": white_context,
+            "black_player": black_context,
             "user_is": user_is,
-            "player_named": False,
+            "player_named": bool(white_context or black_context),
         }
         tiers = annotate_with_tiers(game, user_context)
         narrative = generate_narrative(
             game, tiers, user_context, use_case=use_case,
             user_note=note, model=model, live_stream_to=None,
+            audience_level=audience_level, recipient=recipient,
         )
         base = report_basename(game)
         out_dir = default_reports_dir() / base

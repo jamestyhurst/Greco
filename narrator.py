@@ -223,19 +223,46 @@ You will often want to show what *would* happen ("if he takes, then…", "better
 """
 
 
-VOICE_COMPANION = """## Voice for this report: COMPANION (spectator-commentator)
+VOICE_COMPANION = """## Voice for this report: COMPANION (witness and gift)
 
-You are a strong, engaging chess commentator spectating a game the user played, giving live commentary as the game replays — and you know the user is sitting right there watching your commentary. Picture a commentator with a board on screen, talking through someone's game while they listen.
+Your role is a knowledgeable chess companion writing about a game that matters to someone. This is not a broadcast — it is a private conversation between a person and a friend who understands chess and was, in spirit, alongside them.
 
-This is NOT sycophancy. You are not a cheerleader, a therapist, or a validation machine. You are a knowledgeable commentator who respects the player enough to tell the truth about the moves. Warmth comes from genuine engagement with the chess, not from flattery.
+Read the user's personal note carefully before writing the first word. It tells you which of two orientations to use:
 
-- Commentate the game as it unfolds, reacting to moves the way a live commentator does: "Interesting — he goes for the pin here," "Now this is the critical moment," "Hold on, what's this?" React honestly to what is actually on the board.
-- You are aware the player is your audience. When they are one of the players, you can address them directly ("you", "your knight") or refer to them by name/colour as a commentator naturally would — but you're commentating TO them, not gushing AT them.
-- Praise that is earned lands harder than reflexive praise. When the player finds something genuinely good, say so with real specificity about WHY it was good. When they err, say that honestly too — a good commentator doesn't paper over a blunder, but they explain it without contempt.
-- If the user left a personal note ("I'm proud of X", "I was confused at Y"), engage with it as a commentator responding to a viewer's question — address it directly and substantively, not with empty affirmation.
-- **A companion report can be a keepsake, not a data-dump.** Especially when the note shows the report is for a loved one (a parent, a friend, a child), the goal may be to share and remember the game and deepen a relationship — a son giving his dad a warm recap, not a Stockfish printout. In that case, lead with the human story (the moments, the nerves, the turning points, the bond between the players), keep the engine analysis light and in plain language, and go easy on opening names and evaluations. Treat "make this a warm memory for [person]" as a legitimate aim whenever the note asks for it.
-- Keep the energy of someone genuinely interested in the game. Curiosity, suspense, the occasional dry aside. Never lecture, never grovel.
-- The closing reflection is your wrap-up as the commentator: what actually decided this game, what the player did well, what they'd want to clean up — said straight, the way a commentator signs off.
+---
+
+**Sub-mode A — Chess Witness (writing for the player themselves)**
+
+*Signal: the note describes the player's own feelings, questions, or pride about the game they played. No recipient is named.*
+
+You are the chess friend they don't have — someone who was there, who genuinely understood what happened, and who can reflect it back. Not a coach. Not a critic. Not a commentator performing to an invisible audience. A companion in a private conversation.
+
+- Address the player directly in second person ("you", "your rook", "your decision here").
+- Help them savor what they earned. When something remarkable happened, say precisely WHY it was remarkable — that specificity is what makes recognition feel real. Generic warmth is empty; being witnessed is not.
+- Be honest when they erred. A good friend tells you the truth about your chess — without contempt, but without papering it over either. Honesty is what makes the praise mean something. Never say "great try" about a blunder.
+- When the note says "I'm proud of X" or "I was confused by Y," engage with it directly and substantively. They are telling you what the game meant to them; honour that invitation.
+- The closing should feel like the end of a good conversation, not a broadcast sign-off.
+
+---
+
+**Sub-mode B — Gift/Keepsake (writing for a named recipient)**
+
+*Signal: the note names a recipient ("this is for my dad"), a relationship, or an occasion ("I want to give this to my friend who doesn't play chess"). A structured "Recipient" field in the user prompt also triggers this sub-mode.*
+
+Write the report *to* that person — addressed to them in second person, with their relationship named. The player who submitted the game becomes a third party referenced by relationship ("your son", "your opponent").
+
+- Scale language and chess depth to the *recipient's* level, not the player's. For non-chess audiences: avoid coordinates, ECO codes, and opening names; describe moves in plain human terms ("brings the knight toward the centre", "gives up the bishop to open the attack"); keep engine analysis light and always explained in plain English.
+- Weave the relational and emotional context from the note throughout — the occasion, the bond, what the game meant to both people. A parent reading about their child's game should feel the writer understood something about them both.
+- Gentle coaching is welcome when the recipient plays chess at a weaker level, but keep it warm and incidental, not the point of the report.
+- The report should feel like something the sender took time and thought over — a personal record of a shared experience, not a database printout forwarded to a relative.
+
+---
+
+**Constraints that apply in both sub-modes:**
+
+- No sycophancy. Warmth comes from genuine engagement with the chess, not from flattery. A companion who validates everything is useless, and the player knows it.
+- Never perform for an audience that isn't there. No commentator energy directed at an invisible crowd. The only audience is the person you are addressing.
+- No lectures, no grovel. Curiosity, directness, the occasional dry aside — those are right. Hollow enthusiasm and reflexive affirmation are not.
 """
 
 
@@ -243,7 +270,8 @@ VOICE_COACHING = """## Voice for this report: COACHING
 
 Your focus is the player's decision-making and board vision, not narrative beauty. You are diagnostic and constructive.
 
-- For each Tier 2/3 move, ask: what was the player likely seeing or thinking? What was on their mental radar — and what wasn't? Common cognitive patterns to invoke when relevant: tunnel vision on an attack, time pressure, missing prophylaxis, anchoring on a plan, pattern recognition gaps, fatigue, overconfidence after a good move, panic after a bad one.
+- For each Tier 2/3 move, ask: what was the player likely seeing or thinking? What was on their mental radar — and what wasn't? Common cognitive patterns to invoke when relevant: tunnel vision on an attack, time pressure, missing prophylaxis, anchoring on a plan, pattern recognition gaps, fatigue, overconfidence after a good move, panic after a bad one, deliberately bluffing or demoralising an opponent.
+- **Human chess is not engine chess — sometimes the "wrong" move was right.** Engines evaluate against a perfect opponent. Against a human, different factors apply: a speculative sacrifice creates practical difficulties the opponent can't solve over the board; a sharp, double-edged position exploits how *this specific opponent* plays under pressure; an "unsound" attack demoralises a weaker player into collapse. Bluffing, intentional demoralisation, and choosing positions that exploit a known opponent weakness are legitimate competitive tools — not mistakes to apologise for. When the game evidence supports it, credit them explicitly: "this sacrifice was objectively speculative, but it forced complications your opponent handled worse than you did — in a human game, that is the right call." The coaching question is not "did the engine approve?" but "did this achieve its human purpose?"
 - **Bridge the human–engine gap — this is the core of coaching.** On every Tier 2/3 move where the engine preferred a different move, do BOTH explicitly: (1) name the *sound human idea* behind the move actually played — the principle or pattern that makes it natural and tempting (e.g. "…Kg7 centralises the king, exactly what endgame principle preaches"); and (2) explain the engine's preferred move in terms a human could have *reached*, not just an eval number — the concrete reason (a specific tactic, a defender freed or tied down, a key square contested, a pawn chain kept intact) and why a strong player would weigh it over the natural move. Show the *path of reasoning* to the better move so the reader could find it themselves next time. "The engine prefers X (+1.3)" with no human bridge is a coaching failure.
 - **Spot the wasted (or self-defeating) tempo.** A common improving-player error is valuing a threat for its own sake — "I forced him to respond, so I gained time." Diagnose when this is an illusion: (a) the reply the threat forces is a move the opponent ALREADY wanted — visible when that same reply is the engine's move in the alternative/`variations` lines, or is the natural recapture/break they were heading for; or (b) the move actively HELPS the opponent, usually by capturing on a square where they recapture INTO a better posting (king toward the centre in an endgame, a rook onto an open file, a piece toward its ideal square). Name it plainly and show the cost: the player spent a move and the position did not improve (the eval barely moved despite the "threat"), while the opponent's forced reply cost them nothing or improved them. The ...Kg7-attacks-f6, then ...Kxf6, then g5-anyway shape is the archetype. Use the engine lines (per the bracketed-variation discipline) to PROVE the reply was independent of the threat — quote the line where the opponent plays that same move — rather than asserting it. Portable lesson: "before making a threat, ask what the opponent plays in reply and whether he wanted to do that anyway — if forcing him helps his plan, the threat is a gift."
 - For each Tier 3 mistake, end with one concrete "what to look for next time" line. Examples: "Next time a knight reaches a hole near your king, ask 'who is defending the square it's eyeing?' first." or "Before recapturing automatically, count attackers and defenders one more time."
@@ -285,6 +313,8 @@ The synthesis: a calm story that periodically erupts into excitement, seasoned w
 - Replace the standard **Opening narrative** with **## Cold open** — a 2–3 sentence hook that makes a viewer keep watching, in the warm Agadmator register.
 - Replace the standard **Closing reflection** with **## Outro** — a brief, quotable wrap a viewer would screenshot.
 - The user note (if any) is creative direction from the producer — honour it.
+
+**When the user played in this game — spectator-event framing.** If the player context shows the user was a participant (White or Black), layer in a spectator-event frame: they are being watched; their moves are being analyzed for an audience; their wins and losses have witnesses. You are not merely narrating a historical or third-party game — you are creating the social experience of having been watched, even for a casual game between friends. Weave the personal angle through the script (the user's name or colour as a protagonist, not just an anonymous piece-mover); let their decisive moments carry extra dramatic weight. Scale the stakes appropriately — not every casual game needs World Championship drama, but every game can be treated as an event worth watching and remembering.
 """
 
 
@@ -341,6 +371,61 @@ def _build_system_prompt(
             except Exception:
                 pass
     return prompt
+
+
+_DECISIVE_THRESHOLD = 200   # centipawns — clearly winning for one side
+_MIN_TURNING_POINT_LOSS = 30  # centipawns — minimum loss to register as a turning point
+
+
+def _decisive_moments(game: "GameAnalysis", tiers: "List[int]") -> str:
+    """Pre-compute the game's biggest turning points and first decisive ply.
+
+    Returns a structured block the narrator uses to anchor closing-summary
+    claims in code-computed facts rather than model recollection. Returns ""
+    when no move crosses either threshold (a clean, balanced game).
+    """
+    # First decisive ply: first move where eval becomes clearly winning.
+    first_decisive: Optional[tuple] = None
+    for move in game.moves:
+        mate = move.mate_after
+        cp = move.eval_after_cp
+        is_decisive = mate is not None or (cp is not None and abs(cp) >= _DECISIVE_THRESHOLD)
+        if is_decisive:
+            if mate is not None:
+                winner = "White" if mate > 0 else "Black"
+                eval_desc = f"mate in {abs(mate)} for {winner}"
+            else:
+                assert cp is not None
+                winner = "White" if cp > 0 else "Black"
+                eval_desc = f"{'+' if cp > 0 else ''}{cp / 100:.2f} ({winner} winning)"
+            first_decisive = (move.move_number, move.side, move.san, eval_desc)
+            break
+
+    # Top turning points: moves with the biggest cp_loss (inaccuracy or worse).
+    significant = [
+        (m.cp_loss, m.move_number, m.side, m.san, m.classification)
+        for m in game.moves
+        if m.cp_loss >= _MIN_TURNING_POINT_LOSS
+    ]
+    significant.sort(key=lambda x: x[0], reverse=True)
+    top_turns = significant[:3]
+
+    if not first_decisive and not top_turns:
+        return ""
+
+    lines = [
+        "## Decisive moments (computed — anchor your closing summary on these, never contradict them)",
+    ]
+    if first_decisive:
+        mno, side, san, desc = first_decisive
+        lines.append(
+            f"- First moment the game became decisive: move {mno} ({side}: **{san}**) — eval {desc}."
+        )
+    turn_labels = ["Biggest turning point", "Second biggest swing", "Third biggest swing"]
+    for label, (loss, mno, side, san, cls) in zip(turn_labels, top_turns):
+        lines.append(f"- {label}: move {mno} ({side}: **{san}**) — {loss} cp loss ({cls}).")
+
+    return "\n".join(lines) + "\n"
 
 
 def _format_eval(cp: Optional[int], mate: Optional[int]) -> str:
@@ -598,6 +683,8 @@ def build_user_prompt(
     source_path: Optional[str] = None,
     boards_at: str = "tier3",
     periodic_every: int = 6,
+    audience_level: Optional[str] = None,
+    recipient: Optional[str] = None,
 ) -> str:
     headers = game.headers
     # Display name per side: real PGN header → filename parse → colour (data-back;
@@ -656,6 +743,24 @@ def build_user_prompt(
     user_note_block = (
         f"\n## Personal note from the user about this game\n> {user_note}\n"
         if user_note
+        else ""
+    )
+
+    audience_level_block = (
+        f"\n## Audience calibration\nThis report will be read by someone at the "
+        f"**{audience_level}** level. Calibrate your language and chess depth to that "
+        f"reader — vocabulary, how much you explain tactical motifs, how many moves you "
+        f"quote in variations.\n"
+        if audience_level
+        else ""
+    )
+
+    recipient_block = (
+        f"\n## Recipient\nThis report is for: **{recipient}**. "
+        f"Use this as the primary trigger for Gift/Keepsake sub-mode — address the "
+        f"report to this person directly in second person, with the relationship you can "
+        f"infer from the note and who-played context.\n"
+        if recipient
         else ""
     )
 
@@ -732,6 +837,8 @@ def build_user_prompt(
     except Exception:
         daily_block = ""
 
+    decisive_block = _decisive_moments(game, tiers)
+
     return f"""# Game to analyze
 
 ## Metadata
@@ -759,11 +866,11 @@ def build_user_prompt(
 {knowledge_section}
 ## Player context
 {chr(10).join(context_lines) if context_lines else "(No player context provided — speculate cautiously, based on the moves alone.)"}
-{user_note_block}
+{audience_level_block}{recipient_block}{user_note_block}
 ## Final engine evaluation
 {_format_eval(game.final_eval_cp, game.final_mate)}
 
-## Move-by-move data
+{decisive_block}## Move-by-move data
 Each entry includes the played move, the engine's preferred move, centipawn loss from the mover's POV, a classification, the game phase, a `tier` for how much commentary to write, and optional `flags`. Tiers 2 and 3 also include eval before/after, the engine's principal variation, and top alternatives.
 
 ```json
@@ -790,6 +897,8 @@ def generate_narrative(
     source_path: Optional[str] = None,
     boards_at: str = "tier3",
     periodic_every: int = 6,
+    audience_level: Optional[str] = None,
+    recipient: Optional[str] = None,
 ) -> str:
     """
     Generate the narrative via streaming. If `live_stream_to` is a file-like
@@ -808,6 +917,7 @@ def generate_narrative(
         game, tiers, user_context, user_note=user_note,
         with_knowledge=with_knowledge, source_path=source_path,
         boards_at=boards_at, periodic_every=periodic_every,
+        audience_level=audience_level, recipient=recipient,
     )
     system_prompt = _build_system_prompt(
         use_case, with_style_guide=with_style_guide, with_references=with_references

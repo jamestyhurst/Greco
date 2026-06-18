@@ -33,9 +33,29 @@ class Settings(BaseModel):
     engine_ok: bool = False
     key_ok: bool = False
 
+    # ngrok — "Share now" ephemeral public tunnel
+    ngrok_auth_token: str = ""
+
+    # Cloudflare R2 — "Publish permanently" cloud storage
+    r2_account_id: str = ""
+    r2_access_key_id: str = ""
+    r2_secret_access_key: str = ""
+    r2_bucket_name: str = ""
+    r2_public_url: str = ""   # e.g. https://pub-xxx.r2.dev or custom domain
+
     @property
     def ready(self) -> bool:
         return self.engine_ok and self.key_ok
+
+    @property
+    def ngrok_ready(self) -> bool:
+        return bool(self.ngrok_auth_token)
+
+    @property
+    def r2_ready(self) -> bool:
+        return all([self.r2_account_id, self.r2_access_key_id,
+                    self.r2_secret_access_key, self.r2_bucket_name,
+                    self.r2_public_url])
 
 
 def _load_config() -> dict:
@@ -66,4 +86,10 @@ def resolve_settings() -> Settings:
         reports_dir=reports_dir,
         engine_ok=bool(engine) and os.path.isfile(engine),
         key_ok=bool(api_key),
+        ngrok_auth_token=cfg.get("ngrok_auth_token") or os.environ.get("NGROK_AUTH_TOKEN") or "",
+        r2_account_id=cfg.get("r2_account_id") or os.environ.get("R2_ACCOUNT_ID") or "",
+        r2_access_key_id=cfg.get("r2_access_key_id") or os.environ.get("R2_ACCESS_KEY_ID") or "",
+        r2_secret_access_key=cfg.get("r2_secret_access_key") or os.environ.get("R2_SECRET_ACCESS_KEY") or "",
+        r2_bucket_name=cfg.get("r2_bucket_name") or os.environ.get("R2_BUCKET_NAME") or "",
+        r2_public_url=cfg.get("r2_public_url") or os.environ.get("R2_PUBLIC_URL") or "",
     )

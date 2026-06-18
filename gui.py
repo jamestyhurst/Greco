@@ -40,6 +40,7 @@ SPEED_LABELS = {"Fast (0.5s/move)": 0.5, "Normal (0.8s/move)": 0.8, "Deep (1.5s/
 USE_CASES = ["companion", "coaching", "commentary"]
 SIDES = ["White", "Black", "Neither"]
 MODELS = ["claude-sonnet-4-6", "claude-opus-4-8", "claude-fable-5"]
+AUDIENCE_LEVELS = ["(not specified)", "Beginner", "Casual", "Club", "Advanced"]
 
 # Preferred place to look for PGNs (the E: library), with a sensible fallback.
 PGN_LIBRARY = r"E:\Chess\PGNs"
@@ -266,6 +267,25 @@ class GrecoGUI:
         self.note_var = tk.StringVar()
         ttk.Entry(noterow, textvariable=self.note_var).pack(side="left", fill="x", expand=True, padx=6)
 
+        ctxrow1 = ttk.Frame(opt)
+        ctxrow1.pack(fill="x", pady=(4, 0))
+        ttk.Label(ctxrow1, text="Audience level:").pack(side="left")
+        self.audience_var = tk.StringVar(value=AUDIENCE_LEVELS[0])
+        ttk.Combobox(ctxrow1, textvariable=self.audience_var, values=AUDIENCE_LEVELS,
+                     state="readonly", width=14).pack(side="left", padx=6)
+        ttk.Label(ctxrow1, text="Report is for (recipient):").pack(side="left", padx=(12, 0))
+        self.recipient_var = tk.StringVar()
+        ttk.Entry(ctxrow1, textvariable=self.recipient_var).pack(side="left", fill="x", expand=True, padx=6)
+
+        ctxrow2 = ttk.Frame(opt)
+        ctxrow2.pack(fill="x", pady=(4, 0))
+        ttk.Label(ctxrow2, text="White context:").pack(side="left")
+        self.white_ctx_var = tk.StringVar()
+        ttk.Entry(ctxrow2, textvariable=self.white_ctx_var).pack(side="left", fill="x", expand=True, padx=6)
+        ttk.Label(ctxrow2, text="Black context:").pack(side="left", padx=(6, 0))
+        self.black_ctx_var = tk.StringVar()
+        ttk.Entry(ctxrow2, textvariable=self.black_ctx_var).pack(side="left", fill="x", expand=True, padx=6)
+
         # --- Setup (persistent config, falls back to environment variables) ---
         adv = self._section(main, "♜", "Setup")
         adv.pack(fill="x", **pad)
@@ -477,6 +497,7 @@ class GrecoGUI:
         self.log.configure(state="disabled")
 
         side = self.side_var.get().lower()
+        audience_raw = self.audience_var.get()
         params = {
             "pgn_path": pgn_path,
             "engine": engine,
@@ -485,6 +506,10 @@ class GrecoGUI:
             "note": self.note_var.get().strip() or None,
             "time_limit": SPEED_LABELS.get(self.speed_var.get(), 0.8),
             "model": model,
+            "audience_level": audience_raw if audience_raw != AUDIENCE_LEVELS[0] else None,
+            "recipient": self.recipient_var.get().strip() or None,
+            "white_context": self.white_ctx_var.get().strip() or None,
+            "black_context": self.black_ctx_var.get().strip() or None,
         }
         threading.Thread(target=self._worker, args=(params,), daemon=True).start()
         self.root.after(100, self._poll)
@@ -501,10 +526,10 @@ class GrecoGUI:
                 progress_cb=lambda d, t: self.q.put(("progress", d, t)),
             )
             user_context = {
-                "white_player": None,
-                "black_player": None,
+                "white_player": p.get("white_context"),
+                "black_player": p.get("black_context"),
                 "user_is": p["user_is"],
-                "player_named": False,
+                "player_named": bool(p.get("white_context") or p.get("black_context")),
             }
             self.q.put(("status", "Assigning commentary tiers…"))
             tiers = annotate_with_tiers(game, user_context)
@@ -517,8 +542,9 @@ class GrecoGUI:
                 user_note=p["note"],
                 model=p["model"],
                 live_stream_to=_QueueWriter(self.q),
-                # Recover player names from the filename when the PGN lacks them.
                 source_path=p["pgn_path"],
+                audience_level=p.get("audience_level"),
+                recipient=p.get("recipient"),
             )
             # Name the report informatively ("White vs. Black, Blitz, 2024") and
             # save it under the E: reports library (falls back to Documents).

@@ -1,0 +1,31 @@
+[Event "Opening Theory Reference"]
+[Site "?"]
+[Date "????.??.??"]
+[Round "?"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[ECO "B02"]
+[Opening "Alekhine Defence, Timoshenko Variation"]
+[Annotator "Greco / James Hurst 2026-06-15"]
+
+1. e4 { Timoshenko Variation: both sides capture all the way through to the
+enemy camp. White answers 1...Nf6 with 2.Nc3 rather than the more common
+2.e5, and the game soon turns into a race of mutual captures. } 1... Nf6
+{ Alekhine Defence. Black invites the e-pawn to overextend. }
+2. Nc3 d5 { Black stakes a claim in the centre. }
+3. e5 d4 { White advances anyway; Black gains space and the d4-pawn will
+shortly drive deep into White's position. }
+4. exf6 { White takes the knight; the f-pawn now heads toward the seventh
+rank. } 4... dxc3 { Black recaptures on c3, eliminating the Nc3 and creating
+a passed c-pawn of its own. The mutual-captures sequence is now in full swing. }
+5. fxg7 { White's pawn reaches the seventh rank. } 5... cxd2+
+{ Black's c3-pawn captures d2 with check: a pawn on d2 attacks the e1-square
+diagonally, putting the white king in check. }
+6. Bxd2 { White blocks with the dark-squared bishop. } 6... Bxg7
+{ The key result of the variation: Black's dark-squared bishop occupies g7
+with nothing in front of it. The g-pawn that would normally block the long
+diagonal (a1-h8) has been exchanged away, so the bishop bears down the entire
+diagonal from g7 to a1. Black has active piece play as compensation for the
+pawn imbalance; White has an extra pawn but a disrupted structure. The position
+is sharp and unbalanced. } *

@@ -71,7 +71,33 @@ _FORM = Template("""<!doctype html><html lang="en"><head>
       <div><label>Model</label><select name="model">{% for m in models %}<option value="{{ m }}"{% if m==model %} selected{% endif %}>{{ m }}</option>{% endfor %}</select></div>
     </div>
     <label>Note for Greco (optional)</label>
-    <input type="text" name="note" placeholder="e.g. I'm proud of the queen sacrifice">
+    <input type="text" name="note" placeholder="e.g. I&rsquo;m proud of the queen sacrifice">
+    <div class="row">
+      <div>
+        <label>Audience level</label>
+        <select name="audience_level">
+          <option value="">Not specified</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Casual">Casual</option>
+          <option value="Club">Club player</option>
+          <option value="Advanced">Advanced</option>
+        </select>
+      </div>
+      <div>
+        <label>This report is for (optional)</label>
+        <input type="text" name="recipient" placeholder="e.g. my dad, a non-chess friend">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>White player context (optional)</label>
+        <input type="text" name="white_context" placeholder="e.g. my son, an attacker">
+      </div>
+      <div>
+        <label>Black player context (optional)</label>
+        <input type="text" name="black_context" placeholder="e.g. positional style">
+      </div>
+    </div>
     <button id="go" type="submit">Analyze game</button>
     <p class="hint">Runs on your computer. Analysis takes ~1&ndash;3 minutes; keep this tab open.</p>
   </form>
@@ -88,12 +114,83 @@ _RESULT = Template("""<!doctype html><html lang="en"><head>
   <div class="banner ok">&#10003; Report ready &mdash; {{ base }}</div>
   <div class="row">
     <div><a class="btn go" href="/report/{{ rid }}" target="_blank">Open report &#8599;</a></div>
-    <div><a class="btn alt" href="/report/{{ rid }}/shareable">Download single file (email) &#11015;</a></div>
+    <div><a class="btn alt" href="/report/{{ rid }}/shareable">Download &#11015;</a></div>
     <div><a class="btn alt" href="/">Analyze another game</a></div>
+  </div>
+  <div class="card" style="margin-top:1rem;">
+    <p style="font-weight:700;margin:0 0 8px;font-size:.9rem;color:var(--wine-dark);">Share this report</p>
+    <div class="row">
+      <div><button id="gv-copy"    class="btn alt" data-rid="{{ rid }}" type="button">&#128279; Same WiFi</button></div>
+      <div><button id="gv-ngrok"   class="btn alt" data-rid="{{ rid }}" type="button">&#127760; Share anywhere (ngrok)</button></div>
+      <div><button id="gv-publish" class="btn alt" data-rid="{{ rid }}" type="button">&#9729; Publish permanently</button></div>
+    </div>
+    <p class="hint" id="gv-share-hint" style="margin-top:8px;"></p>
   </div>
   <p class="hint">Saved to: {{ saved_dir }}</p>
   <iframe src="/report/{{ rid }}" style="width:100%;height:78vh;border:1px solid var(--line);border-radius:12px;margin-top:16px;background:#fff;"></iframe>
-</div></body></html>""")
+</div>
+<script>(function(){
+  var hint = document.getElementById('gv-share-hint');
+  function showHint(msg){ hint.textContent = msg; }
+
+  // --- Same-WiFi link (LAN IP) ---
+  var btnCopy = document.getElementById('gv-copy');
+  btnCopy.addEventListener('click', function(){
+    var rid = btnCopy.getAttribute('data-rid');
+    fetch('/lan-url').then(function(r){ return r.json(); }).then(function(d){
+      var url = d.url + '/report/' + rid;
+      navigator.clipboard.writeText(url).then(function(){
+        btnCopy.textContent = '✓ Copied!';
+        showHint('Link: ' + url + ' — works for anyone on your WiFi.');
+        setTimeout(function(){ btnCopy.textContent = '🔗 Same WiFi'; }, 3000);
+      });
+    }).catch(function(){ showHint('Could not copy — open the report and copy from the address bar.'); });
+  });
+
+  // --- Anywhere link (ngrok tunnel) ---
+  var btnNgrok = document.getElementById('gv-ngrok');
+  btnNgrok.addEventListener('click', function(){
+    var rid = btnNgrok.getAttribute('data-rid');
+    fetch('/ngrok-url').then(function(r){ return r.json(); }).then(function(d){
+      if(!d.url){
+        showHint('ngrok not running — add "ngrok_auth_token" to config.json and restart Greco Web.');
+        return;
+      }
+      var url = d.url + '/report/' + rid;
+      navigator.clipboard.writeText(url).then(function(){
+        btnNgrok.textContent = '✓ Copied!';
+        showHint('Link: ' + url + ' — works anywhere, as long as Greco Web is running.');
+        setTimeout(function(){ btnNgrok.textContent = '🌐 Share anywhere (ngrok)'; }, 3000);
+      });
+    }).catch(function(){ showHint('Could not reach ngrok — check your auth token.'); });
+  });
+
+  // --- Publish permanently (R2) ---
+  var btnPublish = document.getElementById('gv-publish');
+  btnPublish.addEventListener('click', function(){
+    var rid = btnPublish.getAttribute('data-rid');
+    btnPublish.textContent = 'Uploading…';
+    btnPublish.disabled = true;
+    fetch('/report/' + rid + '/publish', {method: 'POST'})
+      .then(function(r){
+        if(r.status === 503){ return r.json().then(function(d){ throw new Error(d.detail); }); }
+        if(!r.ok){ throw new Error('Upload failed (' + r.status + ')'); }
+        return r.json();
+      })
+      .then(function(d){
+        navigator.clipboard.writeText(d.url).then(function(){
+          showHint('Published! Link copied: ' + d.url);
+        }).catch(function(){ showHint('Published! Link: ' + d.url); });
+        btnPublish.textContent = '✓ Published';
+      })
+      .catch(function(e){
+        showHint(e.message || 'Publish failed — check config.json for r2_* keys.');
+        btnPublish.textContent = '☁ Publish permanently';
+        btnPublish.disabled = false;
+      });
+  });
+})();</script>
+</body></html>""")
 
 _ERROR = Template("""<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -103,6 +200,58 @@ _ERROR = Template("""<!doctype html><html lang="en"><head>
   <p><a class="btn alt" href="/">&larr; Back</a></p>
   {% if detail %}<pre>{{ detail }}</pre>{% endif %}
 </div></body></html>""")
+
+
+_WAITING = Template("""<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analysing&hellip; &mdash; Greco</title><style>{{ base_css|safe }}
+.spinner{font-size:2.8rem;display:inline-block;animation:spin 2s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.status-wrap{text-align:center;padding:36px 20px;}
+</style></head><body>
+<div class="wrap">
+  <div class="banner ok" id="s-banner">Analysing your game&hellip;</div>
+  <div class="card status-wrap">
+    <div class="spinner">&#9818;</div>
+    <p class="sub" id="s-text" style="margin-top:18px;">
+      Stockfish is evaluating every move, then Claude writes the report.
+      This usually takes 1&ndash;3 minutes.
+    </p>
+    <p class="hint" id="s-err" style="display:none;color:#b03030;"></p>
+  </div>
+  <p class="hint" style="text-align:center;">Keep this tab open &mdash; you&rsquo;ll be taken to your report automatically.</p>
+  <p style="text-align:center;margin-top:8px;"><a class="btn alt" style="display:inline-block;width:auto;padding:8px 20px;" href="/">Cancel &amp; start over</a></p>
+</div>
+<script>
+(function(){
+  var jobId = "{{ job_id }}";
+  var done = false;
+  function poll(){
+    if(done) return;
+    fetch("/job/" + jobId)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.status === "done"){
+          done = true;
+          document.getElementById("s-banner").textContent = "✓ Report ready — redirecting…";
+          document.getElementById("s-text").textContent = "Taking you to your report now.";
+          window.location.href = "/result/" + jobId;
+        } else if(d.status === "failed"){
+          done = true;
+          var b = document.getElementById("s-banner");
+          b.className = "banner warn"; b.textContent = "Analysis failed";
+          document.getElementById("s-text").style.display = "none";
+          var e = document.getElementById("s-err");
+          e.style.display = ""; e.textContent = d.error || "An unexpected error occurred. Please try again.";
+        }
+      })
+      .catch(function(){ /* transient network error — retry on next tick */ });
+  }
+  poll();
+  setInterval(poll, 2000);
+})();
+</script>
+</body></html>""")
 
 
 def render_form(s: Settings) -> str:
@@ -119,3 +268,7 @@ def render_result(base: str, rid: int, saved_dir: str) -> str:
 
 def render_error(message: str, detail: str = "") -> str:
     return _ERROR.render(base_css=BASE_CSS, message=message, detail=detail)
+
+
+def render_waiting(job_id: str) -> str:
+    return _WAITING.render(base_css=BASE_CSS, job_id=job_id)

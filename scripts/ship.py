@@ -111,6 +111,28 @@ def main() -> None:
             fail("core modules do not import — fix before shipping:\n" + (r.stderr or r.stdout))
         print("      " + (r.stdout.strip() or "imports OK"))
 
+    # 2b) Optional verify gate: deterministic contradiction check against saved
+    #     fixture files (no API key or Stockfish needed). If the fixtures aren't
+    #     present this is a no-op; when they are, a deterministic contradiction
+    #     blocks the ship just like a failing test.
+    if not args.skip_tests:
+        _fx_analysis = REPO / "tests" / "fixtures" / "sample_analysis.json"
+        _fx_report = REPO / "tests" / "fixtures" / "sample_report.md"
+        if _fx_analysis.is_file() and _fx_report.is_file():
+            print("      verify gate: checking saved fixtures for contradictions...")
+            _vr = subprocess.run(
+                [py(), str(REPO / "tools" / "verify_report.py"),
+                 "--analysis", str(_fx_analysis),
+                 "--report", str(_fx_report),
+                 "--no-llm"],
+                cwd=REPO,
+                env={**os.environ, "PYTHONUTF8": "1"},
+            )
+            if _vr.returncode != 0:
+                fail("verify_report found deterministic contradictions in the saved fixtures — "
+                     "fix the narrator, then re-run ship.py.")
+            print("      verify gate: OK — no contradictions in saved fixtures.")
+
     # 3) Secret scan — ironclad; the repo is public.
     step(3, "Scanning for secrets...")
     tracked = subprocess.run(["git", "ls-files", "--error-unmatch", "config.json"],

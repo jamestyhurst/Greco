@@ -32,9 +32,16 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import ssl
 import sys
 import urllib.request
 from pathlib import Path
+
+try:
+    import truststore
+    _SSL_CONTEXT = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+except Exception:
+    _SSL_CONTEXT = None
 
 GRECO_DIR = Path(__file__).resolve().parent.parent
 KNOWLEDGE_DIR = GRECO_DIR / "knowledge"
@@ -52,7 +59,7 @@ def download_gutenberg(book_id: int) -> str:
     for url in urls:
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Greco corpus builder"})
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with urllib.request.urlopen(req, timeout=60, context=_SSL_CONTEXT) as resp:
                 raw = resp.read()
             # Gutenberg text is UTF-8 for modern files; fall back leniently.
             try:

@@ -48,6 +48,7 @@ did before the corpus existed.
 
 from __future__ import annotations
 
+import io
 import json
 import re
 import sqlite3
@@ -61,7 +62,7 @@ BUCKETS = ("opening_theory", "chess_principles")
 
 # Bump when the indexing/cleaning logic changes (not just the texts), so the
 # staleness check forces a rebuild even when the source files are untouched.
-INDEX_VERSION = "2"
+INDEX_VERSION = "3"
 
 # Chunking: passages of roughly this many words, so a retrieved excerpt is big
 # enough to carry a real idea but small enough to quote. A little overlap keeps a
@@ -166,6 +167,25 @@ def _iter_book_dirs():
                 yield bucket, book_dir
 
 
+def _iter_pgn_paths():
+    """Yield Path for each .pgn in knowledge/opening_theory/games/."""
+    games_dir = KNOWLEDGE_DIR / "opening_theory" / "games"
+    if not games_dir.is_dir():
+        return
+    for path in sorted(games_dir.glob("*.pgn")):
+        yield path
+
+
+def _iter_md_paths():
+    """Yield Path for each .md file in knowledge/terminology/ (non-hidden)."""
+    term_dir = KNOWLEDGE_DIR / "terminology"
+    if not term_dir.is_dir():
+        return
+    for path in sorted(term_dir.glob("*.md")):
+        if not path.name.startswith((".", "_")):
+            yield path
+
+
 def _read_meta(book_dir: Path, bucket: str) -> Dict[str, object]:
     """Per-book metadata from meta.json, with sensible fallbacks."""
     meta: Dict[str, object] = {}
@@ -188,6 +208,75 @@ def _read_meta(book_dir: Path, bucket: str) -> Dict[str, object]:
         "author": author,
         "year": year,
         "bucket": bucket,
+    }
+
+
+def _pgn_to_text(pgn_path: Path) -> str:
+    """Extract all annotation comments from a PGN file as joinable prose."""
+    try:
+        import chess.pgn
+        text = pgn_path.read_text(encoding="utf-8", errors="ignore")
+        game = chess.pgn.read_game(io.StringIO(text))
+        if game is None:
+            return ""
+        comments = []
+        if game.comment:
+            comments.append(game.comment.strip())
+        for node in game.mainline():
+            if node.comment:
+                comments.append(node.comment.strip())
+        return "\n\n".join(c for c in comments if c)
+    except Exception:
+        return ""
+
+
+def _pgn_meta(pgn_path: Path) -> Dict[str, object]:
+    """Attribution metadata drawn from PGN headers."""
+    title = pgn_path.stem.replace("-", " ").title()
+    annotator = ""
+    year: Optional[int] = None
+    try:
+        import chess.pgn
+        text = pgn_path.read_text(encoding="utf-8", errors="ignore")
+        game = chess.pgn.read_game(io.StringIO(text))
+        if game is not None:
+            h = game.headers
+            title = h.get("Opening") or h.get("Event") or title
+            annotator = h.get("Annotator") or ""
+            date_str = h.get("Date") or ""
+            if date_str and date_str[:4].isdigit():
+                try:
+                    year = int(date_str[:4])
+                except ValueError:
+                    pass
+    except Exception:
+        pass
+    return {
+        "book_id": pgn_path.stem,
+        "title": title,
+        "author": annotator,
+        "year": year,
+        "bucket": "opening_theory",
+    }
+
+
+def _md_meta(md_path: Path) -> Dict[str, object]:
+    """Title drawn from the first # heading; author is the Greco project."""
+    title = md_path.stem.replace("-", " ").title()
+    try:
+        for line in md_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("# "):
+                title = stripped[2:].strip()
+                break
+    except Exception:
+        pass
+    return {
+        "book_id": md_path.stem,
+        "title": title,
+        "author": "Greco project",
+        "year": None,
+        "bucket": "terminology",
     }
 
 
@@ -247,6 +336,34 @@ def _clean_chunk(text: str) -> str:
     return text.strip()
 
 
+# Markdown stripping: convert .md prose to plain text for indexing.
+_MD_HEADING_RE = re.compile(r"^#{1,6}\s+.*$", re.MULTILINE)
+_MD_TABLE_ROW_RE = re.compile(r"^\|.*\|$", re.MULTILINE)
+_MD_HR_RE = re.compile(r"^[-*_]{3,}\s*$", re.MULTILINE)
+_MD_BOLD_ITALIC_RE = re.compile(r"\*{1,3}([^*\n]+)\*{1,3}|_{1,3}([^_\n]+)_{1,3}")
+_MD_CODE_INLINE_RE = re.compile(r"`([^`]+)`")
+_MD_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]+\)")
+_MD_BLOCKQUOTE_RE = re.compile(r"^>\s*", re.MULTILINE)
+_MD_BULLET_RE = re.compile(r"^[-*+]\s+", re.MULTILINE)
+_MD_ORDERED_RE = re.compile(r"^\d+\.\s+", re.MULTILINE)
+
+
+def _strip_markdown(text: str) -> str:
+    """Convert markdown to plain prose for FTS indexing."""
+    text = _MD_HEADING_RE.sub("", text)
+    text = _MD_TABLE_ROW_RE.sub("", text)
+    text = _MD_HR_RE.sub("", text)
+    text = _MD_BOLD_ITALIC_RE.sub(lambda m: (m.group(1) or m.group(2) or ""), text)
+    text = _MD_CODE_INLINE_RE.sub(r"\1", text)
+    text = _MD_LINK_RE.sub(r"\1", text)
+    text = _MD_BLOCKQUOTE_RE.sub("", text)
+    text = _MD_BULLET_RE.sub("", text)
+    text = _MD_ORDERED_RE.sub("", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
 def _is_quotable_prose(text: str) -> bool:
     """True if a chunk is mostly teaching prose (worth quoting), not a game score
     or a diagram fragment."""
@@ -262,7 +379,7 @@ def _is_quotable_prose(text: str) -> bool:
 
 
 def _corpus_fingerprint() -> str:
-    """A string that changes whenever any text.txt is added, edited, or removed —
+    """A string that changes whenever any source file is added, edited, or removed —
     used to decide when the index must be rebuilt."""
     parts: List[str] = []
     for bucket, book_dir in _iter_book_dirs():
@@ -270,6 +387,18 @@ def _corpus_fingerprint() -> str:
         try:
             st = tpath.stat()
             parts.append(f"{bucket}/{book_dir.name}:{st.st_size}:{int(st.st_mtime)}")
+        except OSError:
+            continue
+    for path in _iter_pgn_paths():
+        try:
+            st = path.stat()
+            parts.append(f"pgn/{path.stem}:{st.st_size}:{int(st.st_mtime)}")
+        except OSError:
+            continue
+    for path in _iter_md_paths():
+        try:
+            st = path.stat()
+            parts.append(f"md/{path.stem}:{st.st_size}:{int(st.st_mtime)}")
         except OSError:
             continue
     return f"v{INDEX_VERSION}|" + "|".join(sorted(parts))
@@ -337,6 +466,51 @@ def build_index() -> int:
                 cleaned = _clean_chunk(chunk)
                 if not _is_quotable_prose(cleaned):
                     continue  # skip game scores, diagrams, sparse fragments
+                conn.execute(
+                    "INSERT INTO chunks (text, book_id, title, author, year, bucket, chunk_index)"
+                    " VALUES (?,?,?,?,?,?,?)",
+                    (cleaned, meta["book_id"], meta["title"], meta["author"],
+                     meta["year"], meta["bucket"], kept),
+                )
+                kept += 1
+                total += 1
+
+        # Index PGN annotation comments.
+        for pgn_path in _iter_pgn_paths():
+            raw = _pgn_to_text(pgn_path)
+            if not raw or len(raw) < _MIN_TEXT_CHARS:
+                continue
+            meta = _pgn_meta(pgn_path)
+            kept = 0
+            for chunk in chunk_text(raw):
+                cleaned = _clean_chunk(chunk)
+                if not _is_quotable_prose(cleaned):
+                    continue
+                conn.execute(
+                    "INSERT INTO chunks (text, book_id, title, author, year, bucket, chunk_index)"
+                    " VALUES (?,?,?,?,?,?,?)",
+                    (cleaned, meta["book_id"], meta["title"], meta["author"],
+                     meta["year"], meta["bucket"], kept),
+                )
+                kept += 1
+                total += 1
+
+        # Index terminology/glossary markdown files.
+        for md_path in _iter_md_paths():
+            try:
+                raw = _strip_markdown(
+                    md_path.read_text(encoding="utf-8", errors="ignore")
+                )
+            except Exception:
+                continue
+            if len(raw) < _MIN_TEXT_CHARS:
+                continue
+            meta = _md_meta(md_path)
+            kept = 0
+            for chunk in chunk_text(raw):
+                cleaned = _clean_chunk(chunk)
+                if not _is_quotable_prose(cleaned):
+                    continue
                 conn.execute(
                     "INSERT INTO chunks (text, book_id, title, author, year, bucket, chunk_index)"
                     " VALUES (?,?,?,?,?,?,?)",
@@ -697,8 +871,7 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
     """
     try:
         themes = themes_from_game(game)
-        all_passages = retrieve(themes, opening_name=opening_name, top_k=max_passages)
-        passages = [p for p in all_passages if _is_human_authored(p)]
+        passages = retrieve(themes, opening_name=opening_name, top_k=max_passages)
     except Exception:
         return ""
     if not passages:
@@ -799,13 +972,22 @@ def load_knowledge_for_game(game, opening_name: Optional[str] = None,
 # --------------------------------------------------------------------------- #
 def _print_status() -> None:
     books = list(_iter_book_dirs())
+    pgns = list(_iter_pgn_paths())
+    mds = list(_iter_md_paths())
     print(f"knowledge corpus at: {KNOWLEDGE_DIR}")
-    if not books:
-        print("  (no books yet — deposit texts per knowledge/README.md)")
+    if not books and not pgns and not mds:
+        print("  (no sources yet — deposit files per knowledge/README.md)")
     for bucket, book_dir in books:
         meta = _read_meta(book_dir, bucket)
         yr = f", {meta['year']}" if meta["year"] else ""
-        print(f"  [{bucket}] {meta['title']}{yr}  <{book_dir.name}>")
+        print(f"  [text/{bucket}] {meta['title']}{yr}  <{book_dir.name}>")
+    for path in pgns:
+        meta = _pgn_meta(path)
+        yr = f", {meta['year']}" if meta["year"] else ""
+        print(f"  [pgn/opening_theory] {meta['title']}{yr}  <{path.name}>")
+    for path in mds:
+        meta = _md_meta(path)
+        print(f"  [md/terminology] {meta['title']}  <{path.name}>")
     if DB_PATH.exists():
         try:
             conn = _connect()

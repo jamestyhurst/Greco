@@ -20,13 +20,17 @@ from fastapi.responses import HTMLResponse
 from version import __version__
 from web.config import resolve_settings
 from web.routers import analysis
+from web import ngrok_tunnel
 from web.templates import render_form
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Apply settings/env once at startup (mirrors the old Flask resolve at import).
-    resolve_settings()
+    s = resolve_settings()
+    if s.ngrok_ready:
+        tunnel_url = ngrok_tunnel.start_tunnel(s.ngrok_auth_token)
+        if tunnel_url:
+            print(f"  ngrok tunnel active — share reports anywhere: {tunnel_url}/report/<id>")
     yield
 
 
@@ -61,9 +65,14 @@ if __name__ == "__main__":
     import uvicorn
 
     s = resolve_settings()
+    from web.routers.analysis import _lan_base_url
+    _base = _lan_base_url()
     print(f"Greco Web {__version__} — open http://127.0.0.1:5000 in your browser.")
+    print(f"  Share reports with devices on your WiFi via {_base}/report/<id>")
     print("  Interactive API docs at http://127.0.0.1:5000/docs")
     if not s.ready:
         print("  Heads up: Stockfish path or API key not set — open the desktop app's settings once.")
     print("  Press Ctrl+C to stop.")
-    uvicorn.run(app, host="127.0.0.1", port=5000)
+    # Bind to all interfaces so devices on the same WiFi can open share links.
+    # The API key is never sent to the browser; reports are read-only to guests.
+    uvicorn.run(app, host="0.0.0.0", port=5000)

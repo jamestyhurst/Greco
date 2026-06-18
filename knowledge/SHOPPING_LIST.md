@@ -66,12 +66,12 @@ content the model does *not* reliably know:
 
 | Status | Title | Author | Year | Lang | Source | Notes |
 |---|---|---|---|---|---|---|
-| `[ ]` | Chess Openings, Ancient and Modern | Freeborough & Ranken | 1889/1896 | en | [archive.org](https://archive.org/details/chessopeningsanc00freerich) | Major English openings manual; OCR text available |
+| `[x]` | **Chess Openings, Ancient and Modern** | Freeborough & Ranken | 1889/1896 | en | [archive.org](https://archive.org/details/chessopeningsanc00freerich) | **Acquired 2026-06-17.** 92k words; opening_theory bucket. OCR cleaned. |
 | `[ ]` | Handbuch des Schachspiels | Bilguer / von der Lasa | 1843–1916 eds | de | [archive.org](https://archive.org/details/handbuchdesscha00schagoog) | The 19th-c. opening encyclopedia; German |
 | `[ ]` | Modern Chess Openings, 1st ed. | Griffith & White | 1911 | en | verify (archive.org) | EARLY eds only — later MCO editions are NOT public domain |
 | `[ ]` | The Modern Chess Instructor | Wilhelm Steinitz | 1889/1895 | en | verify (archive.org) | Opening theory + method from a world champion |
-| `[ ]` | Chess Generalship | Franklin K. Young | 1910 | en | [Gutenberg #55278](https://www.gutenberg.org/ebooks/55278) | Idiosyncratic but PD; verify year |
-| `[ ]` | The Blue Book of Chess (Staunton-based) | — | pre-1930 | en | [Gutenberg #16377](https://www.gutenberg.org/ebooks/16377) | Rudiments + openings |
+| `[x]` | **Chess Generalship** | Franklin K. Young | 1910 | en | [Gutenberg #55278](https://www.gutenberg.org/ebooks/55278) | **Acquired 2026-06-17.** 40k words; opening_theory bucket |
+| `[x]` | **The Blue Book of Chess (Staunton-based)** | Howard Staunton (ed.) | 1889 | en | [Gutenberg #16377](https://www.gutenberg.org/ebooks/16377) | **Acquired 2026-06-17.** 103k words; opening_theory bucket |
 
 ## B. Annotated master games & tournament books — HIGH  ·  `opening_theory` or `chess_principles` (+ PGN → `opening_theory/games/`)
 
@@ -79,9 +79,10 @@ content the model does *not* reliably know:
 |---|---|---|---|---|---|---|
 | `[ ]` | New York 1924 (tournament book) | annot. Alekhine | 1925 | en | verify (archive.org) | Famous deep annotations |
 | `[ ]` | Hastings 1895 (tournament book) | — | 1896 | en | verify (archive.org) | Landmark event, annotated |
-| `[ ]` | Morphy's Games of Chess | Löwenthal / Sergeant | 1860/1916 | en | verify (Gutenberg/archive) | Tactics-rich; great PGN source |
+| `[x]` | **The Exploits of Paul Morphy (Edge)** | Frederick Milnes Edge | 1859 | en | [Gutenberg #34180](https://www.gutenberg.org/ebooks/34180) | **Acquired 2026-06-17.** 54k words; opening_theory bucket. Morphy's games in Europe with narrative. |
+| `[x]` | **Morphy's Games of Chess (Löwenthal ed.)** | Johann Jacob Löwenthal (ed.) | 1860 | en | [archive.org](https://archive.org/details/morphysgamesches00lowe) | **Acquired 2026-06-17.** 156k words; opening_theory bucket. OCR cleaned. |
 | `[ ]` | Mr. Blackburne's Games at Chess | J. H. Blackburne | 1899 | en | verify (archive.org) | Attacking classics |
-| `[ ]` | Chess History and Reminiscences | H. E. Bird | 1893 | en | [Gutenberg #4902](https://www.gutenberg.org/ebooks/4902) | History + games |
+| `[x]` | **Chess History and Reminiscences** | H. E. Bird | 1893 | en | [Gutenberg #4902](https://www.gutenberg.org/ebooks/4902) | **Acquired 2026-06-17.** 65k words; opening_theory bucket |
 | `[ ]` | British Chess Magazine (pre-1930 vols) | — | 1881– | en | [archive.org](https://archive.org/details/britishchessmaga1882watk) | Periodical: annotated games + theory |
 
 ## C. Endgames — MEDIUM  ·  bucket: `chess_principles`
@@ -103,8 +104,8 @@ content the model does *not* reliably know:
 | Status | Title | Author | Year | Lang | Source | Notes |
 |---|---|---|---|---|---|---|
 | `[x]` | **Chess Fundamentals** | José Raúl Capablanca | 1921 | en | [Gutenberg #33870](https://www.gutenberg.org/ebooks/33870) | **Acquired 2026-06-13.** English original |
-| `[ ]` | Chess Strategy | Edward Lasker | 1915 | en | [Gutenberg #5614](https://www.gutenberg.org/ebooks/5614) | English original; clean Gutenberg text |
-| `[ ]` | Chess and Checkers: The Way to Mastership | Edward Lasker | 1918 | en | [Gutenberg #4913](https://www.gutenberg.org/ebooks/4913) | English original |
+| `[x]` | **Chess Strategy** | Edward Lasker | 1915 | en | [Gutenberg #5614](https://www.gutenberg.org/ebooks/5614) | **Acquired 2026-06-17.** 81k words; chess_principles bucket |
+| `[x]` | **Chess and Checkers: The Way to Mastership** | Edward Lasker | 1918 | en | [Gutenberg #4913](https://www.gutenberg.org/ebooks/4913) | **Acquired 2026-06-17.** 55k words; chess_principles bucket |
 | `[ ]` | Common Sense in Chess | Emanuel Lasker | 1896 | en | verify (archive.org) | English original; not found on Gutenberg in last check |
 | `[ ]` | The Principles of Chess in Theory and Practice | James Mason | 1894 | en | verify (archive.org) | English original |
 | `[ ]` | My System / Mein System | Aron Nimzowitsch | 1925 (de); Eng. trans. Hereford 1929 | de/en | verify | German original PD; the **1929 Hereford English translation** may be PD — confirm before quoting it |
