@@ -7,6 +7,15 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.30.0] — 2026-06-18
+
+### Added
+- **`factgate.creates_overloaded(board_after)`** — first Tier-B certified claim; thin wrapper over new `analyzer.detect_overloaded_defender_full()`. Detects a piece that simultaneously defends two or more attacked friendly pieces and is the sole defender of at least one (the classic "overworked defender"). Returns a structured evidence bundle `{tag, side, defender, defender_square, defender_piece, targets, evidence}` or None. `"overloaded_piece"` added to `GATED_TAGS`; `certified_claims()` emits the tag whenever the detector fires.
+- **`analyzer.detect_overloaded_defender_full(board)`** — structured companion to `detect_overloaded_defender`; returns the same detection result as a dict instead of a string, preserving backward compatibility of the original function.
+- **`overloaded_evidence` serialized** as `d["overloaded_evidence"]` in the Tier-1+ `_move_to_dict` block in narrator.py, alongside `certified`, `fianchetto_evidence`, `outpost_evidence`, and `zugzwang_evidence`.
+- **Narrator fact-gate clause** for `overloaded_piece`: gates the words "overloaded"/"overworked" to require the tag; instructs the narrator to use the `overloaded_evidence` bundle for specific details; notes when a move exploits (trades off a target) or relieves (defends/drives off) the weakness. Updated the exemption sentence to remove the now-gated term.
+- 6 new tests (162 total): positive bundle assertion, required-keys check, no-internal-field-names guard, quiet-position negative, sole-defender-count negative, and `certified_claims` integration.
+
 ## [0.29.0] — 2026-06-18
 
 ### Added

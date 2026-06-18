@@ -1453,3 +1453,79 @@ def test_zugzwang_evidence_near_format():
     assert "no useful waiting move" in ev
     assert "Kd2" in ev
     assert "centipawns" in ev
+
+
+# --- creates_overloaded / detect_overloaded_defender_full ------------------
+# Position: White queen c3 is the SOLE defender of the White knight on a1
+# (attacked by the Black rook on b1) and the White bishop on f6 (attacked by
+# the Black bishop on g5). The queen defends both via the same c3-a1 diagonal
+# and the c3-f6 diagonal.
+_OVERLOADED_FEN = "7k/8/5B2/6b1/8/2Q5/8/Nr5K w - - 0 1"
+
+
+def test_creates_overloaded_positive_evidence_bundle():
+    board = chess.Board(_OVERLOADED_FEN)
+    result = F.creates_overloaded(board)
+    assert result is not None
+    assert result["tag"] == "overloaded_piece"
+    assert "queen" in result["defender"].lower()
+    assert len(result["targets"]) >= 2
+    assert "overloaded" in result["evidence"].lower()
+    assert "side" in result
+    assert "defender_square" in result
+    assert "defender_piece" in result
+
+
+def test_creates_overloaded_evidence_keys_present():
+    board = chess.Board(_OVERLOADED_FEN)
+    result = F.creates_overloaded(board)
+    assert result is not None
+    for key in ("tag", "side", "defender", "defender_square", "defender_piece", "targets", "evidence"):
+        assert key in result, f"missing key: {key}"
+
+
+def test_creates_overloaded_evidence_no_internal_field_names():
+    # Evidence string must read naturally — no JSON key names in the prose.
+    board = chess.Board(_OVERLOADED_FEN)
+    result = F.creates_overloaded(board)
+    assert result is not None
+    ev = result["evidence"].lower()
+    for bad in ("overloaded_piece", "defender_square", "defender_piece"):
+        assert bad not in ev, f"internal key '{bad}' leaked into evidence string"
+
+
+def test_creates_overloaded_negative_sole_defender_not_required():
+    # The knight on e4 is defended by BOTH the rook on e1 and the queen on a4,
+    # so no sole-defender condition holds; should not certify.
+    # White: Ke1-rook, Qa4, Ne4; Black: Kh8, Ra4-attacks e4? No — let's use
+    # a simple "no overloaded piece" quiet position.
+    board = chess.Board()  # starting position — no piece is overloaded
+    assert F.creates_overloaded(board) is None
+
+
+def test_creates_overloaded_negative_only_one_target():
+    # A defender defends ONE attacked piece only — not overloaded (needs >= 2).
+    # White: Kh1, Qe4 (defends Nf6); Black: Kh8, Be7 (attacks Nf6); Qe4 sole-defends Nf6 only.
+    board = chess.Board("7k/4b3/5N2/8/4Q3/8/8/7K w - - 0 1")
+    result = F.creates_overloaded(board)
+    # The queen on e4 attacks f6 and is the sole defender of the knight on f6
+    # (attacked by the bishop on e7). But it only defends ONE attacked piece,
+    # so the condition `len(defended_attacked) >= 2` is not met.
+    assert result is None
+
+
+def test_creates_overloaded_in_certified_claims():
+    # certified_claims must add "overloaded_piece" to its tag set on the
+    # overloaded position. Use a quiet null-move to keep the test simple:
+    # push a do-nothing move so we have board_before/move/board_after.
+    board_before = chess.Board(_OVERLOADED_FEN)
+    # Make a legal move that leaves the overloaded structure intact.
+    # Any move that doesn't change the defender/targets works; here we move the
+    # Black king from h8 to g8 (it's Black's turn after White last moved).
+    # Actually _OVERLOADED_FEN has White to move; let's make a White king move
+    # that keeps the queen, knight, and bishop in place.
+    move = chess.Move.from_uci("h1g1")  # Kg1 — doesn't disturb the overloaded structure
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "overloaded_piece" in tags

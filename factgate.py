@@ -41,6 +41,7 @@ from analyzer import (  # pure board helpers — none touch Stockfish or the API
     PIECE_NAMES,
     detect_discovered_attack,
     detect_double_attack,
+    detect_overloaded_defender_full,
     detect_pin,
     detect_royal_alignment,
     detect_skewer,
@@ -1180,6 +1181,16 @@ def creates_discovered_attack(
     return (result is not None, result)
 
 
+def creates_overloaded(board_after: chess.Board) -> Optional[dict]:
+    """Certifies an 'overloaded / overworked defender': a piece that simultaneously
+    defends two or more attacked friendly pieces and is the sole defender of at
+    least one — it physically cannot save both. Thin wrapper over
+    detect_overloaded_defender_full; returns the evidence bundle when certified,
+    None otherwise.
+    """
+    return detect_overloaded_defender_full(board_after)
+
+
 # --------------------------------------------------------------------------- #
 # Zugzwang (engine-dependent, pre-computed scores).
 # --------------------------------------------------------------------------- #
@@ -1332,6 +1343,7 @@ GATED_TAGS = (
     "infiltration",
     "fianchetto",
     "zugzwang",
+    "overloaded_piece",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -1447,5 +1459,9 @@ def certified_claims(
         fz = _safe(lambda c=col: is_fianchetto(board_after, c))
         if fz and fz[0]:
             tags.add("fianchetto")
+
+    ov = _safe(lambda: creates_overloaded(board_after))
+    if ov is not None:
+        tags.add("overloaded_piece")
 
     return tags

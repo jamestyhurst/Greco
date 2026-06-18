@@ -970,6 +970,51 @@ def detect_overloaded_defender(board: chess.Board) -> Optional[str]:
     return None
 
 
+def detect_overloaded_defender_full(board: chess.Board) -> Optional[dict]:
+    """Structured variant of detect_overloaded_defender. Returns an evidence
+    bundle dict (tag, side, defender, defender_square, defender_piece, targets,
+    evidence) for use by factgate.creates_overloaded, or None if no overloaded
+    defender exists. The detection logic is identical to detect_overloaded_defender.
+    """
+    for sq, piece in board.piece_map().items():
+        color = piece.color
+        enemy = not color
+        defended_attacked = []
+        for tsq in board.attacks(sq):
+            tp = board.piece_at(tsq)
+            if tp is None or tp.color != color:
+                continue
+            if tp.piece_type in (chess.KING, chess.PAWN):
+                continue
+            if not board.is_attacked_by(enemy, tsq):
+                continue
+            defenders = board.attackers(color, tsq)
+            is_sole = len(defenders) == 1 and sq in defenders
+            defended_attacked.append((tp.piece_type, tsq, is_sole))
+        if len(defended_attacked) >= 2 and any(t[2] for t in defended_attacked):
+            side = "White" if color == chess.WHITE else "Black"
+            dname = PIECE_NAMES[piece.piece_type]
+            defender_sq_name = chess.square_name(sq)
+            targets = [
+                f"{PIECE_NAMES[pt]} on {chess.square_name(s)}"
+                for pt, s, _ in defended_attacked
+            ]
+            evidence = (
+                f"{side}'s {dname} on {defender_sq_name} is overloaded — it defends "
+                f"{' and '.join(targets)} (both under attack) and cannot hold both"
+            )
+            return {
+                "tag": "overloaded_piece",
+                "side": side,
+                "defender": f"{dname} on {defender_sq_name}",
+                "defender_square": defender_sq_name,
+                "defender_piece": dname,
+                "targets": targets,
+                "evidence": evidence,
+            }
+    return None
+
+
 def detect_allowed_pawn_fork(board_after: chess.Board, mover_color: bool) -> Optional[str]:
     """
     After the mover's move, can the OPPONENT play a pawn push that forks two of

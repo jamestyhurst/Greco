@@ -6,7 +6,7 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.19.0
+## Where we are — v0.29.0
 
 > See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. **All seven Greco
 > Online phases through Phase 6 are complete.** The web layer is a full multi-user FastAPI
@@ -19,6 +19,14 @@ foundation we're building out from. Versioning is [Semantic](https://semver.org/
 > "featured passage", GitHub Actions CI, a large correctness sweep, and — the structural
 > answer to the "LLM vs. engine" trust problem — the **Output Fact-Gate** (`factgate.py`)
 > plus the **Layer-2 claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`).
+> v0.20.0–v0.29.0 completed the full **18-predicate Tier-A fact-gate library**: every
+> certifiable chess claim (pin, skewer, discovered attack, backward pawn, infiltration,
+> fianchetto, outpost evidence, zugzwang, and more) now has a deterministic detector,
+> an evidence bundle, narrator guidance, and L2 acceptance tests (156 tests total).
+> The voice prompts were also rewritten to align with the design concept (chess witness
+> framing in Companion, human-chess principle in Coaching, spectator-event framing in
+> Commentary) and the web form gained structured context fields (audience level, recipient,
+> per-player context).
 
 ### Baseline (v0.3.0)
 - Working Tkinter GUI over the full pipeline (importers → analyzer → triage → narrator
@@ -133,9 +141,9 @@ was built stays visible.
 | 25 | **Multi-move sacrifice detection** — flag a material-down / eval-up window across plies in code (today the model judges it from the trajectory). | M | todo |
 | 26 | **Auto-strip confabulated variation moves** — promote `find_unverified_variation_moves` from a warning to an enforced edit, once it is trusted not to mangle good prose. | S | **done** |
 | 27 | **GUI/web per-player context fields** — let desktop/web users supply structured "White is my dad, an attacker" context (CLI-only via `--white-context` today). | S | **done** |
-| 28 | **Output Fact-Gate predicate library** (`factgate.py`) — per-ply allow-set of engine-certified claims (fork, pin, rook-lift, outpost, passed-pawn, mate-threat) + scoped prompt rule. The output-side mirror of the input validation gate. | L | **done** (v0.10.0); extended with battery + promotion_threat in v0.18.0 |
+| 28 | **Output Fact-Gate predicate library** (`factgate.py`) — per-ply allow-set of engine-certified claims (fork, pin, rook-lift, outpost, passed-pawn, mate-threat) + scoped prompt rule. The output-side mirror of the input validation gate. | L | **done** (v0.10.0); all 18 Tier-A predicates complete through v0.29.0 |
 | 29 | **Layer-2 claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`) — deterministic CI-safe contradiction checks (exit-1 gate) + an advisory LLM-judge; runs off a saved analysis. | L | **done** (v0.10.0) |
-| 30 | **Grow the predicate library + chess glossary** — more certified claim types; definitions=corpus in `knowledge/`, detection=code predicates (James's output-gate doctrine). | M | todo |
+| 30 | **Grow the predicate library + chess glossary** — Tier-A predicates (18) are done; next is Tier-B predicates (checkable-but-harder: overloaded piece, compensation, tempo, …) from the pacing roadmap in `docs/specs/TERMINOLOGY_TIERS.md`. | M | **Tier-A done** (v0.29.0); Tier-B todo |
 | 31 | **Wire `verify_report` into the release/CI loop** — run the deterministic gate on a sample report in `ship.py` / CI so a confabulation regression fails the build. | S | **done** |
 | 32 | **Essay Mode** — candidate fourth mode; answers chess questions analytically using the knowledge corpus; PGN optional as illustrative material. Design spec pending — see `Developer Notes (Greco)/Handoffs/package-d-essay-mode.md` before implementing. | M | todo (design first) |
 
@@ -145,7 +153,17 @@ was built stays visible.
 - *Private GitHub repo for phone ↔ laptop* — **superseded** by Greco Online: once Greco is
   a website, you just open it on your phone, so there's nothing to git-sync.
 
-**Recently shipped** (newest first): **v0.19.0** — Clickable variation lines in the PGN
+**Recently shipped** (newest first): **v0.29.0** — `is_zugzwang` predicate (spec 18, engine-dependent approximate): null-move probe in `analyzer.py` first pass, sign-correct side-to-move POV conversion, 5-veto ladder, strictness ladder (STRICT/NEAR), full evidence bundle, narrator guidance; 13 new tests including mandatory two-color trébuchet regression. 156 total factgate tests.
+**v0.28.0** — `outpost_evidence()` sibling function: ready-to-quote evidence bundle for certified outpost; serialized as `outpost_evidence` in narrator Tier-1+ block; narrator instruced to quote the `evidence` string. 7 new tests; 143 total.
+**v0.27.0** — `is_fianchetto`: certifies bishop-on-flank + knight-pawn-advanced structure; both-colors loop; pin never suppresses; conservative on damaged structures; evidence bundle per flank with `king_behind` flag. 15 new tests; 136 total.
+**v0.26.0** — `is_infiltration`: rook/queen on 7th/8th or endgame king ≥ rank 6; 5-veto ladder; hanging rook certifies with caveat; evidence bundle with `arrival_file_state` + `confines_king`. Phase threaded through `certified_claims()`. 16 new tests; 121 total.
+**v0.25.0** — `is_backward_pawn`: rear-most on adjacent files, stop square enemy-pawn-controlled, no support lane; home-rank double-step escape; `subtype` + `fixed_level_neighbors` evidence. 10 new tests; 105 total.
+**v0.24.0** — `creates_discovered_attack` + `detect_discovered_attack` in `analyzer.py`: plain / discovered check / double check; causation guard binds each revealed target to the specific vacated square; pinned-rear flag; en passant capture square joins vacated set. 9 new tests.
+**v0.23.0** — `creates_skewer` + `detect_skewer`: absolute (king-in-front, gives check) and relative; pinned-attacker veto; no pawn-as-front-piece; mirrors pin's ray-walk engine. 9 new tests.
+**v0.22.0** — `creates_pin` + `detect_pin`: absolute and relative pins by the mover's sliding pieces; 9-rule veto-then-confirm; pawn-as-front-piece; evidence bundle with `line`, `coord`, attacker/pinned/behind squares. 12 new tests.
+**v0.21.0** — `is_luft` + `is_back_rank_weak`: luft certifies a quiet pawn push that opens a survivable king flight square; back-rank weakness certifies vulnerability (not mate) for both colors per ply. 16 new tests.
+**v0.20.0** — `is_isolated_pawn` + `is_doubled_pawn`: IQP/isolani and isolated-doubled evidence; doubled-pawn STATE (distinct from the event field `doubled_pawns_created`). 29 new tests.
+**v0.19.0** — Clickable variation lines in the PGN
 replay viewer (#22): `_pv_to_fen_plies()` parses engine variation strings into per-ply FEN
 data; `build_pgn_viewer()` embeds the data in the payload; JS `showVars()` renders "Better:"
 / "Then:" chips below the board — clicking any chip peeks at that position (highlighted in
