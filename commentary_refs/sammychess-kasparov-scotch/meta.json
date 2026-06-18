@@ -1,8 +1,9 @@
 {
   "title": "Garry Kasparov's Spectacular Scotch Game (5-game compilation)",
   "commentator": "SammyChess (@SammyChess1)",
+  "video_id": "iBv5llNG4No",
   "source_url": "https://www.youtube.com/watch?v=iBv5llNG4No",
-  "channel_verified": "youtube.com/@SammyChess1 (confirmed via YouTube oEmbed author_url)",
+  "channel_verified": true,
   "games_in_order": [
     "01 Kasparov vs Jan Timman, Corus (Wijk aan Zee) 2000",
     "02 Kasparov vs Michael Adams, Sarajevo 1999",
