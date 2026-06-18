@@ -7,6 +7,27 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+- **Lichess URL input** — the analysis form now accepts a Lichess game URL or 8-character
+  game ID directly. `load_from_lichess()` fetches the PGN before passing it to the
+  pipeline. Priority: Lichess URL > file upload > pasted text. Returns 400 with a
+  human-readable error if the game cannot be fetched. Three new tests cover the happy
+  path, error path, and priority over pasted PGN text.
+
+## [0.15.0] — 2026-06-18
+
+### Added
+- **CSV export and report delete for My Reports** (Phase 5 continuation).
+  - `GET /my-reports/export` — downloads the user's report history as a CSV
+    file (`report_id, game, date`).
+  - `GET /admin/reports/export` — admin-only CSV of all reports across all
+    users (`report_id, username, game, date`).
+  - `POST /my-reports/{rid}/delete` — removes the ownership record for a report
+    (file is kept). Users can only delete their own reports; admins can delete
+    any report; non-owners get 403.
+  - `web/db.py` — `delete_report_ownership()` function added.
+  - `tests/test_dashboard.py` — 15 tests total (CSV export + delete coverage
+    added); 248 tests pass total.
+
 ## [0.14.0] — 2026-06-18
 
 ### Added
