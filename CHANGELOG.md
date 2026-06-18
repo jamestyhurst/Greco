@@ -7,6 +7,12 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.40.2] — 2026-06-18
+
+### Added
+- **`bishop_pair` factgate predicate** — `is_bishop_pair(board, color)` certifies that the mover has both bishops while the opponent has at most one; engine-free pure count. Wired into `certified_claims()`, `GATED_TAGS`, and the narrator system-prompt rule with per-tag guidance on calibrating emphasis by position type (open vs closed).
+- **`rook_on_open_file` factgate predicate** — `is_rook_on_open_file(board, square, color)` certifies a standing rook on a fully open or half-open file via `file_structure()`; distinct from `rook_lift` (which certifies the *move*). Wired into `certified_claims()` and the narrator rule. 12 new tests; full suite now 615 passed.
+
 ## [0.40.1] — 2026-06-18
 
 ### Added (web UX follow-up — 6-item James request)
