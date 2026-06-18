@@ -1760,3 +1760,61 @@ def test_detect_weak_square_integration_certified_claims():
     board_after  = chess.Board("7k/8/8/3N4/8/8/8/7K b - - 1 1")
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "weak_square" in tags
+
+
+# --- is_zwischenzug ---------------------------------------------------------
+# Position: White Rook d1, Queen h1, King e1; Black Knight d5 (free), King a3.
+# White plays Qh3+ (checking Black King a3 along rank 3) instead of Rxd5.
+# The Black knight on d5 is attacked by the Rook and undefended — the forgone capture.
+_ZWIG_FEN_BEFORE   = "8/8/8/3n4/8/k7/8/3RK2Q w - - 0 1"
+_ZWIG_BOARD_BEFORE = chess.Board(_ZWIG_FEN_BEFORE)
+_ZWIG_MOVE_CHECK   = chess.Move.from_uci("h1h3")   # Qh3+ checking King a3 along 3rd rank
+_ZWIG_BOARD_AFTER  = _ZWIG_BOARD_BEFORE.copy()
+_ZWIG_BOARD_AFTER.push(_ZWIG_MOVE_CHECK)
+
+
+def test_is_zwischenzug_positive_checking_intermezzo():
+    result = F.is_zwischenzug(
+        _ZWIG_BOARD_BEFORE, _ZWIG_MOVE_CHECK, _ZWIG_BOARD_AFTER, chess.WHITE
+    )
+    assert result is not None
+    assert result["tag"] == "zwischenzug"
+    assert result["forgone_piece"] == "knight"   # Black knight d5 was forgone
+
+
+def test_is_zwischenzug_positive_keys_present():
+    result = F.is_zwischenzug(
+        _ZWIG_BOARD_BEFORE, _ZWIG_MOVE_CHECK, _ZWIG_BOARD_AFTER, chess.WHITE
+    )
+    assert result is not None
+    for key in ("tag", "check_square", "forgone_capture", "forgone_piece", "side", "evidence"):
+        assert key in result, f"missing key: {key}"
+
+
+def test_is_zwischenzug_veto1_no_check():
+    # White captures the knight directly — no check given, not a zwischenzug.
+    move_capture  = chess.Move.from_uci("d1d5")   # Rxd5 (captures the free knight)
+    board_after_c = _ZWIG_BOARD_BEFORE.copy()
+    board_after_c.push(move_capture)
+    result = F.is_zwischenzug(
+        _ZWIG_BOARD_BEFORE, move_capture, board_after_c, chess.WHITE
+    )
+    assert result is None
+
+
+def test_is_zwischenzug_veto3_no_forgone_piece():
+    # White gives check but there is no undefended enemy piece to bypass.
+    board_before = chess.Board("8/8/8/8/8/k7/8/4K2Q w - - 0 1")
+    move         = chess.Move.from_uci("h1h3")   # Qh3+ checking King a3
+    board_after  = board_before.copy()
+    board_after.push(move)
+    result = F.is_zwischenzug(board_before, move, board_after, chess.WHITE)
+    assert result is None
+
+
+def test_is_zwischenzug_integration_certified_claims():
+    # Full pipeline: Qh3+ in the zwischenzug position — "zwischenzug" in the tag set.
+    board_after = _ZWIG_BOARD_BEFORE.copy()
+    board_after.push(_ZWIG_MOVE_CHECK)
+    tags = F.certified_claims(_ZWIG_BOARD_BEFORE, _ZWIG_MOVE_CHECK, board_after, chess.WHITE)
+    assert "zwischenzug" in tags

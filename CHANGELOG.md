@@ -7,6 +7,13 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.34.0] — 2026-06-18
+
+### Added
+- **`factgate.is_zwischenzug(board_before, move, board_after, mover_color)`** — fifth Tier-B certified claim. Certifies the checking-zwischenzug (intermezzo) pattern: the mover has a free enemy piece available to capture in board_before but instead plays a check — inserting an intermediate threat before completing the exchange. Only the checking variant is certified (non-checking intermezzos require eval comparison and are deferred). VETO ladder: no check → None; checkmate → None; no undefended enemy piece other than what was just captured → None. Evidence bundle `{tag, check_square, forgone_capture, forgone_piece, side, evidence}`; picks the most valuable forgone piece when multiple hang. `"zwischenzug"` added to `GATED_TAGS`; wired into `certified_claims()`.
+- **`zwischenzug_evidence` serialized** as `d["zwischenzug_evidence"]` in narrator.py `_move_to_dict` Tier-1+ block; narrator clause gates "zwischenzug"/"intermezzo"/"in-between move" vocabulary to require the tag.
+- 5 new tests (196 total factgate, 447 across the full suite).
+
 ## [0.33.0] — 2026-06-18
 
 ### Added

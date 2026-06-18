@@ -1548,6 +1548,83 @@ def detect_weak_square(
 
 
 # --------------------------------------------------------------------------- #
+# Zwischenzug / checking intermezzo (board-only predicate).
+# --------------------------------------------------------------------------- #
+_PIECE_VALUES = {
+    chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9,
+}
+
+
+def is_zwischenzug(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Optional[dict]:
+    """Certifies the checking-zwischenzug (intermezzo) pattern: instead of taking an
+    available free enemy piece, the mover plays a check first — changing the terms of
+    the exchange before completing it. Only the checking variant is certified; non-checking
+    intermezzos require eval comparison and are deferred to a future iteration.
+
+    VETOs:
+      1. Move does not give check.
+      2. Move gives checkmate (the ultimate win, but not a tactical intermezzo).
+      3. No undefended enemy piece (other than the king and what was just captured) exists
+         in board_before that the mover could have taken instead.
+    """
+    # VETO 1: must give check
+    if not board_after.is_check():
+        return None
+
+    # VETO 2: checkmate is not a zwischenzug
+    if board_after.is_checkmate():
+        return None
+
+    enemy = not mover_color
+
+    # CONFIRM: find the most valuable forgone free capture in board_before.
+    # A "forgone" piece is undefended, attacked by the mover's side, not the king,
+    # and NOT on the square the mover just moved to (not what was captured this turn).
+    candidates: List[tuple] = []
+    for enemy_sq, ep in board_before.piece_map().items():
+        if ep.color != enemy:
+            continue
+        if ep.piece_type == chess.KING:
+            continue
+        if enemy_sq == move.to_square:
+            continue
+        if not board_before.is_attacked_by(mover_color, enemy_sq):
+            continue
+        if board_before.attackers(enemy, enemy_sq):
+            continue  # defended — not a free capture
+        candidates.append((_PIECE_VALUES.get(ep.piece_type, 0), enemy_sq, ep.piece_type))
+
+    if not candidates:
+        return None
+
+    # Pick the most valuable forgone piece so the evidence names the clearest target
+    candidates.sort(reverse=True)
+    _, forgone_sq, forgone_type = candidates[0]
+
+    forgone_name = chess.square_name(forgone_sq)
+    forgone_piece_name = PIECE_NAMES[forgone_type]
+    check_sq_name = chess.square_name(move.to_square)
+    side = "White" if mover_color == chess.WHITE else "Black"
+    evidence = (
+        f"{side} ignores the free {forgone_piece_name} on {forgone_name} "
+        f"and inserts a check — a zwischenzug that changes the terms of the exchange"
+    )
+    return {
+        "tag": "zwischenzug",
+        "check_square": check_sq_name,
+        "forgone_capture": forgone_name,
+        "forgone_piece": forgone_piece_name,
+        "side": side,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1577,6 +1654,7 @@ GATED_TAGS = (
     "compensation",
     "tempo_gain",
     "weak_square",
+    "zwischenzug",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -1700,5 +1778,9 @@ def certified_claims(
     ws = _safe(lambda: detect_weak_square(board_after, move, mover_color))
     if ws is not None:
         tags.add("weak_square")
+
+    zw = _safe(lambda: is_zwischenzug(board_before, move, board_after, mover_color))
+    if zw is not None:
+        tags.add("zwischenzug")
 
     return tags
