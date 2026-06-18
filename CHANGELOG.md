@@ -7,6 +7,31 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.26.0] — 2026-06-18
+
+### Added
+- **`factgate.is_infiltration()`** — certifies infiltration/penetration: a rook or queen
+  that has landed on a deep rank inside enemy territory (7th/8th for heavy pieces), or an
+  endgame-only king that has marched to its 6th rank or beyond. Key design choices:
+  (1) Veto 3 (`board_after.is_check()`) prevents certifying check-giving moves as
+  "standing penetration" — a rook landing with check is a tactic owned by `fork`/eval, not
+  infiltration; (2) a separate, broader `king_deep_ranks = {5, 6, 7}` (vs `{6, 7}` for heavy
+  pieces) corrects the draft's self-defeating gate that would have vetoed the canonical
+  "king to the sixth" endgame; (3) purpose is confirmed via three ordered targets — king
+  confinement (b) > pawn-raking (a) > open-file back-rank arrival (c) — with the king
+  restricted to (a) only; (4) a hanging rook certifies with a caveat ("but the infiltrating
+  rook is itself hanging") rather than abstaining outright, preserving the rook-sacrifice
+  motif; a hanging queen/king abstains. Evidence bundle: `piece`, `square`, `rank_label`,
+  `targeted_pawns`, `confines_king`, `arrival_file_state`, `absolute_seventh`, `hanging`,
+  `evidence_str`.
+- **`certified_claims()` extended to accept `phase: str = "middlegame"`** (default keeps
+  all existing callers and tests working). Phase is threaded through to `is_infiltration`
+  for the king-phase gate; `narrator.py` passes `move.phase` at the call site.
+- **`"infiltration"` added to `GATED_TAGS`**, wired into `certified_claims()`, and
+  registered in the narrator fact-gate system prompt with per-tag usage guidance.
+- 16 new tests (121 total), covering all 6 spec positive examples, 8 negative/edge cases,
+  an evidence-string forbidden-words assertion, and the `certified_claims` integration.
+
 ## [0.25.0] — 2026-06-18
 
 ### Added
