@@ -123,6 +123,7 @@ def apply_bump(v: tuple[int, int, int, int], level: int) -> tuple[int, int, int,
 
 
 def main() -> None:
+    sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     ap = argparse.ArgumentParser(description="Bump Greco's version from Conventional Commits.")
     ap.add_argument("--apply", action="store_true", help="write version.py, commit, and tag")
     args = ap.parse_args()

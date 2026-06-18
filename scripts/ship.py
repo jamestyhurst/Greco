@@ -81,7 +81,7 @@ def main() -> None:
     args = ap.parse_args()
     # Flush each line immediately so our step lines stay in order with the
     # output of the git/bump subprocesses we shell out to.
-    sys.stdout.reconfigure(line_buffering=True)
+    sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
 
     branch = git("rev-parse", "--abbrev-ref", "HEAD")
     if branch == "HEAD":
