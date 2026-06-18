@@ -11,14 +11,15 @@ from scripts.bump_version import (
 
 
 def test_classify_conventional_types():
-    assert classify("feat: add adapter", "") == MINOR
+    assert classify("feat: add adapter", "") == PATCH
     assert classify("fix: wrong square", "") == PATCH
     assert classify("micro: tweak colour", "") == MICRO
     assert classify("docs: update readme", "") == NONE
     assert classify("chore: bump deps", "") == NONE
     assert classify("refactor: extract gate", "") == NONE
     assert classify("not a conventional subject", "") == NONE
-    assert classify("feat(web): scoped", "") == MINOR
+    assert classify("feat(web): scoped", "") == PATCH
+    assert classify("release: corpus v1 complete", "") == MINOR
 
 
 def test_classify_breaking_changes():
