@@ -59,6 +59,9 @@ _FORM = Template("""<!doctype html><html lang="en"><head>
   {% endif %}
   <form class="card" method="post" action="/analyze" enctype="multipart/form-data"
         onsubmit="document.getElementById('overlay').classList.add('show');document.getElementById('go').disabled=true;">
+    <label>Lichess game URL or ID</label>
+    <input type="text" name="lichess_url" placeholder="https://lichess.org/abcd1234 &mdash; or paste the 8-character game ID">
+    <div class="or">&mdash; or &mdash;</div>
     <label>Upload a PGN file</label>
     <input type="file" name="pgn_file" accept=".pgn,.txt">
     <div class="or">&mdash; or &mdash;</div>

@@ -164,3 +164,68 @@ def test_analyze_passes_context_fields_to_pipeline(monkeypatch, tmp_path):
     assert captured.get("recipient") == "my friend"
     assert captured.get("white_context") == "an attacker"
     assert captured.get("black_context") == "positional style"
+
+
+# ---------------------------------------------------------------------------
+# Lichess URL input (R-IN1)
+# ---------------------------------------------------------------------------
+
+def test_lichess_url_fetches_pgn_and_runs_analysis(monkeypatch, tmp_path):
+    """When lichess_url is provided, load_from_lichess is called and its PGN
+    is forwarded to run_analysis."""
+    _ready(monkeypatch)
+    captured = {}
+    FAKE_PGN = "[Event \"Lichess Game\"]\n1. d4 d5 *"
+
+    import importers as _imp
+    monkeypatch.setattr(_imp, "load_from_lichess", lambda url_or_id: (FAKE_PGN, "lichess"))
+
+    def fake_run(**kw):
+        captured.update(kw)
+        return AnalysisResult(rid=10, base="LichessGame",
+                              out_dir=str(tmp_path), html_path=str(tmp_path / "r.html"))
+
+    monkeypatch.setattr(analysis, "run_analysis", fake_run)
+
+    r = client.post("/analyze", data={"lichess_url": "https://lichess.org/abcd1234"})
+    assert r.status_code == 200
+    assert _UUID_RE.search(r.text), "Expected a job UUID in the waiting page"
+    assert captured.get("pgn_text") == FAKE_PGN
+
+
+def test_lichess_url_error_returns_400(monkeypatch):
+    """When load_from_lichess raises, the route returns 400 with an error page."""
+    _ready(monkeypatch)
+
+    import importers as _imp
+    monkeypatch.setattr(
+        _imp, "load_from_lichess",
+        lambda url_or_id: (_ for _ in ()).throw(ValueError("Game not found"))
+    )
+
+    r = client.post("/analyze", data={"lichess_url": "https://lichess.org/notreal"})
+    assert r.status_code == 400
+    assert "Lichess" in r.text or "Game not found" in r.text
+
+
+def test_lichess_url_takes_priority_over_pgn_text(monkeypatch, tmp_path):
+    """lichess_url is preferred over pasted pgn_text when both are submitted."""
+    _ready(monkeypatch)
+    captured = {}
+    LICHESS_PGN = "[Event \"Lichess\"]\n1. e4 *"
+
+    import importers as _imp
+    monkeypatch.setattr(_imp, "load_from_lichess", lambda url_or_id: (LICHESS_PGN, "lichess"))
+
+    def fake_run(**kw):
+        captured.update(kw)
+        return AnalysisResult(rid=11, base="X",
+                              out_dir=str(tmp_path), html_path=str(tmp_path / "r.html"))
+
+    monkeypatch.setattr(analysis, "run_analysis", fake_run)
+
+    client.post("/analyze", data={
+        "lichess_url": "https://lichess.org/abcd1234",
+        "pgn_text": "1. d4 Nf6 2. c4",
+    })
+    assert captured.get("pgn_text") == LICHESS_PGN

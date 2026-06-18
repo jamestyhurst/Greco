@@ -73,6 +73,7 @@ async def analyze(
     current_user: User = Depends(require_login),
     pgn_file: Optional[UploadFile] = File(None),
     pgn_text: str = Form(""),
+    lichess_url: str = Form(""),
     use_case: str = Form("companion"),
     side: str = Form("neither"),
     speed: str = Form("normal"),
@@ -94,16 +95,25 @@ async def analyze(
             status_code=400,
         )
 
-    # Resolve the PGN from the file upload, else the pasted text.
+    # Resolve the PGN: Lichess URL > file upload > pasted text.
     text = ""
-    if pgn_file is not None and (pgn_file.filename or "").strip():
+    if (lichess_url or "").strip():
+        try:
+            from importers import load_from_lichess
+            text, _src = load_from_lichess(lichess_url.strip())
+        except Exception as exc:
+            return HTMLResponse(
+                render_error(f"Could not fetch Lichess game: {exc}"),
+                status_code=400,
+            )
+    elif pgn_file is not None and (pgn_file.filename or "").strip():
         raw = await pgn_file.read()
         text = raw.decode("utf-8", errors="replace").strip()
     if not text:
         text = (pgn_text or "").strip()
     if not text:
         return HTMLResponse(
-            render_error("Please upload a PGN file or paste PGN text."),
+            render_error("Please upload a PGN file, paste PGN text, or enter a Lichess URL."),
             status_code=400,
         )
 
