@@ -1700,6 +1700,105 @@ def detect_space_advantage(
 
 
 # --------------------------------------------------------------------------- #
+# Prophylaxis / blockade (board-only — goes in certified_claims).
+# --------------------------------------------------------------------------- #
+def is_prophylaxis(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Optional[dict]:
+    """Certifies 'prophylaxis': a quiet (non-checking, non-capturing) move in which
+    the mover places a piece on the natural advance square of an advanced enemy pawn,
+    blocking its further progress. The pawn must have crossed the centre:
+
+      • Black pawn being blocked by White: pawn rank ≤ 4 (rank 1–4, r ≤ 3)
+      • White pawn being blocked by Black: pawn rank ≥ 5 (rank 5–8, r ≥ 4)
+
+    The blocking piece must not be trivially hanging (attacked and completely
+    undefended). Passed-pawn blockades are flagged in the evidence bundle.
+    """
+    # VETO 1: giving check is a tactical reply, not prophylaxis
+    if board_after.is_check():
+        return None
+
+    # VETO 2: a capture is not a prophylactic quiet move
+    if board_before.is_capture(move):
+        return None
+
+    enemy = not mover_color
+    to_sq = move.to_square
+    to_file = chess.square_file(to_sq)
+    to_rank = chess.square_rank(to_sq)
+
+    # VETO 3: to-square must have been empty before the move (true blockade)
+    if board_before.piece_at(to_sq) is not None:
+        return None
+
+    # Scan enemy pawns for one whose advance square matches to_sq
+    blocked_pawn_sq: Optional[int] = None
+    for pawn_sq in board_before.pieces(chess.PAWN, enemy):
+        pr = chess.square_rank(pawn_sq)
+        pf = chess.square_file(pawn_sq)
+        if pf != to_file:
+            continue
+        if enemy == chess.WHITE:
+            advance_rank = pr + 1    # White pawns advance up
+            dangerous = (pr >= 4)    # past the centre: rank 5+ (r ≥ 4)
+        else:
+            advance_rank = pr - 1    # Black pawns advance down
+            dangerous = (pr <= 3)    # past the centre: rank 4 or below (r ≤ 3)
+        if advance_rank != to_rank:
+            continue
+        if not dangerous:
+            continue
+        blocked_pawn_sq = pawn_sq
+        break
+
+    if blocked_pawn_sq is None:
+        return None
+
+    # VETO 4: blocking piece is trivially hanging (attacked and completely undefended)
+    if (board_after.is_attacked_by(enemy, to_sq)
+            and not board_after.is_attacked_by(mover_color, to_sq)):
+        return None
+
+    piece = board_after.piece_at(to_sq)
+    if piece is None:
+        return None
+
+    piece_name = PIECE_NAMES[piece.piece_type]
+    side = "White" if mover_color == chess.WHITE else "Black"
+    enemy_side = "Black" if mover_color == chess.WHITE else "White"
+    to_name = chess.square_name(to_sq)
+    pawn_name = chess.square_name(blocked_pawn_sq)
+    pawn_rank_label = chess.square_name(blocked_pawn_sq)[1]   # digit only, e.g. "4"
+
+    passed = is_passed_pawn(board_before, blocked_pawn_sq, enemy)
+
+    if passed:
+        evidence = (
+            f"{side}'s {piece_name} on {to_name} blockades the passed {enemy_side} pawn "
+            f"on {pawn_name}, preventing its advance — a prophylactic blockade"
+        )
+    else:
+        evidence = (
+            f"{side}'s {piece_name} on {to_name} blocks the {enemy_side} pawn "
+            f"on {pawn_name} from pushing forward — a prophylactic move"
+        )
+
+    return {
+        "tag": "prophylaxis",
+        "blocked_pawn": pawn_name,
+        "blocking_piece": piece_name,
+        "blocking_square": to_name,
+        "side": side,
+        "is_passed_pawn_blockade": passed,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Initiative — checking sequence (PV-dependent, wired in narrator._move_to_dict).
 # --------------------------------------------------------------------------- #
 def is_initiative(
@@ -1795,6 +1894,7 @@ GATED_TAGS = (
     "zwischenzug",
     "initiative",
     "space_advantage",
+    "prophylaxis",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -1926,5 +2026,9 @@ def certified_claims(
     sa = _safe(lambda: detect_space_advantage(board_after, mover_color))
     if sa is not None:
         tags.add("space_advantage")
+
+    ph = _safe(lambda: is_prophylaxis(board_before, move, board_after, mover_color))
+    if ph is not None:
+        tags.add("prophylaxis")
 
     return tags

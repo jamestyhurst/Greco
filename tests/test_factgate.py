@@ -1927,3 +1927,79 @@ def test_detect_space_advantage_integration_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "space_advantage" in tags
+
+
+# --- is_prophylaxis ----------------------------------------------------------
+# Position: White Rook d1, Black pawn d4 (rank 4, r=3, dangerous), Black King g8.
+# White plays Rd3 — places the Rook directly in front of the Black pawn on d4.
+_PROP_FEN = "6k1/8/8/8/3p4/8/8/3R2K1 w - - 0 1"
+_PROP_BOARD_BEFORE = chess.Board(_PROP_FEN)
+_PROP_MOVE = chess.Move.from_uci("d1d3")    # Rd3, blocking d4 pawn's advance to d3
+_PROP_BOARD_AFTER = _PROP_BOARD_BEFORE.copy()
+_PROP_BOARD_AFTER.push(_PROP_MOVE)
+
+
+def test_is_prophylaxis_positive():
+    result = F.is_prophylaxis(_PROP_BOARD_BEFORE, _PROP_MOVE, _PROP_BOARD_AFTER, chess.WHITE)
+    assert result is not None
+    assert result["tag"] == "prophylaxis"
+    assert result["blocked_pawn"] == "d4"
+    assert result["blocking_square"] == "d3"
+
+
+def test_is_prophylaxis_positive_keys_present():
+    result = F.is_prophylaxis(_PROP_BOARD_BEFORE, _PROP_MOVE, _PROP_BOARD_AFTER, chess.WHITE)
+    assert result is not None
+    for key in ("tag", "blocked_pawn", "blocking_piece", "blocking_square",
+                "side", "is_passed_pawn_blockade", "evidence"):
+        assert key in result, f"missing key: {key}"
+
+
+def test_is_prophylaxis_veto1_gives_check():
+    # Any move that gives check must not certify as prophylaxis.
+    # White Rook d1 slides to g1, checking Black King on g8 via g-file.
+    board_before = chess.Board("6k1/8/8/8/3p4/8/8/3R2K1 w - - 0 1")
+    move = chess.Move.from_uci("d1g1")    # Rg1+ checks King g8 along g-file
+    board_after = board_before.copy()
+    board_after.push(move)
+    assert board_after.is_check()
+    assert F.is_prophylaxis(board_before, move, board_after, chess.WHITE) is None
+
+
+def test_is_prophylaxis_veto2_capture():
+    # White Rook captures the Black pawn directly — not a quiet blockade.
+    board_before = chess.Board("6k1/8/8/8/3pR3/8/8/6K1 w - - 0 1")
+    move = chess.Move.from_uci("e4d4")    # Rxd4 captures
+    board_after = board_before.copy()
+    board_after.push(move)
+    assert F.is_prophylaxis(board_before, move, board_after, chess.WHITE) is None
+
+
+def test_is_prophylaxis_veto_pawn_not_dangerous():
+    # Black pawn on d7 (rank 7, r=6) — not past centre for White's purposes.
+    board_before = chess.Board("6k1/3p4/8/8/8/8/8/3R2K1 w - - 0 1")
+    move = chess.Move.from_uci("d1d6")    # Rd6 — in front of d7 pawn but not dangerous
+    board_after = board_before.copy()
+    board_after.push(move)
+    assert F.is_prophylaxis(board_before, move, board_after, chess.WHITE) is None
+
+
+def test_is_prophylaxis_veto_hanging_piece():
+    # White Rook on d3 would be attacked by Black Bishop on f5 and not defended.
+    board_before = chess.Board("6k1/8/8/5b2/3p4/8/8/3R2K1 w - - 0 1")
+    move = chess.Move.from_uci("d1d3")    # Rd3 — hangs to Bf5
+    board_after = board_before.copy()
+    board_after.push(move)
+    assert F.is_prophylaxis(board_before, move, board_after, chess.WHITE) is None
+
+
+def test_is_prophylaxis_passed_pawn_blockade_flag():
+    # Black pawn d4 with no Black pawns on c- or e-files → it's a passed pawn.
+    result = F.is_prophylaxis(_PROP_BOARD_BEFORE, _PROP_MOVE, _PROP_BOARD_AFTER, chess.WHITE)
+    assert result is not None
+    assert result["is_passed_pawn_blockade"] is True
+
+
+def test_is_prophylaxis_integration_certified_claims():
+    tags = F.certified_claims(_PROP_BOARD_BEFORE, _PROP_MOVE, _PROP_BOARD_AFTER, chess.WHITE)
+    assert "prophylaxis" in tags

@@ -7,6 +7,13 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.37.0] — 2026-06-18
+
+### Added
+- **`factgate.is_prophylaxis(board_before, move, board_after, mover_color)`** — eighth Tier-B certified claim. Certifies a quiet (non-checking, non-capturing) move that places a piece on the advance square of an advanced enemy pawn — a prophylactic blockade. "Advanced" means past the centre: Black pawn on rank ≤ 4 (blocked by White), White pawn on rank ≥ 5 (blocked by Black). VETOs: gives check; is a capture; to-square was occupied; no advanced enemy pawn's advance-square matches; blocking piece is hanging. Evidence bundle `{tag, blocked_pawn, blocking_piece, blocking_square, side, is_passed_pawn_blockade, evidence}`. `is_passed_pawn_blockade` flags a passed-pawn blockade specifically. `"prophylaxis"` added to `GATED_TAGS`; wired into `certified_claims()` (board-only).
+- **`prophylaxis_evidence` serialized** as `d["prophylaxis_evidence"]` in narrator.py `_move_to_dict` Tier-1+ block; narrator clause gates "blockade"/"prophylaxis"/"prophylactic blockade" vocabulary to require the tag; instructs emphasizing passed-pawn blockades when the flag is set.
+- 8 new tests (217 total factgate, 468 across the full suite).
+
 ## [0.36.0] — 2026-06-18
 
 ### Added
