@@ -7,6 +7,21 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.23.0] — 2026-06-18
+
+### Added
+- **`analyzer.detect_skewer()`** — detects absolute (king in front, gives check) and relative
+  (front piece strictly more valuable than back) skewers. Mirrors `detect_pin`'s ray-walk
+  engine with reversed value ordering. Key differentiators: (1) rule 2 adds
+  `board.is_pinned(mover_color, asq)` guard (pinned-attacker veto); (2) front candidates
+  skip pawns (no "skewered pawn" tactic); (3) absolute case requires `board.is_check()` AND
+  `asq in board.attackers(mover_color, king_sq)` (actual check along this ray, not latent);
+  (4) relative back-piece worth gate requires `FORK_TARGET_TYPES` (back pawn alone is noise).
+  Evidence bundle mirrors the pin bundle with `forced`, `mover_color`, and `back_is_pawn` fields.
+- **`factgate.creates_skewer()`** — thin wrapper; `"skewer"` registered in `GATED_TAGS` and
+  wired into `certified_claims()`. Narrator whitelist updated with absolute/relative framing.
+- 9 new tests. 337/337 passing.
+
 ## [0.22.0] — 2026-06-18
 
 ### Added
