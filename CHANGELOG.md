@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.40.1] — 2026-06-18
+
 ### Added (web UX follow-up — 6-item James request)
 - **Browser auto-open** — `run_greco_web.bat` now launches `web.main` which opens `http://127.0.0.1:5000` automatically in the default browser ~1.8 s after startup; bat message updated to match.
 - **Paste PGN in Greco Offline** — the desktop Tkinter GUI now shows a scrollable text area under the file picker ("or paste PGN text:"); `_on_analyze` prefers paste over file when text is present; `_worker` short-circuits `load_pgn` for pasted text.
