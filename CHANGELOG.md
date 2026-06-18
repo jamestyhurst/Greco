@@ -8,6 +8,12 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 ## [Unreleased]
 
 ### Added
+- **`compute_pv_material_delta(board, pv)`** — engine-free function in `analyzer.py` that computes the net material gain (in pawns) for the side-to-move if they follow the engine's PV to its end. Positive = mover gains material; negative = mover comes out down. Handles en passant and promotions via the existing `material_balance()` function. New `MoveAnalysis` field `pv_material_delta` populated in the second pass. Serialized in narrator `_move_to_dict` at Tier 2+ (when non-zero). Narrator system-prompt rule added: use `pv_material_delta` instead of counting from the SAN string when writing about what the best line wins.
+- 6 new engine-free tests (481 total).
+
+## [0.38.0] — 2026-06-18
+
+### Added
 - **`propagate_sacrifice_windows(moves)`** — second-pass mutator in `analyzer.py` that tags each ply lying within a certified-sound multi-move sacrifice. When `is_sacrifice` fires at ply M with `sacrifice_invested ≥ 1.5`, subsequent plies are tagged `in_sacrifice_window=True` while the material deficit from the sacrificing side's perspective is still ≥ 0.5 pawns AND the eval from that side's perspective is ≥ −150 cp. The window closes silently when either gate fails, or after at most `_MAX_SACRIFICE_WINDOW_PLIES = 8` plies. New `MoveAnalysis` fields: `in_sacrifice_window`, `sacrifice_window_origin_ply`, `sacrifice_window_invested`.
 - **`sacrifice_window` serialized** in narrator.py `_move_to_dict` when `in_sacrifice_window` is True: emits `{origin_ply, invested}` so the narrator knows the sacrifice was engine-certified. Narrator system-prompt rule added: do NOT write "down material," "in trouble," or "under pressure on material" when `sacrifice_window` is present; correct framing is "operating within a prepared sacrifice."
 - 7 new tests (475 total); `test_sacrifice_window.py` is engine-free (constructs `MoveAnalysis` lists directly).

@@ -210,6 +210,7 @@ You are given engine ground truth precisely so you never have to guess at the bo
 - When you state why an alternative move loses, cite the concrete line or the resulting material/tactic from the data — never a hand-wave.
 - **Don't call a still-winning move a "mistake."** When a move is flagged `still-decisively-winning`, the player kept a winning position (winning by ~3+ before and after) — do NOT label it a mistake, blunder, or even inaccuracy just because the engine had a faster path. Frame it as "fine — just not the quickest," and explain its human purpose (e.g. "...Kf6 defends the g5-pawn") instead of scolding it. A slower route to a won game is a stylistic choice, not an error.
 - **Don't describe a sacrifice-window move as "material trouble."** When a move carries `sacrifice_window`, the mover is deliberately operating with fewer pieces than their opponent — a deliberate investment that the engine *already certified as sound* at `origin_ply`. Do NOT write "down material," "in trouble," "under pressure on material," or any phrase implying the deficit is a problem. The correct framing is "operating within a prepared sacrifice" or simply narrating the attacking ideas without flagging the imbalance as adverse. Only when `sacrifice_window` is absent may you treat a material deficit as a concern.
+- **`pv_material_delta` is the verified material gain along the best PV — use it, don't count.** When `pv_material_delta` appears in the fact packet it is the engine-computed net gain in pawns for the side-to-move if they follow `best_pv` to the end of the supplied line. Positive = mover gains material; negative = mover comes out down. Use this number when writing about what the best line wins or costs — do NOT count captures from the SAN string yourself. If `pv_material_delta` is absent, material claims along the PV follow the VAGUE-BUT-TRUE rule (don't invent a count).
 - **Don't belabor obvious or forced moves.** When a move is clearly forced or obvious (a one-answer recapture the player plainly intended, especially an `only-good-move` recapture), say so in a sentence and move on — do NOT enumerate the losing alternatives at length. Spend your words where the player faced a real decision, not on moves with a single sensible reply.
 
 ## Hypothetical lines and variations — quote the engine, never invent
@@ -713,6 +714,10 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
     # Tier 2 and Tier 3 get extra context for the model to chew on.
     if tier >= 2:
         d["best_pv"] = move.best_pv_san
+        # Verified net material gain along the best PV (backlog #23).  Positive = mover gains.
+        # Use this number instead of counting from the SAN when writing about material consequences.
+        if getattr(move, "pv_material_delta", 0.0) != 0.0:
+            d["pv_material_delta"] = round(move.pv_material_delta, 1)
         # Engine-sourced lines the narrator may quote in parenthetical variations
         # — and ONLY these (the closed set the anti-confabulation rule enforces):
         # the line had the player chosen better ("best"), the line that punishes the

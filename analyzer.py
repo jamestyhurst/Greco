@@ -106,6 +106,8 @@ class MoveAnalysis:
     in_sacrifice_window: bool = False        # True when this ply is within a certified-sound sacrifice sequence
     sacrifice_window_origin_ply: int = -1   # ply number where the sacrifice was certified sound (is_sacrifice fired)
     sacrifice_window_invested: float = 0.0  # pawns invested at the window origin (mover's POV)
+    # --- PV material trajectory (backlog #23) ---
+    pv_material_delta: float = 0.0  # net pawns gained by the side-to-move if they follow best_pv_san
 
 
 @dataclass
@@ -1154,6 +1156,27 @@ def propagate_sacrifice_windows(moves: "List[MoveAnalysis]") -> None:
             later.sacrifice_window_invested = origin.sacrifice_invested
 
 
+def compute_pv_material_delta(board: chess.Board, pv: list) -> float:
+    """Net material gain (in pawns) for the side-to-move after executing pv.
+
+    Uses the same PIECE_VALUES scale as ``material_balance()``.
+    Positive = the side-to-move gains material; negative = they come out down.
+    Handles en passant and promotions (queens created raise the balance automatically).
+    Returns 0.0 when pv is empty or a move proves illegal.
+    """
+    if not pv:
+        return 0.0
+    b = board.copy()
+    mover = b.turn
+    sign = 1.0 if mover == chess.WHITE else -1.0
+    start = material_balance(b) * sign
+    for move in pv:
+        if not b.is_legal(move):
+            break
+        b.push(move)
+    return material_balance(b) * sign - start
+
+
 def _enemy_pawn_can_attack(board: chess.Board, target_sq: int, piece_color: bool) -> bool:
     """Can an enemy pawn, in one push, reach a square from which it attacks target_sq?"""
     enemy = not piece_color
@@ -1400,6 +1423,7 @@ def analyze_pgn(
             # don't run out of engine data mid-tactic (the model is told never to
             # continue a line past where the data stops).
             best_pv_san = pv_to_san(board, best_info.get("pv", []), max_moves=10)
+            pv_material_delta = compute_pv_material_delta(board, best_info.get("pv", []))
             # Numbered "what to play instead" line for the variations channel,
             # rooted at the PRE-move board (board is not yet pushed here — M4).
             best_line_san = pv_to_numbered_san(board, best_info.get("pv", []))
@@ -1608,6 +1632,7 @@ def analyze_pgn(
                     best_move_san=best_move_san,
                     best_move_uci=best_move_uci,
                     best_pv_san=best_pv_san,
+                    pv_material_delta=pv_material_delta,
                     cp_loss=cp_loss,
                     top_alternatives=alternatives,
                     legal_move_count=legal_move_count,
