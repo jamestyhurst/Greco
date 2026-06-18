@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.1] — 2026-06-18
+
+### Added
+- **Essay Mode in desktop GUI** — mode dropdown now includes "Essay"; selecting it shows a "Chess question" entry field and hides the engine-depth and side fields. `_toggle_essay_ui()` handles show/hide via pack/pack_forget. Validation requires a question (≥10 chars) in essay mode; engine path not required. `_worker` branches into an essay path that calls `essay_mode.generate_essay()`, converts to HTML via `essay_to_html()`, saves under `default_reports_dir()`, and opens the result in Chrome — the same post-run flow as a standard analysis. PGN is optional and is passed to the essay generator when present.
+
 ## [0.41.0] — 2026-06-18
 
 ### Added (Essay Mode — candidate fourth mode, backlog #32)

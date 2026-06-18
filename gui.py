@@ -33,11 +33,12 @@ from analyzer import analyze_pgn
 from triage import annotate_with_tiers
 from narrator import generate_narrative
 from outputs import assemble_report, markdown_to_html, report_basename, default_reports_dir, export_shareable_html
+import essay_mode as _essay
 from version import __version__
 
 
 SPEED_LABELS = {"Fast (0.5s/move)": 0.5, "Normal (0.8s/move)": 0.8, "Deep (1.5s/move)": 1.5}
-USE_CASES = ["companion", "coaching", "commentary"]
+USE_CASES = ["companion", "coaching", "commentary", "essay"]
 SIDES = ["White", "Black", "Neither"]
 MODELS = ["claude-sonnet-4-6", "claude-opus-4-8", "claude-fable-5"]
 AUDIENCE_LEVELS = ["(not specified)", "Beginner", "Casual", "Club", "Advanced"]
@@ -259,13 +260,22 @@ class GrecoGUI:
         grid.pack(fill="x")
         ttk.Label(grid, text="Report style:").grid(row=0, column=0, sticky="w", pady=3)
         self.usecase_var = tk.StringVar(value="companion")
-        ttk.Combobox(grid, textvariable=self.usecase_var, values=USE_CASES, state="readonly", width=16).grid(row=0, column=1, sticky="w", padx=6)
+        uc_combo = ttk.Combobox(grid, textvariable=self.usecase_var, values=USE_CASES, state="readonly", width=16)
+        uc_combo.grid(row=0, column=1, sticky="w", padx=6)
         ttk.Label(grid, text="I played as:").grid(row=0, column=2, sticky="w", padx=(16, 0))
         self.side_var = tk.StringVar(value="Neither")
         ttk.Combobox(grid, textvariable=self.side_var, values=SIDES, state="readonly", width=10).grid(row=0, column=3, sticky="w", padx=6)
         ttk.Label(grid, text="Engine speed:").grid(row=1, column=0, sticky="w", pady=3)
         self.speed_var = tk.StringVar(value="Normal (0.8s/move)")
         ttk.Combobox(grid, textvariable=self.speed_var, values=list(SPEED_LABELS), state="readonly", width=16).grid(row=1, column=1, sticky="w", padx=6)
+
+        # Essay question row — shown only when "essay" mode is selected.
+        self._essay_frame = ttk.Frame(opt)
+        ttk.Label(self._essay_frame, text="Chess question:", foreground="#8a7a5c").pack(side="left")
+        self.essay_q_var = tk.StringVar()
+        ttk.Entry(self._essay_frame, textvariable=self.essay_q_var).pack(side="left", fill="x", expand=True, padx=6)
+        self.usecase_var.trace_add("write", lambda *_: self._toggle_essay_ui())
+
         noterow = ttk.Frame(opt)
         noterow.pack(fill="x", pady=(6, 0))
         ttk.Label(noterow, text="Note (optional):").pack(side="left")
@@ -375,6 +385,7 @@ class GrecoGUI:
         )
         self.log.pack(fill="both", expand=True, padx=8, pady=(4, 8))
         self.log.configure(state="disabled")
+        self._toggle_essay_ui()  # set initial visibility (hidden by default)
 
     # ---------- input helpers ----------
     def _browse_pgn(self):
@@ -408,6 +419,12 @@ class GrecoGUI:
         path = filedialog.askdirectory(title="Choose reports output folder")
         if path:
             self.reports_var.set(path)
+
+    def _toggle_essay_ui(self):
+        if self.usecase_var.get() == "essay":
+            self._essay_frame.pack(fill="x", pady=(4, 0))
+        else:
+            self._essay_frame.pack_forget()
 
     def _log(self, text: str):
         self.log.configure(state="normal")
@@ -464,12 +481,23 @@ class GrecoGUI:
         pgn_paste = self.pgn_text_box.get("1.0", "end").strip()
         engine = self.engine_var.get().strip()
         key = self.key_var.get().strip()
-        if not pgn_paste and (not pgn_path or not os.path.isfile(pgn_path)):
-            messagebox.showerror("Greco", "Please choose a PGN file or paste PGN text.")
-            return
-        if not engine or not os.path.isfile(engine):
-            messagebox.showerror("Greco", "Please set a valid Stockfish executable path.")
-            return
+        use_case = self.usecase_var.get()
+
+        if use_case == "essay":
+            essay_question = self.essay_q_var.get().strip()
+            if not essay_question:
+                messagebox.showerror("Greco", "Please enter a chess question for Essay Mode.")
+                return
+            if len(essay_question) < 10:
+                messagebox.showerror("Greco", "Your question is too short. Please be more specific.")
+                return
+        else:
+            if not pgn_paste and (not pgn_path or not os.path.isfile(pgn_path)):
+                messagebox.showerror("Greco", "Please choose a PGN file or paste PGN text.")
+                return
+            if not engine or not os.path.isfile(engine):
+                messagebox.showerror("Greco", "Please set a valid Stockfish executable path.")
+                return
         if not key:
             messagebox.showerror("Greco", "Please enter your Anthropic API key.")
             return
@@ -508,7 +536,8 @@ class GrecoGUI:
             "pgn_path": pgn_path,
             "pgn_paste": pgn_paste,
             "engine": engine,
-            "use_case": self.usecase_var.get(),
+            "use_case": use_case,
+            "essay_question": self.essay_q_var.get().strip(),
             "user_is": side if side in ("white", "black") else "neither",
             "note": self.note_var.get().strip() or None,
             "time_limit": SPEED_LABELS.get(self.speed_var.get(), 0.8),
@@ -523,6 +552,33 @@ class GrecoGUI:
 
     def _worker(self, p: dict):
         try:
+            if p.get("use_case") == "essay":
+                question = p.get("essay_question", "")
+                pgn_text = p.get("pgn_paste") or None
+                if not pgn_text and p.get("pgn_path") and os.path.isfile(p["pgn_path"]):
+                    try:
+                        pgn_text, _ = load_pgn(p["pgn_path"])
+                    except Exception:
+                        pgn_text = None
+                self.q.put(("status", "Searching the classical corpus…"))
+                result = _essay.generate_essay(
+                    question=question,
+                    pgn_text=pgn_text,
+                    audience_level=p.get("audience_level") or "club",
+                    note=p.get("note") or "",
+                    model=p["model"],
+                )
+                self.q.put(("status", "Generating essay with Claude…"))
+                html_content = _essay.essay_to_html(result)
+                title_safe = re.sub(r"[^\w\-]", "_", result["title"][:40]).strip("_") or "essay"
+                base = f"essay_{title_safe}"
+                out_dir = default_reports_dir() / base
+                out_dir.mkdir(parents=True, exist_ok=True)
+                html_path = out_dir / f"{base}.html"
+                html_path.write_text(html_content, encoding="utf-8")
+                self.q.put(("done", str(html_path)))
+                return
+
             if p.get("pgn_paste"):
                 pgn_text = p["pgn_paste"]
                 src = "pasted text"
