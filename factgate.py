@@ -158,6 +158,46 @@ def is_outpost(
     return (True, supporters)
 
 
+def outpost_evidence(board: chess.Board, square: int, color: bool) -> Optional[dict]:
+    """Companion to is_outpost: builds a ready-to-quote evidence bundle for narrator
+    use when is_outpost certifies, or returns None. Does not change is_outpost's
+    own return shape — certified_claims continues to call is_outpost directly.
+    """
+    ok, supporters = is_outpost(board, square, color)
+    if not ok:
+        return None
+    piece = board.piece_at(square)
+    if piece is None:
+        return None
+    square_nm = chess.square_name(square)
+    piece_name = PIECE_NAMES[piece.piece_type]
+    supporter_names = [chess.square_name(s) for s in supporters]
+    color_name = "White" if color == chess.WHITE else "Black"
+    if len(supporter_names) == 1:
+        evidence = (
+            f"the {color_name} {piece_name} on {square_nm} is an outpost — "
+            f"defended by the pawn on {supporter_names[0]} "
+            f"and immune to any enemy pawn challenge"
+        )
+    else:
+        all_but_last = ", ".join(supporter_names[:-1])
+        evidence = (
+            f"the {color_name} {piece_name} on {square_nm} is an outpost — "
+            f"defended by the pawns on {all_but_last} and {supporter_names[-1]} "
+            f"and immune to any enemy pawn challenge"
+        )
+    return {
+        "is_outpost": True,
+        "supporters": supporters,
+        "square": square,
+        "square_name": square_nm,
+        "piece_name": piece_name,
+        "supporter_names": supporter_names,
+        "color_name": color_name,
+        "evidence": evidence,
+    }
+
+
 def is_passed_pawn(board: chess.Board, square: int, color: bool) -> bool:
     """Certifies a 'passed pawn': a pawn of `color` with no enemy pawn ahead of it on
     its own file or either adjacent file (the standard definition). Pure square

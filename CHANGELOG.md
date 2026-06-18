@@ -7,6 +7,20 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.28.0] — 2026-06-18
+
+### Added
+- **`factgate.outpost_evidence(board, square, color)`** — sibling to `is_outpost`: when the
+  outpost test certifies, returns a ready-to-quote evidence bundle (`is_outpost`, `supporters`,
+  `square_name`, `piece_name`, `supporter_names`, `color_name`, `evidence`). Evidence string
+  verbatim from PIECE_NAMES + chess.square_name; one-supporter and two-supporter templates. Does
+  not change `is_outpost`'s existing `(bool, List[int])` return shape.
+- **`outpost_evidence` serialized** as `d["outpost_evidence"]` in the Tier-1+ `_move_to_dict`
+  block in narrator.py, alongside `certified` and `fianchetto_evidence`.
+- **Narrator whitelist note** for `outpost`: instructs the narrator to use the `outpost_evidence`
+  field's `evidence` string rather than re-deriving the piece/square/supporter.
+- 7 new tests (143 total).
+
 ## [0.27.0] — 2026-06-18
 
 ### Added

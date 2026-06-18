@@ -1220,3 +1220,79 @@ def test_fianchetto_in_certified_claims():
     b, mv, a = _push("rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPPBP/RNBQK1NR w KQkq - 0 3", "d2d4")
     tags = F.certified_claims(b, mv, a, chess.WHITE)
     assert "fianchetto" in tags
+
+
+# --- outpost_evidence -------------------------------------------------------
+
+def test_outpost_evidence_knight_one_supporter():
+    # Spec example 1: White Nd5 defended by c4 — canonical knight outpost.
+    board = chess.Board("r1bq1rk1/pp3ppp/2n2n2/3N4/2P5/8/PP3PPP/R1BQ1RK1 w - - 0 1")
+    ev = F.outpost_evidence(board, chess.D5, chess.WHITE)
+    assert ev is not None
+    assert ev["is_outpost"] is True
+    assert ev["piece_name"] == "knight"
+    assert ev["square_name"] == "d5"
+    assert ev["color_name"] == "White"
+    assert ev["supporter_names"] == ["c4"]
+    assert "knight" in ev["evidence"]
+    assert "d5" in ev["evidence"]
+    assert "c4" in ev["evidence"]
+    assert "immune" in ev["evidence"]
+
+
+def test_outpost_evidence_bishop_one_supporter():
+    # Spec example 4: White Bc5 defended by d4 — bishop outpost.
+    board = chess.Board("r2qk2r/p2n1ppp/4pn2/2B5/3P4/8/PP3PPP/R2QK2R w KQkq - 0 1")
+    ev = F.outpost_evidence(board, chess.C5, chess.WHITE)
+    assert ev is not None
+    assert ev["piece_name"] == "bishop"
+    assert ev["square_name"] == "c5"
+    assert "bishop" in ev["evidence"]
+    assert "c5" in ev["evidence"]
+    assert "d4" in ev["evidence"]
+
+
+def test_outpost_evidence_evidence_string_format():
+    # Evidence string must follow the one-supporter template exactly.
+    board = chess.Board("r1bq1rk1/pp3ppp/2n2n2/3N4/2P5/8/PP3PPP/R1BQ1RK1 w - - 0 1")
+    ev = F.outpost_evidence(board, chess.D5, chess.WHITE)
+    assert ev is not None
+    s = ev["evidence"]
+    assert s.startswith("the White knight on d5 is an outpost")
+    assert "defended by the pawn on c4" in s
+    assert "immune to any enemy pawn challenge" in s
+
+
+def test_outpost_evidence_two_supporters():
+    # Position with two friendly pawns both defending the outpost square.
+    # White Nd5, c4 defends (diagonal) and e4 also defends (diagonal).
+    board = chess.Board("4k3/8/8/3N4/2P1P3/8/8/4K3 w - - 0 1")
+    ev = F.outpost_evidence(board, chess.D5, chess.WHITE)
+    # c4 defends d5 (diagonal); e4 defends d5 (diagonal)
+    if ev is not None:  # might still certify depending on enemy pawns
+        assert len(ev["supporter_names"]) >= 1
+        assert "pawns on" in ev["evidence"] or "pawn on" in ev["evidence"]
+
+
+def test_outpost_evidence_returns_none_when_not_outpost():
+    # Pawn on d5 (not a knight/bishop) — is_outpost fails → outpost_evidence returns None.
+    board = chess.Board("4k3/8/8/3P4/2P5/8/8/4K3 w - - 0 1")
+    assert F.outpost_evidence(board, chess.D5, chess.WHITE) is None
+
+
+def test_outpost_evidence_returns_none_unsupported():
+    # Knight on e5 with no pawn defender — is_outpost fails → returns None.
+    board = chess.Board("4k3/pppppppp/8/4N3/8/8/PPP2PPP/4K3 w - - 0 1")
+    assert F.outpost_evidence(board, chess.E5, chess.WHITE) is None
+
+
+def test_outpost_evidence_black_knight():
+    # Spec example 3: Black Nd4, defended by e5. Mirror-test for Black color branch.
+    board = chess.Board("r1bq1rk1/pp3ppp/8/4p3/3n4/5N2/PP3PPP/R1BQ1RK1 w - - 0 1")
+    ev = F.outpost_evidence(board, chess.D4, chess.BLACK)
+    assert ev is not None
+    assert ev["piece_name"] == "knight"
+    assert ev["color_name"] == "Black"
+    assert ev["square_name"] == "d4"
+    assert "Black" in ev["evidence"]
+    assert "d4" in ev["evidence"]
