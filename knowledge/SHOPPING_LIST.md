@@ -69,8 +69,9 @@ content the model does *not* reliably know:
 | `[x]` | **Chess Openings, Ancient and Modern** | Freeborough & Ranken | 1889/1896 | en | [archive.org](https://archive.org/details/chessopeningsanc00freerich) | **Acquired 2026-06-17.** 92k words; opening_theory bucket. OCR cleaned. |
 | `[ ]` | Handbuch des Schachspiels | Bilguer / von der Lasa | 1843–1916 eds | de | [archive.org](https://archive.org/details/handbuchdesscha00schagoog) | The 19th-c. opening encyclopedia; German |
 | `[ ]` | Modern Chess Openings, 1st ed. | Griffith & White | 1911 | en | verify (archive.org) | EARLY eds only — later MCO editions are NOT public domain |
-| `[ ]` | The Modern Chess Instructor | Wilhelm Steinitz | 1889/1895 | en | verify (archive.org) | Opening theory + method from a world champion |
+| `[x]` | **The Modern Chess Instructor** | Wilhelm Steinitz | 1889 | en | [archive.org](https://archive.org/details/modernchessinstr00steirich) | **Acquired 2026-06-18.** 496k chars; opening_theory bucket. Archive.org djvu OCR; double-spaces collapsed. Part I (1889) + analysis. |
 | `[x]` | **Chess Generalship** | Franklin K. Young | 1910 | en | [Gutenberg #55278](https://www.gutenberg.org/ebooks/55278) | **Acquired 2026-06-17.** 40k words; opening_theory bucket |
+| `[x]` | **The Chess Openings** | H. E. Bird | 1880 | en | [archive.org](https://archive.org/details/chessopenings00bird) | **Acquired 2026-06-18.** 268k chars; opening_theory bucket. Archive.org djvu OCR; double-spaces collapsed. |
 | `[x]` | **The Blue Book of Chess (Staunton-based)** | Howard Staunton (ed.) | 1889 | en | [Gutenberg #16377](https://www.gutenberg.org/ebooks/16377) | **Acquired 2026-06-17.** 103k words; opening_theory bucket |
 
 ## B. Annotated master games & tournament books — HIGH  ·  `opening_theory` or `chess_principles` (+ PGN → `opening_theory/games/`)
@@ -96,7 +97,7 @@ content the model does *not* reliably know:
 
 | Status | Title | Author | Year | Lang | Source | Notes |
 |---|---|---|---|---|---|---|
-| `[ ]` | The Minor Tactics of Chess | Young & Howell | 1895 | en | verify (archive.org) | Pattern-level tactics |
+| `[x]` | **The Minor Tactics of Chess** | Young & Howell | 1894 | en | [archive.org](https://archive.org/details/minortacticsofch00youn) | **Acquired 2026-06-18.** 235k chars; chess_principles bucket. Archive.org djvu OCR; double-spaces collapsed. |
 | `[ ]` | The Major Tactics of Chess | Young & Howell | 1896 | en | verify (archive.org) | Companion volume |
 
 ## E. General principles / strategy / mastery — LOWER (model already knows most)  ·  `chess_principles`
@@ -106,7 +107,7 @@ content the model does *not* reliably know:
 | `[x]` | **Chess Fundamentals** | José Raúl Capablanca | 1921 | en | [Gutenberg #33870](https://www.gutenberg.org/ebooks/33870) | **Acquired 2026-06-13.** English original |
 | `[x]` | **Chess Strategy** | Edward Lasker | 1915 | en | [Gutenberg #5614](https://www.gutenberg.org/ebooks/5614) | **Acquired 2026-06-17.** 81k words; chess_principles bucket |
 | `[x]` | **Chess and Checkers: The Way to Mastership** | Edward Lasker | 1918 | en | [Gutenberg #4913](https://www.gutenberg.org/ebooks/4913) | **Acquired 2026-06-17.** 55k words; chess_principles bucket |
-| `[ ]` | Common Sense in Chess | Emanuel Lasker | 1896 | en | verify (archive.org) | English original; not found on Gutenberg in last check |
+| `[x]` | **Common Sense in Chess** | Emanuel Lasker | 1896 | en | [archive.org](https://archive.org/details/commonsenseinche00laskrich) | **Acquired 2026-06-18.** 115k chars; chess_principles bucket. Archive.org djvu OCR; double-spaces collapsed. |
 | `[ ]` | The Principles of Chess in Theory and Practice | James Mason | 1894 | en | verify (archive.org) | English original |
 | `[ ]` | My System / Mein System | Aron Nimzowitsch | 1925 (de); Eng. trans. Hereford 1929 | de/en | verify | German original PD; the **1929 Hereford English translation** may be PD — confirm before quoting it |
 | `[ ]` | Modern Ideas in Chess | Richard Réti | 1923 (Eng. trans.) | en | verify | German 1922; 1923 English translation likely PD — confirm |

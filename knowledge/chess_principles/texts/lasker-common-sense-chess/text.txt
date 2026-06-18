@@ -1,0 +1,7426 @@
+riKiimniitintiwwifm 
+
+UC-NRLF 
+
+$B Efil 5E7 
+
+r^ 
+
+laAOHKHOf 
+
+Digitized by the intern'et Archive 
+
+in 2007 with funding from 
+
+IVIicrosoft Corporation 
+
+http://www.archive.org/details/commonsenseincheOOIaskrich 
+
+COMMON SENSE 
+IN CHESS 
+
+BY 
+
+EMANUEL LASKER 
+
+New York : 
+
+J. S. OGILVIE PUBLISHING COMPANY. 
+
+57 Rose Street. 
+
+I ^ ! 0 f :/ 
+
+/f/o 
+
+(j<:^t^2i^.^r^y^^ 
+
+PREFACE. 
+
+The following is an abstract of Twelve Lectures 
+given before an audience of London chess players 
+during the spring of 1 895. It may be regarded as 
+an attempt to deal with all parts of a game of chess 
+by the aid of general principles. The principles laid 
+down are deduced from considerations concerning 
+the nature of Chess as a fight between two brains, 
+and their conception is based on simple facts. Their 
+practical working has been illustrated by positions 
+adapted to the purpose, and likely to occur over 
+the board. 
+
+It has been my aim to reduce the different rules 
+innumberasmuch as wascompatible with clearness. 
+They all, it will be found, have a remote likeness, 
+and it would therefore not have been very difficult 
+to reduce their number still more. Indeed they 
+may ultimately be united in one single leading 
+principle, which is the germ of the theory not only 
+of Chess, but of any kind of fight. This principle 
+is sufficiently indicated here, but it is so general in 
+its conception, and the difficulty of expressing the 
+whole compass of its meaning in definite terms so 
+enormous, that I have not ventured to formulate it. 
+In a future work, for which the present one shall 
+
+ivi97496 
+
+8 
+
+pave the way, I hope to be able to illustrate the 
+significance of that principle, and its capacity for 
+showing facts in their right relation to one another. 
+For that work I have also deferred the discussion of 
+some points which require very nice differentiation, 
+such as all questions relating to the manoeuvring 
+of the King and the exchange of men. 
+
+The games and positions given in this book are 
+comparatively few, but they have been selected with 
+care. I therefore would advise the student not to 
+attempt to read ihQ matter only, but to study it 
+and sink some work into it. The rules deduced 
+are, I believe, very plausible. This need not deceive 
+the student, who will see their significance in a 
+clearer light if he tries to be reasonably sceptical 
+and exacting in the matter of proofs. 
+
+As regards the analytical notes about games or 
+openings, I have tried to be short and to the point. 
+Analytical detail is therefore not abundant, but 
+I think, reliable. The method of enumerating all 
+the variitions thought possible, or probable, has 
+been laid aside, and in its place an analysis has been 
+given, which makes use of both the consideration 
+of the leading variations and general principles. 
+The diction and style of the work are those of a 
+lecturer. Feeling that I have not been able to make 
+them as perfect as I should have desired, I must 
+ask for the lenient judgment of the reader. 
+
+I take this opportunity for expressing my hearty 
+thanks to Professor Villin Marmery for his kind 
+assistance in looking over the proofs. 
+
+Emanuel Lasker. 
+
+,«^ 
+
+Common ^ense m Cfjessi. 
+
+No. 1. 
+
+Gentlemen, — It is customary to begin with 
+definitions, but I am sure that all of you are so well 
+acquainted with the essential parts of the history, 
+the rules and the characteristics of Chess, that you 
+will allow me to jump at once in medias res. Chess 
+has been represented, or shall I say misrepresented, 
+as a game — that is, a thing which could not well 
+serve a serious purpose, solely created for the enjoy- 
+ment of an empty hour. If it were a game only, Chess 
+would never have survived the serious trials to 
+which it has, during the long time of its existence, 
+been often subjected. By some ardent enthusiasts 
+Chess has been elevated into a science or an art. It 
+is neither ; but its principal characteristic seems to 
+be — what human nature mostly delights in — a fight. 
+Not a fight, indeed, such as would tickle the nerves 
+of coarser natures, where blood flows and the blows 
+delivered leave their visible traces on the bodies of 
+the combatants, but a fight in which the scientific, 
+the artistic, the purely intellectual element holds 
+undivided sway. From this standpoint, a game of 
+Chess becomes a harmonious whole, the outlines of 
+which I wall endeavor to describe to you in this 
+course of lectures. 
+
+The requisites in Chess are a board of sixty-four 
+squares, and two bodies of men. We have, there- 
+fore, one great advantage over the general who is 
+to lead an army into the field — we know where to 
+find the enemy, and the strength at his disposal. 
+
+,10 
+
+We have the gratifying^ knowledge that as far as 
+material strength is concerned we shall be equal to 
+our opponents. Nevertheless, our first step will be 
+exactly analogous to that of a commander of an 
+army. First of all we shall mobilize our troops, 
+make them ready for action, try to seize the impor- 
+tant lines and points which are yet wholly unoccu- 
+pied. This proceeding will take, as a rule, no more 
+than six moves, as we shall see later on. If we 
+should neglect to do so, our opponent would avail 
+himself of the opportunity thus given him, would 
+quickly assail some vital point, and ere we could 
+rally, the battle would be finished. 
+
+Let me, in illustration of my assertions, go over 
+some well known little games, in which mistake 
+and the punishment thereof are clearly traceable. 
+
+White. Black. 
+
+1. P— K4 P— K4: 
+
+2. Kt— KB3 P— Q3 
+
+3. B— B4 P— KR3 
+
+So far, with the exception of the last move, Black 
+has played quite well. He has opened lines for his 
+two Bishops and the Queen, and now should bring 
+out his QKt to B3. Instead of that, afraid of some 
+premature attack, he quite unnecessarily makes a 
+move that does not give additional force to any of 
+his pieces. 
+
+4. Kt— QB3 ^B— Kt5 
+
+A mistake. The Knights should be first devel- 
+oped, then the Bishops. 
+
+11 ; 
+
+5. Kt X P B X Q 
+
+6. BxPch K — K2 
+
+7. Kt — Q 5 checkmate 
+
+Another tune to the same song. 
+
+White. Black. 
+
+1. P— K4 P— K4 
+
+2. Kt— KB3 Kt— KB3 
+
+3. KtxP Kt— QB3 
+
+Black evidently believes in the principle of quick 
+development, and even neglects to take White's 
+KP, in order to gain time. 
+
+4. 
+
+KtxKt 
+
+QPxKt 
+
+5. 
+
+P-Q3 
+
+B— QB4 
+
+6. 
+
+B— Kt5 
+
+A mistake ; he ought to guard against the threat- 
+ened Kt — Kt5 with B — K2. Now he is overtaken 
+by a catastrophe. 
+
+6 KtxP 
+
+7. BxQ • BxPch 
+
+8. K— K2 B—Kt5 checkmate 
+
+Another variation. 
+
+White. Bi.ack. 
+
+1. P— K4 P— K4 
+
+2. P— KB4 PxP 
+
+White, in order to aid his development, sacrifices 
+a Pawn, Whether with good reason or not, we 
+shall not argue for the present. 
+
+12 
+
+3. B— B4 Q— R5ch 
+
+4. K— B P— Q4 
+
+An excellent move. Black also sacrifices a Pawn, 
+to invest it, so to say, in facilities for bringing out 
+his pieces. 
+
+5. 
+
+BxP 
+
+P— KKt4 
+
+6. 
+
+Kt— KB3 
+
+Q-T-R4 
+
+7. 
+
+P— KR4 
+
+A good move, which gives our Rook something to 
+do. The attack on Black's Pawn, liowever, is only 
+an apparent one for the moment, because both the 
+Kt and KRP are pinned. 
+
+7 P^KR3 
+
+He ought to develop a piece, for instance B — Kt2. 
+This omission will cost him the game. 
+
+8. BxPch QxB 
+Not KXB, on account of (9) Kt— K5ch. 
+
+9. Kt— K5 Q— Kt2 
+
+10. Q— R5ch K— K2 
+
+11. Kt— Kt6ch K— Q 
+
+12. KtxR QxKt 
+
+13. PxP 
+
+And now we have two Pawns and an excellently 
+placed Rook for two pieces, while Black's pieces are 
+all still at home, and his King in an unsafe position. 
+Between fairly even players the issue of the game 
+is therefore decided in favor of White. 
+
+13 
+
+lyct me go over the moves which frequently 
+occur in games of a close character. 
+
+White. Black. 
+
+1. P— K4 P— K3 
+
+2. P— Q4 P— Q4 
+
+3. Kt— QB3 Kt— KB3 
+
+4. B— KKt5 B—K2 
+
+He ought to first exchange the Pawns, and then 
+bring his Bishop to K2. In such manner he would 
+obtain an almost unassailable position. 
+
+5. BxKt. BxB 
+
+6. Kt— KB3 Castles 
+
+There is no necessity for him to castle so early. 
+His first aim should be to bring his Q side into 
+action. For instance: (6) .... PxP; (7) KtxP, 
+Kt— Q2; (8) B— Q3, P— QKt3; (9) Castles, B— 
+Kt2, would be, although not the very best, a 
+sufficiently safe plan for bringing his pieces out. 
+
+7. 
+
+B-Q3 
+
+P— QKt3 
+
+8. 
+
+P— K5 
+
+B K2 
+
+9. 
+
+P— KR4 
+
+White consistently takes aim against Black's K' 
+side. Black's Q side pieces have so little bearing 
+upon the actual scene of battle that his game is 
+already greatly compromised. 
+
+9 B— Kt2 
+
+The only comparatively safe move would have 
+been B— QR3. 
+
+14 
+Black. 
+
+Mm 
+
+w. 
+
+'■^///////A ^/y?//%. 
+
+fiil 
+
+7^, y////////- 
+
+y/////////' ''^^ 
+
+li 
+
+White. 
+
+10. BxPch KxB 
+
+11. Kt— Kt5ch K— Kt3 
+
+If instead K— Kt sq.; (12) Q— R5, BxKt; (13) 
+PXB, P— B3; (14) P— Kt6, and mate cannot be 
+avoided. 
+
+12. Kt— K2 BxKt 
+
+13. PxB P— B4 
+
+If QXP; (14) Kt— B4ch.,K— B4; (15)Q— Q3ch., 
+K— Kt5; (16) Q— R3ch., KxKt; (17) Q— B3 
+mate. 
+
+Id 
+
+By the same process, through which your oppo- 
+nent has achieved greater scope for his pieces, you 
+will then always be able to recoup yourself, and, 
+as a rule, be a gainer in the bargain. 
+
+I am speaking rather authoritatively in this 
+matter, as I cannot prove my assertions for the 
+moment. However, I do not ask you to believe 
+me blindly. In the course of this lecture, and in 
+those that are to follow, enough, I trust, will be 
+found to warrant what I said. This principle is 
+the one amendment which I wish to add to the 
+four rules given in the last Lecture, 
+
+KtxP 
+
+This move exposes Black to some danger, and 
+I • do not think it would be right of me to show 
+you only how Black gets out of it with flying 
+colors. We shall come to a fuller understanding 
+of the possibilities of the position when we, in some 
+variations, let Black pay the penalty for his daring. 
+
+5. R— Ksq 
+
+Not the best move, but one that most naturally 
+suggests itself. 
+
+5 Kt— Q3 
+
+To gain time by the attack on the White Bishop. 
+
+6. Kt— QB3 KtxB 
+
+7. KtxP 
+
+Cunning play. If Black now takes one of the 
+Knights he loses, e.g.^ 
+
+A 7 KKtxKt 
+
+8. KtxKtch B--K2 
+
+9. KtxB ! KtxQ 
+
+10. Kt— Kt6ch Q— K2 
+
+11. KtxQ and remains a piece ahead 
+
+B 7 QKtxKt 
+
+8. RxKtch B— K2 
+
+9. Kt— Q5 ! Castles 
+
+10. KtxBch K— Rsq 
+
+Now see White's mode of attack, which is rather 
+instructive and of frequent occurrence. 
+
+11. Q— R5 P— KKt3 
+White threatened mate in two by QxPch, etc. 
+
+12. Q— R6 P— Q3 
+White mates in two. Which is the move? 
+
+13. R— R5 PxR 
+
+14. Q— B6 checkmate 
+
+Let us now return to the original position, at 
+Black's seventh turn to move. 
+
+7 B— K2 
+
+We thus intercept the dangerous file against our 
+King and develop a piece — two great advantages. 
+
+8. Kt— Q5 Castles 
+
+9. KtxKt QPxKt 
+
+10. KtxBch K— R 
+
+11. KtxB QxKt 
+
+12. P— Q3 Q— B4 
+
+13. B— K3 P— KR3 
+
+21 
+
+And Black's game is, if anything, preferable. You 
+see how quickly Whitens attack has spent itself out. 
+But then he did not make the best of his position 
+at move 5. Let us therefore return to that point. 
+
+6. P-Q4 
+
+We develop and attack at the same time, while 
+
+our Pawn cannot be taken, viz : (5) PxP, 
+
+(6) R— K, (6) P— KB4, (7) KtxP, threatening 
+P — KB 3, and should win. 
+
+B— K2 
+
+Kt — Q3 instead leads to an early exchange of 
+Queens. The resulting position is rather somewhat 
+
+in favor of White, viz.:— (5) Kt— Q3 ; (6) 
+
+BxKt, QPxB; (7)PxP, Kt— B4; (8) QxQch, 
+KxQ; (9) R— Qch, K— K ; (10) Kt— QB3. 
+B— K2 : (11) P— KR3, B— KB ; (12) B— KKt5 
+with an occasional onslaught of the K side Pawns. 
+
+6. Q— K2 
+
+The last move is more aggressive than PxP at 
+once, which would allow Black time to do anything 
+he pleases, for instance to castle at once, or to ad- 
+vance P — Q4. Consider the following variation as 
+an example of what is likely to follow after : (6) 
+PxP, P— Q4; (7) PxP e.p., KtxP ; (8) Bx 
+Ktch., PxB; (9) Kt— K5, B— Kt2, and in spite 
+of his double Pawn Black's pieces are excellently 
+placed. 
+
+6 Kt— Q3 
+
+7. BxKt KtPxB 
+
+22 
+
+not QPxB, which would open the Q file to White's 
+
+Rook, e.g., (7) , QPxB; (8) PxP, Kt— B4; 
+
+(9) R~Q, B--Q2. 
+
+The Black QB and Q are now so badly placed 
+that White has an opportunity of bringing the 
+game to a virtual finish by energetic attack. (10) 
+P— K6, PxP; (11) Kt— K5, threatening both the 
+Bishop and Q — R5ch. , and should therefore win. 
+
+8. PxP Kt— Kt2 
+Black. 
+
+White, 
+
+We have now come to a critical stage. Black's 
+pieces have retired into safety, ready, with one 
+single move, to occupy points of importance. 
+White, on the contrary, has all field to himself, 
+but he can do nothing for the present, as there is 
+no tangible object of attack. Various attempts 
+have been made to show that White has here the 
+superior position. I do not believe that White has 
+any advantage, and am rather inclined to attribute 
+the greater vitality to the party that has kept its 
+forces a little back. 
+
+Ere we proceed any further let us consider some 
+sub-variations:— (9) Kt— Q4, Castles; (10)R~Q, 
+Q— K; (11) R— K (to prevent either P— E3 or 
+P — Q4), Kt — B4(not to be recommended, although 
+in frequent use); (12) Kt— QB3, B— R3 ; (13) 
+Q-Kt4, Kt— K3; (14) Kt— B5, K— R; (15) 
+Kt — K4 ; and Black is quite helpless against the 
+threat R— K3andR3, etc. Or again; (9)Kt— Q4. 
+Castles; (10) R— Q, Q— K; (11) R— K, Kt— B4; 
+(12) KtB3, Kt— K3; (13) Kt— B5, P— Q4; (14) 
+PXP e.p., PxP; (15) Q— Kt4, P— Kt3 ; (16) 
+B— R6, Kt— Kt2; (17) KtxBch, QxKt; (18) 
+Q — Q4, and wins at least the exchange. 
+
+These variations show that it must be Black*s 
+aim to post his KB on a line where he can dosome 
+effectual work, and to advance his QP. From this 
+position the following variations suggest them- 
+selves:— 9 Kt— Q4 Castles 
+
+10. R— Q Q— K 
+
+11. R— K B— B4! 
+
+12. Kt— Kt3 B— Kt3 
+
+13. Kt— B3 P--Q4 
+
+24 
+
+and, if Black has not the best of the position, at 
+least all danger is past. Another attempt ; 
+
+9. 
+
+Kt— B3 
+
+Castles 
+
+10. 
+
+Kt— Q4 
+
+P— B4 
+
+11. 
+
+B— K3 
+
+Q—K 
+
+12. 
+
+P— KB4 
+
+P-Q3 
+
+Black's pieces are again all well in play. White 
+has, to a certain extent, compromised himself by 
+the advance of the KBP. 
+
+We can now announce our final judgment. The 
+
+defence considered, initiated by (3) , Kt 
+
+— KB3, yields, in all respects, a satisfactory game 
+to the second player. 
+
+No. 3. 
+
+Gentlemen, — Though we have estabhshed in 
+our last Lecture a line of play which will yield a 
+good defence to the usual form of the Ruy Lopez, 
+we may nevertheless look at others well worth 
+noticing. Truth derives its strength not so much 
+from itself as from the brilliant contrast it makes 
+with what is only apparently true. This applies 
+especially to Chess, where it is often found that 
+the profoundest moves do not much startle the 
+imagination. 
+
+A defence which is frequently played is initiated 
+in the third move by advancing the QRP against 
+our Bishop. I need not dwell on the point that 
+this move is against the principles of our first 
+Lecture, just as much as Kt — KB3 is in accord- 
+ance with them. Neither does it, I believe, lead 
+to an even game — an opinion which I shall attempt 
+to substantiate in the following variations : — 
+
+1. P— K4 P— K4 
+
+2. Kt— KB3 Kt— QB3 
+
+3. B— QKt5 P— QR3 
+White has now the option to exchange his 
+
+Bishop against the adverse Kt, or to retreat it. As 
+a general rule, it i's not good policy to exchange in 
+the early stages of a game the long reaching Bishop 
+against the Knight, whose power does not extend 
+beyond a certain circle. Therefore 
+
+4. B— QR4 Kt— KB3 
+
+(4) P — Q3 is not to be recommended, on 
+
+account of (5) P— Q4, B— Q2; (6) P— B3, P— B4 
+(7) KPxP, P— K5 ; (8) Kt— Kt5, with an all 
+round healthy position for White. 
+6. Castles 
+
+2« 
+
+Both, (5) Kt— B3 or P— Q3, would yield White 
+a good game. His chances of success are, how- 
+ever, greatly increased if he adopts a more dash- 
+ing form of attack. 
+
+5 KtxP 
+
+Black cannot well refuse the acceptance of the 
+(momentary) sacrifice, as otherwise White will 
+obtain a good position by P — Q4, followed bv 
+
+P— K5 ; or else (5) P— Q3 ; (6) P— Q4. 
+
+P— QKt4 ; (7) PxP with a good game. 
+
+6. P— Q4 P— QKt4 
+
+7. B— Kt3 P— Q4 
+
+Black would be rather venturesome to take the 
+QP, because White could continue with R — K 
+and molest the Black KKt, in fact finally win it. 
+
+8. PxP B— K3 
+
+9. P— QB3 
+
+White's last move is an exception to the rule we 
+have hitherto followed, to develop as quickly as 
+possible. The game has assumed already a character 
+of its own, which in consequence adds to the im- 
+portance of some pieces in preference to others. 
+Onr KB is destined to serve as the backbone of 
+our attack against the Black King, in the moment 
+(which must soon arrive) that he castles on the K 
+^ide. We therefore preserve it against the possible 
+attack of the Black Kts, which are driven into 
+exposed points. 
+
+9 KB— B4 
+
+K2 would also be a favorable spot for the Bishop, 
+but it seems necessary to reserve this point for the 
+QKt. 
+
+27 
+
+Moreover, there is a certain want of protection 
+on the Q vside, for which you provide by putting 
+I he Bi.shop into the rear of your Pawns. 
+
+No fault is now to be found with Black's 
+development, all his pieces being well in play; but 
+liis Pawn position on the Q side is compromised. 
+How White will take advantage of that weakness 
+the following will explain : — 
+
+10. Kt— Q2 Castles 
+
+11. B— B2 
+
+Black. 
+
+Whit«, 
+
+The position becomes now very instructive. 
+Whether the twice attacked Kt is removed, or 
+exchanged, or guarded, in each case White obtains 
+a splendid game. 
+
+A 11. 
+
+Kt— Kt4 
+
+12. 
+
+KtxKt 
+
+QxKt 
+
+13. 
+
+Kt— K4 
+
+Q— K2 
+
+14. 
+
+KtxB 
+
+QxKt 
+
+15. 
+
+B— K3 
+
+Q— K2 
+
+16. 
+
+P— KB4 
+
+sooner or later threatening P- 
+position. 
+
+-B5, with a beautiful 
+
+B 11. 
+
+KtxKt 
+
+What is the right move now — the move which 
+adds most to the power of our pieces ? 
+
+12. QxKt ! 
+
+Now we threaten Kt— Kt5. With P— KR3 he 
+cannot defend, as Q — Q3 would force P — KKt3, 
+and thus the gratuitous win of the RP. If 
+B— K2, R— K, to be followed by Kt— Q4, and 
+then speedily P — KB4, would give us the pull ; 
+so he plays 
+
+12 
+
+13. P— QKt4 
+
+14. Kt— Kt5 
+
+Kt— K2 
+B— Kt3 
+
+29 
+BlvACK. 
+
+I 
+
+1^1 ^1 
+
+m. ^i 1^1 ».. 'mm. 
+
+^-^ mm. -mm, . i 
+
+K.rM'' ...M zMl 
+
+^w-^^i^ «^ ^^^-^ 
+
+i 
+
+iJ^^^. ^^5«^ 
+
+y^//////ZM^ 
+
+I„4b isi .^ n 
+
+^..^^™ 
+
+fii 
+
+\V//////////. OfT^^TTT^/, 
+
+^ ^ fe^ 
+
+White. 
+
+Let us consider some variations in this interest- 
+ing position : 
+
+A 14. 
+
+P— KR3 
+
+15. 
+
+Kt— R7 
+
+R— K 
+
+16. 
+
+Kt— B6ch 
+
+PxKt 
+
+17. 
+
+QxP 
+
+P— B4 
+
+18. 
+
+B— Kt5 
+
+and Black is without defence. 
+
+30 
+
+B 14. 
+
+Kt— Kt3 
+
+15. 
+
+Bxkt* 
+
+RPXB 
+
+16. 
+
+Q-B4 
+
+threatening Q 
+
+— R4, etc. 
+
+16. 
+
+R— K 
+
+17. 
+
+Q— R4 
+
+P— KB3 
+
+18. 
+
+Q— R7ch. 
+
+K-B 
+
+19. 
+
+Q— R8ch. 
+
+B— Kt 
+
+20. 
+
+PxP 
+
+PxP 
+
+21. 
+
+Kt— R7ch. 
+
+K— B2 
+
+22. 
+
+B— R6 and 
+
+wins. 
+
+C 14. 
+
+B— KB4 
+
+15. 
+
+*BxB * 
+
+KtxB 
+
+16. 
+
+Q-Q3 
+
+P— KKt3 
+
+17. 
+
+Q-R3 
+
+P— R3 
+
+18. 
+
+P— KKt4 
+
+PxKt 
+
+19. 
+
+PxKt 
+
+Q— K2 
+
+20. 
+
+R— K 
+
+Now we threaten the advance of our KB Fawn, 
+to be followed up by Q — R6. So Black can do 
+nothing else but 
+
+20 P— KB3 
+
+21. PxKtP PxP 
+
+22. RxP 
+regardless of expense, 
+
+22 BxPch. 
+
+23. K— R Q— Kt2 
+
+24. Q— K6ch. K— R 
+
+25. RxKtP winning easily. 
+
+What must strike us most forcibly in this varia- 
+tion, is the tremendous power of our K side 
+
+31 
+
+Pawns, which have swept everything before them, 
+as a matter of fact, totally annihilated the oppos- 
+ing force, while at the same time Black's Q side 
+Pawns have been lazy spectators of the fight. 
+
+Let us go back again to where we left off the 
+examination of our principal line of play. 
+
+11 P— KB4 
+
+12. PxP e./>. 
+
+Also Kt— Kt3 and then QKt— Q4 would be a 
+good continuation. 
+
+12 KtxP 
+
+13. Kt— Kt5 B— Kt5 
+
+14. QKt— B3 Kt— K4 
+
+15. B— B4 KtxKt 
+
+16. PxKt B— B 
+
+B — Q2 would be still worse on account of the re- 
+joinder (17) B— K5. 
+
+17. Q— Q3 P— KKt3 
+
+He has no other mode of defence. If, for instance 
+
+(17) , Kt— K5; (18) KtxKt, PxKt; (19) 
+
+QxQ, etc. 
+
+18. KtxP B— B4 
+
+Obviously, if (18) , KxKt; (19) QxPch, 
+
+K — R; (20) K — R would speedily decide the issue 
+
+19. KtxKtch. RxKt 
+
+20. Q— Q2 BxB 
+
+21. B— Kt5 (or else QxB). 
+
+with a winning advantage. 
+
+32 
+
+My object, in thus diving down into the depths 
+of this position, is not by any means to provide 
+your memory with ballast. All I want to show 
+is that the superior position will perforce become 
+overpowering, whichever turn you may try to give 
+to the game. And why have we got what we 
+termed the superior position? You see, Black's 
+Q side Pawns do not work, they only require pro- 
+tection, while White's Pawns, either actively or 
+only as potentials of future action, are contribut- 
+ing to White's success. 
+
+But we must not yet rest satisfied with the an- 
+alysis. There may yet be a way of escape, at 
+move 11, namely, 
+
+11 B— B4 
+
+12. Kt— Kt3 B— Kt3 
+
+13. P— QR4 
+
+The unfortunate Q side Pawns serve us again as a 
+mark for attack. Now we threaten to exchange 
+the Pawns, then the Rook, and to gain the QP. 
+
+13 R— QKt 
+
+This move seems to be the only practicable reply, 
+as otherwise, for instance after Kt — K2, QKt — Q4: 
+would become very dangerous. 
+
+14. KKt— Q4 KtxKt 
+
+15. KtxKt BxKt 
+
+or if (15) , B— Q2; (16) PxP,PxP; (17) 
+
+Q— Q3. 
+
+16. PxB 
+
+Now we have obtained our purpose. Firstly, we 
+have two Bishops beautifully bearing down against 
+
+33 
+
+the adverse K side; then Black's QBP is now kept 
+backward by our Q Pawn, and will never be able 
+to advance. 
+
+16 B— Kt3 
+
+or else P — B3 will win a piece. 
+
+17. PxP PxP 
+
+18. R— R7 P— QB3 
+Kt— Kt4 
+R— B 
+Kt— K3 
+BxB 
+Q-Q2 
+
+A desperate attempt to free himself by (23) , 
+
+P— QB4 would fail against (24) PxP, P— Q5 ; 
+(25) R— Q6, RxP; (26) Q— Q3. 
+
+24. P— B5 Kt— Q 
+
+25. Q— KB2 
+
+We now want our most powerful piece on the K 
+side. 
+
+25 K— R 
+
+26. Q— R4 Q— Kt2 
+
+He must, after all, try to get something out of 
+his Q side. 
+
+19. 
+
+P— B3 
+
+20. 
+
+R— R6 
+
+21. 
+
+B— K3 
+
+22. 
+
+P— B4 
+
+^3. 
+
+QXB 
+
+27. 
+
+P— B6 
+
+P— Kt3 
+
+28. 
+
+Q— R6 
+
+Kt— K3 
+
+29. 
+
+R— R3 
+
+R— KKt 
+
+30. 
+
+B— Q2 
+
+Kt— B 
+
+31. 
+
+B— Kt4 
+
+and Black is quite helpless. 
+
+84 
+
+Again I beg to draw your attention to the dif- 
+ference of power exerted by the White and the 
+Black Pawns. Taken all round you will perhaps 
+agree with me when I declare that Black, by 
+
+choosing the defence (3) , P— QR3 to the 
+
+Ruy I/)pez, unnecessarily damages his Q side 
+Pawns, while the development of his pieces gives 
+him no compensation for that disadvantage. 
+
+To relieve your chess nerves from the tension 
+which they must have undergone to-day, allow me 
+to introduce, as a finale, a more pleasing matter. 
+In my match with Mr. Steinitz, that master chose, 
+for a long while, a somewhat close defence to the 
+Ruy Lopez, beginning with (3) P — Q3. The 
+game usually ran as follows: — 
+
+1. P— K4 
+
+2. Kt— KB3 
+
+3. B— Kt5 
+
+4. P-Q4 
+
+5. Kt— B3 
+
+6. B— QB4 
+
+P— K4 
+Kt— QB3 
+P— Q3 
+B-Q2 
+KKt— K2 
+
+<;, of course, Kt- 
+
+-KKt5. 
+
+6 
+
+7. KtxP 
+
+PxP 
+
+Now it seems that Black, in order to keep White's 
+Queen at bay, has a good way of developing his 
+KB by means of P— KKt3 and BKt2, where the 
+Bishop certainly would have an excellent diagonal. 
+This little plan, however, was never executed by 
+
+85 
+
+Mr. Steinitz, the reason appearing in what fol- 
+lows. If 
+
+7 P— KKt3 
+
+8. B— KKt5 
+
+In order to take possession of the diagonal which 
+Black attempts to occupy. 
+
+8 B— Kt2 
+
+9. Kt—QS 
+
+attack and counter-attack. 
+
+9 BxKt 
+
+Anything else would be clearly disadvantageous. 
+Black, of course, is now under the expectation 
+that White will continue with (10) KtxKt, when 
+BxP would allow Black to get out of danger. But 
+White has a more efficient move at his disposal; 
+
+10. QxB! 
+
+This is very awkward for Black. If now (10) 
+
+KtxQ ; (11) Kt— B6ch., K— B ; (12) 
+
+B — R6 checkmate. So nothing remains but to 
+castle. 
+
+10 Castles 
+
+11. Kt—BGch. K— R 
+
+12. Kt— Kt4ch. KtxQ 
+
+13. B— B6ch. K— Kt 
+
+14. Kt— R6 checkmate. 
+
+36 
+
+No. 4 
+
+Gentlemen, — The Evan's gambit, which in ac- 
+cordance with your desire I have chosen to-night 
+as subject of discussion, is constituted by these 
+four moves: — 
+
+1. P— K4 P— K4 
+
+2. Kt— KB3 Kt— QB3 
+
+3. B— B4 B— B4 
+
+4. P— QKt4 
+
+There is no necessity for Black to accept the 
+offer of the Pawn. On the contrary, if he retires 
+with his Bishop to Kt3 in reply, he will, as White's 
+last move has in no way furthered his develop- 
+ment, gain a small but distinct advantage in posi- 
+tion. The pla}^ which would then ensue will be 
+of the following character: — 
+
+4. 
+
+B— Kt3 
+
+5. 
+
+P— QR4 
+
+P— QR3 
+
+6. 
+
+P— QB3 
+
+Kt— KB3 
+
+7. 
+
+P-Q3 
+
+P— Q3 
+
+8. 
+
+Castles 
+
+Kt— K2 
+
+soon to be followed by P— QB3 and PQ4. Black's 
+pieces are all well placed, no matter whether 
+White castles at his eighth turn to move, or de- 
+fers that yet for some time. If White therefore 
+sacrifices a Pawn by giving the gambit, Black 
+sacrifices the sure prospect of positional advan- 
+tage by taking it. 
+
+The idea of the gambit is very obvious. We 
+want to continue, if BxP (or KtxP), with 
+
+5. P— QB3 
+
+87 
+
+and later on proceed with the advance of tlie QP, 
+so as to obtain a very strong centre and to open 
+several lines for the attack of the pieces. The 
+Bishop can retire to either B4, R4, K2, to his 
+own square, or to Q3, where he is not as badly 
+placed as at first sight appears. The best players 
+tavor B — R4: or B4, with a preference for the for- 
+mer. If we retire to B4 the Bishop may be at- 
+tacked again by P — Q4, while on the contrary 
+B — R4 counteracts that advance. On the other 
+hand, the Bishop at R4 will take away from the 
+QKt an important point, from where he might 
+attack the White KB. But taken all around, 
+
+5 B— R4 
+
+seems to be the preferable move. 
+
+White has now two formidable continuations. 
+
+6. P-Q4 
+
+naturally suggests itself first, although it is not of 
+such lasting effect as another move which we 
+shall consider later on. 
+Black will answer 
+
+6 PxP 
+
+7. Castles PxP 
+
+The weakest point in Black's camp is the KBP, 
+so we follow up our attack by 
+
+8. Q— Kt3 
+
+Black can reply with either Q — K2 or Q— B3. 
+From K2 the Q has hardly any move that is not 
+commanded by White's pieces, therefore 
+8 Q— B3 
+
+9. P— K5 
+
+38 
+
+in the expectation of embarrassing Black's de- 
+velopment, as neither the QP nor the KBP can 
+advance for the present without being taken, with- 
+v^^ith the effect that all lines are opened up to our 
+pieces. 
+
+9 Q— Kt3 
+
+10. KtxP KKt— K2 
+
+Black. 
+
+lliiiiHlilii 
+
+#1 
+
+wm m. 
+
+111 ■ 
+
+n 
+
+W/////^, 
+
+m^m 
+
+White. . 
+In this position we already see that White's at- 
+tacking moves are pretty well exhausted. He 
+has only a very unsatisfactory continuation. 
+11. B— R3 
+
+which gives to the Bishop a long file merely in 
+exchange for another one. 
+
+This position has been subject of analysis for 
+many decades, and several variations have been 
+found v^^hich seem to leave Black with a compar- 
+atively safe K position and a Pawn ahead. None 
+of the continuations given seem to be superior to 
+the one that follows. 
+
+11 BxKt 
+
+(This move was suggested by Mr. Lord during 
+the lecture). 
+
+12. QxB P— QKt3 
+
+13. B— Q3 Q— R3 
+
+Not Q— R4, as (14) BxKt, KxB; (15) P— K6, 
+might follow. 
+
+14. KR^Q B— Kt2 
+
+and it is difficult to see in which way White will 
+make good his minus of two Pawns. 
+
+This line of play, the so-called compromised 
+defence of the Evans gambit, leads sometimes to 
+very brilliant combinations. Let me give you an 
+instance of this at move 11 of our principal varia- 
+tion. 
+
+11. 
+
+Castles 
+
+12. 
+
+QR-Q 
+
+KR— K 
+
+13. 
+
+Kt— K4 
+
+QxKt 
+
+14. 
+
+BxPch 
+
+K— B 
+
+15. 
+
+B— Kt8 
+
+P— Q4 
+
+16. 
+
+PxP e.p. 
+
+KtxB 
+
+17. 
+
+Kt— Kt5 
+
+Q— B4 
+
+18. 
+
+Q— B7ch. 
+
+QXQ 
+
+19. 
+
+KtxP mate 
+
+40 
+
+Instead of (6) P — Q4, the greatest connoisseur 
+of the Evans, Mr. Tchigorin, favors (6) castles, 
+with the object of maintaining his centre. It 
+cannot be doubted that this line of play is more 
+in keeping with the original idea of the gambit. 
+
+Black, in accordance with the principles laid 
+down in lecture 1, must either play his QP, or 
+his KKt. It is usually the best policy when you 
+are subject to a violent attack to move the QP, 
+and when you are the aggressive party to develop 
+your pieces first. 
+
+In the position before us 
+
+6 P— Q3 
+
+appears therefore to be the allowed sounder play. 
+
+7. P— Q4 PxP 
+
+8. PxP B— Kt3 
+
+leads to the "normal position** of the Evans. 
+The five Pawns that White has gathered on his 
+K wing against Black's four, exert a considerable 
+amount of pressure on Black's pieces, the more so 
+as Black will be obliged to leave his K on the dan- 
+gerous side. It is true that Black may estab- 
+lish three pawns to one on the other wing ; but 
+then it will take him a great deal of time to force 
+the fighting on that side, while White's pieces 
+will soon be in direction and ready for assault. 
+
+Various continuations have recently been recom- 
+mended as best for White ; but it seems to me 
+that the old way of playing is as good as any. The 
+line of play usually followed by the old masters is 
+
+41 
+
+9. P— Q5 
+
+10. B— Kt2 
+
+11. B— Q3 
+
+12. Kt— B3 
+
+Kt— R4 
+Kt— K2 
+P— KB3 
+
+Castles 
+
+Black. 
+
+im i im 
+
+m. 
+
+'im 
+
+H m 
+
+WB^ R M 
+
+1 , /mm 
+
+"wKiTm 
+
+White. 
+
+It is not my intention to analyze the position 
+by the method usually followed, of simply enum- 
+erating all possible variations. Such analysis, un- 
+less it is very thorough, I contend, is quite useless. 
+It certainly, as the experience of many centuries 
+indisputably shows, would by no means exclude 
+
+42 
+
+the possibility of committing grave errors, and it 
+usually puts into obscurity the points of view from 
+which the essential characteristics of the position 
+may be deduced. 
+
+Without going into details, this much is certain, 
+either 
+
+(«) Black will advance his KBP to B4 ; or, 
+
+(5) He will initiate an attack on the Q side with 
+P— QB4, P— QR3, B— B2, P— QKt4, etc ; or, 
+
+(c) He will be content to break up White's 
+strong centre by P — QB3. 
+
+There is indeed no other p/an de campagne to 
+follow. 
+
+As regards the first point, it is easily seen that 
+such an advance would not increase the defensive 
+strength of Black's position. It would open the 
+file of the White QB, the point K4 to the White 
+Kts (after the exchange of the Pawns) and prob- 
+ably facilitate the joint attack of the White KBP 
+and KKtP. 
+
+(J)) This was the plan of defence, or rather 
+counter attack, in Anderssen's tierce. White will 
+obtain the advantage in the following manner : 
+
+13. 
+
+K— R 
+
+Kt— Kt3 
+
+14. 
+
+Kt-Q2 
+
+P— QB4 
+
+15. 
+
+P— KB4 
+
+P~QR3 
+
+16. 
+
+Kt— K2 
+
+B— B2 
+
+17. 
+
+Kt— B3 
+
+P— QKt4 
+
+18. 
+19. 
+
+P— B5 
+Kt— B4 
+
+Kt— K4 
+
+48 
+
+This will represent pretty accurately the state 
+of affairs ten or twelve moves after the normal 
+position has been arrived at. It takes at least 
+seven moves to bring the Black Pawns to their 
+destination. In the meantime, White is free to 
+advance his KKt Pawn in two steps to Kt5, and 
+to open up a pernicious attack against Black's K 
+side. 
+
+(c) White's policy will be exactly as in (^), to 
+advance his KBP. If Black exchanges the QBP 
+against the QP, the KP will retake, and the Black 
+QKt will be unfavorably situated. Black has in 
+this variation practically no chance of winning, in 
+spite of his extra Pawn, while the attack of White 
+is very lasting and dangerous. 
+
+It seems then that the normal position will yield 
+to White much better chances of winning than it 
+will to Black. 
+
+If you want to simplify matters, I advise you 
+to play 
+
+.7 B— Kt3 
+
+At once, with the object of converting your extra 
+material into positional advantage. If then (8) 
+PxP, PxP; (9) QxQ, KtxQ; (10) KtxP, 
+Kt — KB3. Black's solid Pawns and good, sound 
+development will make it hard to White to keep 
+up the equilibrium, as his QRP, and more so the 
+QBP, require constant care. If, on the other 
+hand, (8) PxP, PxP; (9) Q— Kt3, Q— B3; (10) 
+
+u 
+
+B— Q5, KKt— K2; (11) B— Kt5. Q— Kt3; (12) 
+QBxKt, KxKt; (13) BxKt, QxB; (14) KtxP, 
+Q— K3; (15) Q— R3, P— QB4 or K— B3, with 
+two Bishops, a healthy development of forces and 
+a solid position. 
+
+One of the finest games on record was played 
+at a time when the analysis of the Evans gambit 
+was not yet far advanced. It has been named 
+* ' the evergreen partie. " The leader of the White 
+forces was Professor Anderssen. 
+
+1. 
+
+P— K4 
+
+P— K4 
+
+2. 
+
+Kt— KB3 
+
+Kt— QB3 
+
+3. 
+
+B— B4 
+
+B— B4 
+
+4. 
+
+P— QK4 
+
+BxP 
+
+5. 
+
+P— B3 
+
+B— R4 
+
+6. 
+
+P— Q4 
+
+PxP 
+
+7. 
+solet 
+
+Castles 
+:e defence. 
+
+P-Q6 
+
+8. 
+
+Q-Kt3 
+
+Q— B3 
+
+9. 
+
+P— K5 
+
+Q— Kt3 
+
+10. 
+
+B— R3 
+
+KKt— K2 
+
+11. 
+
+R— K 
+
+P— QKt4 
+
+12. 
+
+BxP 
+
+R— QKt 
+
+13. 
+
+Q-R4 
+
+B— Kt3 
+
+14. 
+
+QKt-Q2 
+
+B— Kt2 
+
+15. 
+
+Kt~K4 
+
+Q— B4 
+
+16. 
+
+BxP 
+
+Q— R4 
+
+17. 
+
+Kt— B6ch 
+
+PxKt 
+
+18. 
+
+PxP 
+
+R— Kt 
+
+45 
+
+Black. 
+
+1 
+
+^ '?y/////M, 
+
+■ 
+
+^ '^kjT^A ^^^ 
+
+fai i 
+
+White. 
+
+19. 
+
+QR-Q 
+
+One of the most subtle and profound 
+
+moves on 
+
+record. 
+
+19. 
+
+QxKt 
+
+20. 
+
+RxKtch 
+
+KtxR 
+
+21. 
+
+QxPch 
+
+Grand! - . 
+
+21 KxQ 
+
+22. B— B5doublech K— B3 
+
+23. B— QTcheckmate 
+
+If at move 20 Black continues with (20) , 
+
+K— Q; (21)RxPch. K— B; (22) R— Q8ch,KtxR; 
+(23) Q — Q7ch and mates in two more moves. 
+
+No. 5 
+
+Gentlemen, — According to the request you 
+made to me last Monday, we shall consider to-day 
+the King's Bishop's gambit, which as you all 
+know, is constituted by these moves : — 
+
+1. 
+
+P— K4 
+
+P— K4 
+
+2. 
+
+P— KB4 
+
+PxP 
+
+3. 
+
+B— B4 
+
+If I remind you of Rule III. you will admit 
+that the development of the B is not in accord- 
+ance with our fundamental principles. Actually 
+the move of the KKt to B3 would be far stronger, 
+as it leads to a fairly even game, while the KB 
+gambit should be lost to the first player. 
+
+The defence will, before all, disturb the quiet 
+
+course of White's development, by (3) , 
+
+Q — R5ch., to which White is bound to answer 
+with 
+
+4. K— B 
+
+According to the principles of development, 
+either the QP or one of the Kts should move. 
+White is threatening to bring forth an enormous 
+force in no more than three moves, to bear upon 
+the centre of the board, namely Kt — KB3, 
+Kt— QB3, P— Q4. Black dare not quietly submit 
+to that, as for the moment his Q is exposed to 
+danger. To keep the White K in his unsound 
+position, to spoil the plan of White, and to aid the 
+quick development of Black's forces, the best pol- 
+icy is the most aggressive one, that is the one 
+initiated by the sacrifice of the QP. 
+
+47 
+
+4 P~Q4 
+
+5. BxP 
+
+Now, before anything else is undertaken 
+
+5 P— KKt4 ! 
+
+Our Bishops have two long lines ; our Kts have 
+only one move to make to occupy points of im- 
+portance, and to add to the firmness of our posi- 
+tion. We can, therefore, spare the time for this 
+advance of the KKtP, destined to protect our 
+KBP against all possible attack, and to render 
+the K side unsafe for White's pieces. 
+
+6. Kt— KB3 Q— R4 
+
+7. P— KR4 B— Kt2 
+
+An excellent reply. The Bishop not only protects 
+the Rook, but guards the two centre points, Q4 
+(Q5), K5 (K4). 
+
+8. 
+
+P— Q4 
+
+P— KR3 
+
+9. 
+
+K— Kt 
+
+Q— Kt3 
+
+10. 
+
+Kt— QB3 
+
+Kt— K2 
+
+So far, everything went all right, because White 
+consistently played for the development of his 
+minor pieces. Now it becomes apparent that the 
+White QR is awkwardly placed, and the QB no 
+less. The K position need not give any anxiety, 
+but the Q has somehow no good prospects of ser- 
+ving her cause. At the same time, Black is quite 
+safe — there is only one weak point in his camp, 
+the KBP — and any possible attacks of the White 
+minor pieces in the centre are obviated by the 
+clever sacrifice of the fourth move. 
+
+48 
+
+Black. 
+
+ill 
+
+W4 t WM 'MB L 
+
+iil^lli 
+
+^^^^'^^''"''^^8^ 
+
+1^ ^. 
+
+'p^' 
+
+ill I 
+
+I A 111 IM 
+
+^. ^■^i^Fm'?^^"^»W 
+
+?^, §fe^ 
+
+^X-'^p '^'"'" 
+
+^ 
+
+White. 
+
+11. Q-Q3 
+preparatory to B — Q2 
+
+11 
+
+12. B— Kt3 
+
+P— QB3 
+B— Kt5 ! 
+
+Here the QB has a splendid position safe of all 
+
+49 
+
+possible attack by inferior pieces and with R4 as a 
+safe retreat. 
+
+13. B— Q2 Kt— Q2 
+
+14. K— B2 Castles Q side 
+
+All the weakness of the White game becomes 
+now at once apparent . His K and QP are ex- 
+posed to the most direct attack of the hostile R 
+and Kts, and KB. Try what he may the day is 
+gone. Black threatens BxKt and Kt— K4. If 
+(15) Kt— K2, Kt— QB4 wins directly. If (15) 
+PxP, PxP; (16) RxR, BxR the danger is 
+not obviated. If finally (15) Q— B4, BxKt; (16) 
+PxB,Kt— K4; (17)PxKt, RxBch.; (18) K— K, 
+KR— Q; (19)QxP, QxQ; (20)BxQ, BxP; 
+(21) B— Kt3, BxKt; (22) PxB, Kt— Kt3, fol- 
+lowed by Kt — K4, is at least one way of obtaining 
+a great advantage. 
+
+Let us return to move 11, and vary White's 
+play. 
+
+11. P— K5 P— QB3 
+
+12. B— K4 B— KB4 
+
+13. Q— K2 Kt— Q2 
+
+14. BxB KtxB 
+
+White is obliged to undertake some kind of attack, 
+or Black will Castle Q side, and the breakdown 
+of White's centre will be practically certain. 
+
+15. Kt— •K4 P— KKt6 
+
+50 
+
+Now at last, this advance is justified, because the 
+QP has lost its protection by the Q 
+
+16. Kt— Q6ch. K— B 
+
+17. KtxKt PxKt 
+
+and wins a piece or (17) P — R5, PxKt or (17) 
+Kt— K, QxKt ; (18) PxKt, BxPch., and should 
+win. 
+
+We must therefore come to the conclusion that 
+the KB gambit is unsound. I will not pretend 
+that there is any right and wrong in Chess from 
+an ethical standpoint, but by what right should 
+White, in an absolutely even position, such as 
+after move 1, when both sides have advanced 
+P — K4, sacrifice a Pawn, whose recapture is quite 
+uncertain, and open up his K side to attack ? And 
+then follow up this policy by leaving the check of 
+the Black Queen open ? None whatever ! The 
+idea of the gambit, if it has any justification, can 
+only be to allure Black into the too violent and 
+hasty pursuit of his attack. If, therefore, we can 
+obtain by sound and consistent play, the superior- 
+ity of position, common sense triumphs over 
+trickery, and rightly so. 
+
+When the analytical and theoretical knowledge 
+of Chess was not so far advanced as at the present 
+time, famous players frequently chose the lively 
+forms of development which are the outcome of 
+gambits. One of these games, though unsound 
+in the highest degree, has been of such excep- 
+
+I 
+
+61 
+
+tionally brilliant character that it was honored by 
+the players of the time with a special name. We 
+know it as "The Immortal Partie." Here its 
+moves follow : 
+
+White. 
+
+BI.ACK. 
+
+Anderssen. 
+
+Kieseritzky. 
+
+1. 
+
+P— K4 
+
+P— K4 
+
+2. 
+
+P— KB4 
+
+PxP 
+
+3. 
+
+B— B4 
+
+Q— R5ch. 
+
+4. 
+
+K— B 
+
+P— QKt4 
+
+5. 
+
+BxP 
+
+Kt— KB3 
+
+6, 
+
+Kt— KB3 
+
+Q— R3 
+
+7. 
+
+P— Q3 
+
+Kt— R4 
+
+8. 
+
+Kt— R4 
+
+P— QB3 
+
+9. 
+
+Kt— B5 
+
+Q— Kt4 
+
+10. 
+
+P— KKt4 
+
+Kt— B3 
+
+11. 
+
+R— KKt 
+
+PxB 
+
+12. 
+
+P— KR4 
+
+Q-Kt3 
+
+13. 
+
+P— R5 
+
+Q-Kt4 
+
+14. 
+
+Q— B3 
+
+Kt— Kt 
+
+15. 
+
+BxP 
+
+Q— B3 
+
+16. 
+
+Kt— B3 
+
+B— B4 
+
+17. 
+
+Kt-Q5 
+
+I have not dwelt on the constant violation of 
+principle by Black. The consequence of his im- 
+aginative schemes is that none of his pieces are 
+developed ; and here White could have smashed 
+Black up by advancing first P — Q4. 
+
+17 QxP 
+
+18. B— Q6 
+
+52 
+
+Black. 
+
+rw^'^ 
+
+ill ,: ■ i ■ i ill ,. i 
+
+J » B 
+# ^^1 ^^ 
+
+■///////?// 
+
+ill 
+
+m.^ 'mm. 
+
+1 ^ €Sl 
+
+A fine coup. 
+
+Whitb. 
+
+18 
+
+19. K— K2 
+
+20. P— K5 
+
+QxRch. 
+•BxR 
+
+Obstructing the line from QR8 to KKt2. A glor- 
+ious finish. 
+
+20 Kt--QR3 
+
+21. KtxPch. K— Q 
+
+22. Q— B6ch. KtxQ 
+
+23. B— K7 checkmate 
+
+No. 6. 
+
+Gentlemen, — As you have expressed the desire 
+to have one of the close openings discussed, I have 
+chosen to-night as subject of discussion the popu- 
+lar and important French defence, which arises 
+when Black replies to White's P— K4 with P— K3. 
+
+1. P— K4: P— K3 
+
+This defence had for a long time the reputation of 
+leading to a dull kind of game. In later years it 
+has been found that it gives opportunities for a 
+great many violent attacks of a character which 
+it is difficult to obtain in any other opening. 
+
+The difference between Black's first move P — 
+K3 and the other P — K4, commonly chosen, is 
+twofold. The Pawn at K3 blocks the long diag- 
+onal of the Black QB reaching up to KR6, which 
+is, I might say, almost naturally open to him. On 
+the other hand, in the ordinary games which open 
+with P — K4 on each side, the White KB can take 
+up a very strong diagonal from QB4 pointing 
+towards the initially weakest point in Black's 
+camp, the square KB2. This line also is obstructed. 
+These two peculiarities give to the French defence 
+a character of its own, which, with good play on 
+the part of White, it should never lose. 
+
+The move, which gives to the White pieces as 
+much freedom as can be obtained in one single 
+move, is 
+
+2. P— Q4 
+
+And just so on the part of Black. 
+
+2 ^ P-Q4 
+
+As early as this, opinions"greatly differ as to the 
+
+64 
+
+best continuation to be chosen by White. The 
+attack has namely the choice — 
+
+a. To sacrifice the KP. 
+
+b» To exchange it. 
+
+c. To advance it. 
+
+d. To guard it. 
+
+{a) May be at once dismissed. If we play (3) 
+Kt— KB3, PxP ; (4) Kt— Kt5, this may lead to 
+a tricky game, but with sound and energetic play 
+on the part of Black, a great advantage ought to 
+accrue to the second player. (<:) is equally inad- 
+visable, as the early advance of Pawns unbacked 
+by pieces always is. This may be the line of play 
+to follow : — 
+
+3. 
+4. 
+5. 
+6. 
+
+7. 
+
+P— K5 
+P— QB3 
+Kt— KB3 
+B— K2 
+
+Castles 
+
+P-QB4 
+Kt— QB3 
+Q— Kt3 
+KKt— K2 
+Kt— B4 
+
+or 5. 
+6. 
+7. 
+
+8. 
+
+9. 
+
+and if 10. 
+
+P— KB4 
+Kt— KB3 
+P— QKt3 
+B— K3 
+B— B2 
+PxP 
+
+Q— Kt3 
+BQ2 
+Kt— R3 
+Kt— B4 
+PxP 
+B— Kt5ch. 
+
+You see White comes, without compensation, 
+into great difficulties. 
+
+(J)) The exchange of the Pawns in the third 
+
+move 
+
+3. 
+
+PxP 
+
+PxP 
+
+leads to a very even game, in which the advan- 
+tage of the first move counts for very little. The 
+game might go on 
+
+55 
+
+4. 
+
+Kt— KB3 
+
+Kt— KB3 
+
+5. 
+
+B— Q3 
+
+B— Q3 
+
+6. 
+
+Castles 
+
+Castles 
+
+7. 
+
+B— KKt5 
+
+B— K3 
+
+8. 
+
+QKt-Q2 
+
+QKt-Q2 
+
+9. 
+
+R— K 
+
+R— K 
+
+10. 
+
+Kt— K5 
+
+Kt—B 
+
+or 10. 
+
+P— B3 
+
+Kt— B 
+
+11. 
+
+Q~B2 
+
+P— B3 
+
+12. 
+
+R— K2 
+
+Q-B2 
+
+13. 
+
+BxKt 
+
+PXB 
+
+14. 
+
+QR-K 
+
+Kt— Kt3 
+
+15. 
+
+P— KKt3 
+
+When the advantage of the doubled Rooks on the 
+open file is counterbalanced by the strong position 
+of the two Black Bishops, and Black may even 
+have, on account of the somewhat questionable 
+exchange at move 13, the superior game. 
+
+A game well worth knowing is the one played 
+by Blackburne against Scbwarz in Berlin, 1881. 
+(1) P— K4, P— K3; (2) P— Q4, P— Q4; (3) PxP, 
+PXP ; (4) Kt— KB3, B— Q3 ; (5) B— Q3, Kt— 
+KB3; (6) Castles, castles; (7) B— KKt5, B— 
+KKt5; (8) Kt— B3, Kt— B3 ; (9) BxKt, QxB. 
+White is greedy to win a Pawn, and voluntarily 
+exchanges B v. pinned Kt — always a great mis- 
+take. (10) KtxP, Q— R3; (11) P— KR3, 
+KtxP, and Black (Blackburne) won easily, as 
+White's K position is exposed. 
+
+The want oi finesse in variation {h) is accounted 
+for by the Pawn position. The Pawn at Q4 takes 
+away a good square from the KKt ; it blocks the 
+file of the B from K3 to R7, or from QB3 to 
+
+56 
+
+KKt7 ; it further obstructs the Q file. If the two 
+Pawns on the Q file could by some means be ex- 
+changed, the position would assume a very differ- 
+ent character. As it is they are never to be got 
+rid of, unless with the friendly assistance of your 
+opponent. 
+
+{d) The strongest move that comes under this 
+heading is (3) Kt — QB3. A custom has lately 
+sprung up of posting this Kt at Q2, where it 
+obstructs the QB and the Q. A good reply 
+against such sickly policy is always to open up all 
+lines quickly ; for instance, in the given case to 
+advance P — QB4. To the move actually chosen 
+Black's answer is, as a rule 
+
+3 Kt--KB3 
+
+Now most players choose as continuation 
+
+4. B— KKt5 
+
+A move unquestionably against the rules of de- 
+velopment, to which Black ought to reply by 
+
+4. 
+
+PxP 
+
+5. 
+
+KtxP 
+
+P— K2 
+
+6. 
+
+BxKt 
+
+PxB 
+
+7. 
+
+Kt— KB3 
+
+P— KB4 
+
+8. 
+
+Kt— Kt3 
+
+P-QB4 
+
+And Black will have a very good game. 
+The better play is the more audacious one, 
+
+4. P— K5 KKt— Q2 
+
+5. P— KB4 
+
+According to one of Mr. Steinitz's principles, 
+which is, whenever you advance your Pawn to 
+K5, back it up by P — KB4 as soon as possible. 
+
+67 
+
+6. PxP 
+
+P— QB4 
+
+This exchange of Pawns is imperative. In former 
+years White invariably tried, in close games, to 
+keep his P at Q4 by backing it up by P — QB3. 
+This policy has the two great disadvantages that 
+it leaves a weak Pawn at Q4 open to attack, and 
+that it opens a file (the QB file) for the interven- 
+tion of the Black Rooks. 
+
+BlvACK. 
+
+nan 
+
+i. 
+
+^^i 
+
+m0^M§ ^^m>- 
+
+11 i H^H i 11 i 
+
+^ »^ 
+
+m ^mm Pi mm 
+
+1 i 
+
+'^miM '^///////^ 
+
+^Q^ 
+
+Whitk. 
+
+68 
+
+6 BxP 
+
+7. Q— Kt4 Castles 
+
+8. B— Q3 Kt— QB3 
+
+9. Kt— B3 
+
+White now threatens the sacrifice, which is so 
+common in close games, that of B against RP. 
+
+9 P— KB4 
+
+10. Q— R3 Kt— Kt5 
+
+11. P— KKt4 
+
+White has only one aim — to make play on the K 
+side, while the development of the Black QB is 
+yet unaccomplished. He therefore does not lose 
+any time by advancing the QRP, and has now a 
+fine attacking game. Assume for instance 
+
+11. 
+
+KtxBch. 
+
+12. 
+
+PxKt 
+
+Kt— Kt3 
+
+13. 
+
+P-Q4 
+
+B— Kt5 
+
+14. 
+
+R— KKt 
+
+Q-B2 
+
+15. 
+
+B— Q2 
+
+Kt— B5 
+
+16. 
+
+P-R3 
+
+KtxB 
+
+17. 
+
+KxKt 
+
+A^hil 
+
+:e game is a 
+
+Itogether prefer 
+
+11. 
+
+Kt— Kt3 
+
+12. 
+
+P— QR3 
+
+KtxBch. 
+
+13. 
+
+PxKt 
+
+B— Q2 
+
+14. 
+
+P— QKt4 
+
+B— K2 
+
+15. 
+
+Kt-Q4 
+
+59 
+
+To make an6tlier attempt 
+
+11 Q— Kt3 
+
+12. PxP KtxBch. 
+
+13. PxKt RxP 
+
+14. KtxP 
+
+and should win. 
+
+If, then, Black is reduced at move 9 to the 
+necessity 
+
+9. P— KR3 
+
+White can, nevertheless, pursue the policy of 
+aggression by immediately adv^ancing his KKtP. 
+
+10. P— KKt4 
+
+To take advantage of the opportunity thus offered 
+of opening up the adverse K side. 
+
+Black may strengthen his defence at move 6 
+
+6 Kt— QB3 
+
+7. P— QR3 BxP 
+
+The Pavi^n must Ije taken now, as otherwise P — 
+QKt4 will save it. To capture it with Kt does 
+not appear to be superior, as the Kt is not ver}^ 
+happily placed at B4, and obstructs the KB some- 
+what. 
+
+8. Q— Kt4 Castles 
+
+Here Black may defend himself by P — KKt3, 
+when a very difficult game will ensue, in which, 
+however, the Black K side Pawns will furnish 
+White with good objects of attack. 
+
+9. B— 03 P— QR3 
+
+00 
+
+It is difficult to suggest a different line of play. 
+Black must do something to bring the White Q 
+side under a certain pressure, as otherwise White 
+would gratuitously obtain a good K side attack. 
+The advance of the QRP and the QKtP seem to 
+be the only means of accomplishing that purpose. 
+
+10. Kt— KB3 
+threatening BxPch. 
+
+10 P— KB4 
+
+11. Q— R3 P— QKt4 
+
+12. P— KKt4 P— KKt3 
+
+13. Q— Kt3 
+
+A very important manoeuvre, but it is difficult to 
+say whether this move, or Q — Kt2, will, in the 
+the end prove superior. 
+
+13 K— R 
+
+Again it is hard to find out better play, as White 
+threatens to obtain a passed K Pawn by PxP. 
+
+14. P— KR4 
+
+with a first rate attack. 
+
+I think you will agree with the proposition that 
+I have to lay down, viz., that (3) Kt— KB3 sub- 
+jects the defence to a difficult game. As a good 
+reply to (3) Kt — QB3 I advise you to choose the 
+following continuation 
+
+3. 
+
+PxP 
+
+4. 
+
+ktxp' 
+
+Kt— KB3 
+
+5. 
+
+Kt— Kt3 
+
+P— QB4 
+
+6. 
+
+Kt— B3 
+
+Kt— B3 
+
+7. 
+
+B— K3 
+
+Q— Kt3 
+
+61 
+
+or, 5. 
+
+B— Q3 
+
+P— QB4 
+
+6. 
+
+PxP 
+
+BxP 
+
+7. 
+
+KtxB 
+
+Q— R4ch^ 
+
+8. 
+
+P— B3 
+
+QxKt 
+
+9. 
+
+B— K3 
+
+Q— B2 
+
+10. 
+
+Kt— B3 
+
+Kt— B3 
+
+11. 
+
+Castles 
+
+P— QKt3 
+
+It is dangerous to Castle into the two B files ; so 
+Black first brings out his B— Kt2, R to Q square, 
+and waits with moving his King until White has 
+spent some of his accumulated ''potential force" 
+(gathered in the centre). You may vary your 
+
+tactics at move 5 by playing : (5) Kt — 
+
+B3 ; (6) P— QB3, P— K4 with a good.game. 
+
+One word about close games in general. The 
+rules of quick development, as laid down in lecture 
+1, require one amendment, viz., do not obstruct 
+your QBP by your QKt (unless you wish to open 
+the game at once by P — K4), and advance that 
+Pawn as early as you can to QB4. 
+
+After the Easter holidays we shall discuss the 
+general principles of the remaining parts of the 
+game, when much that has been said hitherto, will 
+obtain a different and a deeper meaning. 
+
+Nos. 7 and 8 
+
+Gentlemen, — So far we have considered the first 
+part of a game of Chess, called the opening, and 
+usually embracing about a dozen moves. The 
+object of development is, as we have seen, to get 
+the pieces into action, and to place them on favor- 
+able lines, in order to have them at hand when 
+you intend to make them " work." The process 
+of making pieces in chess do something useful 
+(whatever it may be) has received a special name : 
+it is called the attack. The attack is that process 
+by means of which you remove obstructions. That is 
+so in every fight, whether it be a battle, or a fight 
+with swords, or a boxing encounter, this defini- 
+tion will always apply. 
+
+Let us compare the game of Chess to some other 
+fight — for instance, to a battle. Two armies op- 
+posite each other are attempting to destroy, or at 
+least to frighten each other. The armies, if about 
+even in numbers, and also as far as favorable posi- 
+tion is concerned, will each have a superiority in 
+some quarter which will enable them not only to 
+hold their opponents there in check, but also to 
+drive them out of their position. Three things 
+determine whether an attack should be made, and, 
+if so, in which manner. First of all the proper- 
+
+63 
+
+tion of the attacking force to that directly oppos- 
+ing it in numbers ; secondly the nature of the 
+surroundings ; thirdly the relation of the forces 
+engaged to the rest of the army. 
+
+The third consideration will influence the time 
+in which the attack must be executed, whether 
+rapidly (if the advent of reserve force must under 
+all circumstances be avoided) or step by step; in 
+other words, it determines whether we should 
+make it our object to economize in time, or in 
+material force at our disposal. 
+
+The surroundings will, in part, add to the de- 
+fensive strength of our opponents, and in part take 
+away from it. Their character will determine 
+which part of the hostile force is exposed to the 
+effect of our weapons, and which is shielded ; 
+where we can advance with comparative safety, 
+and which part of the ground we have to traverse 
+rapidly, in other terms, which are weaknesses to 
+be assailed, and which our strong points towards 
+which to advance. The first consideration will 
+tell us whether, after we have gained, by the 
+methodical destruction of the obstacles in our way, 
+a position of advantage, we are able to destroy or 
+drive away the opposing force ; or whether the 
+object of our attack, if obtained, is a sufficient 
+compensation for the lives sacrificed. If, in any 
+kind of fight, the rules for attack are laid down, 
+the three things mentioned must be studied. 
+
+In Chess the soldiers are the men and the gen- 
+eral is the mind of the player. If anything that 
+
+64 
+
+is subject to the possibility of an attack be a weak 
+point, all men, and especially the King and the 
+heavy pieces (Queen and Rooks), would be such ; 
+we shall, howe\er, call a weakness only such 
+pieces, or group of pieces, as in proportion to 
+their importance, have a defect in defensive 
+strength, for instance : a Queen, that has only a 
+very limited range of action, or a Pawn that can- 
+not advance nor yet be protected by other Pawns. 
+A weak point is a square — not necessarily occupied 
+— which can only be attacked by heavy pieces like 
+the Queen or the Rooks, so that Pawns. Knights 
+and Bishops, or eventually also Rooks, protected 
+by other men, are there quite safe. Our oppon- 
+ent's weak points we shall name strong points, 
+speaking from our point of view. If we can oc- 
+cupy a strong point by one of our pieces, which 
+has from there a large sphere of action, the battle 
+is often half decided in our favor. 
+
+Obstructions in Chess are pieces of minor im- 
+portance which intercept the lines of action of our 
+men. It is, as a rule, easier to remove them when 
+they are hostile men, because we may threaten 
+them by so many of our own pieces that we can 
+finally safely capture them ; it is different when, 
+for instance, one of our own Pawns, blocked by 
+one of the Pawns or pieces of the enemy, stands 
+in our way ; and worse still when this Pawn is 
+isolated ; the only way of removing it by force 
+consists then usually in placing a piece under the 
+protection of this Pawn, and forcing the exchange 
+of that piece. 
+
+Let us now consider the initial position. The 
+
+65 
+
+ultimate object of every attack in Chess is given 
+beforehand — it is the capture by force of the hos- 
+tile King. For that purpose we must command 
+nine squares, the eight around the King and the 
+one he occupies ; we can reduce that number only 
+by driving the King to the edge of the board, or 
+by forcing his own pieces to obstruct his escape. 
+Finally, the checkgiving piece must not be liable 
+to capture, nor must any of the hostile pieces be 
+able to intercept its line of attack. This is the 
+"work to be done," and it is enormous, consider- 
+ing the large amount of force gifted with capacity 
+to capture and obstruct, at the enemy's disposal. 
+This task is still made more difficult l3y the other 
+one which you have to perform — to protect your 
+own King against your opponent's assaults. 
+
+The Chess world went about the task thus vol- 
+untarily undertaken, and attempted to solve the 
+problem involved by the humanly most direct 
+method ; it simply tried it, piling variation on 
+variation, correcting and re-correcting them, for, 
+say, two thousand years. Many beautiful games 
+were played, and startling discpveries made, but 
+the real problem was never solved. And why, 
+may we ask, have for so long a time the exertions 
+of the best brains of the human race continually 
+failed? There is one answer whose cogency is 
+irresistible, an answer whose truth seems to be 
+proved by experience beyond doubt, viz., there is 
+no solution, and for this reason, the resources on 
+each side are so evenly balanced that the trifling 
+advantage of the first move is not sufiicient to 
+force the defence to resignation. 
+
+66 
+
+This admitted, we must begin, before entering 
+upon our task, with the supposition that the in- 
+itial position has been differentiated to such an 
+extent that the win of the game becomes possible 
+to the one or other party. After having granted 
+this much the problem is transformed, and it as- 
+sumes the following shape : the balance of posi- 
+tion and forces has at least been partly disturbed, 
+and to checkmate the King of the inferior force 
+becomes a feasible achievement. 
+
+Whether a nearly balanced position allows a 
+forced win to the one or the other party depends 
+usually on the slightest differences, so much so, 
+indeed, that it would be a hopeless undertaking to 
+search for certain rules, or a mathematical formula 
+that would give you its solution without the ap- 
+plication of intellectual power in each special case. 
+The question involved is of such a complicated 
+nature that the only way to obtain an answer is 
+to divide the board into parts, to analyze the par- 
+tial questions by the experimental method, and to 
+finally draw the sum total of all the answers. 
+
+Now, given a position in Chess, where, on the 
+one wing (for instance the K side) we have the 
+superiority, on another (the Q side, or the centre) 
+we may be at a disadvantage, but where, on the 
+whole, onr advantage is prevailing ; in what man- 
+ner are we to make capital out of that superiority ? 
+The answer depends, of course, on the analysis of 
+the position; but if this analysis is methodical it 
+will greatly acquire clearness and sharpness, and 
+the mental labor required will be reduced to a 
+minimum. 
+
+67 
+
+The moves in Chess are of three kinds, they 
+are either 
+
+(a) Developing, i.e., bringing new force into 
+
+play. 
+
+(d) Attacking, i.e., making pieces threaten 
+
+the hostile men, give a check, threaten a 
+
+checkmate, etc , in other words, making 
+
+pieces do something, or work, 
+
+(c) Serving defensive purposes, i.e. giving 
+
+protection to a weak point, obstructing 
+
+an important line, etc., in other words 
+
+undoing the work of the hostile men. 
+
+What kind of move is required is determined 
+
+by the exigencies of the position. If you have a 
+
+large superiority of force in a quarter where the 
+
+enemy has important weaknesses, like the King 
+
+or the Queen in a bad position, etc., you must 
+
+assail quickly. Every one of your moves must 
+
+be intended to do much. Your reserve force must 
+
+be made useful for the attack with as much gain 
+
+of time as possible — by attacking, for instance, 
+
+some weaknesses while on the way — and the 
+
+reserve forces of the opponent must be kept back, 
+
+if possible, by obstructions that you can place in 
+
+their way (think of Morphy's Pawn sacrifices for 
+
+that purpose). The devices are manifold, but 
+
+the variations, on account of the many forced 
+
+moves on the part of the defence, are usually few, 
+
+and therefore subject to direct analysis. Of such 
+
+attacks we say that their * ' pace ' ' is quick. 
+
+All the games given (especially the French de- 
+fence of the previous lecture) have contained 
+attacks of quick pace. Here follows another. 
+
+Bl,ACK. 
+
+m 
+
+immm m 
+
+■AM 
+
+^ P 
+
+» 
+
+M 
+
+^rs^ 
+
+^„^_^i 
+
+White. 
+
+The game (International Tournament, Amster 
+dam) went on 
+
+1. Kt— R5 KtxKt 
+
+2. BxPch. KxB 
+
+3. QxKtch. K— Kt 
+
+4. BxP KxB 
+
+5. Q— Kt4ch. K— R2 
+
+6. R— B3 P— K4 
+
+7. R— R3ch. Q— R3 
+
+8. RxQch. KxR 
+
+9. Q— Q7 B— KB3 
+
+69 
+
+10. 
+
+QXB 
+
+K— Kt2 
+
+11. 
+
+R— KB 
+
+QR— Kt 
+
+12. 
+
+Q-Q7 
+
+KR-Q 
+
+13. 
+
+Q— Kt4cli. 
+
+K— B 
+
+14. 
+
+PxP 
+
+B— Kt2 
+
+15. 
+
+P— K6 
+
+R— Kt2 
+
+16. 
+
+Q-Kt6 
+
+P— B3 
+
+17. 
+
+RxPch. 
+
+BxR 
+
+18. 
+
+QxBch. 
+
+K— K 
+
+19. 
+
+Q— R8ch. 
+
+K— K2 
+
+20. 
+
+Q— Kt7ch. 
+
+aud wins. 
+
+When your superiority is not clearly defined, 
+you must be satisfied with attacking in a moder- 
+ate pace, advancing on your strong points, and 
+methodically creating new ones near your op- 
+ponent's line of defence Then \.\\q plan is every- 
+thing, and the time a matter of secondary impor- 
+tance (compare the 3d, 4th, 5th and 6th game 
+given in these lectures). Generally the **pace" 
+of your attack must slacken down, the less pro- 
+nounced your advantage is. A very good player 
+will seldom give you opportunities for violent and 
+short attacks, which require an amount of acting 
+force that is often underrated. 
+
+Some of Morphy's games : 
+
+— 
+
+1. P— K4 
+
+P— K4 
+
+2. P— KB4 
+
+PxP 
+
+3. B— B4 
+
+P-Q4 
+
+4. PxP 
+
+B— Q3 
+
+5. Kt— QB3 
+
+Kt— KB3 
+
+6. P-Q4 
+
+Castles 
+
+7. KKt— K2 
+
+P— B6 
+
+70 
+BI.ACK. 
+
+Hi i mm mm i fit i 
+
+^» ^» Q ^^ 
+
+i ^e. 
+
+■ @Pi ^ 
+
+Wa^^-^WMM, ^ii 
+
+^ P« W^ kWM 
+
+'iM. i 
+
+^^^^¥> *^ 
+
+W:%M % WZ'^M^'^. 
+
+wmi 
+
+^M^^ 
+
+V//77777/// ^?7777>7^;^ ^ W//////A 
+
+Whits. 
+
+The White King stands in an unobstructed file, 
+so Morphy sacrifices his Pawn to prevent the 
+King from castling with safety. It will be re- 
+marked that after the sacrifice the defensive power 
+of the White KR and KB Pawn becomes very 
+weak, both of these Pawns being isolated. 
+
+8. PxP 
+
+9. P— KR4 
+
+Kt— R4 
+
+71 
+
+It would have been better to defend by a de- 
+veloping move, such as (9) B — K3, when the fol- 
+lowing play might ensue (9) , R — K; (10) 
+
+Q— Q2, Q— K2; (11) Kt— K4, B— KB4 ; (12) 
+B— y3. 
+
+9 R— K 
+
+10. Kt— K4 
+
+Occupying one of White's strong points, only to be 
+attacked by tie KBP or QB, therefore an excel- 
+lent obstruction. 
+
+10 B— Kt6ch. 
+
+11. K— Q2 B— Q3 
+
+12. K-^B3 
+
+Here he unnecessarily exposes himself to new 
+dangers. P — B3 would have provided a safe 
+retreat to the King. 
+
+12 P— QKt4 
+
+Quickly opening up all the lines on the side which 
+the White King has chosen as refuge. 
+
+13. BxP P— QB3 
+
+Now he threatens Q — R4ch, so he indirectly 
+
+forces White to remove the well posted Kt from 
+K4. 
+
+14. KtxB QxKt 
+
+15. B— R4 B— R3 
+
+16. R— K Kt— Q2 
+
+17. P— Kt3 Kt— Kt3 
+
+18. BxP QR— B 
+
+72 
+
+Every one of Black's pieces has now long open 
+files, in consequence of the energetic attacking 
+manoeuvres of the last six moves. 
+
+19. K— Q2 
+
+Black threatened to win a piece by Kt or Q 
+takes Pawn, K — Kt2 would have lost immed- 
+iately on account of (19) BxKt; (20) 
+
+RxB, RxR; (21) QxR, Kt—R5ch. , either win- 
+ning the Queen or checkmating the King in the 
+next move J 
+
+19 RxB 
+
+20. PxR BxKt 
+
+21. RxB QxPch. 
+
+22. K— K ' Q— KtSch. 
+
+23. ,K— Q2 R— Qch. 
+
+24. K— B3 Q— B4ch. 
+
+25. K-Kt2 Kt— R5ch. 
+
+(26) resigns, for if PxKt, Q— KtSmate; if K— 
+Kt, (26) Kt—B6ch., winning first the Queen and 
+then the Rook. 
+
+His famous game against Paulsen in the New 
+York Tournament runs as follows : 
+
+White 
+
+Black 
+
+Paulsen 
+
+Mcrphy 
+
+1. 
+
+P— K4 
+
+P— K4 
+
+2. 
+
+Kt— KB3 
+
+Kt— QB3 
+
+3. 
+
+Kt— B3 
+
+Kt— B3 
+
+4. 
+
+B— Kt5 
+
+B— B4 
+
+5. 
+
+Castles 
+
+Castles 
+
+6. 
+
+KtxP 
+
+R— K 
+
+7. 
+
+KtxKt 
+
+73 
+
+This capture only develops Black. It would 
+have been quite as good to retire with the Kt to 
+
+B3 and to follow this up, if (7) , KtxP by 
+
+(8) P-Q4. 
+
+7 QPxKt 
+
+8. B— B4 P— QKt4 
+
+9. B— K2 
+
+The Black Pawns by thus advancing do not of 
+course gain in defensive strength, but Black is so 
+far ahead in development that White will never 
+be able to take advantage of that weakness. 
+
+9 KtxP 
+
+10. KtxKt RxKt 
+
+11. B— B3 
+
+If here (11) P— QB3, which looks at first sight 
+stronger, then Black will assail the castled King, 
+which for the present is the only support of the 
+KR and KKt Pawn. The game mi^ht proceed 
+
+(11) , Q— R5; (12) P— KKt3, Q~R6 ; 
+
+(13) B— B3, R— R5 ; (14) PxR. B— Q3 ; or (12) 
+P— Q4, B— 03; (13) P— KKt3, Q— R6 ; (14) 
+P— KB4, B— Q2; (15) B— B3, R— K2 ; when 
+Black will double his Rooks on the K file and 
+obtain a sound position with many attacking 
+possibilities. 
+
+11 R— K3 
+
+12. P— B3 
+
+A somewhat elaborate process for so simple an 
+object. First, P — Q3 was the proper play. 
+
+12 Q-Q6 
+
+74 
+
+This is one of the rare cases, in which a heavy- 
+piece hke the Queen can with success be used for 
+the purpose of obstruction. The Queen cannot 
+be attacked in her present situation by any hostile 
+man but exerts a considerable amount of pressure, 
+preventing, for instance, such moves as Q — B2 or 
+B— K2. 
+
+13. 
+
+P— QKt4 
+
+B— Kt3 
+
+14. 
+
+P— QR4 
+
+PxP 
+
+16. 
+
+QXP 
+
+B-Q2 
+
+16. 
+
+R— R2 
+
+This move may serve as a preparation for Q — B2. 
+White evidently is beginning to feel the restraint 
+which he suffers through the blockade of his QP 
+by the adverse Queen. His plan, however, is frus- 
+trated by Black, whose attack has already become 
+ripe for a decisive blow. If (16) Q — R6 instead. 
+
+Black's best reply seems to be (16) , Q — 
+
+B4; (17) P— Q4, QR— K ; (18) B— K3, P— 
+QB4; (19) KtPxP, BxP ; (20) Q— R5.?, R— 
+KKt3, with a winning advantage, for if (21) K — 
+R, QxB, (22) PxQ, B— B3, leaves White help- 
+less ; therefore Whitens best would be (20) Q — 
+K2, B— Kt3; (21) B— Kt4, RxB; (22) BxQ, 
+RxQ; (23)BxB with an even ending. 
+
+16 ■ QR— K 
+
+The strongest move for development and simul- 
+taneously for attack . Black threatens now Q X Rch . 
+
+17. Q— R6 
+
+75 
+
+Black. 
+
+■ IMHiHi 
+
+V/////////. V////////A 
+
+y////^iy//. _ m 
+
+Wfi. 
+
+1 » 
+
+1 '"mm. 
+
+"^^ '^§i ^ ^ PR 
+
+i@l 
+
+White. 
+
+17 QxB 
+
+An effective, surprising, and beautiful coup. 
+18. PxQ R— KtSch. 
+
+19. K— R 
+
+B— R6 
+
+Black threatens B— Kt7ch., followed by BxP 
+mate. R — KKt is no safeguard, as after the ex- 
+change of the Rooks the QR will checkmate him. 
+Nor would (20) Q — Q3 mend matters, as Black 
+will answer with P— KB4, and if then (21) Q— - 
+B4ch., by K— B. 
+
+76 
+
+20. R— Q B— KtTch. 
+
+21. K— Kt BxPch. 
+
+22. K— B B— KtTch. 
+
+He might have decided the issue by R — Kt7, with 
+the double threat RxPch., etc., and RxRP. 
+
+23. K— Kt B— R6ch. 
+
+24. K— R BxP 
+
+25. Q— B 
+
+His only resource. 
+
+25 BxQ 
+
+26. RxB R— K7 
+
+Again binding the hostile QP to his post. 
+
+27. R— R R— R3 
+
+28. P— Q4 
+
+At last ! 
+
+28 B— K6 
+
+29. Resigns, for if (29) BxB, R (R3) 
+xPch. (30) K— Kt, R— Kt7 
+checkmate. 
+
+Let us now pass over to more recent times. 
+
+White. 
+Anderssen. 
+
+Black. 
+Steinitz. 
+
+1. P— K4 
+
+2. Kt— KB3 
+
+3. B— Kt5 
+
+4. P— Q3 
+
+5. BxKtch, 
+
+P— K4 
+Kt— QB3 
+Kt— B3 
+P— Q3 
+
+This exchange is decidedly uncalled for. Black* s 
+QR gains thereby an open file, as well as the QB. 
+
+77 
+
+White has no compensation whatever ; for to 
+speak in the early stage of a game of the weak- 
+ness of a double Pawn or an isolated Pawn for end 
+game purposes is nothing but a chimera. 
+
+5 PxB 
+
+6. P— KR3 P— Kt3 
+
+Black has already the advantage, and can there- 
+fore afford to lose a move for development, which 
+will later on support his plan of attack. 
+
+7. Kt— B3 B— KKt2 
+
+8. Castles Castles 
+
+9. B— Kt5 P— KR3 
+10. B— K3 P— B4 
+
+An excellent coup. Black's plan, as will be seen, 
+is to make the fighting on the K side with his 
+Pawns ; he therefore keeps the White QP back, 
+to preserve the obstructions in the centre. 
+
+11. R— Kt 
+
+It would have been much more to the interest of 
+White to forestall the imminent attack, for in- 
+stance, by (11) Q— Q2, K— R2 ; (12) P— KKt4, 
+Kt— Kt ; (13) Kt— R2, P— B4 ; (14) P— B3. 
+
+11. 
+
+Kt— K 
+
+12. 
+
+P— QKt4 
+
+PxP 
+
+18. 
+
+RxP 
+
+P-QB4 
+
+14. 
+
+R— R4 
+
+B-Q2 
+
+15. 
+
+R— R3 
+
+P— B4 
+
+The White K Pawn, which intercepts the B file 
+from QB3, blocks the KP and holds back the QP, 
+dare not be removed. It is, therefore, an excel- 
+lent object of attack. 
+
+78 
+
+16. Q— Kt K— R 
+
+17. Q— Kt7 P— QR4 
+
+18. R— Kt P— R5 
+
+19. Q-Q5 Q-B 
+
+White's game suffers of want of design. There 
+is no possible object in all this manoeuvring of the 
+heavy pieces. His policy should have bten one 
+of defence, which he might conduct on, the 
+Kt — R2, P — KB3 a.s.o. , and perhaps successfully. 
+
+20. R— KtG R— R2 
+
+In order to have his Queen free for the following 
+
+threat (21) P— B5 ; (22) B— Q2, BxP ; 
+
+(23) PxB, QxP ; (24) Kt— R2, P— B6, etc. 
+
+21. K— R2 P— B5 
+
+22. B— Q2 P— Kt4: 
+
+23. Q-B4 Q-Q 
+
+24. R— Kt Kt— B3 
+
+25. K— Kt Kt— R2 
+
+The RP shall advance and then the KtP, to be 
+followed by Kt — Kt4, where the Kt will have in 
+conjunction with his advanced Pawns, a command- 
+ing sway. Mark how carefully all this is prepared. 
+No strong point is left to the White party in the 
+rear of the Black Pawns, nor in front of them, 
+during the whole of the tedious process. 
+
+P— R4 
+P— Kt5 
+PxP 
+Q— R5 
+Kt— Kt4 
+Q~R7 
+
+26. 
+
+K— B 
+
+27. 
+
+Kt— Kt 
+
+28. 
+
+PxP 
+
+29. 
+
+P— B3 
+
+30. 
+
+Kt— Q 
+
+31. 
+
+B—K 
+
+79 
+
+Black. 
+
+White. 
+Here we have the beau ideal of the concluding 
+stages of a King side attack supported by a chain 
+of Pawns. If PxP, all the lines are opened by 
+P — B6 with tremendous effect. White cannot 
+much improve his position, as his pieces have no 
+space to execute any movements. So Black has 
+any amount of time to prepare the finishing stroke. 
+
+32. P— Q4: PxBP 
+
+33. KtPxP Kt— R6 
+
+34. B— B2 KtxKt 
+
+35. PxBP 
+
+80 
+
+Of course, if (35) BxKt, B— R6ch, wins. 
+35 Q—RGch. 
+
+36. K— K 
+
+or (36) KxKt, B— KB3 the White King being 
+quite helpless. 
+
+36 KtxPch. 
+
+37. RxKt QxR 
+and Black won easily a few moves later. 
+
+Do not overlook how the apparently unimport- 
+ant sixth move on the part of White was the real 
+reason of all the trouble that he had to undergo 
+
+'^^^^- Whitk. 
+
+Black. 
+
+Steinitz. 
+
+Zuckertort. 
+
+1. B— K4 
+
+P— K4 
+
+2. Kt— KB3 
+
+Kt— QB3 
+
+3. P-Q4 
+
+PxP 
+
+4. KtxP 
+
+Kt— B3 
+
+According to our rules 
+
+this should 
+
+strongest reply. It certainly is a mov 
+
+answers all purposes. 
+
+5. Kt— QB3 
+
+B— Kt5 
+
+6. KtxKt 
+
+KtPxKt 
+
+7. B— Q3 
+
+P-Q4 
+
+8. PxP 
+
+PxP 
+
+9. Castles 
+
+Castles 
+
+10. B KKt5 
+
+P— B3 
+
+11. Kt— K2 
+
+B— Q3 
+
+12. Kt— Kt3 
+
+be the 
+e that 
+
+The Kt occupies a square which White would do 
+better to reserve for the Bishop. (12) Kt — Q4 
+seems therefore preferable. 
+
+12 P— KR8 
+
+13. B— Q2 
+
+81 
+Black. 
+
+■JM, 
+
+<^^^A 
+
+^ 
+
+■ i 
+
+■"i 
+
+.1*1 
+
+W ill 
+
+^^/^~« 
+
+•i«f- 
+
+^P ^P di 1 
+
+; Am AM B AS 
+
+^ ^ ^^ ^ ^^. i 
+
+White. 
+
+13. 
+
+Kt— Kt5 
+
+Excellent ! Black now threatens Q — R5. If 
+White replies by (14) P— KR3, then KtxP ; (14) 
+KxKt, Q— R5; (15) Q— B3, P— KE4 winning. 
+
+14. B— K2 Q~R5 
+
+15. BxKt BxB 
+
+16. Q— B B— K7 
+
+What he purposes with this is not very clear. 
+He ought to strike hard while White is yet behind 
+in the development of his Rooks, thus; (16) 
+
+82 
+
+, P— KB4: ; (17) B— B4, B— B4 ; (18) 
+
+R— K, P— KKt4; (19) B— K3, BxB ; (20) 
+PxB, P — B5, with an excellent attack; or even 
+(16) B — Q2 will give him a lasting attack, difi&- 
+cult to meet. 
+
+17. R— K^ B— R3 
+
+18. B— B3 P— KB4 
+
+19. R— K8 QR— Q 
+
+20. Q-Q2 
+
+Now he threatens Q — Q4, or the doubling of 
+the Rooks on the open file ; but mark how finely 
+Black frustrates all this. 
+
+20 P— Q5 
+
+21. B— R5 
+
+Of course he cannot take the Pawn without 
+losing a piece. 
+
+21 R— Q2 
+
+22. RxB RxR 
+
+23. B— Kt4 Q— B3 
+
+24. R— Q R— Q4 
+
+25. BxR QxB 
+
+26. Kt— R5 Q— K 
+
+27. Kt— B4 R— K4 
+
+Black is first to take the open file — a great ad- 
+vantage, which White should not have yielded at 
+move 26. gg. P— KR4 P— B4 
+
+29. P— R5 
+
+This manoeuvre with the RP, which shall make 
+the position of the Kt unassailable, is misplaced. 
+The RP exposes itself only to the attack of the 
+Bishop. 29 R— K6 
+
+30. P— QB3 
+
+83 
+
+This unnecessary advance is the principal rea- 
+son of the speedy conclusion that follows. Black's 
+play from now to the end is admirably consistent 
+and strong. 
+
+30 
+
+31. P— KKt3 
+
+32. Kt— Kt6 
+
+33. Kt— B4 
+
+34. P— Kt3 
+
+Q— Kt 
+Q-K4 
+
+Q-Q3 
+
+P-Q6 
+
+If (34) KtxP, BxKt; (35) QxB, R— K8ch., 
+wins the Rook or Queen. 
+
+34 P— B5 
+
+35. R— Kt K— R2 
+
+36. K— R2 Q— QKt3 
+First rate ; he now threatens R — K7. 
+
+37. K— Kt 
+
+38. R— Kt2 
+
+39. P— B3 
+
+40. Q— B2 
+
+41. K— R2 
+
+B— Kt2 
+Q— B3 
+Q— B4ch. 
+R— K8ch. 
+
+or (41) K— Kt2, R— K6. 
+
+41 
+
+42. RxQ 
+
+QxQ 
+
+BxP 
+
+Decisive. The QP must now win. 
+
+43. P— KKt4 B— K7 
+
+and Black won a few moves later. 
+
+If we glance critically over 
+we find two rules confirmed : 
+
+the games given, 
+
+(i.) Don't attack unless you have some tang- 
+ible superiority, either in the stronger working of 
+your pieces, or in longer reach. 
+
+Corollary : If you do the re-action will place 
+
+84 
+
+your army in a critical position, and the inevit- 
+able counter attack will find you in disorder. 
+
+(ii.) Let it be the first object of your attack to 
+create strong points as near your opponent's camp 
+as possible, and occupy them with pieces which 
+have from there a large field of action. 
+
+Corollary : Try to force your opponent's Pawns 
+to advance on the side where you attack. 
+
+White. Black. 
+
+Dr. Noa. Dr. Tarrasch. 
+
+1. P— K4 P— K4 
+
+2. Kt— KB3 Kt— QB3 
+
+3. B— Kt5 Kt— B3 
+
+4. Castles KtxP 
+
+5. R— K Kt— Q3 
+
+6. B— R4 B— K2 
+
+7. KtxP KtxKt 
+
+8. RxKt Castles 
+
+Now Black's development is excellent, and the 
+Pawn position unassailable. 
+
+9. P-Q4 Kt— B5 
+
+10. R— K P— Q4: 
+
+11. P— QB3 
+
+White has no time for such amove. (11) B — 
+Kt3, Kt— R4; (12) Kt— B3, KtxB ; (13) RPx 
+B. B— Q3; (14) Q— B3, P— QB3 ; (15) B— B4, 
+is a sounder line of play. 
+
+11 B— KB4 
+
+Immediately bearing down on the weak points of 
+White, Q3, QB2. 
+
+86 
+
+12. Kt— Q2 KtxKt 
+
+13. BxKt B— Q3 
+
+14. Q— R5 B— Kt3 
+
+15. Q— R3 
+
+This manoeuvre has not much point. (14) B — 
+QB2 is more to the purpose. 
+
+15 P— QB3 
+
+From here to the end Black's play is simply 
+classical. Mark how how finely Black will com- 
+bine the advantage resulting from the weak posi- 
+tion of the White Queen, the slight weakness con- 
+tained in the loose and ineffective positions of the 
+White Bishops, his own strongly posted QB, and 
+the lack of protection of the White QKtP for a 
+highly logical and successful attack. 
+
+16. R— K2 Q— Kt3 
+
+17. B— Kt3 P— QR4 
+
+Capital ! Developing the QR, dislodging the 
+obstruction, and keeping the QKtP in its unsafe 
+position. 
+
+18. B— K3 P— R5 
+
+19. B— Q KR—K 
+
+20. R— B P— KB4 
+Grand ! He forces White to advance either the 
+
+KKtP or KBP. In the latter case K5 becomes a 
+very strong point, in the former the Q is ob- 
+structed, and the P position weakened. 
+
+21. P— KB4 R— K2 
+
+22. QR— B2 QR— K 
+
+23. B— B Q— Kt4 
+preventing Q — Q3, and again bearing down on 
+the central weak points of the White game. 
+
+86 
+
+24. Q— B3 Q— B5 
+
+25. P— QR3 R— K5 
+
+26. P— KKt3 P— B4 
+
+To get his reserve force, the KB, into play. 
+
+27. RxR BPxR 
+
+28. Q— K3 Q— Q6 
+
+29. QxQ PxQ 
+
+30. R— B2 P— Kt4 
+31 B— Q2 B— K2 ., 
+
+32. P— B5 B— B2 
+
+33. R— B PxP 
+
+34. PxP B— B3 
+
+35. B— QB3 R— K5 
+
+36. B~B3 BxPch. 
+
+37. K— Kt2 
+
+A mistake. (37) BxB, RxB ; (38) R— Q is by 
+far the preferable policy. 
+
+37 BxB 
+
+Energetic and decisive, but not very difficult to 
+forsee. 
+
+38. BxR PxB 
+
+39. PxB B— KtG 
+
+and White resigns, for after (40) K— B2, P— Q7; 
+(41) K^K2, B~B5ch. he will lose his Rook. 
+
+One of my Match Games of 1892. 
+
+White. 
+
+Black. 
+
+Lasker. 
+
+Blackburne. 
+
+1. P-Q4 
+
+P-Q4 
+
+2. Kt— KB3 
+
+Kt— KB3 
+
+3. P— B4 
+
+P— K3 
+
+4. Kt— B3 
+
+QKt-Q2 
+
+5. B— B4 
+
+P— B3 
+
+87 
+
+On account of the last move which is more or less 
+forced (not to allow QKt — Kt5) the development 
+chosen by Black is not advisable. 
+
+6. 
+
+P— K3 
+
+Kt— R4 
+
+7. 
+
+B Kt5 
+
+B— K2 
+
+8. 
+
+BxB 
+
+QxB 
+
+9. 
+
+B— Q3 
+
+P— KKt3 
+
+.0. 
+
+Q— K2 
+
+Castles 
+
+1. 
+
+Castles K side 
+
+P— KB4 
+
+Attacks on the K side in this opening have usual - 
+ly little hope of success. An inspection of the 
+position will show that the K side does not pre- 
+sent weaknesses that could be assailed. The fight 
+is, therefore, in the centre and on the Q side. 
+
+12. KR— Q QKt— B3 
+
+13. QR— B B— Q2 
+
+14. Kt— K5 BK 
+
+15. Q— B2 
+
+Black has, with his 11th move, stopped the ad- 
+vance of the White KP. The White Q is there- 
+fore now available for the Q*s wing. 
+
+15. 
+
+R-Q 
+
+16. 
+
+P— QR3 
+
+Kt-Q2 
+
+17. 
+
+Kt— B3 
+
+Kt— Kt2 
+
+18. 
+
+R— K 
+
+White intends a Q side attack ; and, therefore, 
+makes first preparations to take advantage of any 
+forward movement that Black might undertake on 
+the K side, beginning with P — B5. 
+
+18. Kt— B3 
+
+19. P— QKt4 Kt— K5 
+
+20. Kt— K5 KtxKt 
+
+21. QxKt Kt— R4 
+
+22. P— QR4 Kt— B3 
+
+23. P— Kt5 Kt— Q2 
+
+24. Kt— B3 PxBP 
+
+White threatened now P — B5, followed by P — 
+R5 and P — R6, to establish a dangerous passed 
+Pawn at B5. 
+
+25. QxP Kt— Kt3 
+
+26. Q— Kt3 PxP 
+
+27. PxP B— B2 
+
+28. Kt— K5 R— B 
+
+29. R— R 
+
+The object of White's attack was to keep the 
+QRP back, which is now indefensible. 
+
+29 R— R 
+
+30. R— K2 KR— B 
+
+31. KR— R2 Q~B2 
+
+32. P— Kt3 Q— B6 
+
+33. QxQ RxQ 
+
+34. RxP RxR 
+
+35. RxR R— B2 
+
+The attack has now succeeded. White has the 
+advantage of a Pawn plus on the K side. What 
+remains is to convert this into positional super- 
+iority— not an easy process, as still there are hard- 
+ly any assailable points in the Black camp. 
+
+36. K— B B— K 
+
+37. K— K2 K— B 
+
+38. K— Q2 K— K2 
+
+39. R— R3 K— Q3 
+
+40. P— B3 R— B 
+
+41. P— K4 R— B2 
+
+89 
+
+42. 
+
+R— R 
+
+R— B 
+
+43. 
+
+P— R4 
+
+R— B2 
+
+44. 
+
+R-QKt 
+
+R— S3 
+
+R— B 
+
+45. 
+
+K— K2 
+
+46. 
+
+P— R5 
+
+The decisive manoeuvre. If the P is taken, the 
+two isolated RPs will be a splendid object of at- 
+tack, well worth the sacrifice. 
+
+46 K— B3 
+
+47. PxP PxP 
+
+48. R— KR K— Kt2 
+
+Here, after some manoeuvres to complete the 
+third hour (we played eighteen moves an hour) 
+the game went on at move 55, the position being 
+unchanged. 
+
+55. P— Kt4 PxKtP 
+
+56. PxP R— QR 
+
+57. P— Kt5 
+
+threatening Kt— Kt4— 
+
+B6. 
+
+And so on. 
+
+57 
+
+R— R6 
+
+58. K— Q2 
+
+R— R7ch. 
+
+59. K— K3 
+
+R— R6 
+
+60. K— B4 
+
+Kt— Q2 
+
+61. B— B4 
+
+Kt— B 
+
+62. R— QB 
+
+The finishing stroke. 
+
+The Rook will now enter 
+
+via B7 into the Black camp. 
+
+. 62 
+
+R— R4 
+
+63. B— Q3 
+
+BxP 
+
+64. R— B5 
+
+and White won easily. 
+
+No. 9 
+
+Gentlemen, — The principles of defence will be 
+the subject of out lecture to-night. 
+
+If the attack is the process through which ob- 
+structions are brought out of the way, the defence 
+is the art of strengthening them, of giving firm- 
+ness to your position, and of averting the blow 
+directed against you. When your position is not 
+inferior to that of your opponent, and he never- 
+theless makes preparations to attack you, disre- 
+gard them altogether, develop reserve forces, 
+avoid his attack by the slightest defensive move- 
+ment possible (like a first-rate boxer, who in the 
+nick of time and with an almost imperceptible 
+movement evades the blow) and institute a quick 
+counter action. When you, however, have been 
+unfortunate enough to compromise yourself, to 
+give your opponent an undeniable reason for, 
+and tangible object of attack (which may occur 
+to the best and most cautious player, as the result 
+of an unsuccessful attack) you have to act very 
+differently. 
+
+Also here common sense tells us exactly how to 
+proceed. Every position will comprise points 
+which are exposed to the action of the hostile 
+forces and other points which are well guarded. 
+An attack will direct itself in the first instance 
+
+91 
+
+against your weakest points — for instance against 
+the KRP and KKtP after Castling, or against a Kt 
+at B3, etc. You will, therefore, first of all, vacuate 
+these points, if they are occupied by men of great 
+importance, the Queen, or Rook, for instance, and 
+also frequently a Knight and a Bishop; secondly, 
+you will have to give them support; place the 
+support in points which are not easily accessible 
+by the enemy. The rest of your army is best em- 
+ployed in engaging the reserve force of the enemy 
+— that is, such force which it will take him time 
+and labor to utilize for the purposes of his attack. 
+
+The object of your opponent's attack is, gener- 
+ally speaking, to change the position of your men 
+in a certain quarter by force. Abstain from 
+changing it voluntarily, except for most forcible 
+reasons. This is where most chess players fail. 
+In order, for instance, to avoid the approach of a 
+Kt or Bishop to Kt5, they advance the RP to R3, 
+losing a move, and besides, as a general rule, im- 
+pairing the strength for purposes of defence of the 
+chain of Pawns on the wing ; or they advance the 
+KKt Pawn to Kt3, to drive a Kt away posted at 
+KB4, which, howeve: well placed, is usually not 
+half as dangerous as this move ; or they retire a 
+piece, because it may be driven away. Wait with 
+all such moves until your antagonist has expended 
+some time, material position, etc. — well, call it, 
+taken altogether, some of the ''power" at his 
+disposal — on them. 
+
+For the rest your defensive movements must, of 
+course, be subservient to the objects of the en- 
+
+92 
+
+emy's attack. You may, therefore, revert the 
+rules for attack ; let it be your object to prevent 
+your opponent from creating strong points very 
+near your line of defence. That comprises every- 
+thing, as we shall see in the instances that are to 
+follow. 
+
+1. 
+
+P— K4 
+
+P— K4 
+
+2. 
+
+Kt— KB3 
+
+Kt— QB3 
+
+3. 
+
+P-Q4 
+
+PxP 
+
+4. 
+
+KtxP 
+
+Kt— KB3 
+
+5. 
+
+KtxKt 
+
+KtPxKt 
+
+6. 
+
+B-Q3 
+
+P— Q4 
+
+7. 
+
+P— K5 
+
+Black has followed up to this point the rules of 
+development. He has given to White no object of 
+attack, none of his pieces being in a weak posi- 
+tion. White's attacking manoeuvre is therefore 
+premature. 
+
+7 Kt— Kt5 
+
+8. Castles B~-QB4 
+
+9. P— KR3 
+
+Now follows a clever stroke, which shows how 
+unsound all White's play has been. 
+
+9. 
+
+Kt 
+
+xKP 
+
+10. 
+
+R- 
+
+-K* 
+
+-B3 
+
+11. 
+
+Q- 
+
+-K2 
+
+Castles 
+
+12. 
+
+QxKt 
+
+QxPch. 
+
+13. 
+
+K- 
+
+-R 
+
+BxRP 
+
+14. 
+
+PxB 
+
+Q- 
+
+-B6ch, 
+
+15. 
+
+K- 
+
+-R2 
+
+B- 
+
+-Q3 
+
+and Black wins. 
+
+1. P— K4 p— k:4 
+
+2. Kt— KB3 Kt~QB3 
+
+3. P— Q4 PxP 
+
+4. B— B4 B— B4 
+
+5. Castles Kt— KB3 
+
+(5) P — Q3 would be more in conform- 
+ity with our rules. The next move is slightly 
+inferior, and gives White the opportunity to a 
+violent onslaught, which, however, in the face 
+of Black's splendid development, fails against the 
+best line of defence. 
+
+6. P— K5 P— Q4 
+
+The right reply. To remove the Kt would be 
+
+vastly inferior. If, for instance (6) Kt — 
+
+K5; (7) B — Q5 would disorganize Black's game; 
+
+and if (6) Kt— Kt5 ; (7) BxPch., KxB ; 
+
+(8) Kt— Kt5ch., might follow. 
+
+7. PxKt PxB 
+
+8. R— Kch. B— K3 
+
+9. Kt— Kt5 Q— Q4: 
+
+NotQ— Q2, as (10) KtxB, PxKt; (11) Q— 
+R5ch., would allow White to gain the KB. 
+
+10. Kt— B3 Q— B4 
+
+11. P— KKt4 Q— Kt3 
+
+Black must not take the KBP, as White would 
+answer with (12) Kt— Q5, Q— Q ; (13) RxBch., 
+PxR; (14) KtxP. Now Black threatens to 
+Castle Q side with a magnificent game, as White 
+through his attacking manceuvres has vastly im- 
+paired the solidity of his position. 
+
+94 
+
+12. 
+
+QKt— K4 
+
+B— Kt3 
+
+13. 
+
+P— KB4 
+
+Castles Q side 
+
+14. 
+
+P— B5 
+
+BxP 
+
+15. 
+
+PXB 
+
+QxP 
+
+At last White has recouped himself in material, 
+but at what an expense ! He is three Pawns be- 
+hind, his King is in a totally unsafe position, his 
+enemy is brilliantly developed, and the QP and 
+QBP, far advanced and well protected, are ready 
+for decisive action whenever the slightest oppor- 
+tunity is offered. All this for a minor piece. 
+
+16. 
+
+PxP 
+
+KR— K 
+
+17. 
+
+Kt— Kt3 
+
+P— Q6ch. 
+
+18. 
+
+B— K3 
+
+PxBch. 
+
+19. 
+
+RXB 
+
+Q— B4 
+
+or QxKt winning. Similar conclusions follow in 
+in any variations that White may choose after 
+move 13. Therefore let us go back to that posi- 
+tion, and vary the attack. 
+
+13. KtxBP 
+
+A bold sacrifice, to maintain the attack. If K or 
+Q takes Kt, Kt — Kt5, will regain the piece with 
+an excellent position. If BxKt, White must be 
+satisfied with driving the King into a somewhat 
+exposed position by (14) PxP, QxP ; (15) Kt— 
+B6ch., K— Q; (16) Q— B3 with good attacking 
+possibilities against the exposed King. Black, 
+however, has just as bold a reply, which utterly 
+turns the tables and gives him the attack against 
+the weakened K side of White. 
+
+96 
+BI.ACK. 
+
+11 i 111 H^ll i 
+
+^'''mmf'-\ ^ 
+
+iB 
+
+^..•, B 
+
+i A ■ M pi 
+
+m^ '////////>Z', '>y//////?Z'. 
+
+1 
+
+White. 
+
+13 Castles 
+
+Now, at once all of the White pieces become 
+badly placed, and must speedily return to their 
+camp. The tide turns and the reaction sets in. 
+
+14. KKt— Kt5 B— Q4 
+
+15. PxP KR— K 
+
+16. Kt— Kt3 P— KR3 
+
+17. Kt— R3 Kt— K4 
+
+and Black should win ; or perhaps more effect- 
+ively, 
+
+RxR 
+R— K 
+Kt— K4 
+Q-B3 
+
+P- 
+
+Kt- 
+
+-K4 
+-QB3 
+
+96 
+
+17 
+
+18. QxR 
+
+19. Q-Q 
+
+20. Kt— B4 
+
+with a brilliant attack. 
+
+1. P— K4 
+
+2. Kt— KB3 
+
+3. P— QB3 
+The Ponziani opening. I cannot recommend it to 
+you on account of the questionable early advance 
+of the QB Pawn which it involves. 
+
+3 P-Q4 
+
+An excellent answer. By his third move White 
+has weakened the square Q3 ; so Black tries to 
+open the Q file, to get possession of that very 
+important point. 
+
+4. Q— R4 PxP 
+
+5. KtxP Q— 04 
+
+6. B— Kt5 KKt— K2 
+
+7. P— KB4 
+
+This is the move given by Staunton. It is in- 
+tended to keep up the attack, which by the ex- 
+change of the minor pieces would be utterly lost. 
+White threatens now B — B4, and Staunton lets 
+Black, therefore, reply by PxP e.p. A fine Liver- 
+pool player, looking at the position with the in- 
+stinct of a true chess player, thought that there 
+must be, against such precipitate attack as White 
+has undertaken, a better reply. And this is how 
+he defeated one of his opponents in a match game. 
+7 B— Q2 
+
+8. KtxB KxKt 
+
+9. Caiitles Kt— B4 
+
+97 
+
+Black has by far the better development, and 
+now threatens B — B4ch. 
+
+10. P— QKt4 
+
+P— QR4 
+
+11. K— R 
+
+PxP 
+
+12. BxKtch. 
+
+PxB 
+
+13. QxR 
+
+B— B4 
+
+14. QxR 
+
+Kt— Kt6ch. 
+
+15. PxKt 
+
+Q — R4checkmate. 
+
+White. ' 
+
+Black. 
+
+Blackburne. 
+
+Burn. 
+
+1. P— K4 
+
+P— K3 
+
+2. P— Q4 
+
+P— Q4 
+
+3. Kt— QB3 
+
+Kt— KB3 
+
+4. P— K5 
+
+KKt~Q2 
+
+5. P— B4 
+
+P-QB4 
+
+6. PxP 
+
+BxP 
+
+7. Q— Kt4 
+
+Castles 
+
+8. B— Q3 
+
+P— B4 
+
+9. Q— R3 
+
+Kt— QB3 
+
+10. Kt— B3 
+
+R— K 
+
+Black is evidently preparing his K side for a 
+long siege. His last move answers that purpose 
+excellently. The Rook vacates the square KB 
+for the Kt, which is there quite secure, and gives 
+his support to the weakest point, the KRP, besides 
+to K3 and to Kt3, and is always ready to obstruct 
+the KKt file. 
+
+11. P— KKt4 P— KKt3 
+
+12. P— QR3 
+
+One of those harmless looking moves, to pre- 
+vent something that really is no threat at all. 
+Those superfluous defensive moves spoil many a 
+
+game. Why not at once Q — Kt3, and then a vig- 
+orous advance of the KRP ? 
+
+12 B— QKB- 
+
+13. B— Q2 P— QKt4 
+
+14. PxP KtPxP 
+
+15. Castles QR Kt~B 
+
+16. R— Ktch. 
+
+A bold and promising sacrifice, which yields a 
+violent attack very difficult to meet. 
+16 BxR 
+
+17. RxBch. Kt— Kt3 
+
+18. Kt— K2 R— R2 
+
+Again an excellent defensive manoeuvre. The 
+Rook protects several of the weakest points, and 
+can be used as a means of obstructing the open 
+KKtfile. 19. Kt— Kt3 KR— K2 
+
+20. Kt— R5 K— R 
+
+21. Kt— B6 R— KKt2 
+
+22. Q— R6 Kt— B 
+
+23. Kt— Kt5 
+
+Black is practically out of danger, but must yet 
+play very carefully. White intends now to con- 
+tinue with (24) QxRch., RxQ ; (25) Kt— B7ch. 
+RxKt; (26) R— Kt8 mate. 
+
+23 R— Kt3 
+
+24. Q— R5 QR— KKt2 
+
+25. R— Kt3 Q— K2 
+Another protection to the KRP. White's attack 
+slackens down because his two Bishops cannot 
+find an opening to add their weight to it. 
+
+26. B— K2 RxKt 
+vigorous and decisive. 
+
+99 
+
+27. PxR QxBP 
+
+28. R— QB3 B— Q2 
+
+29. Kt— B3 K— Kt 
+
+White threatened RxKt, followed by B— QB3. 
+
+30. Q— R3 Kt— Kt3 
+
+31. Q— R6 Q— K2 
+
+32. RxKt BxR 
+
+A last attempt to neutralize Black's material 
+superiority by attack. 
+
+33. B— B3 R— B2 
+
+34. Kt— Kt5 KtxP 
+
+35. KtxR KtxBch. 
+
+36. K— Q2 KtxB 
+and Black won after a few more moves. 
+
+Black . — Steinitz. 
+
+White . — I^asker. 
+
+100 
+
+The annexed position occured in my match 
+with Mr. Steinitz ; White to move. I played some- 
+what hastily. 
+
+1. R— B 
+
+being under the impression that KtxR would 
+lead to a draw by perpetual check. This is, how- 
+ever (as, I believe, first pointed out by Tschigorin) 
+not the case ^.^., (1) KtxR, Q— Kt8ch.; (2) 
+K— Q2, QxPch.; (3) K— Q, Q— Kt6ch.; (4) K— 
+K2, Q— B5ch; (5) K— K! QxPch.; (6) B— Q2, 
+Q— R8ch.; (7) K— K2, and White should easily 
+win. 
+
+1 Q-B7 
+
+2. B— Q2 R— K2 
+
+3. Kt— K6 QxPch. 
+
+Here White must be extremely careful in select- 
+ing his reply. If he plays the plausible (4) K — 
+Q, Q-Kt8ch; (5) B-B, Kt-Q6 ; (6) QxQP, 
+KtxPch; (7) K— K2, Q— K4ch; (8) B— K3, 
+QxBch., equalizing the material forces, and with 
+good chances for a draw. 
+
+4. Q— K3 QxKtP 
+
+Now follows a very important manoeuvre, the 
+key to White's defence. 
+
+5. P— Kt3 
+
+1^5) Q — K2 instead, Black will answer by 
+Q — Q4, and have all the Q side at his own dis- 
+posal. 
+
+5 R— K 
+
+101 
+
+To take the RP would not be sufficient to keep 
+the balance of forces ; White would reply with 
+K — Q or P — Kt5, and very soon be able to as- 
+sume the attack. 
+
+6. Q— K2 Q— R6 
+
+The first symptom of the gradual exhaustion 
+of Black's attack. The Q would be better posted 
+somewhere on the Q side ; but Q — Q4 is not play- 
+able, as P — B4 would now force the exchange of 
+Queens. 
+
+7. K-Q R-QR 
+
+8. R— B2 R— R7 
+
+Black's pieces are well placed, but they do not 
+threaten anything. 
+
+9. P— Kt5 P— B4 
+
+10. KtxKtP PQ4 
+
+11. K— P 
+
+White threatens to drive the Rook away, in 
+order to bring matters speedily to a climax. 
+
+11 Q-Q6 
+
+(11) , P~-B5 would be answered by (12) 
+
+PXP, (11) , Kt— Q6ch. by K— Kt ; and 
+
+the resulting exchanges leave White always in 
+the possession of his advantage. 
+
+12. 
+
+QXQ 
+
+KtxQch. 
+
+13. 
+
+K— Kt 
+
+R— Kt7ch 
+
+14. 
+
+K— R 
+
+RXP 
+
+15. 
+
+R— B3 
+
+and White won the ending. 
+
+102 
+
+Black . — Lasker. 
+
+White. — Steinitz. 
+
+This diagram shows the state of the game No. 
+18, at move 33, White to play, of my match with 
+Mr. vSteinitz I recommend you the careful study 
+of this position, in which White can keep the bal- 
+ance only by a very ingenious manoeuvre of de- 
+fence. The question concerns only the next move of 
+
+White. Black threatens (1) KtxPch; (2) 
+
+KtxKt, BxKt: (3) QxB, Q— K8ch., winning. 
+
+How is White to save his game ? 
+
+If (1) R— B2, RxR,- (2) BxR, Q--B3 ; (3) 
+
+103 
+
+K— Kt2, KtxP ; (4) KtxKt, Kt—K4, will regain 
+the piece and keep the Pawn plus. 
+
+If (1) R— K2, R— B8 ; (2) B— B2, Q— Q4 ; (3) 
+Kt— K3, QxBP, or else (3) R— Q2, KtxPch.; 
+(4) KtxKt, QxKt; (5) QxQ, BxQ ; (6) Rx 
+Kt, RxB, should win. (1) Kt— K3 may be 
+
+answered by (1) R— B8 ; (2) R-Q, Ktx 
+
+Pch,; (3) KtxKt, RxRch; (4) KtxR. Q— Q4, 
+again remaining a Pawn ahead, with at least an 
+even position. 
+
+If (1) K— Kt2, KtxP ; (2) KtxKt, Kt— K4 ; 
+(3) R— Q3, R— B8 ; (4) R— QSch, K— Kt2; (5) 
+
+Q — R7, Q — B3, will yield and irresistible attack 
+to the second player. 
+
+The move actually made, and the only one to 
+save the game (which ended in a draw) was (1) 
+K — B ! against which Black mu^t play very cau- 
+tiously not to be at a disadvantage, any too violent 
+attack will fail. 
+
+You will have sometimes to look very deep into 
+the position to find a good move for the defence. 
+But this much, I believe, I can promise you, that 
+if you follow the rules laid down, you will not 
+search in vain. If you will seek you will find, no 
+matter how dangerous the attack may look. 
+
+Nos. 10, 11, 12 
+
+Gentlemen, — When both parties through the 
+struggles of the middle game have held their own, 
+when by the exertions undergone in attack and 
+defence the material forces on both sides have be- 
+come decimated, and direct attacks on the King 
+have consequently lost any chance of success, the 
+game enters upon a new stage, difftring in many 
+points from those preceding it. Of this part of 
+the game, called the end game, it is a character- 
+istic that the King — hitherto the direct or indirect 
+object of attack on the part your opponent — over 
+whose safety you anxiously watched, and whose 
+power was limited to the protection of a few 
+Pawns needed for his own security, now becoii.es 
+a powerful weapon of offence and aggression in 
+your hands. 
+
+When the game enters this last stage, the gen- 
+eral rules for attack and defence are not changed 
+in any particular. Weakenesses will principally be 
+represented by Pawns, which are blocked, or can- 
+not advance for some other reason, and which, be- 
+sides cannot be defended by other Pawns. Here 
+again the attack will direct itself against the weak- 
+nesses. Our weak points will be such as are open to 
+the enemy's men or King, and not commanded by 
+any of our own men nor by our King ; our oppo- 
+nent's weak points will be directed towards those 
+strong points, and will attempt to create new ones 
+as near the hostile weaknesses as it has the power 
+
+105 
+
+to do. Here also the attacking party needs, for 
+success, a superiority of some kind. But in com- 
+bination with all this, two new factors enter into 
+the end game, which give it its peculiar character. 
+
+The first is based on the greater facility ac- 
+quired (in consequence of the exhaustion of the 
+material forces) to lead 3^our passed Pawns to 
+Queen. For that purpose there are never more 
+than five separate moves required, and often less. 
+If the line where the Pawn advances consists en- 
+tirely of strong points, the enemy will be obliged 
+to engage one of his men, perhaps his King, 
+whose function it will be to command one of these 
+p:)ints or to obstruct that line. Points and lines 
+through which the hostile men prevent the ad- 
+vance of the passed Pawn, may be called poinls of 
+vantage in regard to it. The game will very often 
+then present a fight for the command of these 
+points or lines of advance, which may be inter- 
+cepted by our men, or from which the hostile 
+forces may be driven back. On the other hand, 
+being quite satisfied with the result that part of 
+the hostile army is engaged in watching our 
+passed Pawn, we may undertake an attack with 
+all our forces in some other quarter. 
+
+When attack and defence in the very latest 
+stages of the game are so evenly balanced, and 
+both our own men and those of our opponent are 
+so favorably placed, that, unless the adversary 
+voluntarily gives way, neither party can improve 
+his position, when, in other words, the move 
+ceases to be a privilege, "time" (the right to 
+
+106 
+
+move, that is to do something useful), will assume 
+a new and very different character. In such posi- 
+tions as are very frequent in well contested games, 
+
+Black. 
+
+White. 
+
+and the occurrence of which can often with cer- 
+tainty be forecalculated, to have to move means 
+often a loss in the working power of your pieces, 
+and it may consequently lose you the game. We 
+shall speak of this as the principle of exhaustion 
+(that is, exhaustion of moves to improve your posi- 
+tion). This principle will manifest itself in the 
+
+107 
+
+great care with which the two combatants hold 
+back certain moves, which either would improve 
+their position, or at least i ot affect it harmfully, 
+until a favorable opportunity has arrived for ex- 
+ecuting them. 
+
+The principle of exhaustion may be illustrated 
+by the diagrams. 
+
+White, manoeuvring on the KR or KKt file, 
+has no chance to force the win ; there is not suffi- 
+cient space at his disposal. For instance, after 
+(1) K— R3, K— R3; (2) K— R4, K— Kt3, he 
+would have to recede ; therefore we must leave 
+that quarter of the board to the Black King. Our 
+KRP will consequently be a weakness, and it will 
+be wise to hold it back as long as possible. The 
+best position for the Black King to occupy will be 
+Kt5. Whenever he will occupy that, our King 
+must be ready to march to K3 or K5. From this 
+we deduce the following line of play : 
+
+1. K— R3 K— R3 
+
+2. K— Kt2 K— R4 
+
+3. K— Kt3 K— R3 
+the first manifestation of the principle. 
+
+4. K--B2 K— R4 
+
+5. K— K2 
+
+Not (5) K— K3, as (5) , K— Kt5 would 
+
+win a Pawn. 
+
+5. ..'.... K— R5 
+
+6. K— Q3 K— Kt5 
+
+7. K— K3 K— R6 
+
+8. K— Q4 KxP 
+
+9. K — K5 winning 
+
+108 
+
+Black. 
+
+^^^'""'^ 
+
+1//. 
+
+V/////M,, ^^^A 
+
+p^ mm 
+
+^^. ^«^^- 
+
+p^.^. ^^ ''''''''^^^'- 
+
+m ^m. 
+
+W 
+
+'m 
+
+White. 
+
+White has two chances of winning, the one 
+based on his passed Pawn, the other on the weak- 
+n..^ss of the Black RP. The Black K occupies at 
+present a position of advantage in regard to both. 
+This is changed by the follwing manceuvre : 
+
+1. 
+
+K— Q5 
+
+K— B 
+
+2. 
+
+K-B4 
+
+K-Q 
+
+3. 
+
+K— Q4 
+
+K— B 
+
+4. 
+
+K— Q5 
+
+K— B2 
+
+5. 
+
+K— B5 
+
+109 
+BI.ACK. 
+
+1 WM^^ 
+
+» 
+
+%^ ^' 
+
+"^^ 
+
+^^^.^^rp 
+
+■ .,^^ 
+
+''mm- ^ 
+
+i 
+
+^ '^^i i%mm. 
+
+White. 
+
+Now the move is changed, and White wins easily ; 
+or 
+
+4 K-Q 
+
+5. K— Q6 K— B 
+
+6. P— B7 K— Kt2 
+
+7. K— Q7 
+
+and mates in a few more moves. 
+
+An ending by Mr. Locock (page 109). 
+White has two dangerous attacks ; the one 
+against the weak Black KKtP, the K threatening 
+
+110 
+
+it from KB4 ; the object of the other is to advance 
+his P— K5, supported by the K at Q4. There- 
+fore, when the White King will be at K3, the 
+Black K must be able to occupy in that moment 
+KKt4 ; and when the White King will stand on 
+Q4, the Black King must prevent the threatened 
+advance by marching to KB3. If then the White 
+King is at Q3, ready to go in one move to either 
+of these squares, the hostile King must i-tar.d on 
+Kt3. Thus, the different squares on each side 
+correspond to each other. This mode of reason- 
+ing followed up, we shall come to the conclusion 
+that White with the move draws, Black with the 
+move loses. 
+
+For example, if Black moves first, 
+
+1. 
+
+K— R 
+
+2. 
+
+K- 
+
+-Kt2 
+
+K— Kt 
+
+3. 
+
+K- 
+
+-Kt3 
+
+K— R2 
+
+4. 
+
+K- 
+
+-B2 
+
+K— R3 
+
+5. 
+
+K- 
+
+-Q2 
+
+K— R4 
+
+6. 
+
+K- 
+
+-B3 
+
+K— Kt4 
+
+7. 
+
+K- 
+
+-B4 
+
+K— Kt3 
+
+8. 
+
+K- 
+
+-Q3 
+
+K— Kt4 
+
+9. 
+
+K- 
+
+-K3 and 
+
+wins ; or 
+
+8. 
+
+K— B3 
+
+9. K— Q4 K— Kt3 
+
+10. P— K5 PxPch. 
+
+11. KxP K— B2 
+
+12. K — B5 winning 
+
+Now let White have the move. 
+
+1. K— B2 K— R2 
+
+2. K— Q2 K— R3 
+
+112 
+
+3. 
+
+K— K2 
+
+K— R4 
+
+4. 
+
+K— Q2 
+
+K— R3 
+
+5. 
+
+K— B2 
+
+K~R2 
+
+6. 
+
+K— B3 
+
+K— Kt2 
+
+7. 
+
+K— B4 
+
+K— B2 
+
+8. 
+
+K— Q4 
+
+K— B3 
+
+9. 
+
+K— Q3 
+
+K— Kt3 
+
+0. 
+
+K— K3 
+
+K— Kt4, etc 
+
+One of the gentlemen present, Mr. McLaren, 
+asked for the explanation of following position : 
+
+Black. 
+
+k mm. 
+
+e H H^ ^^ 
+
+V/, ^^ w^^/> ^^^/A 
+
+I 
+
+Whitk. 
+
+112 
+
+This position depends also on the principle of 
+exhaustion. Black's points of advantage, from 
+where he attacks the White Pawn, are three — K7, 
+K6, KB5. The most forward, and therefore, best 
+of these is K7. Whenever the Black King is 
+there, the White King must be ready to occupy 
+KKt2 ; and whenever the Black King marches to 
+K6, the White King must take the point KKt3. 
+The game will run therefore — 
+
+1. 
+
+K—R 
+
+K— Q7 
+
+2. 
+
+K— R2 
+
+K— Q6 
+
+3. 
+
+K— R3 
+
+K— Q5 
+
+4. 
+
+K— Kt4 
+
+K— K6 
+
+5. 
+
+K— Kt3 
+
+K— K7 
+
+6. 
+
+K— Kt2 
+
+K— Q8 
+
+7. 
+
+K—R (or 
+
+R3) 
+
+and draws 
+
+An attempt to force one of the passed Pawns 
+will fail. 
+
+1. K—R P— Kt5 
+
+2. K—Kt2, and draws 
+
+Black with the move will win. 
+
+1 K— KB 
+
+2. K— Kt2 K— K7 
+
+3. K— Kt3 K— B8 
+
+4. K— R3 K— B7 
+
+5. K— Kt4 K— Kt7 winning 
+
+The following positions are illustrative of the 
+power of the passed Pawn : 
+
+113 
+Black. 
+
+mi 
+
+'mm ""''mm. ^'^'wmA \. 
+
+% --^- 
+
+m 
+
+Wa _€si 
+
+m 
+
+Whitk. 
+
+White wins by a clever stroke, in which all the 
+powers of the Pawn at Kt7 are made use of. 
+
+1. R— B8ch. RxR 
+
+2. QxPch. KxQ 
+
+PxR, becomes a Kt, wins the Q and 
+the game. 
+
+The above is more of a mid game combination 
+than an end game type ; but even backed by very 
+little force, a passed Pawn can be very dangerous. 
+
+114 
+
+Black. 
+
+m 
+
+'mm m 
+
+- ^^#^« 
+
+''^m^y 
+
+- '^-mJ^-m 
+
+L^ 
+
+i „™ 
+
+^ pi 
+
+White. 
+
+1. Kt— B3 
+
+2. Kt— K5 
+
+3. Kt— Kt4 
+
+4. Kt— B6 
+
+B— Q 
+K— R2 
+K— R 
+
+and win, as Black has to move ; if (3) B — 
+
+R6 (Kt4) ; (4) Kt— B6ch. would obstruct the 
+Bishop file and therefore win. 
+
+116 
+
+BirACK. 
+
+^ "^ mm, 
+
+wsk 
+
+J 'mm^A 
+
+\m 
+
+^m. 
+
+'A , y//////////, 
+
+P b 
+
+i mm. 
+
+White 
+
+1. B— Q4 B— Kt6 
+
+2. B— R7 B— B5 
+
+3. B— Kt8 B— K6 
+
+4. B— B7 B— R7 
+
+5. B— Kt6 
+
+and wins in a few more moves. In both of the 
+latter cases the King of the winning party is ex- 
+ceedingly well placed. 
+
+116 
+
+BI.ACK. 
+
+1 m 
+
+iSi ■ 
+
+m 'mm. 
+
+^^^.^^r ^^ 
+
+i «^.. -mm. 
+
+-« % — 
+
+" iT«ii-lp-*i_ 
+
+ill 
+
+'mm. ^ e^ 
+i..^...™. in fc 
+
+White:. 
+
+The difference in the position of the Kings de- 
+cides the struggle. 
+
+1. K— Kt8 R— KtTch. 
+
+2. K— R8 R— B7 
+
+3. R— B6ch. K— R4 
+
+If K— Kt4, (4), K— Kt8 would speedily win. 
+
+4. K— KtS R—KtTch. 
+
+5. K— R7 R— B7 
+
+117 
+
+6. 
+
+R— B5cli. 
+
+K— R6 
+
+7. 
+
+K— Kt7 
+
+R— Kt7ch 
+
+8. 
+
+K— R6 
+
+R— B7 
+
+9. 
+
+R— B4ch. 
+
+K— R6 
+
+10. 
+
+K— Kt6 
+
+R— Kt7ch 
+
+11. 
+
+K— R5 
+
+R— B7 
+
+12. 
+
+R— B3ch. 
+
+K— R7 
+
+13. 
+
+RxP 
+
+and wins by Queen against Rook. 
+
+Black. 
+
+'m^/ ~ 'm. 
+
+^^^^^«^^;^^ 
+
+m 'mm, ■mm, 
+wmi mm. 
+
+ISI^ ■ ■ 
+
+J^ .,,^Mm^,^ , ;mm. 
+
+m_ 
+
+1^ _^^^^^«^^^«^ 
+
+m 
+
+w/M^ mm 
+
+Q mm. ^>^^ 
+
+^^ 
+
+y-y^A 
+
+Whits. 
+
+118 
+
+1 R— KtTch. 
+
+2. K— B R— Kt5 
+
+3. P becomes a Rook 
+
+If P Queens instead, R — B5ch., sacrificing it- 
+self, would force the stalemate. 
+
+3 R— QR5 
+
+4. R— QR8 K— Kt5 
+
+An excellent move. White threatened P — R6 — 
+R7, and then a check with his Rook. If now (5) 
+P — R6, K — B6, threatening Mate, will force the 
+draw, for instance (6) K— K, K— K6 ; (7) K— 
+Q, K— Q6 ; (8) K— B, K— B6 ; (9) K— Kt, R— 
+Kt5ch. and so on 
+
+5. K— K2 K— B4 
+
+6. P— R6 K— B3 
+
+not K— K3, as (7) P— R7, K— Q2 ; (8) R— 
+KR8 would gain the Rook. 
+
+7. K— Q3 
+
+The decisive manoeuvre. The King comes now to 
+the support of the Pawn, in order to liberate the 
+Rook, while Black can do nothing to change the 
+po.-^ition to his advantage. The square QR7 is left 
+free for the King, to allow hitn a place of safety 
+against the checks of the Black Rook. 
+
+7. 
+8. 
+
+K- 
+K- 
+
+-Kt2 
+-R2 
+
+K- 
+
+-B3 
+
+9. 
+
+K- 
+
+-Kt3 
+
+R- 
+
+-R4 
+
+10. 
+
+K- 
+
+-Kt4 
+
+R- 
+
+-R8 
+
+11. 
+
+K- 
+
+-Kt5 
+
+R- 
+
+-Kt8ch. 
+
+12. 
+
+K- 
+
+-B6 
+
+R- 
+
+-B8ch 
+
+13. 
+
+K- 
+
+-Kt7 
+
+R- 
+
+-K18ch, 
+
+14. 
+
+K- 
+
+--R7 
+
+Without 
+
+this 
+
+place of 
+
+refuge 
+
+the 
+
+game 
+
+would 
+
+pever be 
+
+won. 
+
+Now it i 
+
+is ^ 
+
+v^ry simple matter. 
+
+119 
+
+14. . . K— Kt2 
+
+15. R— Kt8 R— QR8 
+
+16. R— Kl6 K— B2 
+
+17. K — Kt7 winning easily 
+
+Black. 
+
+'m%m _B. 'm 
+
+V'^^-^^ 
+
+B^ H...^...isl ™ 
+
+mm. ..W////M ^ W////M 
+
+If 
+
+„- "^m^i^m 
+
+m wM 
+
+'iMiW/ '^MW/, 
+
+% '-^' 
+
+*»-^ 
+
+White. 
+
+Here White wins by his superior K position 
+and because his Pawns are further advanced than 
+those of Black. 
+
+1. K— B4 
+It is necessary to time the winning manoeuvre cor- 
+rectly. Therefore we must not at once march to 
+K4. 
+
+120 
+
+1 K— B 
+
+2. K— K4 P— B4 
+
+3. K— Q3 K— K 
+
+4. P— K7 
+
+The right moment for the advance. Now all 
+Black's movements are forced. 
+
+4 K— Q2 
+
+5. K— B4 . K— K 
+
+6. KxP P— Q6 
+
+7. K— Q6 P— Q7 
+
+8. K— K6 P Queens 
+
+9. P— BTcheckmate 
+
+Black. 
+
+m 
+
+H '''^' 
+
+i f^A 
+
+m 'mm. > 
+
+WM ■'^' 
+
+m 
+
+^'mmT^'mm. 
+
+'^"m. ^. „:^^^ 
+
+m mm. 'mM. 
+
+White. 
+
+121 
+
+1. P— QR5 B— R3 
+
+The White QRP has only to pass one more Black 
+Square, and that within two moves; therefore 
+the Bishop must hurry to stop it. 
+
+2. P--Kt5ch. BxP 
+
+Now the Bishop is obstructed by his own King. 
+
+3. K— K4 B— R5 
+
+4. K— B3 
+and the Pawn will Queen. 
+
+When the end game stage is nearing, the pow- 
+er of the various pieces is altered to a marked 
+degree. Different issues being at stake, different 
+measures must be adopted, and ideas, correct in 
+the early part of the game, become sensibly modi- 
+fied. The value of each piece varies of course 
+\^ ith each end game position in a greater or lesser 
+degree ; but the men have a certain average 
+value, which will serve as guide. This value will 
+be determined 
+
+(«) By their fighting capacity against the 
+
+adverse King as an aggressive piece, 
+
+{b) and against passed Pawns, 
+
+(^r) and finally their reach or power of offence, 
+
+when obstructions (as is usual in end 
+
+games) are few. 
+
+Let us first cons'der the King. Being placed 
+
+in opposition to the adverse King, he will take 
+
+three squares from him, and can thus hinder him 
+
+fro.n advancing. He can, single-handed, stop 
+
+three united passed Pawns, not advanced beyond 
+
+the sixth row ; and two, one of which is on the 
+
+122 
+
+seventh row. He can attack every square on tl:e 
+board, and that, if he is in a central point, for in- 
+stance at K4, in no more than three moves. 
+
+His reach is totally uninfluenced by obstruc- 
+tions other than the natural limits of the board. 
+He is therefore a powerful weapon, if well devel- 
+oped in one of the central points or near important 
+points ; he can, however, never be used an an in- 
+strument of obstruction, never be exposed to any 
+direct attack, which sensibly diminishes his offen- 
+sive value against strong pieces of offence. 
+Black. — Morphy . 
+
+White. — Harrwitz. 
+
+123 
+
+The annexed position occured in one of Mor- 
+phy's match games. The game went on : 
+
+1 P— QR3 
+
+2. P— R4 Vxt 
+
+3. RPxP R— R 
+
+The first advantage, an unopposed open file for 
+the Rook, is now established, 
+
+4. Kt— Q2 R— R6 
+
+5. P— K4 PxP 
+
+6. KtxP KtxKt 
+
+7. BxKt R— QB6 
+
+8. B— B3 
+
+threatening now, of course, R — K8ch. — QKt8. 
+
+8 K~B2 
+
+9. R— K4 B— B 
+
+10. B— K2 B— B4 
+
+11. R— Q4 P— R4 
+
+Through this last move the important point at 
+KB4 becomes strong. 
+
+12. K— B2 K— B3 
+
+13. R— Q2 B— B7 
+
+14. K— K B— K5 
+
+15. K— B2 K— B4 
+
+The White King is kept back by the Black Rook ; 
+the Black King, however, can advance unchecked. 
+
+16. R— R2 P— R5 
+
+forcing the way for his King, which will soon be- 
+come a dangerous assailant. 
+
+124 
+
+17. PxP 
+
+KxP 
+
+18. R— R7 
+
+R— KR6 
+
+19. RxP . 
+
+R— R7ch 
+
+20. K— K 
+
+K— K6 
+
+crushing every resistance. 
+
+Black. — 
+
+Steinitz. 
+
+^^ uMyMAfi 
+
+^--"-^^1 
+
+White — Lasker. 
+
+In one ':>i my match games with Mr. Steinitz 
+the above position occurred, White to move. 
+1. K-RQ P— K4 
+
+If K— Q2 at once, P— KB4 will give White ^ 
+good game. 
+
+125 
+
+2. 
+
+B— K3 
+
+K-Q2 
+
+3. 
+
+B— B5 
+
+R— R8 
+
+4. 
+
+KR— Q2 
+
+K— K3 
+
+5. 
+
+B— R3 
+
+P~Kt4 
+
+6. 
+
+R— Q5 
+
+R— Kt3 
+
+7. 
+
+K— Kt4 
+
+Now the King actively enters into the fight. 
+
+7 P— Kt5 
+
+The initiation of a subtle counter-attack which 
+nearly succeeded in turning the tables. 
+
+8. K-R5 
+
+It might have been wiser first to accept the 
+offered Pawn, thus: — (8) PxP, R— K8 ; (9) 
+K— R5, B— Q; (10) RxP, R— R3ch.; (11) K— 
+Kl4. RxPch.; (12) K— Kt3 remaining a Pawn 
+ahead. 
+
+8 R— R3ch. 
+
+9. KxP P— R4 
+
+(or 9) R— R8; (10) PxP, R— K8 ; (11) 
+
+P— R3, RxP; (12) P— B4. 
+
+10. 
+
+R-Q 
+
+RxR 
+
+11. 
+
+RxR 
+
+PxP 
+
+12. 
+
+PxP 
+
+R— R 
+
+13. 
+
+K— Kt6 
+
+R— KKt 
+
+14. 
+
+KxP 
+
+R— Kt7 
+
+15. 
+
+P— R4 
+
+R— R7 
+
+16. 
+
+K— B6 
+
+129 
+
+This manoeuvre makes the Black game unten- 
+able. 
+
+16 BxP 
+
+17. RxPch. K— B2 
+
+18. K— Q5 B— B3 
+
+If (18) R— Q7ch.; (19) KxP, B-- 
+
+Kt6ch.; (20) P— B4, RxR; (21) BxR, P— R5 ; 
+(22) B— B5, P— R6 ; (23) B— Kt and the four 
+passed PaAns win easily against the Bishop. 
+
+19. R— Q7ch. K~Kt3 
+
+20. K— K6 
+
+to check the advance of the Black King. 
+
+If now (20) K— Kt4 ; (21) R— KET 
+
+B— Q; (22) R— B8, B~Kt3; (23) B— K7ch. 
+K— Kt3; (24) R— KtSch., K— R2; (25; K— 
+B7 followed by B— B6 would draw the Black 
+King into a mating net. 
+
+20. 
+
+P— R5 
+
+21. 
+
+r-q' 
+
+P— R6 
+
+22. 
+
+R— Ktch. 
+
+R— Kt7 
+
+23. 
+
+RxRch. 
+
+PXR 
+
+24. 
+
+B— B5 
+
+and wins after a few more moves witb Lis passed 
+Pawns. 
+
+127 
+Black. 
+
+iii 
+lii Mi 
+
+i 
+
+M^^mm. 
+
+m, 1 
+
+Cy/zz/z/m 
+
+m 'mm 
+
+'mm ^^ 
+
+i? V/////yMi ^S 
+
+m^ ^^_^ WMz,,^ 
+
+White. — Morphy 
+
+Another of Morphy 's energetic end game at 
+tacks. 
+
+1. 
+
+R— K8 
+
+R— B 
+
+2. 
+
+K— B2 
+
+P— Kt4 
+
+3. 
+
+K— K3 
+
+P— Kt5 
+
+4. 
+
+K~Q3 
+
+P— Kt4 
+
+5. 
+
+B— B6 
+
+PxP 
+
+6. 
+
+PxP 
+
+R— Kt 
+
+7. 
+
+K— B4: 
+
+128 
+
+The Black forces being all engaged by t^r 
+combined action of the White Rook, passed Pawn 
+and Bishop, the co-operation of the King is all 
+that is necessary to decide the day. 
+
+7. 
+
+R— B 
+
+8. 
+
+K— Kt5 
+
+R— Kt 
+
+9. 
+
+K— R6 
+
+R-B 
+
+10. 
+
+K— Kt7 
+
+R— Kt 
+
+11. 
+
+K— B8 
+
+B— Kt3 
+
+12. 
+
+RxR 
+
+KxR 
+
+13. 
+
+P Queens 
+
+BxQ 
+
+14. 
+
+KxB 
+
+Resigns 
+
+Examples concerning the power of the King 
+could be readily multiplied. But w^e leave this 
+for a future occasion, the King as an assailant, or 
+as strong protective power being an essential ele- 
+ment, yea, almost an organic part of each ap- 
+proximately even end game. 
+
+Another piece whose power increases the more 
+the end game stage is approaching is the Rook. 
+His fighting capacity against the adverse King is 
+enormous, and exactly what makes him a valu- 
+able instrument for attack as well as defence. In 
+conjunction with his own King he can checkmate 
+the hostile K driven to the edge of the board, 
+and in combination with a Kt and P and a single 
+obstruction he can give checkmate to the K on 
+
+129 
+
+^ny square of the board (example Rook at B8, 
+•Kt at Kt6, P at B5; opponent's King at B7, one 
+of his Pawns at Kt7). 
+
+Without any kind of support he can give un- 
+told checks to the adverse King, until the same 
+is obliged to approach the Rook, perhaps against 
+the best interests of his game, or forced to protect 
+himself behind some kind of obstruction. On 
+account of his attacking qualities, he is always a 
+valuable ally when you want to force any obstruc- 
+tions out of the way, for instance, of passed 
+Pawns; but he is less fit for fighting against 
+them, and really too valuable a piece to be given 
+away for such a purpose, if other alternatives are 
+open. The best way to stop an adverse passed 
+Pawn with a Rook is to place the Rook behind it, 
+as his reach will increase the more the Pawn 
+advances. He can stop, and even win (if they 
+are unsupported) two passed Pawns, of which 
+one is on the sixth, the other on the fifth row ; 
+but two passed Pawns on the sixth row will 
+Queen against him, if united. Used against ad- 
+vanced Pawns he is therefore not as manageable 
+as the King, or even the Bishop, but he is the 
+more dangerous to the Pawns before they assume 
+a threatening attitude, as his reach is very great, 
+and exactly calculated to serve against Pawns in 
+their strongest position — that is, when they are 
+abreast. He can attack, if unobstructed, any 
+square of the board in one move, and will com- 
+
+180 
+
+mand thirteen at a time. This enables him to 
+restrict the opposite King to a portion of the 
+board. 
+
+This Bishop is very much less fit for assault 
+against the King, or for restricting his approach, 
+than the Rook. The Bishop can take away two 
+squares from the King, and eventually give check 
+and command two squares of the reach of the 
+King. His capacity for yielding support to 
+passed Pawns is not very great, as the line in 
+which the Pawn advances will usually contain 
+some points where obstructions are totally safe 
+against him. His great value consists in two 
+things. (1) That he can stop adverse Pawns from 
+a long distance and from a number of squares. ( 2 ) 
+That a Pawn and a Bishop may protect each other, 
+so as to make both of them comparatively safe 
+against the King or superior pieces. His chess- 
+board, however, contains only thirty-two squares, 
+and whichever influence they may have on the 
+issue of the game, very much determines his 
+share in it ; so that his importance may be ex- 
+aggerated when you have the superiority of 
+position, or almost annihilated when the opposite 
+is the case. 
+
+The Knight is, unless circumstances are very 
+favorable, the weakest piece of all. He may 
+take two squares from the King, or give check, 
+and besides take away one square from him; 
+
+181 
+
+but the adverse King may approach him then, 
+and get rid of him if no more support is near. 
+His great power is that he cannot be obstructed. 
+When obstructions abound, and when he can 
+occupy a strong point near the enemy's line, he 
+can be an invaluable ally. His reach never ex- 
+ceeds eight points, situated in a circle, and he 
+may be obliged to take five moves to cross the 
+board from one point to another (for instance, 
+the two diagonally opposite corner points). On 
+an extended field of battle he must therefore 
+choose the wing to which he will give his sup- 
+port, or very much lose in value. 
+
+To refer to the oft mooted question, ' ' Which 
+piece is stronger, the Bishop or the Knight?" 
+it is clear that the value of the Bishop undergoes 
+greater changes than that of the Knight. If 
+experience has shown, that, on an average, dur- 
+ing the opening or middle game, the Bishop will 
+be at least as strong as the Knight, this will be 
+the more true the more obstructions disappear, 
+that is in endings with only a few Pawns scat- 
+tered about the board. In complicated end game 
+positions, where Pawns partly form blocks, the 
+Knight will find his best chance. The value of 
+two Bishops varies, of course, as they dominate 
+the whole chessboard, very much less than that 
+of one ; in consequence, two Bishops are as a 
+rule appreciably stronger than two Kts or a 
+Bishop and a Kt. 
+
+132 
+
+Black. 
+
+i. 
+
+m y//WM 
+
+^p ^p pp i 
+^ i ■ ■, ■ 
+
+fiij 
+
+.„„4,iM 
+
+pri 
+
+13 ■ W fi ^' 
+
+i 
+
+y/z/z/M, 
+
+I 
+
+P I 
+
+Whits. 
+
+From a correspondence game. 
+
+1. Kt— K4 
+
+2. P— QR3 
+
+P— QKt4 
+Now all the Black squares on the Q side are in 
+
+133 
+
+possession of White ; nor can this be changed, as 
+ihe Black King is necessary on the K side to fight 
+against the White Pawns. 
+
+2. 
+
+B- 
+
+K- 
+
+-Kt3 
+
+3. 
+
+P- 
+
+-B3 
+
+-B2 
+
+4. 
+
+K- 
+
+-B2 
+
+K- 
+
+-K3 
+
+5. 
+
+K- 
+
+-K3 
+
+P- 
+
+-R3 
+
+6. 
+
+P- 
+
+-KKt4 
+
+K- 
+
+-Q4 
+
+7. 
+
+Kt- 
+
+-B3ch. 
+
+K- 
+
+~Q3 
+
+8. 
+
+P- 
+
+-B4 
+
+B- 
+
+-K 
+
+It would have been more advisable to keep the 
+Bishop in the rear of the advancing Pawns. 
+
+9. P— B5 B— Q2 
+
+10. Kt— K4ch. K— K2 
+
+If (10) K~Q4 ; (11) P— B6 will force 
+
+the exchange of Kt v. B. and the extra Pawn will 
+easily win. 
+
+11. K— B4 B— K 
+
+12. K— K5 B— B2 
+
+13. P— KR4 B— Q4 
+
+14. P— Kt5 PxP 
+16. PxP B— Kt 
+16. P— Kt6 Resigns 
+
+as P — B6 will soon prove decisive, 
+
+184 
+
+BlvACK. 
+
+m. 
+
+i 
+
+^ » ■. ii 
+
+'^^^A^^^^^^^^p^/A,^„^,^^^^. ../^/^///^ ^////////// 
+
+S# ^Mtl ^^ /^h. ^^ 
+
+yyZ^'/T/ /Sm^£iik'^ w7.^//// .Sftk ^///y////'^o'. 
+
+im m ill^ 
+
+''''mm''''t\M 
+
+I.,JM„„,„MA« 
+
+W////M,. 
+
+mkm 
+
+^IM 
+
+'■m'y^m 
+
+'mm^. 
+
+^^^^V-^-^-^"^ 
+
+i ^^a 
+
+White. 
+From another game by correspondence 
+
+Black to move. 
+1. .. 
+
+P— QB4 
+
+Strong, and embarrassing to White. The 
+Pawn engages the QP, which is the only White 
+])iece that commands the point K5. It can there- 
+fore not take the hostile Pawn, as after (2) Px 
+Pch., PxP, White has no means to stop the 
+
+135 
+
+check at K4, which would soon prove fatal to 
+him. 
+
+2. R— R7 
+
+unsatisfactory enough ; but the Kt cannot move 
+to any square improving his position, and with- 
+out exposing the White Pawns to the attack of 
+the Rook. 
+
+2 PXP 
+
+3. PxP Kt— B5ch. 
+
+4. K— B3 Kt— K3 
+
+Now White can do nothing effectual. If the Rook 
+moves, Black will win the QP. 
+
+5. K— Q3 P— QR4 
+
+6. K— K3 R— Kt8 
+
+This manoeuvre with the Rook is splendid. He 
+threatens now R — QB8— B6ch. winning the QP. 
+White cannot frustrate that plan, e,g,, (7) K — 
+Q3, R— QB8; (8) P— R4, Kt— B5ch.; (9) K— 
+K3, P— KKt4 (10) K— B2, R— Q8, etc. 
+
+7. 
+
+R— R8 
+
+R— QB8 
+
+8. 
+
+R— QKt8 
+
+R— B6ch. 
+
+9. 
+
+K— B2 
+
+KtxP 
+
+10. 
+
+RxPch. 
+
+K— K4 
+
+11. 
+
+R— Kt7 
+
+K— B5 
+
+If now (12) RxP, R— B7 ; (13) K— K, K— 
+K6 ; (14) R— K7ch , K— Q6 ; (15) Kt— B, Ktx 
+Pch.; (16) K — Q, P— Q5, and White has no sat 
+isfactory move left. 
+
+12. P— Kt5 H— K6 
+
+136 
+
+and White resigns, for after (13) PxP, PxP; 
+(14) R— KB7, P— B4, his position becomes alto- 
+gether untenable. 
+
+The following position occurred in a match 
+game at Hastings, 1895, between Messrs Schlech- 
+ter and Tchigorin. 
+
+Black. 
+
+W////////- ^ y////M'/. v/, 
+
+1^1 
+1: 
+
+mm. 
+
+Wa 'mm, m 
+
+P 
+
+P 
+
+^iil 
+
+m m^ 
+
+«,„5„..fSi'"^,iHi ^'mM. 
+
+t^im fi »i 
+
+W4 
+
+m ■«■ a 
+
+111 ■ 
+
+^ 
+^P^ 
+
+White. 
+
+It was White's turn to move, and the game 
+went on. 
+
+I. P— QKt4 
+
+137 
+
+A Pawn move without a clearly defined pur- 
+pose is to be blamed. The P at Kt4 takes away 
+a good square from the Kt, which that piece 
+ought to have occupied at once in order to 
+threaten Kt — Q5, and to force the advance P — 
+QB3, which would greatly increase the strength 
+of the B. Moreover, it leaves a strong point at 
+QB5 to the Black Kts, which White can only 
+guard by another advance of a Pawn. 
+
+1 R(Q)— KKt 
+
+2. R— KKt 
+
+He ought not to leave the important Q file with 
+his Rook. All defensive purposes could be served 
+just as well by (2) P — KR3, which would enable 
+
+him to reply to (2) P— Kt5 with (3) BPx 
+
+P, PxP, (4) P— R4 and to (2) P— R5 
+
+with P— Kt4. 
+
+2 P— Kt5 
+
+3. P— KB4 Kt— Q 
+
+4. P— B5 Kt— B2 
+
+5. Kt— B2 Kt— Q3 
+
+6. B— B5 Kt— Kt3 
+
+Not (6) KtxB, as (7) PxKt, Kt moves 
+
+(8) P— B6 would follow. 
+
+7. Kt-Q 
+
+Now decidedly R — Q was at the right place, 
+
+when, for instance, (7) R — Q ; (8) Rx 
+
+Kt, RxR ; (9) R— Q would lead to a probable 
+draw. 
+
+7 Kt— B 
+
+8. Kt— K3 K— B2 
+Nqw the KP has become indefensible. 
+
+9. 
+
+Kt— Q5 
+
+P— B3 
+
+10. 
+
+Kt— B7 
+
+KtxKP 
+
+11. 
+
+QR-Q 
+
+KtxB 
+
+12. 
+
+PxKt 
+
+R-Q 
+
+13. 
+
+Kt— K6 
+
+RxR 
+
+14. 
+
+RxR 
+
+K— K2 
+
+15. 
+
+P— R4 
+
+In thus opening up files for the Black Rook he 
+plays Black's game, (15) P — B4 is by far prefer- 
+able. Neither the Black Kt nor the R will tl:en 
+
+ever be able to obtain good positions. (15) 
+
+P — R5 could then, for instance, be answered bv 
+(16) PxP; RxP; (17) R— Q8, Kt— R2 ; (18) 
+R — QR8 winning the piece. 
+
+15. 
+
+PxPe. p. 
+
+16 
+
+R— KR 
+
+K— B2 
+
+17. 
+
+RxP 
+
+Kt— K2 
+
+18. 
+
+P— KKt4 
+
+P— R5 
+
+19. 
+
+P— B4 
+
+Kt— Kt3 
+
+ittle 
+
+move which threatens Kt— 
+
+20. 
+
+PxKtch. 
+
+KxKt 
+
+21, 
+
+P— Kt7 
+
+R— KKt 
+
+22. 
+
+RxP 
+
+RxP 
+
+23. 
+
+K— K3 
+
+K— B2 
+
+It remains to force the exchange of the last P 
+on the K side, in order to have there all lines free, 
+and a clear superiority. 
+
+24. P— Kt4 K— Kt3 
+
+If the plausible (24) K— Kt instead, 
+
+then (25) K— K4, R— R2 ; (26) RxR, KxR ; 
+
+139 
+
+(27) K— B5, K— Kt2; (28) P— KKt5, PxP; 
+
+(29) KxKtP, drawing without difficulty. 
+
+25. R— R8 P— B5 
+
+26. PxPch. KxP 
+
+27. R— R5ch 
+
+(27) R— BSch. would find its reply in K— K3 ; 
+
+(28) R— K8ch., K— Q2 ; (29) RxP, R— Kt6ch. ; 
+
+(30) K moves, R— QKt6 when Black will remain 
+with a winning advantage. 
+
+27. 
+
+K— K3 
+
+28. 
+
+R— R6ch. 
+
+K— Q2 
+
+29. 
+
+P— Kt5 
+
+RPXP 
+
+30. 
+
+PxP 
+
+PxP 
+
+31. 
+
+K— K4 
+
+R— K2 
+
+32. 
+
+R— QKt6 
+
+K— B2 
+
+33. 
+
+RxP 
+
+K— B3 
+
+34. 
+
+R— R5 
+
+R— K 
+
+This manoeuvre with the Rook, which wins a 
+move, decides the game. The White King dare 
+not move, as otherwise the Black KP advances 
+still further : so all White's moves are forced. 
+
+35. 
+
+R- 
+
+-R7 
+
+R- 
+
+-K3 
+
+36. 
+
+R- 
+
+-R5 
+
+R- 
+
+-K2 
+
+37. 
+
+R- 
+
+-R 
+
+KxP 
+
+38. 
+
+R- 
+
+-Brh. 
+
+K- 
+
+-Q3 
+
+39. 
+
+R- 
+
+-Qch. 
+
+K- 
+
+-B3 
+
+40. 
+
+R- 
+
+-Bch. 
+
+K- 
+
+-02 
+
+41. 
+
+R- 
+
+-B5 
+
+K— Q3 
+
+42. 
+
+R- 
+
+-B2 
+
+P- 
+
+-QKt4 
+
+43. 
+
+R- 
+
+-QKt2 
+
+K- 
+
+-B4 
+
+and White resigned the struggl 
+
+e which Black had 
+
+masterfully conducted. 
+
+Thk End, 
+
+r *'^ 
+
+/' 
+
+RETURN TO the circulation desk of any 
+
+University of California Library 
+
+or to the 
+
+NORTHERN REGIONAL LIBRARY FACILITY 
+BIdg. 400, Richmond Field Station 
+University of California 
+Richmond, CA 94804-4698 
+
+** ALL BOOKS MAY BE RECALLED AFTER 7 DAYS 
+
+^*J?^^^d 2-month loans may be renewed by calling 
+M>.^>f^V^ (415)642-6233 
+
+1-year loans may be recharged by bringing books 
+to NRLF 
+c ^^^ Renewals and recharges may be made 4 days 
+
+DUE AS STAMPED BELOW 
+
+'M-r^i 
+
+■k^m::- UBRARiruSE0£C15'86 
+
+g^^ JUL 2 8 1989 
+
+*f 
+
+^^S JUNZ01S99 
+
+I 
+
+% W97496 
+
+i 
+
+T,<: 
+
+^life-UNIVERSITY OF CALIFORNIA LIBRARY ^-

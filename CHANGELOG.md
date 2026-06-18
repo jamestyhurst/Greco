@@ -7,6 +7,16 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added
+- **Knowledge corpus expansion** (backlog #16) — 6 new public-domain chess books deposited and indexed:
+  - *Common Sense in Chess* (Emanuel Lasker, 1896) — 12 lectures on principles from the World Champion
+  - *The Minor Tactics of Chess* (Young & Howell, 1894) — pattern-level tactics and combination themes
+  - *The Chess Openings* (H. E. Bird, 1880) — 222-page opening survey from a 19th-century master
+  - *The Modern Chess Instructor* (Wilhelm Steinitz, 1889) — opening theory + method from the first World Champion (~98k words)
+  Corpus now holds 16 text works + 1 PGN + 1 terminology file, totaling 1456 FTS5 chunks. All archive.org sources; OCR double-spaces collapsed for cleaner narrator retrieval.
+
+## [0.39.1] — 2026-06-18
+
 ### Fixed
 - **`_humanize_time_control` now classifies increment time controls** (backlog #12). OTB classical controls like `90+30` previously showed "90 min + 30 sec increment" with no category label; the narrator had no way to know whether a game was a casual rapid or a serious classical. The fix applies the same 40-moves-per-game estimate already used by `time_control_category` to label every increment control: `5400+30` → "classical", `600+5` → "rapid", `180+2` → "blitz", `60+1` → "bullet". 5 new assertions added to `test_humanize_time_control`.
 
