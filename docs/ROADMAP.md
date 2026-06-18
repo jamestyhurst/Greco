@@ -6,7 +6,7 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.29.0
+## Where we are — v0.37.0
 
 > See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. **All seven Greco
 > Online phases through Phase 6 are complete.** The web layer is a full multi-user FastAPI
@@ -22,11 +22,14 @@ foundation we're building out from. Versioning is [Semantic](https://semver.org/
 > v0.20.0–v0.29.0 completed the full **18-predicate Tier-A fact-gate library**: every
 > certifiable chess claim (pin, skewer, discovered attack, backward pawn, infiltration,
 > fianchetto, outpost evidence, zugzwang, and more) now has a deterministic detector,
-> an evidence bundle, narrator guidance, and L2 acceptance tests (156 tests total).
-> The voice prompts were also rewritten to align with the design concept (chess witness
-> framing in Companion, human-chess principle in Coaching, spectator-event framing in
-> Commentary) and the web form gained structured context fields (audience level, recipient,
-> per-player context).
+> an evidence bundle, narrator guidance, and L2 acceptance tests.
+> v0.30.0–v0.37.0 completed the full **8-predicate Tier-B fact-gate library** (overloaded
+> piece, compensation, tempo gain, weak square, zwischenzug, initiative, space advantage,
+> prophylaxis) — all compound/engine-assisted checkable claims now certified with evidence
+> bundles and narrator gating. 468 tests total. The voice prompts were also rewritten to
+> align with the design concept (chess witness framing in Companion, human-chess principle
+> in Coaching, spectator-event framing in Commentary) and the web form gained structured
+> context fields (audience level, recipient, per-player context).
 
 ### Baseline (v0.3.0)
 - Working Tkinter GUI over the full pipeline (importers → analyzer → triage → narrator
@@ -143,7 +146,7 @@ was built stays visible.
 | 27 | **GUI/web per-player context fields** — let desktop/web users supply structured "White is my dad, an attacker" context (CLI-only via `--white-context` today). | S | **done** |
 | 28 | **Output Fact-Gate predicate library** (`factgate.py`) — per-ply allow-set of engine-certified claims (fork, pin, rook-lift, outpost, passed-pawn, mate-threat) + scoped prompt rule. The output-side mirror of the input validation gate. | L | **done** (v0.10.0); all 18 Tier-A predicates complete through v0.29.0 |
 | 29 | **Layer-2 claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`) — deterministic CI-safe contradiction checks (exit-1 gate) + an advisory LLM-judge; runs off a saved analysis. | L | **done** (v0.10.0) |
-| 30 | **Grow the predicate library + chess glossary** — Tier-A predicates (18) are done; next is Tier-B predicates (checkable-but-harder: overloaded piece, compensation, tempo, …) from the pacing roadmap in `docs/specs/TERMINOLOGY_TIERS.md`. | M | **Tier-A done** (v0.29.0); Tier-B todo |
+| 30 | **Grow the predicate library + chess glossary** — Tier-A predicates (18) and Tier-B predicates (8: overloaded piece, compensation, tempo gain, weak square, zwischenzug, initiative, space advantage, prophylaxis) all done. Next: multi-move sacrifice window detection (#25) and per-ply material trajectory (#23). | M | **done** (Tier-A v0.29.0; Tier-B v0.37.0) |
 | 31 | **Wire `verify_report` into the release/CI loop** — run the deterministic gate on a sample report in `ship.py` / CI so a confabulation regression fails the build. | S | **done** |
 | 32 | **Essay Mode** — candidate fourth mode; answers chess questions analytically using the knowledge corpus; PGN optional as illustrative material. Design spec pending — see `Developer Notes (Greco)/Handoffs/package-d-essay-mode.md` before implementing. | M | todo (design first) |
 
@@ -153,7 +156,8 @@ was built stays visible.
 - *Private GitHub repo for phone ↔ laptop* — **superseded** by Greco Online: once Greco is
   a website, you just open it on your phone, so there's nothing to git-sync.
 
-**Recently shipped** (newest first): **v0.29.0** — `is_zugzwang` predicate (spec 18, engine-dependent approximate): null-move probe in `analyzer.py` first pass, sign-correct side-to-move POV conversion, 5-veto ladder, strictness ladder (STRICT/NEAR), full evidence bundle, narrator guidance; 13 new tests including mandatory two-color trébuchet regression. 156 total factgate tests.
+**Recently shipped** (newest first): **v0.37.0** — `is_prophylaxis`: eighth Tier-B predicate; quiet blockade of advanced enemy pawn's advance square; passed-pawn-blockade flag; 8 new tests. **v0.36.0** — `detect_space_advantage`: pawn-space score, lead ≥4 threshold; 6 new tests. **v0.35.0** — `is_initiative`: consecutive-checking sequence in PV; 7 new tests. **v0.34.0** — `is_zwischenzug`: checking zwischenzug (forgoes capture for a check); 5 new tests. **v0.33.0** — `is_hole` helper + `detect_weak_square`: permanent structural hole with piece occupation; 10 new tests. **v0.32.0** — `is_tempo`: attacks minor/major piece, forced reply addresses attacked square; 8 new tests. **v0.31.0** — `is_compensation`: materially down ≥1.5 pawns, eval near-level or better; 11 new tests. **v0.30.0** — `creates_overloaded`: gates `overloaded_piece` via existing detector; 6 new tests. (Tier-B complete at v0.37.0 — 217 factgate tests, 468 total.)
+**v0.29.0** — `is_zugzwang` predicate (spec 18, engine-dependent approximate): null-move probe in `analyzer.py` first pass, sign-correct side-to-move POV conversion, 5-veto ladder, strictness ladder (STRICT/NEAR), full evidence bundle, narrator guidance; 13 new tests including mandatory two-color trébuchet regression. 156 total factgate tests.
 **v0.28.0** — `outpost_evidence()` sibling function: ready-to-quote evidence bundle for certified outpost; serialized as `outpost_evidence` in narrator Tier-1+ block; narrator instruced to quote the `evidence` string. 7 new tests; 143 total.
 **v0.27.0** — `is_fianchetto`: certifies bishop-on-flank + knight-pawn-advanced structure; both-colors loop; pin never suppresses; conservative on damaged structures; evidence bundle per flank with `king_behind` flag. 15 new tests; 136 total.
 **v0.26.0** — `is_infiltration`: rook/queen on 7th/8th or endgame king ≥ rank 6; 5-veto ladder; hanging rook certifies with caveat; evidence bundle with `arrival_file_state` + `confines_king`. Phase threaded through `certified_claims()`. 16 new tests; 121 total.
