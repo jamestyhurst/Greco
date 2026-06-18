@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.16.0] — 2026-06-18
+
 ### Added
 - **Lichess URL input (R-IN1)** — the analysis form now accepts a Lichess game URL or
   8-character game ID directly. `load_from_lichess()` fetches the PGN before passing it
