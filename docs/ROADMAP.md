@@ -6,7 +6,7 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.16.0
+## Where we are — v0.19.0
 
 > See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. **All seven Greco
 > Online phases through Phase 6 are complete.** The web layer is a full multi-user FastAPI
@@ -127,13 +127,13 @@ was built stays visible.
 | 19 | **Player names across all modes** — filename fallback + header-derived psychology tier-boost for GUI/web (was CLI-only). | M | **done** (v0.9.0) |
 | 20 | **Daily / correspondence voice** — detect the game and inject the protocol; fix the time-control humaniser. | S | **done** (v0.9.0) |
 | 21 | **Deterministic featured passage** — pick one best chunk and hand the model a finished, attributed, verbatim quote. | M | **done** (v0.9.0) |
-| 22 | **Clickable variations in the replay viewer** — emit per-ply FENs for `variations` so a written line plays out on the board (2A phase 2; the per-ply data is the only missing piece). | M | todo |
+| 22 | **Clickable variations in the replay viewer** — emit per-ply FENs for `variations` so a written line plays out on the board (2A phase 2; the per-ply data is the only missing piece). | M | **done** (v0.19.0) |
 | 23 | **Per-ply material trajectory along engine lines** — annotate captures in `best_pv`/variations so "show the money" is computed, not model-tallied. | M | todo |
 | 24 | **Computed decisive-moments block** — biggest eval swings + first-decisive ply, to ground the closing-summary claims in data rather than recollection. | S | **done** |
 | 25 | **Multi-move sacrifice detection** — flag a material-down / eval-up window across plies in code (today the model judges it from the trajectory). | M | todo |
 | 26 | **Auto-strip confabulated variation moves** — promote `find_unverified_variation_moves` from a warning to an enforced edit, once it is trusted not to mangle good prose. | S | **done** |
 | 27 | **GUI/web per-player context fields** — let desktop/web users supply structured "White is my dad, an attacker" context (CLI-only via `--white-context` today). | S | **done** |
-| 28 | **Output Fact-Gate predicate library** (`factgate.py`) — per-ply allow-set of engine-certified claims (fork, pin, rook-lift, outpost, passed-pawn, mate-threat) + scoped prompt rule. The output-side mirror of the input validation gate. | L | **done** (v0.10.0) |
+| 28 | **Output Fact-Gate predicate library** (`factgate.py`) — per-ply allow-set of engine-certified claims (fork, pin, rook-lift, outpost, passed-pawn, mate-threat) + scoped prompt rule. The output-side mirror of the input validation gate. | L | **done** (v0.10.0); extended with battery + promotion_threat in v0.18.0 |
 | 29 | **Layer-2 claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`) — deterministic CI-safe contradiction checks (exit-1 gate) + an advisory LLM-judge; runs off a saved analysis. | L | **done** (v0.10.0) |
 | 30 | **Grow the predicate library + chess glossary** — more certified claim types; definitions=corpus in `knowledge/`, detection=code predicates (James's output-gate doctrine). | M | todo |
 | 31 | **Wire `verify_report` into the release/CI loop** — run the deterministic gate on a sample report in `ship.py` / CI so a confabulation regression fails the build. | S | **done** |
@@ -145,7 +145,19 @@ was built stays visible.
 - *Private GitHub repo for phone ↔ laptop* — **superseded** by Greco Online: once Greco is
   a website, you just open it on your phone, so there's nothing to git-sync.
 
-**Recently shipped** (newest first): **v0.16.0** — Phase 6: Lichess account integration
+**Recently shipped** (newest first): **v0.19.0** — Clickable variation lines in the PGN
+replay viewer (#22): `_pv_to_fen_plies()` parses engine variation strings into per-ply FEN
+data; `build_pgn_viewer()` embeds the data in the payload; JS `showVars()` renders "Better:"
+/ "Then:" chips below the board — clicking any chip peeks at that position (highlighted in
+green); pressing ←/→ returns to the game. 9 new tests; 282 total.
+**v0.18.0** — Factgate: `creates_battery()` and `threatens_promotion()` predicates; both
+added to `GATED_TAGS` + `certified_claims()` + narrator whitelist; king correctly excluded
+from diagonal-capture promotion threats. 10 new tests; 273 total.
+**v0.17.0** — Phase 7 deployment prep: `render.yaml` Render Blueprint, `docs/DEPLOYMENT.md`,
+PostgreSQL support in `web/db.py` (`DATABASE_URL` env var, `postgres://` → `postgresql://`
+normalization), `collation="NOCASE"` removed from models + migration 001,
+`psycopg2-binary` added; period typography (Cinzel + EB Garamond from Google Fonts).
+**v0.16.0** — Phase 6: Lichess account integration
 (profile page, recent-games panel, one-click analysis), Lichess URL direct input in the
 upload form, SMTP "report ready" email notification, `web/email_utils.py`, Alembic migration
 003 (`lichess_username` column), full test coverage (`test_profile.py`, `test_email_utils.py`).
