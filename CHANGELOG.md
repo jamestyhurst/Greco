@@ -7,6 +7,34 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-06-18
+
+### Added
+- **Greco Online Phase 4 — SQLAlchemy ORM + Alembic migrations** (target v0.13).
+  Replaces the raw sqlite3 DB layer with SQLAlchemy 2.0 and introduces Alembic
+  for schema version control. The public API of web/db.py is unchanged — no
+  callers needed updating.
+  - `web/models.py` — declarative ORM models: `User` (id, username, email,
+    password_hash, role, created_at) and `ReportOwnership` (report_id, user_id,
+    created_at). `User.is_admin` property retained.
+  - `web/db.py` rewritten with SQLAlchemy. Module-level `engine` and
+    `SessionLocal` (monkeypatchable for tests). All CRUD functions use session
+    context managers with `expire_on_commit=False` so returned objects are
+    safe to use after session close. `init_db()` now calls
+    `Base.metadata.create_all(engine)` (idempotent, like before).
+  - `alembic/` directory with `env.py` (imports `_DB_URL` from `web.db`;
+    derives the live DB path so Alembic always targets the same file as the
+    app), `script.py.mako` template, and initial revision
+    `001_create_users_and_report_ownership` (upgrade / downgrade both defined).
+    `render_as_batch=True` enables ALTER TABLE support in SQLite.
+  - `alembic.ini` at repo root. URL is a placeholder overridden in `env.py`;
+    run `alembic upgrade head` (fresh install) or `alembic stamp head` (adopt
+    existing Phase 3 schema) to sync the DB.
+  - `requirements.txt` — `sqlalchemy>=2.0` and `alembic>=1.13` added.
+  - `tests/test_auth.py` — `tmp_db` fixture upgraded to create a SQLAlchemy
+    engine + sessionmaker pointing at a temp file, then monkeypatch
+    `web.db.engine` and `web.db.SessionLocal`. 230 tests pass.
+
 ## [0.12.0] — 2026-06-18
 
 ### Added

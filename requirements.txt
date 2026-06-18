@@ -14,9 +14,11 @@ uvicorn[standard]>=0.29
 python-multipart>=0.0.9
 jinja2>=3.1
 
-# Greco Web — auth
+# Greco Web — auth + database ORM
 bcrypt>=4.0           # password hashing for user accounts (used directly, not via passlib)
 starlette>=0.36       # SessionMiddleware (transitive via fastapi, listed for clarity)
+sqlalchemy>=2.0       # ORM layer (Phase 4); SQLite now, PostgreSQL in Phase 7
+alembic>=1.13         # schema migrations
 
 # Greco Web — sharing features
 pyngrok>=7.2      # "Share now" ephemeral public URL via ngrok tunnel

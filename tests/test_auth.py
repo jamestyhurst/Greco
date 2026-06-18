@@ -29,6 +29,7 @@ from web.db import (
     user_count,
 )
 from web.main import app
+from web.models import Base
 
 
 # ---------------------------------------------------------------------------
@@ -37,10 +38,24 @@ from web.main import app
 
 @pytest.fixture()
 def tmp_db(tmp_path, monkeypatch):
-    """Redirect all DB calls to a fresh temp database for test isolation."""
+    """Redirect all DB calls to an isolated temp database.
+
+    Monkeypatches the module-level engine and SessionLocal so every CRUD
+    function in web.db uses the temp SQLite file for the duration of the test.
+    """
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
     db_path = tmp_path / "test.db"
-    monkeypatch.setattr(db_module, "_DB_PATH", db_path)
-    init_db()
+    test_engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={"check_same_thread": False},
+    )
+    Base.metadata.create_all(test_engine)
+    test_session = sessionmaker(bind=test_engine, expire_on_commit=False)
+
+    monkeypatch.setattr(db_module, "engine", test_engine)
+    monkeypatch.setattr(db_module, "SessionLocal", test_session)
     return db_path
 
 
@@ -48,8 +63,8 @@ def tmp_db(tmp_path, monkeypatch):
 def web_client(tmp_db):
     """TestClient backed by an isolated temp database.
 
-    Using the context manager triggers the FastAPI lifespan (which calls
-    init_db()); since _DB_PATH is already patched, this is a safe no-op."""
+    Using the context manager triggers the FastAPI lifespan (init_db); since
+    engine is already patched, that call is a safe no-op."""
     with TestClient(app, raise_server_exceptions=True) as client:
         yield client
 
