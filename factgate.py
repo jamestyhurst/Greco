@@ -142,23 +142,33 @@ def is_outpost(
     ]
     if not supporters:
         return (False, [])
-    # Unchallengeable: no enemy pawn on an adjacent file can ever advance to attack it.
+    # Unchallengeable: no enemy pawn can ever advance to attack the outpost square.
+    if not is_hole(board, square, not color):
+        return (False, [])
+    return (True, supporters)
+
+
+def is_hole(board: chess.Board, square: int, defender_color: bool) -> bool:
+    """True when `defender_color` has no pawn that can ever attack `square`.
+    A square is a permanent 'hole' for a color when they cannot defend it with pawns.
+    Extracted from is_outpost's unchallengeable check so both functions share one source.
+    """
     file_idx = chess.square_file(square)
-    enemy = not color
+    rank = chess.square_rank(square)
     for adj in (file_idx - 1, file_idx + 1):
         if not (0 <= adj <= 7):
             continue
-        for sq in board.pieces(chess.PAWN, enemy):
-            if chess.square_file(sq) != adj:
+        for pawn_sq in board.pieces(chess.PAWN, defender_color):
+            if chess.square_file(pawn_sq) != adj:
                 continue
-            r = chess.square_rank(sq)
-            # An enemy pawn can challenge only if it is still BEHIND the outpost from
-            # its own advancing direction (so it can reach a square attacking it).
-            if color == chess.WHITE and r >= rank + 1:
-                return (False, [])
-            if color == chess.BLACK and r <= rank - 1:
-                return (False, [])
-    return (True, supporters)
+            pr = chess.square_rank(pawn_sq)
+            # White pawn at pr attacks pr+1; can reach the square if pr <= rank-1
+            if defender_color == chess.WHITE and pr <= rank - 1:
+                return False
+            # Black pawn at pr attacks pr-1; can reach the square if pr >= rank+1
+            if defender_color == chess.BLACK and pr >= rank + 1:
+                return False
+    return True
 
 
 def outpost_evidence(board: chess.Board, square: int, color: bool) -> Optional[dict]:
@@ -1482,6 +1492,62 @@ def is_tempo(
 
 
 # --------------------------------------------------------------------------- #
+# Weak square / hole (board-only predicate — no engine required).
+# --------------------------------------------------------------------------- #
+def detect_weak_square(
+    board_after: chess.Board, move: chess.Move, mover_color: bool
+) -> Optional[dict]:
+    """Certifies 'weak_square': the moved piece (minor piece, rook, or queen, not
+    pawn/king) lands on a permanent hole in the opponent's pawn structure — a square
+    the opponent's pawns can never attack. Restricted to the same advanced-territory
+    rank bands used by is_outpost. Piece must not be trivially hanging.
+    """
+    sq = move.to_square
+    piece = board_after.piece_at(sq)
+    if piece is None or piece.color != mover_color:
+        return None
+
+    # VETO 1: only pieces that meaningfully benefit from a hole (not pawn or king)
+    if piece.piece_type in (chess.PAWN, chess.KING):
+        return None
+
+    # VETO 2: advanced territory only — same rank gate as is_outpost
+    rank = chess.square_rank(sq)
+    if mover_color == chess.WHITE:
+        if rank not in (3, 4, 5):
+            return None
+    else:
+        if rank not in (2, 3, 4):
+            return None
+
+    defender = not mover_color
+
+    # VETO 3: square must be a permanent hole for the opponent
+    if not is_hole(board_after, sq, defender):
+        return None
+
+    # VETO 4: piece must not be trivially hanging (attacked and completely undefended)
+    if board_after.is_attacked_by(defender, sq) and not board_after.is_attacked_by(mover_color, sq):
+        return None
+
+    sq_name = chess.square_name(sq)
+    piece_name = PIECE_NAMES[piece.piece_type]
+    side = "White" if mover_color == chess.WHITE else "Black"
+    defender_side = "Black" if mover_color == chess.WHITE else "White"
+    evidence = (
+        f"{side}'s {piece_name} on {sq_name} occupies a permanent weak square — "
+        f"{defender_side} has no pawn that can ever challenge it there"
+    )
+    return {
+        "tag": "weak_square",
+        "square": sq_name,
+        "piece": piece_name,
+        "side": side,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1510,6 +1576,7 @@ GATED_TAGS = (
     "overloaded_piece",
     "compensation",
     "tempo_gain",
+    "weak_square",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -1629,5 +1696,9 @@ def certified_claims(
     ov = _safe(lambda: creates_overloaded(board_after))
     if ov is not None:
         tags.add("overloaded_piece")
+
+    ws = _safe(lambda: detect_weak_square(board_after, move, mover_color))
+    if ws is not None:
+        tags.add("weak_square")
 
     return tags

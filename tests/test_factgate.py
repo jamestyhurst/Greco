@@ -1672,3 +1672,91 @@ def test_is_tempo_pawn_plus_minor_certifies_on_minor():
     )
     assert result is not None
     assert result["square"] == "d5"  # certified on the non-pawn piece
+
+
+# --- is_hole / detect_weak_square -------------------------------------------
+# Position: White Knight on d5 (rank 4, file 3), no Black pawns on adjacent files.
+# Kings on h1 / h8 to satisfy chess.Board requirements.
+_HOLE_FEN        = "7k/8/8/3N4/8/8/8/7K w - - 0 1"
+_HOLE_MOVE       = chess.Move.from_uci("c3d5")   # arbitrary from_sq; only to_sq (d5) used
+_HOLE_BOARD      = chess.Board(_HOLE_FEN)
+
+# Position where Black HAS a pawn on c6 (can still challenge d5).
+_NO_HOLE_FEN     = "7k/8/2p5/3N4/8/8/8/7K w - - 0 1"
+_NO_HOLE_BOARD   = chess.Board(_NO_HOLE_FEN)
+
+# Position where the Black pawn on c4 has ALREADY PASSED the attack rank for d5.
+# A Black pawn at c4 (rank 3) cannot advance back to c6 (rank 5) to attack d5.
+_PASSED_HOLE_FEN  = "7k/8/8/3N4/2p5/8/8/7K w - - 0 1"
+_PASSED_HOLE_BOARD = chess.Board(_PASSED_HOLE_FEN)
+
+
+def test_is_hole_positive_no_enemy_pawns():
+    # d5 with no Black pawns on adjacent files at all — permanent hole.
+    assert F.is_hole(_HOLE_BOARD, chess.D5, chess.BLACK) is True
+
+
+def test_is_hole_negative_enemy_pawn_can_advance():
+    # Black pawn on c6 (rank 5 >= d5_rank+1=5) — can still challenge d5.
+    assert F.is_hole(_NO_HOLE_BOARD, chess.D5, chess.BLACK) is False
+
+
+def test_is_hole_positive_enemy_pawn_has_passed():
+    # Black pawn on c4 (rank 3 < 5) — already advanced past the attack rank.
+    assert F.is_hole(_PASSED_HOLE_BOARD, chess.D5, chess.BLACK) is True
+
+
+def test_detect_weak_square_positive_knight():
+    # White Knight on d5, no Black pawns on adjacent files.
+    result = F.detect_weak_square(_HOLE_BOARD, _HOLE_MOVE, chess.WHITE)
+    assert result is not None
+    assert result["tag"] == "weak_square"
+    assert result["square"] == "d5"
+    assert result["piece"] == "knight"
+    assert "permanent" in result["evidence"].lower()
+
+
+def test_detect_weak_square_positive_rook():
+    # White Rook on d5 — rooks (not just minors) benefit from a hole.
+    board = chess.Board("7k/8/8/3R4/8/8/8/7K w - - 0 1")
+    move  = chess.Move.from_uci("d1d5")
+    result = F.detect_weak_square(board, move, chess.WHITE)
+    assert result is not None
+    assert result["piece"] == "rook"
+
+
+def test_detect_weak_square_veto1_pawn():
+    # White Pawn on d5 — pawns cannot benefit from a hole.
+    board = chess.Board("7k/8/8/3P4/8/8/8/7K w - - 0 1")
+    move  = chess.Move.from_uci("d4d5")
+    assert F.detect_weak_square(board, move, chess.WHITE) is None
+
+
+def test_detect_weak_square_veto2_rank_not_advanced():
+    # White Knight on d3 (rank 2) — not in advanced territory.
+    board = chess.Board("7k/8/8/8/8/3N4/8/7K w - - 0 1")
+    move  = chess.Move.from_uci("c1d3")
+    assert F.detect_weak_square(board, move, chess.WHITE) is None
+
+
+def test_detect_weak_square_veto3_not_a_hole():
+    # Black pawn on c6 can still challenge d5 — NOT a hole.
+    move  = chess.Move.from_uci("c3d5")
+    assert F.detect_weak_square(_NO_HOLE_BOARD, move, chess.WHITE) is None
+
+
+def test_detect_weak_square_veto4_hanging():
+    # White Knight on d5 attacked by Black Rook c5, undefended — hanging; no certification.
+    board = chess.Board("7k/8/8/2rN4/8/8/8/7K w - - 0 1")
+    move  = chess.Move.from_uci("c3d5")
+    assert F.detect_weak_square(board, move, chess.WHITE) is None
+
+
+def test_detect_weak_square_integration_certified_claims():
+    # Full pipeline: White Knight c3 → d5; board_after has the Knight on d5 with no
+    # Black pawns on adjacent files → certified_claims must include "weak_square".
+    board_before = chess.Board("7k/8/8/8/8/2N5/8/7K w - - 0 1")
+    move         = chess.Move.from_uci("c3d5")
+    board_after  = chess.Board("7k/8/8/3N4/8/8/8/7K b - - 1 1")
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "weak_square" in tags

@@ -7,6 +7,16 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.33.0] — 2026-06-18
+
+### Added
+- **`factgate.is_hole(board, square, defender_color)`** — shared board-predicate helper extracted from `is_outpost`'s unchallengeable check. Returns `True` when `defender_color` has no pawn that can ever advance to attack `square` (permanent structural hole). Single source of truth now used by both `is_outpost` and `detect_weak_square`.
+- **`factgate.detect_weak_square(board_after, move, mover_color)`** — fourth Tier-B certified claim. Certifies that the moved piece (minor/rook/queen, not pawn/king) lands on a permanent hole in the opponent's pawn structure (ranks 4–6 for White, 3–5 for Black) and is not trivially hanging. VETOs: pawn/king; rank not advanced; opponent pawn can still challenge (`is_hole` returns False); piece is hanging. Evidence bundle `{tag, square, piece, side, evidence}`. `"weak_square"` added to `GATED_TAGS`; wired via `certified_claims()` (board-only, no engine data needed).
+- **`weak_square_evidence` serialized** as `d["weak_square_evidence"]` in narrator.py `_move_to_dict` Tier-1+ block.
+- **Narrator fact-gate clause** for `weak_square`: gates "hole"/"weak square" language to require the tag; emphasizes permanence ("a square no [side] pawn can ever challenge"); prohibits using `weak_square` vocabulary without the tag.
+- **`is_outpost` refactored** to use `is_hole` for the unchallengeable check — behavior unchanged, DRY achieved.
+- 10 new tests (191 total factgate, 442 across the full suite).
+
 ## [0.32.0] — 2026-06-18
 
 ### Added
