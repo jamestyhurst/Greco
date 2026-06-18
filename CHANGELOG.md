@@ -7,6 +7,26 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.17.0] — 2026-06-18
+
+### Added
+- **`render.yaml`** — Render Blueprint configuration for one-click deployment:
+  Python web service, free PostgreSQL database, 1 GB persistent disk for reports,
+  Stockfish installed via `apt-get`, Alembic migrations run in build step, env vars
+  for all secrets (`ANTHROPIC_API_KEY`, `GRECO_SECRET_KEY`, `GRECO_SMTP_*`, `DATABASE_URL`).
+- **`docs/DEPLOYMENT.md`** — step-by-step Render deploy guide covering Blueprint setup,
+  required secrets, architecture (database, Stockfish, persistent disk, costs),
+  migration workflow, secrets rotation, backups, and troubleshooting.
+
+### Changed
+- **`web/db.py`** — `_DB_URL` now reads `DATABASE_URL` env var first (PostgreSQL on
+  Render), falling back to local SQLite; `postgres://` is normalised to `postgresql://`
+  (Render's legacy prefix); `check_same_thread` is omitted for non-SQLite engines.
+- **`web/models.py`** + **migration 001** — removed `collation="NOCASE"` from the
+  `username` column; it is SQLite-specific and causes a DDL error on PostgreSQL. All
+  case-insensitive comparisons already go through `func.lower()` at query time.
+- **`requirements.txt`** — added `psycopg2-binary>=2.9` (PostgreSQL driver for Phase 7).
+
 ## [0.16.0] — 2026-06-18
 
 ### Added
