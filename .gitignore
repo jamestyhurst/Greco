@@ -50,3 +50,7 @@ software-skills-you-can-learn-from-greco.md
 
 # Desktop shortcut backups
 *.lnk.old-exe-backup
+
+# Handoff / session transfer documents (ephemeral; not part of the codebase)
+skill-install-handoff.md
+*-handoff.md
