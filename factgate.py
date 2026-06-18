@@ -292,6 +292,227 @@ def is_doubled_pawn(board: chess.Board, square: int, color: bool) -> Tuple[bool,
     })
 
 
+def _king_flights(board: chess.Board, king_sq: int, mover_color: bool) -> set:
+    """Survivable king-flight squares from king_sq, with the king removed from that square
+    so it cannot shield its own destination from enemy sliders (sole-blocker bug fix)."""
+    enemy = not mover_color
+    probe = board.copy()
+    probe.remove_piece_at(king_sq)
+    flights: set = set()
+    for s in board.attacks(king_sq):
+        if board.piece_at(s) is not None:
+            continue
+        if probe.is_attacked_by(enemy, s):
+            continue
+        flights.add(s)
+    return flights
+
+
+def is_luft(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies 'luft': a quiet pawn push on the king's own or adjacent file that newly
+    opens a survivable king-flight square. The core gate is the diff of king-flight sets
+    before and after the push; the king-removed survivability probe prevents false-safety
+    via the sole-blocker edge case (the king cannot shield its own destination from a slider).
+    """
+    # VETO 1: must be a pawn push, not a promotion
+    if move.promotion is not None:
+        return (False, None)
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.PAWN or piece.color != mover_color:
+        return (False, None)
+
+    # VETO 2: king exists
+    king_sq = board_after.king(mover_color)
+    if king_sq is None:
+        return (False, None)
+    king_sq_before = board_before.king(mover_color)
+    if king_sq_before is None:
+        return (False, None)
+
+    # VETO 3: not a capture (covers en passant)
+    if board_before.is_capture(move):
+        return (False, None)
+
+    # VETO 4: pawn file must be on the king's file or an adjacent file
+    if abs(chess.square_file(king_sq) - chess.square_file(move.from_square)) > 1:
+        return (False, None)
+
+    # CONFIRM 1: the push newly opens a survivable flight square
+    flights_before = _king_flights(board_before, king_sq_before, mover_color)
+    flights_after = _king_flights(board_after, king_sq, mover_color)
+    new = flights_after - flights_before
+    if not new:
+        return (False, None)
+
+    # CONFIRM 2 is subsumed by VETO 4 + CONFIRM 1 for all practical positions: any new
+    # survivable flight square is king-adjacent and the pawn was on the king's adjacent file.
+
+    was_boxed_in = len(flights_before) == 0
+    luft_squares = sorted(new)
+    king_sq_name = chess.square_name(king_sq)
+    to_name = chess.square_name(move.to_square)
+    luft_names = [chess.square_name(s) for s in luft_squares]
+
+    if was_boxed_in:
+        evidence = (
+            f"{to_name} makes luft for the king on {king_sq_name}, opening "
+            f"{', '.join(luft_names)} as an escape square and easing the back-rank threat"
+        )
+    else:
+        evidence = (
+            f"{to_name} gives the king on {king_sq_name} a flight square on "
+            f"{', '.join(luft_names)}"
+        )
+
+    return (True, {
+        "king_square": king_sq,
+        "king_color": mover_color,
+        "pawn_from": move.from_square,
+        "pawn_to": move.to_square,
+        "luft_squares": luft_squares,
+        "was_boxed_in": was_boxed_in,
+        "flights_before_count": len(flights_before),
+        "relative_pin_on_pawn": board_before.is_pinned(mover_color, move.from_square),
+        "evidence": evidence,
+    })
+
+
+def is_back_rank_weak(
+    board: chess.Board,
+    defending_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies 'back_rank_weakness' for the defending side: king on its first rank with
+    no genuine luft, and an enemy rook/queen bearing on or able to reach that rank. Run
+    twice per ply (for both colors) in certified_claims. Turn-independent except for the
+    in-check abstention guard which uses board.turn.
+
+    The tag certifies the VULNERABILITY, never a forced mate — mate is the eval/mate gate's job.
+    """
+    D = defending_color
+    E = not D
+    back_rank = 0 if D == chess.WHITE else 7
+    luft_rank = 1 if D == chess.WHITE else 6
+
+    # VETO 1: king must be on its own back rank
+    king_sq = board.king(D)
+    if king_sq is None or chess.square_rank(king_sq) != back_rank:
+        return (False, None)
+
+    # VETO 2: abstain only when it is D's king that is currently in check (live tactical state)
+    if board.is_check() and board.turn == D:
+        return (False, None)
+
+    # VETO 3: enemy must have at least one rook or queen
+    enemy_heavy = board.pieces(chess.ROOK, E) | board.pieces(chess.QUEEN, E)
+    if not enemy_heavy:
+        return (False, None)
+
+    # VETO 4: every forward escape square blocked or enemy-covered — one genuine escape vetoes
+    king_file = chess.square_file(king_sq)
+    blocked_escape: list = []
+    for f in (f for f in (king_file - 1, king_file, king_file + 1) if 0 <= f <= 7):
+        s = chess.square(f, luft_rank)
+        occ = board.piece_at(s)
+        if occ is not None:
+            if occ.color == D and occ.piece_type == chess.PAWN:
+                reason = "own pawn"
+            elif occ.color == D:
+                reason = "own piece"
+            else:
+                reason = "enemy piece"
+        elif board.is_attacked_by(E, s):
+            reason = "covered by the enemy"
+        else:
+            return (False, None)  # genuine luft: king is not back-rank-weak
+        blocked_escape.append((s, reason))
+
+    # CONFIRM 5 is implicit: surviving VETO 4 means every escape square is blocked.
+
+    # CONFIRM 6: heavy piece already bearing or reachable via open/half-open file
+    heavy_piece_bearing = False
+    heavy_pieces: list = []
+
+    for f in range(8):
+        back_sq = chess.square(f, back_rank)
+        for atk_sq in board.attackers(E, back_sq):
+            p = board.piece_at(atk_sq)
+            if p is not None and p.piece_type in (chess.ROOK, chess.QUEEN):
+                heavy_piece_bearing = True
+                if atk_sq not in heavy_pieces:
+                    heavy_pieces.append(atk_sq)
+
+    if not heavy_piece_bearing:
+        files = file_structure(board)
+        e_half_key = "half_open_white" if E == chess.WHITE else "half_open_black"
+        for heavy_sq in enemy_heavy:
+            fl = chess.FILE_NAMES[chess.square_file(heavy_sq)]
+            if fl not in files["open"] and fl not in files[e_half_key]:
+                continue
+            back_sq = chess.square(chess.square_file(heavy_sq), back_rank)
+            between_squares = chess.SquareSet(chess.between(heavy_sq, back_sq))
+            if all(board.piece_at(t) is None for t in between_squares):
+                if heavy_sq not in heavy_pieces:
+                    heavy_pieces.append(heavy_sq)
+
+    # Rule 3 guaranteed a heavy piece exists: certify even when heavy_pieces == []
+    # (piece present but blocked path → latent weakness, narrated as "latent").
+
+    # CONFIRM 7: back_rank_defended — flag only, never a veto
+    d_heavy = board.pieces(chess.ROOK, D) | board.pieces(chess.QUEEN, D)
+    king_attacks = board.attacks(king_sq)
+    back_rank_defended = False
+    for f in range(8):
+        bs = chess.square(f, back_rank)
+        if bs == king_sq:
+            continue
+        if bool(board.attackers(D, bs) & d_heavy):
+            back_rank_defended = True
+            break
+        if bs in king_attacks:
+            back_rank_defended = True
+            break
+
+    D_str = "White" if D == chess.WHITE else "Black"
+    king_sq_name = chess.square_name(king_sq)
+    rank_name = "first" if D == chess.WHITE else "eighth"
+    blocked_names = [chess.square_name(s) for s, _ in blocked_escape]
+
+    if heavy_piece_bearing and heavy_pieces:
+        p0 = board.piece_at(heavy_pieces[0])
+        piece_word = "rook" if p0 and p0.piece_type == chess.ROOK else "queen"
+        evidence_str = (
+            f"{D_str}'s king on {king_sq_name} has no luft — "
+            f"{', '.join(blocked_names)} sealed — "
+            f"and the enemy {piece_word} on {chess.square_name(heavy_pieces[0])} "
+            f"bears on the back rank, a standing back-rank weakness."
+        )
+    elif back_rank_defended:
+        evidence_str = (
+            f"{D_str}'s back rank is weak — the king on {king_sq_name} has no flight square — "
+            f"though it is currently held by a friendly piece."
+        )
+    else:
+        evidence_str = (
+            f"{D_str}'s king on {king_sq_name} is boxed in with no escape square; "
+            f"the weakness is latent until a rook reaches the {rank_name} rank."
+        )
+
+    return (True, {
+        "defending_color": D,
+        "king_square": king_sq,
+        "blocked_escape_squares": blocked_escape,
+        "heavy_pieces": heavy_pieces,
+        "heavy_piece_bearing": heavy_piece_bearing,
+        "back_rank_defended": back_rank_defended,
+        "evidence": evidence_str,
+    })
+
+
 def file_state(board: chess.Board, file_index: int, color: bool) -> str:
     """'open_file' / 'half_open_file' / '' for a file, delegating to the analyzer's
     file_structure so 'open'/'half-open' mean EXACTLY what the fact packet already says."""
@@ -426,6 +647,8 @@ GATED_TAGS = (
     "passed_pawn",
     "isolated_pawn",
     "doubled_pawn",
+    "luft",
+    "back_rank_weakness",
     "mate_in_one_threat",
     "battery",
     "promotion_threat",
@@ -499,6 +722,15 @@ def certified_claims(
     dp = _safe(lambda: is_doubled_pawn(board_after, move.to_square, mover_color))
     if dp and dp[0]:
         tags.add("doubled_pawn")
+
+    lf = _safe(lambda: is_luft(board_before, move, board_after, mover_color))
+    if lf and lf[0]:
+        tags.add("luft")
+
+    for D in (chess.WHITE, chess.BLACK):
+        brw = _safe(lambda D=D: is_back_rank_weak(board_after, D))
+        if brw and brw[0]:
+            tags.add("back_rank_weakness")
 
     bt = _safe(lambda: creates_battery(board_after, move, mover_color))
     if bt and bt[0]:

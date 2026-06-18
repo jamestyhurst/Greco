@@ -7,6 +7,19 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.21.0] — 2026-06-18
+
+### Added
+- **`factgate.is_luft()`** — certifies a quiet pawn push that newly opens a survivable
+  king-flight square. Uses a king-removed survivability probe to prevent false-safety via
+  the sole-blocker edge case. `was_boxed_in` flag distinguishes relieving a total smothering
+  from adding general air. 8 new tests.
+- **`factgate.is_back_rank_weak()`** — certifies a back-rank weakness (per defending side):
+  king on its first rank with no genuine luft and an enemy heavy piece bearing or able to
+  reach that rank. Run for both colors per ply. Evidence string is mate-free (vulnerability
+  only). 8 new tests; evidence no-mate-words assertion.
+- Both tags added to `GATED_TAGS`; narrator whitelist sentence updated.
+
 ## [0.20.0] — 2026-06-18
 
 ### Added
