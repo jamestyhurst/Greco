@@ -47,7 +47,7 @@ def bypass_auth(monkeypatch):
         return _FAKE_USER
 
     monkeypatch.setattr(web_main, "get_current_user", _fake_current_user)
-    monkeypatch.setattr(analysis, "create_report_ownership", lambda rid, uid: None)
+    monkeypatch.setattr(analysis, "create_report_ownership", lambda rid, uid, **kw: None)
     app.dependency_overrides[require_login] = lambda: _FAKE_USER
     yield
     app.dependency_overrides.pop(require_login, None)

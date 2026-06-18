@@ -7,6 +7,34 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-06-18
+
+### Added
+- **Greco Online Phase 5 — My Reports + Admin dashboard** (target v0.14).
+  Users can now view a history of their past analyses; admins can see all
+  users and their report counts.
+  - `GET /my-reports` — logged-in user's report history (newest first),
+    showing game title and Open/Download links for each.
+  - `GET /admin/users` — admin-only view: all registered users with email,
+    role badge, and report count. Returns 403 for non-admin users.
+  - `web/routers/dashboard.py` — new router for both routes.
+  - `web/templates.py` — `_DASHBOARD` template (report list table with
+    wine/ivory/gold theme and responsive navigation) and `_ADMIN_USERS`
+    template (user table with role badges).
+  - Alembic migration `002` — `ALTER TABLE report_ownership ADD COLUMN
+    base TEXT` (nullable) so each record stores the game title (e.g.,
+    "Fischer vs Spassky") without parsing HTML filenames.
+  - `web/models.py` and `web/db.py` — `ReportOwnership.base` field;
+    `create_report_ownership(rid, uid, base=None)` updated; new
+    `get_user_reports()` and `get_all_reports()` functions.
+  - `web/routers/analysis.py` — passes `base=result.base` to
+    `create_report_ownership` when an analysis completes.
+  - `web/main.py` — dashboard router registered.
+  - Main form footer — "My Reports" link added.
+  - `tests/test_dashboard.py` — 9 new tests (empty list, own reports only,
+    isolation between users, admin/non-admin access control).
+  - 239 tests pass total.
+
 ## [0.13.0] — 2026-06-18
 
 ### Added

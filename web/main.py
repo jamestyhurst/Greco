@@ -23,6 +23,7 @@ from web.config import resolve_settings
 from web.db import init_db
 from web.routers import analysis
 from web.routers import auth as auth_router
+from web.routers import dashboard as dashboard_router
 from web import ngrok_tunnel
 from web.templates import render_form
 
@@ -53,6 +54,7 @@ app.add_middleware(SessionMiddleware, secret_key=_s.secret_key, https_only=False
 
 app.include_router(analysis.router)
 app.include_router(auth_router.router)
+app.include_router(dashboard_router.router)
 
 
 # ---------------------------------------------------------------------------

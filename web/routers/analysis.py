@@ -60,7 +60,7 @@ def _run_background(job_id: str, owner_id: Optional[int] = None, **kwargs) -> No
     try:
         result = run_analysis(**kwargs)
         if owner_id is not None:
-            create_report_ownership(result.rid, owner_id)
+            create_report_ownership(result.rid, owner_id, base=result.base)
         _registry.update(job_id, status=JobStatus.DONE, report_id=result.rid)
     except Exception as exc:
         _log.exception("Background job %s failed", job_id)

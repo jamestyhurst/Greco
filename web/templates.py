@@ -103,7 +103,7 @@ _FORM = Template("""<!doctype html><html lang="en"><head>
     <button id="go" type="submit">Analyze game</button>
     <p class="hint">Runs on your computer. Analysis takes ~1&ndash;3 minutes; keep this tab open.</p>
   </form>
-  <p class="foot">Greco Online &middot; v{{ version }}. Interactive API docs at <a href="/docs">/docs</a>. Logged in as <b>{{ username }}</b> &middot; <form style="display:inline" method="post" action="/auth/logout"><button type="submit" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:.78rem;padding:0;text-decoration:underline;">Log out</button></form></p>
+  <p class="foot">Greco Online &middot; v{{ version }}. <a href="/my-reports" style="color:var(--gold);">My Reports</a> &middot; <a href="/docs" style="color:var(--gold);">API docs</a> &middot; Logged in as <b>{{ username }}</b> &middot; <form style="display:inline" method="post" action="/auth/logout"><button type="submit" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:.78rem;padding:0;text-decoration:underline;">Log out</button></form></p>
 </div>
 <div id="overlay"><div><h2>Analyzing&hellip;</h2>
   <p class="sub">Stockfish is evaluating every move and Claude is writing the report.<br>This can take a minute or two &mdash; keep this tab open.</p></div></div>
@@ -317,6 +317,113 @@ _AUTH = Template("""<!doctype html><html lang="en"><head>
   </p>
   <p class="foot">Greco Online &middot; v{{ version }}</p>
 </div></body></html>""")
+
+
+_DASHBOARD = Template("""<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Reports &mdash; Greco</title><style>{{ base_css|safe }}
+.tbl{width:100%;border-collapse:collapse;font-size:.9rem;}
+.tbl th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--gold);color:var(--wine-dark);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+.tbl td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl a{color:var(--wine-dark);font-weight:700;text-decoration:none;}
+.tbl a:hover{text-decoration:underline;}
+.empty{color:var(--muted);font-size:.92rem;margin:20px 0;}
+.nav{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+</style></head><body>
+<div class="wrap">
+  <h1>&#9818; Greco</h1>
+  <p class="sub">My Reports &mdash; logged in as <b>{{ username }}</b>
+    {% if is_admin %}&nbsp;<span style="color:var(--gold);font-size:.78rem;">[admin]</span>{% endif %}
+  </p>
+  <div class="nav">
+    <a class="btn go" href="/">&#43; Analyze a game</a>
+    {% if is_admin %}<a class="btn alt" href="/admin/users">&#128100; Admin: users</a>{% endif %}
+    <form method="post" action="/auth/logout" style="margin:0;">
+      <button type="submit" style="background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-family:inherit;">Log out</button>
+    </form>
+  </div>
+  {% if reports %}
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Game</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for r in reports %}
+        <tr>
+          <td style="color:var(--muted);font-size:.8rem;">{{ r.report_id }}</td>
+          <td><a href="/report/{{ r.report_id }}" target="_blank">{{ r.base or "Report #" ~ r.report_id }}</a></td>
+          <td>
+            <a href="/report/{{ r.report_id }}" target="_blank" class="btn go" style="padding:5px 12px;font-size:.8rem;display:inline-block;width:auto;">Open</a>
+            &nbsp;<a href="/report/{{ r.report_id }}/shareable" class="btn alt" style="padding:5px 12px;font-size:.8rem;display:inline-block;width:auto;">Download</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card"><p class="empty">No reports yet. <a href="/">Analyze a game</a> to get started.</p></div>
+  {% endif %}
+  <p class="foot">Greco Online &middot; v{{ version }}</p>
+</div></body></html>""")
+
+
+_ADMIN_USERS = Template("""<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin: Users &mdash; Greco</title><style>{{ base_css|safe }}
+.tbl{width:100%;border-collapse:collapse;font-size:.9rem;}
+.tbl th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--gold);color:var(--wine-dark);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+.tbl td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.75rem;font-weight:700;}
+.badge-admin{background:#d4af37;color:#3a2a1a;}
+.badge-user{background:#d9c7a0;color:#5b4a1e;}
+.nav{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+</style></head><body>
+<div class="wrap">
+  <h1>&#9818; Greco Admin</h1>
+  <p class="sub">All registered users &mdash; logged in as <b>{{ admin_username }}</b></p>
+  <div class="nav">
+    <a class="btn alt" href="/my-reports">&#8592; My Reports</a>
+    <a class="btn go" href="/">&#43; Analyze a game</a>
+    <form method="post" action="/auth/logout" style="margin:0;">
+      <button type="submit" style="background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-family:inherit;">Log out</button>
+    </form>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Reports</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td style="color:var(--muted);font-size:.8rem;">{{ u.id }}</td>
+          <td><b>{{ u.username }}</b></td>
+          <td style="color:var(--muted);">{{ u.email }}</td>
+          <td><span class="badge badge-{{ u.role }}">{{ u.role }}</span></td>
+          <td>{{ counts.get(u.id, 0) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="foot">{{ users|length }} user(s) total &middot; Greco Online v{{ version }}</p>
+</div></body></html>""")
+
+
+def render_dashboard(user, reports) -> str:
+    return _DASHBOARD.render(
+        base_css=BASE_CSS, version=__version__,
+        username=user.username, is_admin=user.is_admin,
+        reports=reports,
+    )
+
+
+def render_admin_users(admin_user, users, counts: dict) -> str:
+    return _ADMIN_USERS.render(
+        base_css=BASE_CSS, version=__version__,
+        admin_username=admin_user.username,
+        users=users, counts=counts,
+    )
 
 
 def render_auth(

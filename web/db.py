@@ -115,12 +115,15 @@ def get_user_password_hash(user_id: int) -> Optional[str]:
 # Report ownership
 # ---------------------------------------------------------------------------
 
-def create_report_ownership(report_id: int, user_id: int) -> None:
+def create_report_ownership(
+    report_id: int, user_id: int, base: Optional[str] = None
+) -> None:
     with SessionLocal() as session:
         # INSERT OR IGNORE equivalent: skip if already exists
         existing = session.get(ReportOwnership, report_id)
         if existing is None:
-            session.add(ReportOwnership(report_id=report_id, user_id=user_id))
+            session.add(ReportOwnership(report_id=report_id,
+                                        user_id=user_id, base=base))
             session.commit()
 
 
@@ -137,4 +140,22 @@ def get_user_report_ids(user_id: int) -> List[int]:
             .where(ReportOwnership.user_id == user_id)
             .order_by(ReportOwnership.report_id.desc())
         )
+        return list(session.scalars(stmt).all())
+
+
+def get_user_reports(user_id: int) -> List[ReportOwnership]:
+    """Return all ReportOwnership rows for a user, newest first."""
+    with SessionLocal() as session:
+        stmt = (
+            select(ReportOwnership)
+            .where(ReportOwnership.user_id == user_id)
+            .order_by(ReportOwnership.report_id.desc())
+        )
+        return list(session.scalars(stmt).all())
+
+
+def get_all_reports() -> List[ReportOwnership]:
+    """Return all ReportOwnership rows across all users (admin use)."""
+    with SessionLocal() as session:
+        stmt = select(ReportOwnership).order_by(ReportOwnership.report_id.desc())
         return list(session.scalars(stmt).all())
