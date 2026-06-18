@@ -310,8 +310,9 @@ updates are instant and every user is on the same version.
   general-principles books as low-priority. Tracked in `knowledge/SHOPPING_LIST.md`.
 
 ## Working conventions
-- **Versioning:** bump PATCH for fixes, MINOR for new features, MAJOR for big/breaking
-  changes; record every change in `CHANGELOG.md`.
+- **Versioning:** `feat:` and `fix:` → PATCH; `release:` → MINOR (use deliberately for
+  meaningful milestones — completing a phase, a named feature set); MAJOR for breaking
+  changes. Record every change in `CHANGELOG.md`.
 - **Backups:** local git is the source of truth; `E:\Chess\Greco` is a mirror. (A private
   GitHub remote is an option for off-site backup, and becomes the natural home for the code
   once Greco is hosted online.)

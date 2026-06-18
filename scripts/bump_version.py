@@ -13,11 +13,16 @@ Which digit gets bumped (the highest-priority commit since the last tag wins):
 
     commit subject / marker        ->  digit bumped
     ---------------------------------------------------------
-    "type!:"  or  "BREAKING CHANGE" in the body   ->  MAJOR  (resets the rest to 0)
-    feat:                                          ->  MINOR  (resets PATCH, MICRO)
-    fix:                                           ->  PATCH  (resets MICRO)
-    micro:                                         ->  MICRO  (+1)
+    "type!:"  or  "BREAKING CHANGE" in the body   ->  MAJOR   (resets the rest to 0)
+    release:                                       ->  MINOR   (resets PATCH, MICRO)
+    feat:                                          ->  PATCH   (resets MICRO)
+    fix:                                           ->  PATCH   (resets MICRO)
+    micro:                                         ->  MICRO   (+1)
     docs / refactor / test / chore / anything else ->  no change
+
+Use "release:" deliberately when a batch of recent "feat:" commits adds up to a
+meaningful product milestone (completing a phase, shipping a named feature set).
+Individual features and fixes use "feat:" / "fix:" and produce PATCH bumps.
 
 Usage:
     python scripts/bump_version.py            # DRY RUN — just shows what it would do
@@ -51,7 +56,7 @@ VERSION_FILE = REPO / "version.py"
 # Bump levels, ordered. Higher number = bigger change.
 NONE, MICRO, PATCH, MINOR, MAJOR = 0, 1, 2, 3, 4
 LEVEL_NAME = {NONE: "none", MICRO: "MICRO", PATCH: "PATCH", MINOR: "MINOR", MAJOR: "MAJOR"}
-TYPE_LEVEL = {"feat": MINOR, "fix": PATCH, "micro": MICRO}
+TYPE_LEVEL = {"release": MINOR, "feat": PATCH, "fix": PATCH, "micro": MICRO}
 
 # Matches a Conventional-Commit prefix: "type:", "type(scope):", or "type!:".
 _TYPE_RE = re.compile(r"^(?P<type>[a-zA-Z]+)(?:\([^)]*\))?(?P<bang>!)?:")
