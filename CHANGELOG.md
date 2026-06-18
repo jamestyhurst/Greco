@@ -7,6 +7,21 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.22.0] — 2026-06-18
+
+### Added
+- **`analyzer.detect_pin()`** — detects absolute and relative pins by the mover's sliding
+  pieces. 9-rule veto-then-confirm per the spec at `docs/specs/predicates/01-pin.md`:
+  hanging-guard (rule 2), ray-type gate + unit step (rule 4), clear-line defensive assert
+  (rule 5), edge-safe ray walk past the front piece (rule 6, prevents board-edge wrap),
+  and value/king classifier (rule 8). Returns a full evidence bundle with attacker,
+  pinned, and behind squares/pieces, line type, coord, and a ready-to-quote string.
+- **`factgate.creates_pin()`** — thin wrapper; `"pin"` registered in `GATED_TAGS` and
+  wired into `certified_claims()`. Narrator whitelist updated with absolute/relative
+  framing guidance.
+- 12 new tests covering all 6 spec positive examples (including pawn-as-front-piece) and
+  5 negative cases (skewer, equal-value rear, hanging pinner, own-piece rear). 328/328.
+
 ## [0.21.0] — 2026-06-18
 
 ### Added
