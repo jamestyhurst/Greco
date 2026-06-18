@@ -417,6 +417,139 @@ def detect_royal_alignment(board: chess.Board, mover_color: bool) -> Optional[st
     return None
 
 
+def detect_pin(board: chess.Board, mover_color: bool) -> Optional[dict]:
+    """Detect an absolute or relative pin by the mover's sliding pieces on board_after.
+
+    Returns an evidence dict for the first certified (attacker, front, rear) triple, or
+    None. Rules follow docs/specs/predicates/01-pin.md (9-rule veto-then-confirm).
+    """
+    opp = not mover_color
+
+    # Rule 1: no sliding attacker → abstain immediately
+    attacker_squares = (
+        board.pieces(chess.BISHOP, mover_color)
+        | board.pieces(chess.ROOK, mover_color)
+        | board.pieces(chess.QUEEN, mover_color)
+    )
+    if not attacker_squares:
+        return None
+
+    for attacker_sq in attacker_squares:
+        attacker_piece = board.piece_at(attacker_sq)
+        if attacker_piece is None:
+            continue
+        attacker_type = attacker_piece.piece_type
+
+        # Rule 2: skip if THIS attacker is hanging (attacked and undefended)
+        if (board.is_attacked_by(opp, attacker_sq)
+                and not board.is_attacked_by(mover_color, attacker_sq)):
+            continue
+
+        # Rule 3: candidate front pieces = enemy non-king pieces this attacker attacks
+        for front_sq in board.attacks(attacker_sq):
+            front_piece = board.piece_at(front_sq)
+            if front_piece is None:
+                continue
+            if front_piece.color != opp:
+                continue
+            if front_piece.piece_type == chess.KING:
+                continue  # giving check is not a pin
+
+            # Rule 4: ray-type gate + compute unit step (df, dr)
+            af, ar = chess.square_file(attacker_sq), chess.square_rank(attacker_sq)
+            ff, fr = chess.square_file(front_sq), chess.square_rank(front_sq)
+            df = (ff > af) - (ff < af)
+            dr = (fr > ar) - (fr < ar)
+
+            if attacker_type == chess.ROOK:
+                if df != 0 and dr != 0:
+                    continue  # rook cannot pin along a diagonal
+            elif attacker_type == chess.BISHOP:
+                if df == 0 or dr == 0:
+                    continue  # bishop cannot pin along a rank or file
+
+            # Rule 5: clear line attacker→front (defensive assertion)
+            if any(
+                board.piece_at(s) is not None
+                for s in chess.SquareSet(chess.between(attacker_sq, front_sq))
+            ):
+                continue
+
+            # Rule 6: edge-safe ray walk past the front piece to find the rear
+            rear_sq = None
+            cur_f = ff + df
+            cur_r = fr + dr
+            while 0 <= cur_f <= 7 and 0 <= cur_r <= 7:
+                sq = chess.square(cur_f, cur_r)
+                if board.piece_at(sq) is not None:
+                    rear_sq = sq
+                    break
+                cur_f += df
+                cur_r += dr
+
+            if rear_sq is None:
+                continue
+
+            # Rule 7: rear must be an enemy piece
+            rear_piece = board.piece_at(rear_sq)
+            if rear_piece is None or rear_piece.color != opp:
+                continue
+
+            # Rule 8: classify absolute vs relative; else veto
+            if rear_piece.piece_type == chess.KING:
+                kind = "absolute"
+            elif PIECE_VALUES[rear_piece.piece_type] > PIECE_VALUES[front_piece.piece_type]:
+                kind = "relative"
+            else:
+                continue  # equal or lesser rear value — no prohibitive consequence
+
+            # Build evidence bundle
+            if df == 0:
+                line = "file"
+                coord = chess.FILE_NAMES[ff]  # same file: ff == af
+            elif dr == 0:
+                line = "rank"
+                coord = chess.RANK_NAMES[fr]  # same rank: fr == ar
+            else:
+                line = "diagonal"
+                coord = chess.FILE_NAMES[af]  # anchor by the attacker's file
+
+            attacker_name = PIECE_NAMES[attacker_type]
+            front_name = PIECE_NAMES[front_piece.piece_type]
+            rear_name = PIECE_NAMES[rear_piece.piece_type]
+            asq_name = chess.square_name(attacker_sq)
+            fsq_name = chess.square_name(front_sq)
+            rsq_name = chess.square_name(rear_sq)
+
+            if kind == "absolute":
+                evidence_str = (
+                    f"your {attacker_name} on {asq_name} pins the {front_name} on {fsq_name}"
+                    f" to the king on {rsq_name} along the {coord}-{line}"
+                    f" — an absolute pin (the {front_name} cannot legally move)"
+                )
+            else:
+                evidence_str = (
+                    f"your {attacker_name} on {asq_name} pins the {front_name} on {fsq_name}"
+                    f" against the {rear_name} on {rsq_name} along the {coord}-{line}"
+                    f" — a relative pin (moving the {front_name} loses the {rear_name})"
+                )
+
+            return {
+                "kind": kind,
+                "attacker_square": asq_name,
+                "attacker_piece": attacker_name,
+                "pinned_square": fsq_name,
+                "pinned_piece": front_name,
+                "behind_square": rsq_name,
+                "behind_piece": rear_name,
+                "line": line,
+                "coord": coord,
+                "evidence": evidence_str,
+            }
+
+    return None
+
+
 def _doubled_files(board: chess.Board, color: bool):
     counts: Dict[int, int] = {}
     for sq in board.pieces(chess.PAWN, color):

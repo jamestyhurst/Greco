@@ -533,3 +533,119 @@ def test_back_rank_weak_in_certified_claims():
     # White king on e1 after move — still on back rank, both rook bearing → tags fire.
     tags = F.certified_claims(b, mv, a, chess.WHITE)
     assert "back_rank_weakness" in tags
+
+
+# --- creates_pin ------------------------------------------------------------
+
+def test_pin_true_absolute_bishop_knight_king():
+    # Spec §3 example 1: bishop b5 pins black knight c6 to black king e8
+    board = chess.Board("4k3/8/2n5/1B6/8/8/8/4K3 w - - 0 1")
+    ok, ev = F.creates_pin(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "absolute"
+    assert ev["attacker_piece"] == "bishop"
+    assert ev["pinned_piece"] == "knight"
+    assert ev["behind_piece"] == "king"
+    assert ev["line"] == "diagonal"
+
+
+def test_pin_true_relative_bishop_knight_queen():
+    # Spec §3 example 2: bishop g5 pins black knight f6 to black queen d8
+    board = chess.Board("3qk3/8/5n2/6B1/8/8/8/4K3 w - - 0 1")
+    ok, ev = F.creates_pin(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "relative"
+    assert ev["pinned_piece"] == "knight"
+    assert ev["behind_piece"] == "queen"
+    assert ev["line"] == "diagonal"
+
+
+def test_pin_true_relative_rook_knight_rook_file():
+    # Spec §3 example 3: rook c1 pins black knight c3 to black rook c8 on c-file
+    board = chess.Board("2r1k3/8/8/8/8/2n5/8/2RK4 w - - 0 1")
+    ok, ev = F.creates_pin(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "relative"
+    assert ev["pinned_piece"] == "knight"
+    assert ev["behind_piece"] == "rook"
+    assert ev["line"] == "file"
+
+
+def test_pin_true_absolute_rook_bishop_king_file():
+    # Spec §3 example 4: rook d1 pins black bishop d3 to black king d8 on d-file
+    board = chess.Board("3k4/8/8/8/8/3b4/8/3RK3 w - - 0 1")
+    ok, ev = F.creates_pin(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "absolute"
+    assert ev["pinned_piece"] == "bishop"
+    assert ev["behind_piece"] == "king"
+    assert ev["line"] == "file"
+
+
+def test_pin_true_relative_queen_knight_rook_rank():
+    # Spec §3 example 5: queen a4 pins black knight c4 to black rook e4 on 4th rank
+    board = chess.Board("4k3/8/8/8/Q1n1r3/8/8/4K3 w - - 0 1")
+    ok, ev = F.creates_pin(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "relative"
+    assert ev["pinned_piece"] == "knight"
+    assert ev["behind_piece"] == "rook"
+    assert ev["line"] == "rank"
+
+
+def test_pin_true_absolute_pawn_as_front():
+    # Spec §3 example 6: rook e1 pins black pawn e6 to black king e8 — pawn as front
+    board = chess.Board("4k3/8/4p3/8/8/8/8/4R1K1 w - - 0 1")
+    ok, ev = F.creates_pin(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "absolute"
+    assert ev["pinned_piece"] == "pawn"
+    assert ev["behind_piece"] == "king"
+
+
+def test_pin_false_skewer_queen_in_front():
+    # Rook d1 → black queen d3 → black rook d8: PIECE_VALUES[rook](5) > PIECE_VALUES[queen](9) is False
+    board = chess.Board("3r2k1/8/8/8/8/3q4/8/3RK3 w - - 0 1")
+    ok, _ = F.creates_pin(board, chess.WHITE)
+    assert ok is False
+
+
+def test_pin_false_equal_value_rear():
+    # Bishop g5 → black knight f6 → black bishop e7: 3 > 3 is False — spec §4 example 2
+    board = chess.Board("4k3/4b3/5n2/6B1/8/8/8/4K3 w - - 0 1")
+    ok, _ = F.creates_pin(board, chess.WHITE)
+    assert ok is False
+
+
+def test_pin_false_hanging_pinner():
+    # Bishop b5 attacked by pawn a6 (diagonal), not defended — rule 2 fires, pin illusory
+    board = chess.Board("4k3/8/p1n5/1B6/8/8/8/4K3 w - - 0 1")
+    ok, _ = F.creates_pin(board, chess.WHITE)
+    assert ok is False
+
+
+def test_pin_false_own_piece_as_rear():
+    # Rook d1 → black knight d3 → white pawn d5: rear is mover's own piece, rule 7 fires
+    board = chess.Board("3k4/8/8/3P4/8/3n4/8/3RK3 w - - 0 1")
+    ok, _ = F.creates_pin(board, chess.WHITE)
+    assert ok is False
+
+
+def test_pin_evidence_bundle_keys():
+    # All documented evidence bundle keys must be present
+    board = chess.Board("4k3/8/2n5/1B6/8/8/8/4K3 w - - 0 1")
+    ok, ev = F.creates_pin(board, chess.WHITE)
+    assert ok
+    for key in ("kind", "attacker_square", "attacker_piece", "pinned_square",
+                "pinned_piece", "behind_square", "behind_piece", "line", "coord", "evidence"):
+        assert key in ev, f"missing evidence key: {key}"
+    assert ev["kind"] in ("absolute", "relative")
+    assert ev["line"] in ("file", "rank", "diagonal")
+    assert "pins" in ev["evidence"]
+
+
+def test_pin_in_certified_claims():
+    # Bishop moves c4→b5, creating absolute pin of c6 knight to e8 king
+    b, mv, a = _push("4k3/8/2n5/8/2B5/8/8/4K3 w - - 0 1", "c4b5")
+    tags = F.certified_claims(b, mv, a, chess.WHITE)
+    assert "pin" in tags

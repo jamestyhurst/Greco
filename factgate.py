@@ -39,6 +39,7 @@ import chess
 
 from analyzer import (  # pure board helpers — none touch Stockfish or the API key
     detect_double_attack,
+    detect_pin,
     detect_royal_alignment,
     file_structure,
 )
@@ -633,6 +634,17 @@ def sets_up_royal_pin(
     return (result is not None, result)
 
 
+def creates_pin(
+    board_after: chess.Board, mover_color: bool
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies a 'pin': mover's sliding piece pins an enemy piece absolutely (king rear)
+    or relatively (front piece less valuable than rear). Wraps analyzer.detect_pin which
+    enforces: hanging guard, ray-type gate, clear line, edge-safe rear walk, and
+    value/king classifier. Evidence dict is the full bundle from detect_pin."""
+    result = detect_pin(board_after, mover_color)
+    return (result is not None, result)
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -642,6 +654,7 @@ def sets_up_royal_pin(
 GATED_TAGS = (
     "fork",
     "royal_pin_setup",
+    "pin",
     "rook_lift",
     "outpost",
     "passed_pawn",
@@ -707,6 +720,10 @@ def certified_claims(
     rp = _safe(lambda: sets_up_royal_pin(board_after, mover_color))
     if rp and rp[0]:
         tags.add("royal_pin_setup")
+
+    pn = _safe(lambda: creates_pin(board_after, mover_color))
+    if pn and pn[0]:
+        tags.add("pin")
 
     op = _safe(lambda: is_outpost(board_after, move.to_square, mover_color))
     if op and op[0]:
