@@ -1625,6 +1625,81 @@ def is_zwischenzug(
 
 
 # --------------------------------------------------------------------------- #
+# Space advantage (board-only — goes in certified_claims).
+# --------------------------------------------------------------------------- #
+_SPACE_ADVANTAGE_THRESHOLD = 4   # minimum pawn-space lead to certify
+_SPACE_ADVANTAGE_MIN_PAWNS = 4   # minimum total pawn count (barren positions excluded)
+
+
+def _pawn_space_score(board: chess.Board, color: bool) -> int:
+    """Sum of rank-advancement for every pawn of `color` beyond its starting rank.
+    White pawn at rank-index r: max(0, r−1) [rank 2 = 0, rank 7 = 5].
+    Black pawn at rank-index r: max(0, 6−r) [rank 7 = 0, rank 2 = 5].
+    """
+    total = 0
+    for sq in board.pieces(chess.PAWN, color):
+        r = chess.square_rank(sq)
+        total += max(0, r - 1) if color == chess.WHITE else max(0, 6 - r)
+    return total
+
+
+def detect_space_advantage(
+    board: chess.Board, mover_color: bool
+) -> Optional[dict]:
+    """Certifies 'space_advantage': the mover's pawn chain is more advanced than
+    the opponent's — measured by a per-pawn rank-advancement score. Requires at
+    least 4 total pawns and a lead of ≥ 4 score points to avoid false positives
+    in barren endings or marginally unequal positions.
+    """
+    enemy = not mover_color
+
+    # VETO 1: too few pawns — space is meaningless in near-pawnless positions
+    mover_pawns = board.pieces(chess.PAWN, mover_color)
+    enemy_pawns = board.pieces(chess.PAWN, enemy)
+    if len(mover_pawns) + len(enemy_pawns) < _SPACE_ADVANTAGE_MIN_PAWNS:
+        return None
+
+    mover_score = _pawn_space_score(board, mover_color)
+    enemy_score = _pawn_space_score(board, enemy)
+    lead = mover_score - enemy_score
+
+    # VETO 2: lead not significant enough
+    if lead < _SPACE_ADVANTAGE_THRESHOLD:
+        return None
+
+    side = "White" if mover_color == chess.WHITE else "Black"
+    enemy_side = "Black" if mover_color == chess.WHITE else "White"
+
+    # Name the most advanced pawns (up to 3) for the evidence string
+    pawn_sqs = sorted(
+        mover_pawns,
+        key=lambda s: chess.square_rank(s) if mover_color == chess.WHITE else -chess.square_rank(s),
+        reverse=True,
+    )
+    adv_names = [chess.square_name(s) for s in pawn_sqs[:3]]
+    if len(adv_names) == 1:
+        pawn_desc = f"pawn on {adv_names[0]}"
+    elif len(adv_names) == 2:
+        pawn_desc = f"pawns on {adv_names[0]} and {adv_names[1]}"
+    else:
+        pawn_desc = f"pawns on {', '.join(adv_names[:-1])} and {adv_names[-1]}"
+
+    evidence = (
+        f"{side}'s {pawn_desc} give {side} a space advantage "
+        f"(pawn-space score {mover_score} vs {enemy_side}'s {enemy_score})"
+    )
+    return {
+        "tag": "space_advantage",
+        "side": side,
+        "mover_score": mover_score,
+        "enemy_score": enemy_score,
+        "lead": lead,
+        "advanced_pawns": adv_names,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Initiative — checking sequence (PV-dependent, wired in narrator._move_to_dict).
 # --------------------------------------------------------------------------- #
 def is_initiative(
@@ -1719,6 +1794,7 @@ GATED_TAGS = (
     "weak_square",
     "zwischenzug",
     "initiative",
+    "space_advantage",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -1846,5 +1922,9 @@ def certified_claims(
     zw = _safe(lambda: is_zwischenzug(board_before, move, board_after, mover_color))
     if zw is not None:
         tags.add("zwischenzug")
+
+    sa = _safe(lambda: detect_space_advantage(board_after, mover_color))
+    if sa is not None:
+        tags.add("space_advantage")
 
     return tags

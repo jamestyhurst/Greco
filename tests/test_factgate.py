@@ -1871,3 +1871,59 @@ def test_is_initiative_veto5_followup_not_check():
     # Second move in PV is not a check (no '+').
     result = F.is_initiative(_INIT_CHECK_FEN, "1... Ke7 2. Rd6", chess.WHITE)
     assert result is None
+
+
+# --- detect_space_advantage --------------------------------------------------
+# White pawns c5, d5, e5 (score 3+3+3=9) vs Black d6, e6, f7 (score 1+1+0=2); lead=7.
+_SA_WHITE_FEN = "4k3/5p2/3pp3/2PPP3/8/8/8/4K3 w - - 0 1"
+# Black pawns c6, d6, e6 (score 1+1+1=3), c5, d5 (score 2+2=4) = 7; White d4 (score 2); lead=5.
+_SA_BLACK_FEN = "4k3/8/2ppp3/2pp4/3P4/8/8/4K3 w - - 0 1"
+
+
+def test_detect_space_advantage_positive_white():
+    board = chess.Board(_SA_WHITE_FEN)
+    result = F.detect_space_advantage(board, chess.WHITE)
+    assert result is not None
+    assert result["tag"] == "space_advantage"
+    assert result["side"] == "White"
+    assert result["lead"] >= 4
+
+
+def test_detect_space_advantage_positive_keys_present():
+    board = chess.Board(_SA_WHITE_FEN)
+    result = F.detect_space_advantage(board, chess.WHITE)
+    assert result is not None
+    for key in ("tag", "side", "mover_score", "enemy_score", "lead", "advanced_pawns", "evidence"):
+        assert key in result, f"missing key: {key}"
+
+
+def test_detect_space_advantage_veto1_too_few_pawns():
+    # Only 1 White pawn, 0 Black pawns — total < 4.
+    board = chess.Board("4k3/8/8/2P5/8/8/8/4K3 w - - 0 1")
+    assert F.detect_space_advantage(board, chess.WHITE) is None
+
+
+def test_detect_space_advantage_veto2_insufficient_lead():
+    # White d5 (score 3) vs Black d6, d7, e7 (scores 1+0+0=1); lead=2 < 4.
+    board = chess.Board("4k3/3pp3/3p4/3P4/8/8/8/4K3 w - - 0 1")
+    result = F.detect_space_advantage(board, chess.WHITE)
+    assert result is None
+
+
+def test_detect_space_advantage_negative_when_opponent_leads():
+    # Black has more advanced pawns; White returns None, Black returns not-None.
+    board = chess.Board(_SA_BLACK_FEN)
+    assert F.detect_space_advantage(board, chess.WHITE) is None
+    result_black = F.detect_space_advantage(board, chess.BLACK)
+    assert result_black is not None
+    assert result_black["side"] == "Black"
+
+
+def test_detect_space_advantage_integration_certified_claims():
+    # Pawn push e4→e5 creates the three-pawn centre; "space_advantage" must appear.
+    board_before = chess.Board("4k3/5p2/3pp3/2PP4/4P3/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("e4e5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "space_advantage" in tags

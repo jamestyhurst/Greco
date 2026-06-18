@@ -7,6 +7,13 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.36.0] — 2026-06-18
+
+### Added
+- **`factgate.detect_space_advantage(board, mover_color)`** — seventh Tier-B certified claim. Certifies that the mover's pawn chain is more advanced than the opponent's, measured by a pawn-space score: White pawn at rank index r → max(0, r−1); Black pawn → max(0, 6−r). VETOs: fewer than 4 total pawns; mover's lead < 4 score points. Returns evidence bundle `{tag, side, mover_score, enemy_score, lead, advanced_pawns, evidence}` or None. `"space_advantage"` added to `GATED_TAGS`; wired into `certified_claims()` (board-only).
+- **`space_advantage_evidence` serialized** as `d["space_advantage_evidence"]` in narrator.py `_move_to_dict` Tier-1+ block; narrator clause gates "space advantage" / "dominates space" vocabulary to require the tag; calibration note: lead 4–6 = moderate edge, 7+ = substantial.
+- 6 new tests (209 total factgate, 460 across the full suite).
+
 ## [0.35.0] — 2026-06-18
 
 ### Added
