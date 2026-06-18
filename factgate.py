@@ -191,6 +191,89 @@ def file_state(board: chess.Board, file_index: int, color: bool) -> str:
     return ""
 
 
+def creates_battery(
+    board_after: chess.Board, move: chess.Move, mover_color: bool
+) -> Tuple[bool, Optional[str]]:
+    """Certifies a 'battery': after the move, the moved rook or queen is aligned with
+    another rook or queen of the same color on the same file or rank, with no pieces
+    between them. Classic examples: doubled rooks on a file, R+Q aiming at the seventh rank.
+
+    The 'nothing between them' check is what prevents certifying a pseudo-battery where a
+    pawn or piece blocks the alignment and the pieces are not truly coordinated.
+    """
+    piece = board_after.piece_at(move.to_square)
+    if piece is None or piece.piece_type not in (chess.ROOK, chess.QUEEN):
+        return (False, None)
+
+    to_file = chess.square_file(move.to_square)
+    to_rank = chess.square_rank(move.to_square)
+    _names = {chess.ROOK: "rook", chess.QUEEN: "queen"}
+    p1 = _names[piece.piece_type]
+
+    for sq in (board_after.pieces(chess.ROOK, mover_color)
+               | board_after.pieces(chess.QUEEN, mover_color)):
+        if sq == move.to_square:
+            continue
+        other = board_after.piece_at(sq)
+        if other is None:
+            continue
+        p2 = _names[other.piece_type]
+        sq_file = chess.square_file(sq)
+        sq_rank = chess.square_rank(sq)
+
+        if sq_file == to_file:  # same file
+            min_r, max_r = sorted((to_rank, sq_rank))
+            blocked = any(
+                board_after.piece_at(chess.square(to_file, r))
+                for r in range(min_r + 1, max_r)
+            )
+            if not blocked:
+                return (True, f"{p1}–{p2} battery on the {chess.FILE_NAMES[to_file]}-file")
+
+        if sq_rank == to_rank:  # same rank
+            min_f, max_f = sorted((to_file, sq_file))
+            blocked = any(
+                board_after.piece_at(chess.square(f, to_rank))
+                for f in range(min_f + 1, max_f)
+            )
+            if not blocked:
+                return (True, f"{p1}–{p2} battery on rank {to_rank + 1}")
+
+    return (False, None)
+
+
+def threatens_promotion(
+    board_after: chess.Board, mover_color: bool
+) -> Tuple[bool, Optional[str]]:
+    """Certifies a 'promotion threat': the mover has a pawn on its seventh rank that
+    can advance or capture to promote on the very next move. Checks reachability directly
+    (advance to empty square, or diagonal capture of an enemy piece) so a pawn that is
+    physically blocked or has nothing to capture is NOT certified as a threat.
+    """
+    promo_rank = 6 if mover_color == chess.WHITE else 1
+    fwd = +1 if mover_color == chess.WHITE else -1
+
+    for sq in board_after.pieces(chess.PAWN, mover_color):
+        if chess.square_rank(sq) != promo_rank:
+            continue
+        sq_file = chess.square_file(sq)
+        sq_rank = chess.square_rank(sq)
+        promo_sq = chess.square(sq_file, sq_rank + fwd)
+
+        if board_after.piece_at(promo_sq) is None:
+            return (True, f"pawn promotion threat on {chess.FILE_NAMES[sq_file]}-file")
+
+        for adj_file in (sq_file - 1, sq_file + 1):
+            if not (0 <= adj_file <= 7):
+                continue
+            cap_sq = chess.square(adj_file, sq_rank + fwd)
+            cap = board_after.piece_at(cap_sq)
+            if cap is not None and cap.color != mover_color and cap.piece_type != chess.KING:
+                return (True, f"pawn promotion threat on {chess.FILE_NAMES[sq_file]}-file (capture)")
+
+    return (False, None)
+
+
 # --------------------------------------------------------------------------- #
 # Thin wrappers over analyzer detectors — so the allow-set never drifts from the
 # fact packet's own double_attack / tactic_setup fields.
@@ -226,6 +309,8 @@ GATED_TAGS = (
     "outpost",
     "passed_pawn",
     "mate_in_one_threat",
+    "battery",
+    "promotion_threat",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -288,5 +373,13 @@ def certified_claims(
 
     if _safe(lambda: is_passed_pawn(board_after, move.to_square, mover_color)):
         tags.add("passed_pawn")
+
+    bt = _safe(lambda: creates_battery(board_after, move, mover_color))
+    if bt and bt[0]:
+        tags.add("battery")
+
+    pt = _safe(lambda: threatens_promotion(board_after, mover_color))
+    if pt and pt[0]:
+        tags.add("promotion_threat")
 
     return tags
