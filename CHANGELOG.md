@@ -7,6 +7,20 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.19.0] — 2026-06-18
+
+### Added
+- **Clickable variation lines in the PGN replay viewer (#22)** — engine variation
+  lines (best move, continuation after a blunder) are now playable on the board.
+  Each move in a "Better:" or "Then:" strip below the board is a clickable chip;
+  clicking peeks at that position (highlighted in green); pressing ← / → or
+  clicking any main-line move returns to the game naturally.
+  - `_pv_to_fen_plies()` in `outputs.py` converts a numbered-SAN string into a
+    per-ply `{san, fen, uci}` list using a clean board copy. Fail-safe: returns
+    `[]` on any parse error so the viewer degrades cleanly.
+  - `build_pgn_viewer()` embeds a `vars` array in each ply's payload entry
+    when `best_line_san` or `refutation_line_san` is non-empty.
+
 ## [0.18.0] — 2026-06-18
 
 ### Added
