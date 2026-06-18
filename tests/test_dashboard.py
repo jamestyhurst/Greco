@@ -15,6 +15,8 @@ from web.db import (
     User,
     create_report_ownership,
     create_user,
+    delete_report_ownership,
+    get_report_owner_id,
     init_db,
 )
 from web.main import app
@@ -157,3 +159,78 @@ def test_admin_users_requires_login():
     client = TestClient(app, raise_server_exceptions=False)
     r = client.get("/admin/users", follow_redirects=False)
     assert r.status_code in (303, 307)
+
+
+# ---------------------------------------------------------------------------
+# CSV export (/my-reports/export, /admin/reports/export)
+# ---------------------------------------------------------------------------
+
+def test_my_reports_export_csv(tmp_db, regular_user):
+    create_report_ownership(99, regular_user.id, base="Tal vs Botvinnik")
+    client = make_client(regular_user)
+    try:
+        r = client.get("/my-reports/export")
+        assert r.status_code == 200
+        assert "text/csv" in r.headers["content-type"]
+        assert "Tal vs Botvinnik" in r.text
+        assert "report_id" in r.text   # CSV header row
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_admin_reports_export_csv(tmp_db, admin_user, regular_user):
+    create_report_ownership(1, regular_user.id, base="Morphy vs Duke")
+    client = make_client(admin_user)
+    try:
+        r = client.get("/admin/reports/export")
+        assert r.status_code == 200
+        assert "text/csv" in r.headers["content-type"]
+        assert "Morphy vs Duke" in r.text
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_admin_reports_export_forbidden_for_regular_user(tmp_db, regular_user):
+    client = make_client(regular_user)
+    try:
+        r = client.get("/admin/reports/export")
+        assert r.status_code == 403
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+# ---------------------------------------------------------------------------
+# Delete report (/my-reports/{rid}/delete)
+# ---------------------------------------------------------------------------
+
+def test_delete_own_report(tmp_db, regular_user):
+    create_report_ownership(55, regular_user.id, base="My Game")
+    client = make_client(regular_user)
+    try:
+        r = client.post("/my-reports/55/delete", follow_redirects=False)
+        assert r.status_code == 303
+        assert get_report_owner_id(55) is None
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_delete_other_users_report_forbidden(tmp_db, admin_user, regular_user):
+    create_report_ownership(60, admin_user.id, base="Admin Game")
+    client = make_client(regular_user)
+    try:
+        r = client.post("/my-reports/60/delete")
+        assert r.status_code == 403
+        assert get_report_owner_id(60) == admin_user.id   # still exists
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_admin_can_delete_any_report(tmp_db, admin_user, regular_user):
+    create_report_ownership(70, regular_user.id, base="User Game")
+    client = make_client(admin_user)
+    try:
+        r = client.post("/my-reports/70/delete", follow_redirects=False)
+        assert r.status_code == 303
+        assert get_report_owner_id(70) is None
+    finally:
+        app.dependency_overrides.pop(require_login, None)

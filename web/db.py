@@ -159,3 +159,12 @@ def get_all_reports() -> List[ReportOwnership]:
     with SessionLocal() as session:
         stmt = select(ReportOwnership).order_by(ReportOwnership.report_id.desc())
         return list(session.scalars(stmt).all())
+
+
+def delete_report_ownership(report_id: int) -> None:
+    """Remove the ownership record for *report_id* (the report file is kept)."""
+    with SessionLocal() as session:
+        row = session.get(ReportOwnership, report_id)
+        if row is not None:
+            session.delete(row)
+            session.commit()

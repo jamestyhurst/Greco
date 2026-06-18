@@ -330,6 +330,8 @@ _DASHBOARD = Template("""<!doctype html><html lang="en"><head>
 .tbl a:hover{text-decoration:underline;}
 .empty{color:var(--muted);font-size:.92rem;margin:20px 0;}
 .nav{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.del-btn{background:none;border:1px solid #b03030;color:#b03030;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem;font-family:inherit;}
+.del-btn:hover{background:#b03030;color:#fff;}
 </style></head><body>
 <div class="wrap">
   <h1>&#9818; Greco</h1>
@@ -338,6 +340,7 @@ _DASHBOARD = Template("""<!doctype html><html lang="en"><head>
   </p>
   <div class="nav">
     <a class="btn go" href="/">&#43; Analyze a game</a>
+    {% if reports %}<a class="btn alt" href="/my-reports/export">&#11015; Export CSV</a>{% endif %}
     {% if is_admin %}<a class="btn alt" href="/admin/users">&#128100; Admin: users</a>{% endif %}
     <form method="post" action="/auth/logout" style="margin:0;">
       <button type="submit" style="background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-family:inherit;">Log out</button>
@@ -355,6 +358,9 @@ _DASHBOARD = Template("""<!doctype html><html lang="en"><head>
           <td>
             <a href="/report/{{ r.report_id }}" target="_blank" class="btn go" style="padding:5px 12px;font-size:.8rem;display:inline-block;width:auto;">Open</a>
             &nbsp;<a href="/report/{{ r.report_id }}/shareable" class="btn alt" style="padding:5px 12px;font-size:.8rem;display:inline-block;width:auto;">Download</a>
+            &nbsp;<form method="post" action="/my-reports/{{ r.report_id }}/delete" style="display:inline;" onsubmit="return confirm('Remove this report from your history?');">
+              <button type="submit" class="del-btn">Remove</button>
+            </form>
           </td>
         </tr>
         {% endfor %}
@@ -385,6 +391,7 @@ _ADMIN_USERS = Template("""<!doctype html><html lang="en"><head>
   <p class="sub">All registered users &mdash; logged in as <b>{{ admin_username }}</b></p>
   <div class="nav">
     <a class="btn alt" href="/my-reports">&#8592; My Reports</a>
+    <a class="btn alt" href="/admin/reports/export">&#11015; Export all CSV</a>
     <a class="btn go" href="/">&#43; Analyze a game</a>
     <form method="post" action="/auth/logout" style="margin:0;">
       <button type="submit" style="background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-family:inherit;">Log out</button>
