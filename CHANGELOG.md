@@ -7,6 +7,15 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added (web UX follow-up — 6-item James request)
+- **Browser auto-open** — `run_greco_web.bat` now launches `web.main` which opens `http://127.0.0.1:5000` automatically in the default browser ~1.8 s after startup; bat message updated to match.
+- **Paste PGN in Greco Offline** — the desktop Tkinter GUI now shows a scrollable text area under the file picker ("or paste PGN text:"); `_on_analyze` prefers paste over file when text is present; `_worker` short-circuits `load_pgn` for pasted text.
+- **Move counter on waiting page** — `web/pipeline.py` passes `move_cb` through to `analyze_pgn`; `web/jobs.py` stores `current_move` / `total_moves` per job; `GET /job/{id}` exposes both; waiting-page JS renders "Evaluating position X of Y" in gold text below the log box while Stockfish runs, and drives the progress bar off the real ratio rather than elapsed time.
+- **Form state restore** — on the home/analysis form, all text inputs and selects are saved to `localStorage` on submit; if the analysis fails or the user cancels and returns to `/`, the values are silently restored and a dismissable "Your previous inputs have been restored" banner appears. On successful completion the WAITING page clears `localStorage` so a fresh-start visit stays clean.
+- **Detailed PGN validation errors** — `POST /analyze` now pre-validates PGN synchronously before creating a background job via `_validate_pgn()` + `_pgn_hint()`; errors render as a styled error page with context-aware hints (URL pasted in wrong field, no digits in first 60 chars, etc.) rather than a stuck waiting page.
+- **Prominent failure display on waiting page** — when a background job reaches FAILED status the page now shows a large, dark-red error box with the full message and a "Back to home" link, replacing the previous tiny muted hint that was easy to miss.
+- **Friendly pipeline error messages** — `_friendly_error()` in `web/routers/analysis.py` converts raw Python exceptions (auth failures, Stockfish errors, timeout, network) into clear user-facing instructions before storing them in the job record.
+
 ### Added (web UI overhaul — 12-item James request)
 - **Guest access** — `POST /analyze` and `GET /` now accept unauthenticated users. Accounts are optional (save history only); guests can generate reports immediately.
 - **Home page** — `/` now serves a marketing landing page with Greco's feature pitch, the analysis form, and input tooltips. Guests see a hero section explaining what Greco does; logged-in users see the form directly.

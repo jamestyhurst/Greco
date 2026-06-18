@@ -15,9 +15,8 @@ if not exist "%~dp0venv\Scripts\python.exe" (
   pause
   exit /b 1
 )
-echo Starting Greco Web (FastAPI)...
-echo When you see "Uvicorn running on http://127.0.0.1:5000", open that address in your browser.
-echo (Interactive API docs are at http://127.0.0.1:5000/docs)
+echo Starting Greco Web...
+echo Your browser will open automatically. If it does not, go to http://127.0.0.1:5000
 echo.
 "%~dp0venv\Scripts\python.exe" -m web.main
 echo.

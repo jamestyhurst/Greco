@@ -101,15 +101,23 @@ async def index(request: Request) -> HTMLResponse:
 
 
 if __name__ == "__main__":
+    import threading
+    import time
+    import webbrowser
     import uvicorn
 
     s = resolve_settings()
     from web.routers.analysis import _lan_base_url
     _base = _lan_base_url()
-    print(f"Greco Web {__version__} — open http://127.0.0.1:5000 in your browser.")
+    print(f"Greco Web {__version__} — starting, browser will open automatically…")
     print(f"  Share reports with devices on your WiFi via {_base}/report/<id>")
-    print("  Interactive API docs at http://127.0.0.1:5000/docs")
     if not s.ready:
         print("  Heads up: Stockfish path or API key not set — open the desktop app's settings once.")
     print("  Press Ctrl+C to stop.")
+
+    def _open_browser():
+        time.sleep(1.8)
+        webbrowser.open("http://127.0.0.1:5000")
+
+    threading.Thread(target=_open_browser, daemon=True).start()
     uvicorn.run(app, host="0.0.0.0", port=5000)

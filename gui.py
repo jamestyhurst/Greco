@@ -246,6 +246,11 @@ class GrecoGUI:
         self.pgn_var = tk.StringVar()
         ttk.Entry(row, textvariable=self.pgn_var).pack(side="left", fill="x", expand=True, padx=6)
         ttk.Button(row, text="Browse…", command=self._browse_pgn).pack(side="left")
+        ttk.Label(game_box, text="or paste PGN text:", foreground="#8a7a5c").pack(anchor="w", pady=(8, 2))
+        self.pgn_text_box = tk.Text(game_box, height=5, wrap="none",
+                                    font=("Consolas", 9), bg="#fffdf6", fg="#3A2A1A",
+                                    relief="solid", borderwidth=1)
+        self.pgn_text_box.pack(fill="x", pady=(0, 4))
 
         # --- Options ---
         opt = self._section(main, "♞", "Options")
@@ -456,10 +461,11 @@ class GrecoGUI:
         if self.running:
             return
         pgn_path = self.pgn_var.get().strip()
+        pgn_paste = self.pgn_text_box.get("1.0", "end").strip()
         engine = self.engine_var.get().strip()
         key = self.key_var.get().strip()
-        if not pgn_path or not os.path.isfile(pgn_path):
-            messagebox.showerror("Greco", "Please choose a valid PGN file.")
+        if not pgn_paste and (not pgn_path or not os.path.isfile(pgn_path)):
+            messagebox.showerror("Greco", "Please choose a PGN file or paste PGN text.")
             return
         if not engine or not os.path.isfile(engine):
             messagebox.showerror("Greco", "Please set a valid Stockfish executable path.")
@@ -500,6 +506,7 @@ class GrecoGUI:
         audience_raw = self.audience_var.get()
         params = {
             "pgn_path": pgn_path,
+            "pgn_paste": pgn_paste,
             "engine": engine,
             "use_case": self.usecase_var.get(),
             "user_is": side if side in ("white", "black") else "neither",
@@ -516,7 +523,11 @@ class GrecoGUI:
 
     def _worker(self, p: dict):
         try:
-            pgn_text, src = load_pgn(p["pgn_path"])
+            if p.get("pgn_paste"):
+                pgn_text = p["pgn_paste"]
+                src = "pasted text"
+            else:
+                pgn_text, src = load_pgn(p["pgn_path"])
             self.q.put(("status", f"Loaded {src}"))
             self.q.put(("status", "Analyzing positions with Stockfish…"))
             game = analyze_pgn(
@@ -542,7 +553,7 @@ class GrecoGUI:
                 user_note=p["note"],
                 model=p["model"],
                 live_stream_to=_QueueWriter(self.q),
-                source_path=p["pgn_path"],
+                source_path=p["pgn_path"] if not p.get("pgn_paste") else None,
                 audience_level=p.get("audience_level"),
                 recipient=p.get("recipient"),
             )

@@ -10,9 +10,12 @@ rendering only. All chess work lives in web.pipeline.
 """
 from __future__ import annotations
 
+import io
 import logging
 import socket
 from typing import Optional
+
+import chess.pgn
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
@@ -63,6 +66,9 @@ def _run_background(job_id: str, owner_id: Optional[int] = None, **kwargs) -> No
         result = run_analysis(
             **kwargs,
             progress_cb=lambda msg: _registry.append_log(job_id, msg),
+            move_cb=lambda done, total: _registry.update(
+                job_id, current_move=done, total_moves=total
+            ),
         )
         _registry.append_log(job_id, "Saving report...")
         if owner_id is not None:
@@ -73,8 +79,8 @@ def _run_background(job_id: str, owner_id: Optional[int] = None, **kwargs) -> No
             _send_completion_email(owner_id, result.rid, result.base)
     except Exception as exc:
         _log.exception("Background job %s failed", job_id)
-        _registry.update(job_id, status=JobStatus.FAILED, error=str(exc))
-        _registry.append_log(job_id, f"Error: {exc}")
+        _registry.update(job_id, status=JobStatus.FAILED, error=_friendly_error(exc))
+        _registry.append_log(job_id, f"Failed: {exc}")
 
 
 def _send_completion_email(owner_id: int, report_id: int, base: Optional[str]) -> None:
@@ -88,6 +94,87 @@ def _send_completion_email(owner_id: int, report_id: int, base: Optional[str]) -
             send_report_ready(s, user.email, user.username, report_id, base)
     except Exception:
         _log.warning("Could not send report-ready email for report %d", report_id, exc_info=True)
+
+
+def _validate_pgn(text: str) -> Optional[str]:
+    """Return a user-facing error string if the PGN is invalid, else None."""
+    try:
+        game = chess.pgn.read_game(io.StringIO(text))
+    except Exception as exc:
+        return f"PGN parse error: {exc}"
+    if game is None:
+        return (
+            "The text you entered could not be parsed as a chess game. "
+            "Make sure it is valid PGN format."
+        )
+    moves = list(game.mainline_moves())
+    if not moves:
+        return (
+            "The PGN was read successfully but contains no moves. "
+            "Greco needs at least one move to generate a report."
+        )
+    return None
+
+
+def _pgn_hint(text: str) -> str:
+    """Return a diagnostic hint to help the user fix their PGN input."""
+    stripped = text.strip()
+    if not stripped:
+        return ""
+    if stripped.startswith("http"):
+        return (
+            "It looks like you pasted a URL. Put URLs in the 'Lichess game URL' field above "
+            "the form, or use the 'Paste PGN text' area for the actual move text."
+        )
+    if not any(c.isdigit() for c in stripped[:60]):
+        return (
+            "Valid PGN starts with header tags like [Event \"...\"] or directly with "
+            "numbered moves like '1. e4 e5 2. Nf3 Nc6'. "
+            "If you copied from a website, try copying the raw PGN instead."
+        )
+    return (
+        "Try copying the PGN from Lichess (Game → Share & Export → Copy PGN) "
+        "or from your chess software's export option."
+    )
+
+
+def _friendly_error(exc: Exception) -> str:
+    """Convert a pipeline exception into a user-facing message."""
+    msg = str(exc)
+    t = type(exc).__name__
+    if "Could not parse PGN" in msg or "PGN" in msg:
+        return (
+            "Greco could not read the chess game. "
+            "Check that the PGN is valid and contains at least one move."
+        )
+    if "No such file" in msg or "FileNotFoundError" in t:
+        return "The PGN file could not be found. Please try uploading it again."
+    if "engine" in msg.lower() or "stockfish" in msg.lower() or "Engine" in t:
+        return (
+            "Stockfish (the chess engine) encountered a problem. "
+            "Check that your Stockfish path in settings is correct and the file exists."
+        )
+    if "401" in msg or "403" in msg or "invalid_api_key" in msg or "AuthenticationError" in t:
+        return (
+            "The AI narration step failed: invalid API key. "
+            "Open the Greco desktop app, go to Settings, and paste a valid Anthropic API key."
+        )
+    if "insufficient" in msg.lower() or "credit" in msg.lower() or "quota" in msg.lower():
+        return (
+            "Your Anthropic API account has insufficient credits. "
+            "Add credits at console.anthropic.com, then try again."
+        )
+    if "timeout" in msg.lower() or "TimeoutError" in t:
+        return (
+            "The analysis timed out. Try a faster engine speed (Normal instead of Deep) "
+            "or a shorter game."
+        )
+    if "connection" in msg.lower() or "ConnectionError" in t or "NetworkError" in t:
+        return (
+            "A network connection error occurred while contacting the Anthropic API. "
+            "Check your internet connection and try again."
+        )
+    return f"Analysis failed: {msg}"
 
 
 @router.post("/analyze", response_class=HTMLResponse)
@@ -140,6 +227,12 @@ async def analyze(
             status_code=400,
         )
 
+    # Pre-validate PGN so errors surface immediately with clear messages
+    # rather than silently failing in the background task.
+    pgn_err = _validate_pgn(text)
+    if pgn_err:
+        return HTMLResponse(render_error(pgn_err, detail=_pgn_hint(text)), status_code=400)
+
     # Validate / normalise options (untrusted form input).
     use_case = use_case if use_case in USE_CASES else "companion"
     user_is = side.lower() if side.lower() in ("white", "black") else "neither"
@@ -174,6 +267,8 @@ def job_status(job_id: str) -> dict:
         "report_id": job.report_id,
         "error": job.error,
         "logs": job.logs,
+        "current_move": job.current_move,
+        "total_moves": job.total_moves,
     }
 
 

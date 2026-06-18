@@ -31,6 +31,8 @@ class Job:
     report_id: Optional[int] = None
     error: Optional[str] = None
     logs: List[str] = field(default_factory=list)
+    current_move: int = 0
+    total_moves: int = 0
 
 
 class JobRegistry:

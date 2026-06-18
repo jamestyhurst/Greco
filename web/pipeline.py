@@ -59,6 +59,7 @@ def run_analysis(
     white_context: Optional[str] = None,
     black_context: Optional[str] = None,
     progress_cb=None,
+    move_cb=None,
 ) -> AnalysisResult:
     """Run the full pipeline on a PGN string and return the registered result.
 
@@ -67,6 +68,7 @@ def run_analysis(
     logic lives here.
     """
     _cb = progress_cb or (lambda msg: None)
+    _move_cb = move_cb or (lambda done, total: None)
     flipped = user_is == "black"
 
     # load_pgn expects a path; write the (already-validated-by-upload) text to a
@@ -77,7 +79,7 @@ def run_analysis(
     try:
         text, _src = load_pgn(tmp)
         _cb("Stockfish is evaluating every move...")
-        game = analyze_pgn(text, engine_path=engine, time_limit=time_limit)
+        game = analyze_pgn(text, engine_path=engine, time_limit=time_limit, progress_cb=_move_cb)
         _cb(f"Engine analysis complete ({len(game.moves)} moves). Claude is writing the report...")
         user_context = {
             "white_player": white_context,

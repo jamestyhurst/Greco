@@ -126,8 +126,12 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
       {% if not key_ok %}<br>&bull; Anthropic API key missing.{% endif %}
     </div>
   {% endif %}
+  <div id="s-restore-banner" class="banner ok" style="display:none;">
+    Your previous inputs have been restored.
+    <button type="button" onclick="document.getElementById('s-restore-banner').style.display='none'" style="margin:0;width:auto;padding:2px 10px;font-size:.82rem;display:inline-block;vertical-align:middle;margin-left:8px;">Dismiss</button>
+  </div>
   <form class="card" method="post" action="/analyze" enctype="multipart/form-data"
-        onsubmit="document.getElementById('overlay').classList.add('show');document.getElementById('go').disabled=true;">
+        onsubmit="document.getElementById('overlay').classList.add('show');document.getElementById('go').disabled=true;saveFormState()">
     <label>Lichess game URL or ID</label>
     <input type="text" name="lichess_url" placeholder="https://lichess.org/abcd1234 &mdash; or the 8-character game ID">
     <div class="or">&mdash; or &mdash;</div>
@@ -192,6 +196,34 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
   <h2 style="font-family:'Cinzel',serif;">Analyzing&hellip;</h2>
   <p class="sub">Stockfish is evaluating every move and Claude is writing the report.<br>This can take a minute or two &mdash; keep this tab open.</p>
 </div></div>
+<script>
+var _FORM_KEY='greco_form_state';
+var _FORM_FIELDS=['lichess_url','use_case','side','speed','model','note','audience_level','recipient','white_context','black_context','pgn_text'];
+function saveFormState(){
+  try{
+    var vals={};
+    _FORM_FIELDS.forEach(function(f){
+      var el=document.querySelector('[name="'+f+'"]');
+      if(el)vals[f]=el.value;
+    });
+    localStorage.setItem(_FORM_KEY,JSON.stringify(vals));
+  }catch(e){}
+}
+(function(){
+  try{
+    var saved=localStorage.getItem(_FORM_KEY);
+    if(!saved)return;
+    var vals=JSON.parse(saved);
+    var restored=false;
+    _FORM_FIELDS.forEach(function(f){
+      if(vals[f]===undefined||vals[f]==='')return;
+      var el=document.querySelector('[name="'+f+'"]');
+      if(el){el.value=vals[f];restored=true;}
+    });
+    if(restored)document.getElementById('s-restore-banner').style.display='';
+  }catch(e){}
+})();
+</script>
 </body></html>""")
 
 
@@ -342,9 +374,14 @@ _WAITING = Template("""<!doctype html><html lang="en"><head>
       <div class="progress-bar"><div class="progress-fill" id="s-bar" style="width:5%;"></div></div>
     </div>
     <div class="log-box" id="s-log">Waiting to start&hellip;</div>
-    <p class="hint" id="s-err" style="display:none;color:#b03030;margin-top:8px;"></p>
+    <p id="s-move-text" style="display:none;font-size:.88rem;color:var(--gold);margin:8px 0 0;text-align:center;"></p>
+    <div id="s-fail-box" style="display:none;background:#3d0d0d;border:2px solid #b03030;border-radius:8px;padding:16px;margin-top:12px;text-align:left;">
+      <p style="color:#f87171;font-weight:700;font-size:1rem;margin:0 0 6px;">Analysis failed</p>
+      <p id="s-fail-msg" style="color:#fca5a5;font-size:.9rem;margin:0 0 14px;line-height:1.5;"></p>
+      <a class="btn alt" href="/" style="display:inline-block;width:auto;padding:8px 20px;font-size:.88rem;">Back to home &rarr;</a>
+    </div>
   </div>
-  <p class="hint" style="text-align:center;margin-top:10px;">Keep this tab open &mdash; you&rsquo;ll be taken to your report automatically.</p>
+  <p class="hint" id="s-keep-open" style="text-align:center;margin-top:10px;">Keep this tab open &mdash; you&rsquo;ll be taken to your report automatically.</p>
   <p style="text-align:center;margin-top:8px;"><a class="btn alt" style="display:inline-block;width:auto;padding:8px 20px;" href="/">Cancel &amp; start over</a></p>
 </div>
 <script>
@@ -381,17 +418,29 @@ _WAITING = Template("""<!doctype html><html lang="en"><head>
     fetch('/job/'+jobId)
       .then(function(r){return r.json();})
       .then(function(d){
+        if(d.current_move && d.total_moves){
+          var mt=document.getElementById('s-move-text');
+          mt.style.display='';
+          mt.textContent='Evaluating position '+d.current_move+' of '+d.total_moves+'…';
+          if(currentStage<=1){
+            setStage(1);
+            setBar(5+Math.round(60*(d.current_move/d.total_moves)));
+          }
+        }
         if(d.logs && d.logs.length>lastLogCount){
           var newLines=d.logs.slice(lastLogCount);
           lastLogCount=d.logs.length;
           document.getElementById('s-log').textContent='';
           appendLog(d.logs);
           var last=d.logs[d.logs.length-1]||'';
-          if(last.indexOf('Stockfish')!==-1||last.indexOf('evaluating')!==-1){setStage(1);setBar(20);}
-          if(last.indexOf('Claude')!==-1||last.indexOf('writing')!==-1){setStage(2);setBar(65);}
+          if(last.indexOf('Stockfish')!==-1||last.indexOf('evaluating')!==-1){setStage(1);}
+          if(last.indexOf('Claude')!==-1||last.indexOf('writing')!==-1){
+            setStage(2);setBar(65);
+            document.getElementById('s-move-text').style.display='none';
+          }
           if(last.indexOf('Saving')!==-1){setBar(88);}
         } else {
-          if(d.status==='running'){
+          if(d.status==='running'&&!d.current_move){
             if(elapsed<30){setStage(1);setBar(Math.min(25,5+elapsed*0.7));}
             else if(elapsed<90){setStage(2);setBar(Math.min(75,25+(elapsed-30)*0.8));}
             else{setBar(Math.min(92,75+(elapsed-90)*0.1));}
@@ -402,15 +451,20 @@ _WAITING = Template("""<!doctype html><html lang="en"><head>
           setStage(3);setBar(100);
           document.getElementById('s-banner').textContent='✓ Report ready — redirecting…';
           document.getElementById('s-text').textContent='Taking you to your report now.';
+          try{localStorage.removeItem('greco_form_state');}catch(e){}
           window.location.href='/result/'+jobId;
         } else if(d.status==='failed'){
           done=true;
           var b=document.getElementById('s-banner');
-          b.className='banner warn';b.textContent='Analysis failed';
+          b.className='banner warn';b.textContent='Something went wrong';
           document.getElementById('s-text').style.display='none';
-          var e=document.getElementById('s-err');
-          e.style.display='';e.textContent=d.error||'An unexpected error occurred. Please try again.';
+          document.getElementById('s-move-text').style.display='none';
+          document.getElementById('s-keep-open').style.display='none';
           setBar(0);
+          var fb=document.getElementById('s-fail-box');
+          fb.style.display='';
+          document.getElementById('s-fail-msg').textContent=
+            d.error||'An unexpected error occurred. Please go back and try again.';
         }
       })
       .catch(function(){});
