@@ -7,6 +7,12 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.32.0] — 2026-06-18
+
+### Added
+- **`factgate.is_tempo(attacks_pieces, refutation_line_san, fen_after, is_capture)`** — third Tier-B certified claim. Certifies a "gain of tempo": the move attacks an enemy minor/major piece (non-pawn, non-king) without capturing, and the engine's best reply is forced to address that attacked square (reply's from_square or to_square matches the attacked square). VETO: move is a capture; only pawn/king attacked; no refutation line; reply ignores the attacked square. Evidence bundle `{tag, attacked, forced_reply, square, evidence}`. `"tempo_gain"` added to `GATED_TAGS`; wired from narrator `_move_to_dict` Tier-1+ block; prompt clause added.
+- 8 new tests (181 total, 432 across the full suite).
+
 ## [0.31.0] — 2026-06-18
 
 ### Added

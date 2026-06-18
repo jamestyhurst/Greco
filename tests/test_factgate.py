@@ -1610,3 +1610,65 @@ def test_compensation_veto1_mate_score_abstain():
 def test_compensation_veto0_no_eval_data():
     # No eval data at all — abstain.
     assert _comp(-2.0, None, None, True) is None
+
+
+# --- is_tempo ---------------------------------------------------------------
+# Position: White queen on e4 attacks the Black knight on d5.
+# The Black knight can move to c7 (Nc7) as its best reply.
+# FEN: "7k/8/8/3n4/4Q3/8/8/7K b - - 0 15" (Black to move)
+_TEMPO_FEN = "7k/8/8/3n4/4Q3/8/8/7K b - - 0 15"
+_TEMPO_ATTACKS = ["knight on d5"]
+_TEMPO_REFUTATION = "15... Nc7"
+
+
+def test_is_tempo_positive_forced_reply_moves_attacked_piece():
+    result = F.is_tempo(_TEMPO_ATTACKS, _TEMPO_REFUTATION, _TEMPO_FEN, False)
+    assert result is not None
+    assert result["tag"] == "tempo_gain"
+    assert "knight" in result["attacked"]
+    assert result["forced_reply"] == "Nc7"
+    assert result["square"] == "d5"
+    assert "tempo" in result["evidence"].lower()
+
+
+def test_is_tempo_evidence_keys_present():
+    result = F.is_tempo(_TEMPO_ATTACKS, _TEMPO_REFUTATION, _TEMPO_FEN, False)
+    assert result is not None
+    for key in ("tag", "attacked", "forced_reply", "square", "evidence"):
+        assert key in result, f"missing key: {key}"
+
+
+def test_is_tempo_veto1_is_capture():
+    # The move was a capture — not a pure tempo gain.
+    assert F.is_tempo(_TEMPO_ATTACKS, _TEMPO_REFUTATION, _TEMPO_FEN, True) is None
+
+
+def test_is_tempo_veto1_only_pawn_attacked():
+    # Only a pawn is attacked — pawn attacks don't certify tempo.
+    assert F.is_tempo(["pawn on d5"], _TEMPO_REFUTATION, _TEMPO_FEN, False) is None
+
+
+def test_is_tempo_veto1_empty_attacks():
+    assert F.is_tempo([], _TEMPO_REFUTATION, _TEMPO_FEN, False) is None
+
+
+def test_is_tempo_veto2_no_refutation_line():
+    assert F.is_tempo(_TEMPO_ATTACKS, "", _TEMPO_FEN, False) is None
+
+
+def test_is_tempo_veto3_reply_ignores_attacked_square():
+    # Opponent plays Kg7 (king shuffle) — ignores the attacked knight on d5.
+    result = F.is_tempo(_TEMPO_ATTACKS, "15... Kg7", _TEMPO_FEN, False)
+    assert result is None
+
+
+def test_is_tempo_pawn_plus_minor_certifies_on_minor():
+    # attacks_pieces has both a pawn and a minor piece; should certify on the minor.
+    result = F.is_tempo(
+        ["pawn on e5", "knight on d5"],
+        _TEMPO_REFUTATION,
+        _TEMPO_FEN,
+        False,
+    )
+    assert result is not None
+    assert result["square"] == "d5"  # certified on the non-pawn piece

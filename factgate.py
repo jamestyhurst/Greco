@@ -33,6 +33,7 @@ HOW IT WORKS (James's doctrine, made literal)
 """
 from __future__ import annotations
 
+import re
 from typing import List, Optional, Set, Tuple
 
 import chess
@@ -1391,6 +1392,96 @@ def is_compensation(
 
 
 # --------------------------------------------------------------------------- #
+# Tempo gain (pre-computed attack/refutation data).
+# --------------------------------------------------------------------------- #
+def is_tempo(
+    attacks_pieces: List[str],
+    refutation_line_san: str,
+    fen_after: str,
+    is_capture: bool,
+) -> Optional[dict]:
+    """Certifies a 'tempo gain': the move attacks an enemy piece (≥ minor value)
+    that the opponent's best reply is forced to address — the opponent spends their
+    move reacting rather than executing their own plan. No material is exchanged by
+    the certifying move itself.
+
+    attacks_pieces      — enemy pieces the moved piece attacks (from MoveAnalysis).
+    refutation_line_san — numbered SAN of the engine's best line from fen_after.
+    fen_after           — FEN of the position after the move (to parse the reply SAN).
+    is_capture          — True if the move itself captured a piece.
+
+    Returns a dict evidence bundle or None.
+    """
+    # VETO 1: move was a capture (material changed — this is a trade, not a pure tempo),
+    #         or no non-pawn / non-king enemy pieces are attacked.
+    non_trivial = [
+        a for a in attacks_pieces
+        if not a.startswith("pawn") and not a.startswith("king")
+    ]
+    if is_capture or not non_trivial:
+        return None
+
+    # VETO 2: no refutation line to check forcing-ness.
+    if not refutation_line_san:
+        return None
+
+    # Extract the first SAN move token from the numbered move string.
+    # Handles both "15. Nd7 ..." (White first) and "15... Nd7 ..." (Black first).
+    tok = re.match(r"^\d+\.{1,3}\s*(\S+)", refutation_line_san.strip())
+    if not tok:
+        return None
+    first_san = tok.group(1)
+
+    # Parse the SAN token on the post-move board (opponent to move).
+    try:
+        board_aft = chess.Board(fen_after)
+        opp_move = board_aft.parse_san(first_san)
+    except Exception:
+        return None
+
+    # Build a square → description map for non-trivial attacked pieces.
+    attacked: dict = {}
+    for atk_str in non_trivial:
+        parts = atk_str.rsplit(" on ", 1)
+        if len(parts) == 2:
+            try:
+                sq = chess.parse_square(parts[1])
+                attacked[sq] = atk_str
+            except ValueError:
+                pass
+
+    if not attacked:
+        return None
+
+    # CONFIRM: the opponent's first reply addresses at least one attacked square
+    # — either the attacked piece moves (from_square) or something comes to that
+    # square to defend/recapture (to_square).
+    addressed_sq = None
+    for sq in attacked:
+        if opp_move.from_square == sq or opp_move.to_square == sq:
+            addressed_sq = sq
+            break
+
+    if addressed_sq is None:
+        return None
+
+    # All checks passed — tempo gain certified.
+    attacked_desc = attacked[addressed_sq]
+    sq_name = attacked_desc.rsplit(" on ", 1)[1]
+    evidence = (
+        f"attacks the {attacked_desc}, forcing the reply {first_san} — a gain of tempo."
+    )
+
+    return {
+        "tag": "tempo_gain",
+        "attacked": attacked_desc,
+        "forced_reply": first_san,
+        "square": sq_name,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1418,6 +1509,7 @@ GATED_TAGS = (
     "zugzwang",
     "overloaded_piece",
     "compensation",
+    "tempo_gain",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
