@@ -38,6 +38,7 @@ from typing import List, Optional, Set, Tuple
 import chess
 
 from analyzer import (  # pure board helpers — none touch Stockfish or the API key
+    PIECE_NAMES,
     detect_discovered_attack,
     detect_double_attack,
     detect_pin,
@@ -724,6 +725,170 @@ def is_backward_pawn(
     })
 
 
+def is_infiltration(
+    board_after: chess.Board, square: int, color: bool, phase: str
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies 'infiltration': a rook, queen, or (endgame-only) king has landed on a deep
+    rank inside enemy territory — the 7th/8th for heavy pieces, 6th/7th/8th for an endgame
+    king — where it is not trivially hanging or pinned, and it is doing real damage (raking
+    pawns, boxing the enemy king, or arriving on an open back-rank file).
+
+    A move that arrives with check is NOT infiltration (veto 3) — the opponent is forced to
+    respond and the move belongs to the tactics gates. Phase must be passed explicitly because
+    chess.Move has no .phase attribute; see the wiring in certified_claims / narrator.py.
+    """
+    if color == chess.WHITE:
+        heavy_deep_ranks = {6, 7}
+        king_deep_ranks  = {5, 6, 7}
+        back_rank = 7
+    else:
+        heavy_deep_ranks = {1, 0}
+        king_deep_ranks  = {2, 1, 0}
+        back_rank = 0
+    enemy = not color
+
+    # VETO 1: piece type — rook, queen, or king only
+    piece = board_after.piece_at(square)
+    if piece is None or piece.color != color:
+        return (False, None)
+    if piece.piece_type not in (chess.ROOK, chess.QUEEN, chess.KING):
+        return (False, None)
+
+    # VETO 2: endgame gate for the king
+    if piece.piece_type == chess.KING and phase != "endgame":
+        return (False, None)
+
+    # VETO 3: no infiltration if the move arrived with check (tactic, not standing penetration)
+    if board_after.is_check():
+        return (False, None)
+
+    # VETO 4: depth — must be on the relevant deep-rank set for this piece type
+    rank = chess.square_rank(square)
+    if piece.piece_type in (chess.ROOK, chess.QUEEN):
+        if rank not in heavy_deep_ranks:
+            return (False, None)
+    else:  # KING
+        if rank not in king_deep_ranks:
+            return (False, None)
+
+    # CONFIRM 5: operability — not absolutely pinned; not hanging-and-undefended
+    attacked = board_after.is_attacked_by(enemy, square)
+    defended = board_after.is_attacked_by(color, square)
+    pinned   = board_after.is_pinned(color, square)
+
+    if pinned:
+        return (False, None)
+
+    hanging = False
+    if attacked and not defended:
+        if piece.piece_type in (chess.QUEEN, chess.KING):
+            return (False, None)
+        else:  # rook — record caveat, don't auto-veto
+            hanging = True
+
+    # CONFIRM 6: purpose — at least one of (a) pawn-raking, (b) king confinement, (c) open back-rank
+    targeted_pawns: List[str] = []
+    confines_king: Optional[str] = None
+    arrival_file_state: str = ""
+    absolute_seventh: bool = False
+
+    # (a) Attacks an enemy pawn (all piece types)
+    for s in board_after.attacks(square):
+        tp = board_after.piece_at(s)
+        if tp is not None and tp.piece_type == chess.PAWN and tp.color == enemy:
+            targeted_pawns.append(chess.square_name(s))
+
+    # (b) King confinement — rook/queen only
+    if piece.piece_type in (chess.ROOK, chess.QUEEN):
+        ek = board_after.king(enemy)
+        if ek is not None and chess.square_rank(ek) == back_rank:
+            # escape_rank: one step toward centre from the back rank
+            escape_rank = back_rank - 1 if color == chess.WHITE else back_rank + 1
+            ek_file = chess.square_file(ek)
+            cuts_escape = any(
+                chess.square_rank(s) == escape_rank
+                and abs(chess.square_file(s) - ek_file) <= 1
+                for s in board_after.attacks(square)
+            )
+            shares_file = (chess.square_file(square) == ek_file)
+            if cuts_escape or shares_file:
+                confines_king = chess.square_name(ek)
+                seventh_rank = 6 if color == chess.WHITE else 1
+                # "absolute 7th": rook on the 7th, same file as the trapped king
+                # (rook pins the king to the back rank by file — the strongest sub-case)
+                if piece.piece_type == chess.ROOK and rank == seventh_rank and shares_file:
+                    absolute_seventh = True
+
+        # (c) Open-file back-rank arrival — rook/queen only
+        if rank == back_rank:
+            files = file_structure(board_after)
+            file_idx = chess.square_file(square)
+            letter = chess.FILE_NAMES[file_idx]
+            half_key = "half_open_white" if color == chess.WHITE else "half_open_black"
+            if letter in files["open"]:
+                arrival_file_state = "open"
+            elif letter in files[half_key]:
+                arrival_file_state = "half-open"
+
+    # Must have at least one purpose
+    has_purpose = (
+        bool(targeted_pawns)
+        or confines_king is not None
+        or arrival_file_state != ""
+    )
+    if not has_purpose:
+        return (False, None)
+
+    # --- Build evidence bundle ---
+    piece_name = PIECE_NAMES[piece.piece_type]
+    sq_name = chess.square_name(square)
+
+    if color == chess.WHITE:
+        rank_label_map = {6: "the seventh rank", 7: "the eighth (back) rank", 5: "the sixth rank"}
+    else:
+        rank_label_map = {1: "the second rank", 0: "the first (back) rank", 2: "the third rank"}
+    rank_label = rank_label_map.get(rank, f"rank {rank + 1}")
+
+    if confines_king is not None:
+        prefix = "absolute seventh — " if absolute_seventh else ""
+        evidence_str = (
+            f"{prefix}the {piece_name} on {sq_name} has infiltrated to {rank_label}, "
+            f"cutting off the enemy king on {confines_king}"
+        )
+    elif targeted_pawns:
+        if piece.piece_type == chess.KING:
+            evidence_str = (
+                f"the king on {sq_name} has marched into enemy territory on {rank_label}, "
+                f"attacking {', '.join(targeted_pawns)}"
+            )
+        else:
+            evidence_str = (
+                f"the {piece_name} on {sq_name} has infiltrated to {rank_label}, "
+                f"attacking the pawn(s) on {', '.join(targeted_pawns)}"
+            )
+    else:  # (c) open-file back-rank
+        file_letter = sq_name[0]
+        evidence_str = (
+            f"the {piece_name} on {sq_name} has infiltrated the enemy back rank "
+            f"down the {arrival_file_state} {file_letter}-file"
+        )
+
+    if hanging:
+        evidence_str += " — but the infiltrating rook is itself hanging"
+
+    return (True, {
+        "piece": piece_name,
+        "square": sq_name,
+        "rank_label": rank_label,
+        "targeted_pawns": targeted_pawns,
+        "confines_king": confines_king,
+        "arrival_file_state": arrival_file_state,
+        "absolute_seventh": absolute_seventh,
+        "hanging": hanging,
+        "evidence_str": evidence_str,
+    })
+
+
 def creates_battery(
     board_after: chess.Board, move: chess.Move, mover_color: bool
 ) -> Tuple[bool, Optional[str]]:
@@ -889,6 +1054,7 @@ GATED_TAGS = (
     "battery",
     "promotion_threat",
     "backward_pawn",
+    "infiltration",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -900,6 +1066,7 @@ def certified_claims(
     move: chess.Move,
     board_after: chess.Board,
     mover_color: bool,
+    phase: str = "middlegame",
 ) -> Set[str]:
     """Run every predicate for one ply and return the set of proven claim TAGS — the
     per-ply allow-set. Each predicate self-vetoes cheaply, so a quiet move costs only
@@ -994,5 +1161,9 @@ def certified_claims(
     bp = _safe(lambda: is_backward_pawn(board_after, move.to_square, mover_color))
     if bp and bp[0]:
         tags.add("backward_pawn")
+
+    inf = _safe(lambda: is_infiltration(board_after, move.to_square, mover_color, phase))
+    if inf and inf[0]:
+        tags.add("infiltration")
 
     return tags

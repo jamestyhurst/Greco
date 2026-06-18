@@ -914,3 +914,147 @@ def test_backward_pawn_in_certified_claims():
     b, mv, a = _push("7k/3p4/8/2p5/4P3/8/8/7K b - - 0 1", "d7d6")
     tags = F.certified_claims(b, mv, a, chess.BLACK)
     assert "backward_pawn" in tags
+
+
+# --- is_infiltration --------------------------------------------------------
+
+def test_infiltration_rook_7th_white_pawn_raking():
+    # Spec example 1: White Ra7 on 7th rank rakes Black f7 pawn (b7-h7 blocked after f7).
+    board = chess.Board("6k1/R4ppp/8/8/8/8/5PPP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.A7, chess.WHITE, "middlegame")
+    assert ok
+    assert ev["piece"] == "rook"
+    assert ev["square"] == "a7"
+    assert "f7" in ev["targeted_pawns"]
+    assert ev["hanging"] is False
+    assert "infiltrated" in ev["evidence_str"]
+
+
+def test_infiltration_queen_7th_multi_pawn():
+    # Spec example 3: White Qd7 attacks Black b7 and f7 pawns.
+    board = chess.Board("r4rk1/pp1Q1ppp/8/8/8/8/PPP2PPP/2KR3R b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.D7, chess.WHITE, "middlegame")
+    assert ok
+    assert ev["piece"] == "queen"
+    assert "b7" in ev["targeted_pawns"] or "f7" in ev["targeted_pawns"]
+    assert ev["hanging"] is False
+
+
+def test_infiltration_black_mirror_rook_2nd():
+    # Spec example 4: Black Ra2 on rank 2 (deep for Black), rakes White f2 pawn.
+    board = chess.Board("6k1/5ppp/8/8/8/8/r4PPP/6K1 w - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.A2, chess.BLACK, "middlegame")
+    assert ok
+    assert ev["piece"] == "rook"
+    assert ev["square"] == "a2"
+    assert "f2" in ev["targeted_pawns"]
+
+
+def test_infiltration_endgame_king():
+    # Spec example 5: White Ke6 (rank 5 = deep for king in endgame) attacks Black f6 pawn.
+    board = chess.Board("8/8/2k1Kp2/8/8/8/5P2/8 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.E6, chess.WHITE, "endgame")
+    assert ok
+    assert ev["piece"] == "king"
+    assert "f6" in ev["targeted_pawns"]
+    assert "marched" in ev["evidence_str"]
+
+
+def test_infiltration_back_rank_open_file():
+    # White Rc8 on open c-file (back rank), Black king off the back rank — open-file arrival.
+    board = chess.Board("2R5/5ppp/6k1/8/8/8/5PPP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.C8, chess.WHITE, "middlegame")
+    assert ok
+    assert ev["arrival_file_state"] == "open"
+    assert "back rank" in ev["evidence_str"]
+
+
+def test_infiltration_king_confinement():
+    # Spec example 2: White Ra7 confines Black king to f8 by covering f7 (escape square).
+    board = chess.Board("5k2/R5pp/8/8/8/8/6PP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.A7, chess.WHITE, "middlegame")
+    assert ok
+    assert ev["confines_king"] == "f8"
+    assert ev["absolute_seventh"] is False  # rook on a-file, king on f-file — different files
+
+
+def test_infiltration_hanging_rook_caveat():
+    # Re7 attacked by Black Re8 (hanging), but rakes Black g7 pawn — certifies with caveat.
+    board = chess.Board("4r1k1/4R1pp/8/8/8/8/6PP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.E7, chess.WHITE, "middlegame")
+    assert ok
+    assert ev["hanging"] is True
+    assert "infiltrating rook is itself hanging" in ev["evidence_str"]
+
+
+def test_infiltration_evidence_str_no_forbidden_words():
+    # Spec §5: evidence_str must never contain "mate", "checkmate", or "wins".
+    board = chess.Board("6k1/R4ppp/8/8/8/8/5PPP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.A7, chess.WHITE, "middlegame")
+    assert ok
+    s = ev["evidence_str"].lower()
+    assert "mate" not in s
+    assert "wins" not in s
+
+
+def test_infiltration_negative_knight_deep():
+    # Veto 1: knight on the 7th is an outpost candidate, not infiltration.
+    board = chess.Board("6k1/4N1pp/8/8/8/8/6PP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.E7, chess.WHITE, "middlegame")
+    assert ok is False
+    assert ev is None
+
+
+def test_infiltration_negative_rook_5th():
+    # Veto 4: rook on the 5th rank is not deep enough for heavy pieces.
+    board = chess.Board("6k1/6pp/8/R7/8/8/6PP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.A5, chess.WHITE, "middlegame")
+    assert ok is False
+    assert ev is None
+
+
+def test_infiltration_negative_king_middlegame():
+    # Veto 2: a king on a deep rank in the middlegame is a blunder, not infiltration.
+    board = chess.Board("8/8/2k1Kp2/8/8/8/5P2/8 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.E6, chess.WHITE, "middlegame")
+    assert ok is False
+    assert ev is None
+
+
+def test_infiltration_negative_check_abstention():
+    # Veto 3: rook on back rank that gives check is a tactic, not standing penetration.
+    board = chess.Board("2R4k/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.C8, chess.WHITE, "middlegame")
+    assert ok is False
+    assert ev is None
+
+
+def test_infiltration_negative_idle_rook():
+    # Step 6: rook on 7th with no pawn targets and enemy king off the back rank — inert.
+    board = chess.Board("8/R7/8/8/8/8/6PP/3k2K1 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.A7, chess.WHITE, "middlegame")
+    assert ok is False
+    assert ev is None
+
+
+def test_infiltration_negative_hanging_queen():
+    # Step 5: hanging queen on the 7th is abstained — a blunder, not infiltration.
+    board = chess.Board("r4rk1/pp1Q1ppp/1n6/8/8/8/PPP2PPP/2K4R b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.D7, chess.WHITE, "middlegame")
+    assert ok is False
+    assert ev is None
+
+
+def test_infiltration_negative_pinned_rook():
+    # Step 5: rook on 7th absolutely pinned to its own king cannot operate.
+    board = chess.Board("4r1k1/4R1pp/8/8/8/8/8/4K3 b - - 0 1")
+    ok, ev = F.is_infiltration(board, chess.E7, chess.WHITE, "middlegame")
+    assert ok is False
+    assert ev is None
+
+
+def test_infiltration_in_certified_claims():
+    # Integration: Ra1→a7 puts "infiltration" in the allow-set (default middlegame phase).
+    b, mv, a = _push("6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1", "a1a7")
+    tags = F.certified_claims(b, mv, a, chess.WHITE)
+    assert "infiltration" in tags
