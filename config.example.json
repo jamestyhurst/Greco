@@ -2,5 +2,25 @@
   "stockfish_path": "C:\\Program Files\\stockfish\\stockfish-windows-x86-64-avx2.exe",
   "api_key": "sk-ant-REPLACE-WITH-YOUR-OWN-ANTHROPIC-API-KEY",
   "model": "claude-opus-4-8",
-  "reports_dir": "C:\\Users\\YourName\\Documents\\Greco Reports"
+  "reports_dir": "C:\\Users\\YourName\\Documents\\Greco Reports",
+
+  "_comment_optional": "All settings below are optional.",
+
+  "web_secret_key": "",
+
+  "ngrok_auth_token": "",
+
+  "r2_account_id": "",
+  "r2_access_key_id": "",
+  "r2_secret_access_key": "",
+  "r2_bucket_name": "",
+  "r2_public_url": "",
+
+  "_comment_smtp": "SMTP email notifications — leave smtp_host empty to disable.",
+  "smtp_host": "",
+  "smtp_port": 587,
+  "smtp_user": "",
+  "smtp_password": "",
+  "smtp_from": "",
+  "app_base_url": "http://localhost:5000"
 }

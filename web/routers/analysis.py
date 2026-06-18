@@ -20,7 +20,8 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from outputs import export_shareable_html
 from web.auth import require_login
 from web.config import MODELS, SPEED_LABELS, USE_CASES, resolve_settings
-from web.db import User, create_report_ownership
+from web.db import User, create_report_ownership, get_user_by_id
+from web.email_utils import send_report_ready
 from web.jobs import JobStatus, _registry
 from web import ngrok_tunnel, publish as pub
 from web.pipeline import report_html_path, run_analysis
@@ -62,9 +63,24 @@ def _run_background(job_id: str, owner_id: Optional[int] = None, **kwargs) -> No
         if owner_id is not None:
             create_report_ownership(result.rid, owner_id, base=result.base)
         _registry.update(job_id, status=JobStatus.DONE, report_id=result.rid)
+        if owner_id is not None:
+            _send_completion_email(owner_id, result.rid, result.base)
     except Exception as exc:
         _log.exception("Background job %s failed", job_id)
         _registry.update(job_id, status=JobStatus.FAILED, error=str(exc))
+
+
+def _send_completion_email(owner_id: int, report_id: int, base: Optional[str]) -> None:
+    """Send a report-ready email if SMTP is configured. Never raises."""
+    try:
+        s = resolve_settings()
+        if not s.smtp_ready:
+            return
+        user = get_user_by_id(owner_id)
+        if user and user.email:
+            send_report_ready(s, user.email, user.username, report_id, base)
+    except Exception:
+        _log.warning("Could not send report-ready email for report %d", report_id, exc_info=True)
 
 
 @router.post("/analyze", response_class=HTMLResponse)

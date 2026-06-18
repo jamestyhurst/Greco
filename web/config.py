@@ -49,6 +49,15 @@ class Settings(BaseModel):
     r2_bucket_name: str = ""
     r2_public_url: str = ""   # e.g. https://pub-xxx.r2.dev or custom domain
 
+    # SMTP — "report ready" email notification (Phase 6)
+    # If smtp_host is empty, email sending is silently skipped.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    app_base_url: str = "http://localhost:5000"
+
     @property
     def ready(self) -> bool:
         return self.engine_ok and self.key_ok
@@ -62,6 +71,10 @@ class Settings(BaseModel):
         return all([self.r2_account_id, self.r2_access_key_id,
                     self.r2_secret_access_key, self.r2_bucket_name,
                     self.r2_public_url])
+
+    @property
+    def smtp_ready(self) -> bool:
+        return bool(self.smtp_host and self.smtp_user and self.smtp_password)
 
 
 _EPHEMERAL_SECRET: str = ""   # module-level cache so it's stable within a process
@@ -122,4 +135,10 @@ def resolve_settings() -> Settings:
         r2_secret_access_key=cfg.get("r2_secret_access_key") or os.environ.get("R2_SECRET_ACCESS_KEY") or "",
         r2_bucket_name=cfg.get("r2_bucket_name") or os.environ.get("R2_BUCKET_NAME") or "",
         r2_public_url=cfg.get("r2_public_url") or os.environ.get("R2_PUBLIC_URL") or "",
+        smtp_host=cfg.get("smtp_host") or os.environ.get("GRECO_SMTP_HOST") or "",
+        smtp_port=int(cfg.get("smtp_port") or os.environ.get("GRECO_SMTP_PORT") or 587),
+        smtp_user=cfg.get("smtp_user") or os.environ.get("GRECO_SMTP_USER") or "",
+        smtp_password=cfg.get("smtp_password") or os.environ.get("GRECO_SMTP_PASSWORD") or "",
+        smtp_from=cfg.get("smtp_from") or os.environ.get("GRECO_SMTP_FROM") or "",
+        app_base_url=cfg.get("app_base_url") or os.environ.get("GRECO_APP_BASE_URL") or "http://localhost:5000",
     )
