@@ -7,6 +7,14 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.29.0] — 2026-06-18
+
+### Added
+- **`factgate.is_zugzwang(board, cp_best, mate_best, cp_pass, mate_pass, phase, legal_move_count, best_move_san)`** — engine-dependent zugzwang detector (spec predicate #18). Takes pre-computed Stockfish scores so the function itself is engine-free and L1-testable. VETO ladder: game_over → in_check → forced → phase/scope gate (endgame OR ≤6 non-KP pieces) → en_passant. CONFIRM: sign-correct side-to-move POV conversion (`sign = 1 if board.turn == WHITE else -1`; `eval = sign * normalize_cp(cp, mate)`) then delta test (`delta_cp = eval_pass - eval_best ≥ ZUGZWANG_CP = 100`). Strictness ladder (spec §Rule 7): STRICT when `eval_pass ≥ -50`; NEAR otherwise. Returns a structured dict with `is_zugzwang`, `strict`, `label`, `evidence`, `eval_pass_cp`, `eval_best_cp`, `delta_cp`, `veto_reason`, and more. `"zugzwang"` added to `GATED_TAGS`.
+- **Null-move probe in `analyzer.py`** — the first pass now conditionally calls Stockfish on a null-moved copy of qualifying positions (endgame phase or ≤6 non-KP pieces; not in check; no en passant; > 1 legal move). Results stored as `null_eval_cp` / `null_eval_mate` in the positions dict and surfaced as new `MoveAnalysis` fields. Also added: `opp_best_san` (opponent's best-move SAN from the post-move position) and `opp_legal_move_count` (legal move count in the post-move position).
+- **Zugzwang serialization in `narrator.py`** — Tier-1+ `_move_to_dict` block calls `is_zugzwang` with the pre-computed scores, extends `d["certified"]` with `"zugzwang"` when it fires, and serializes the full evidence bundle as `d["zugzwang_evidence"]`. The `zugzwang` tag is added to the certified claims whitelist rule and `For zugzwang:` guidance is added to the system prompt.
+- 13 new tests (156 total), including the mandatory two-color trébuchet regression (asserts both White-to-move and Black-to-move fire correctly via the sign-correct POV path).
+
 ## [0.28.0] — 2026-06-18
 
 ### Added
