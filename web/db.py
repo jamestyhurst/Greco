@@ -11,6 +11,7 @@ Alembic reads _DB_URL and models.Base.metadata to generate migrations:
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import List, Optional
 
@@ -26,9 +27,16 @@ from web.models import User  # noqa: F401  (re-exported public symbol)
 # ---------------------------------------------------------------------------
 
 _DB_PATH = Path(__file__).resolve().parent.parent / "greco_web.db"
-_DB_URL = f"sqlite:///{_DB_PATH}"
 
-engine = create_engine(_DB_URL, connect_args={"check_same_thread": False})
+# Phase 7: prefer DATABASE_URL env var (PostgreSQL on Render / Railway).
+# Render uses "postgres://" but SQLAlchemy 1.4+ requires "postgresql://".
+_DB_URL = os.environ.get("DATABASE_URL") or f"sqlite:///{_DB_PATH}"
+if _DB_URL.startswith("postgres://"):
+    _DB_URL = _DB_URL.replace("postgres://", "postgresql://", 1)
+
+# check_same_thread is SQLite-only; PostgreSQL raises if it is passed.
+_connect_args: dict = {"check_same_thread": False} if _DB_URL.startswith("sqlite") else {}
+engine = create_engine(_DB_URL, connect_args=_connect_args)
 
 # expire_on_commit=False keeps ORM attributes accessible after session.commit()
 # so we can return detached User objects without DetachedInstanceError.

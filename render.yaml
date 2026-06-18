@@ -1,0 +1,77 @@
+# Render deployment configuration for Greco — Phase 7.
+# See docs/DEPLOYMENT.md for the full step-by-step guide.
+#
+# Quick start:
+#   1. Push this repo to GitHub.
+#   2. Create a new "Blueprint" on Render and point it at the repo.
+#      Render reads this file and creates both the web service and the database.
+#   3. Set the required secrets in the Render dashboard (see envVars below).
+#   4. Deploy.
+
+services:
+  - type: web
+    name: greco
+    env: python
+    plan: starter   # free plan available but lacks persistent disk for reports
+    buildCommand: >-
+      apt-get update -qq &&
+      apt-get install -y --no-install-recommends stockfish &&
+      pip install -r requirements.txt &&
+      python -m alembic upgrade head
+    startCommand: uvicorn web.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    disk:
+      name: greco-reports
+      mountPath: /mnt/reports
+      sizeGB: 1
+    envVars:
+      # Wired automatically from the database block below.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: greco-db
+          property: connectionString
+
+      # Stockfish is installed in the build step above.
+      - key: STOCKFISH_PATH
+        value: /usr/games/stockfish
+
+      # Reports are stored on the persistent disk above.
+      - key: GRECO_REPORTS_DIR
+        value: /mnt/reports
+
+      # A random 64-char hex key is generated on first deploy and held stable.
+      # All user sessions become invalid if this changes — don't regenerate it.
+      - key: GRECO_SECRET_KEY
+        generateValue: true
+
+      # -----------------------------------------------------------------------
+      # Required — set these in the Render dashboard (Environment tab).
+      # -----------------------------------------------------------------------
+      - key: ANTHROPIC_API_KEY
+        sync: false   # your Anthropic API key; never commit this value
+
+      # Full URL of this service, e.g. https://greco.onrender.com
+      # Used in report-ready email links. Required for email to work.
+      - key: GRECO_APP_BASE_URL
+        sync: false
+
+      # -----------------------------------------------------------------------
+      # Optional — SMTP for "report ready" email notifications.
+      # Leave GRECO_SMTP_HOST blank to disable email (app still works without it).
+      # -----------------------------------------------------------------------
+      - key: GRECO_SMTP_HOST
+        sync: false
+      - key: GRECO_SMTP_PORT
+        value: "587"
+      - key: GRECO_SMTP_USER
+        sync: false
+      - key: GRECO_SMTP_PASSWORD
+        sync: false
+      - key: GRECO_SMTP_FROM
+        sync: false
+
+databases:
+  - name: greco-db
+    databaseName: greco
+    user: greco
+    plan: free

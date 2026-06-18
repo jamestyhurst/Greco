@@ -3,11 +3,6 @@
 These models define the schema. Alembic reads them to generate migrations.
 Application code imports from web.db (which re-exports User and provides
 all CRUD functions); direct imports from here are for migrations only.
-
-Phase 7 note: the SQLite → PostgreSQL swap requires only a URL change.
-The one SQLite-specific choice here is COLLATE NOCASE on username. When
-migrating to PostgreSQL, replace with a citext column or a partial lowercase
-unique index, and update get_user_by_username to compare case-insensitively.
 """
 from __future__ import annotations
 
@@ -26,10 +21,11 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    # COLLATE NOCASE makes username lookups case-insensitive in SQLite.
-    # See module docstring for the PostgreSQL migration path.
+    # Case-insensitive username comparison is done at query time via func.lower();
+    # no collation is needed in the column definition (avoids SQLite-specific NOCASE
+    # which would break PostgreSQL migrations).
     username: Mapped[str] = mapped_column(
-        String(30, collation="NOCASE"), unique=True, nullable=False
+        String(30), unique=True, nullable=False
     )
     email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
