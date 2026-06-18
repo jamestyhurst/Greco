@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import List, Optional
 from urllib.parse import unquote
 
+import chess
+
 from analyzer import GameAnalysis, MoveAnalysis
 from narrator import _humanize_time_control
 from renderers import render_eval_graph_png, save_board_svg
@@ -633,6 +635,7 @@ _VIEWER_JS = r"""
   var boardSvg = document.getElementById('gv-board');
   var statusEl = document.getElementById('gv-status');
   var movesEl  = document.getElementById('gv-moves');
+  var varsEl   = document.getElementById('gv-vars');
 
   function sqXY(file, rank){
     var col  = flip ? 7 - file : file;
@@ -725,12 +728,51 @@ _VIEWER_JS = r"""
       if(cur){ cur.classList.add('active'); cur.scrollIntoView({block: 'nearest'}); }
     }
   }
+  function showVars(i){
+    if(!varsEl) return;
+    varsEl.innerHTML = '';
+    var pl = PLIES[i];
+    if(!pl || !pl.vars || !pl.vars.length) return;
+    for(var v = 0; v < pl.vars.length; v++){
+      var vr = pl.vars[v];
+      if(!vr.plies || !vr.plies.length) continue;
+      var row = document.createElement('div');
+      row.className = 'gv-vars-row';
+      var lbl = document.createElement('span');
+      lbl.className = 'gv-vars-label';
+      lbl.textContent = vr.tp === 'best' ? 'Better:' : 'Then:';
+      row.appendChild(lbl);
+      for(var p = 0; p < vr.plies.length; p++){
+        (function(sp, fen, uci){
+          sp.addEventListener('click', function(){
+            renderBoard(fen, uci);
+            var prev = varsEl.querySelector('.gv-var-peek');
+            if(prev) prev.classList.remove('gv-var-peek');
+            sp.classList.add('gv-var-peek');
+          });
+        })(
+          (function(san){
+            var sp = document.createElement('span');
+            sp.className = 'gv-var-move';
+            sp.textContent = san;
+            sp.title = 'Peek at this position — press ←/→ to return to game';
+            row.appendChild(sp);
+            return sp;
+          })(vr.plies[p].san),
+          vr.plies[p].fen,
+          vr.plies[p].uci
+        );
+      }
+      varsEl.appendChild(row);
+    }
+  }
   function go(i){
     idx = Math.max(0, Math.min(PLIES.length - 1, i));
     var pl = PLIES[idx];
     renderBoard(pl.fen, pl.uci);
     updateStatus();
     highlightMove();
+    showVars(idx);
   }
   document.getElementById('gv-start').onclick = function(){ go(0); };
   document.getElementById('gv-prev').onclick  = function(){ go(idx - 1); };
@@ -814,8 +856,42 @@ _VIEWER_CSS = """
     .gv-move.active.gv-mv-blunder, .gv-move.active.gv-mv-mistake,
     .gv-move.active.gv-mv-inaccuracy, .gv-move.active.gv-mv-brilliant { color: #fff; }
     .gv-hint { font-size: 0.82rem; color: #777; margin-top: 0.4rem; }
-    @media print { .gv-controls, .gv-hint { display: none; } .gv-moves { max-height: none; } }
+    .gv-vars { min-height: 0; margin-top: 0.45rem; line-height: 1.55; }
+    .gv-vars-row { margin: 0.1rem 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    .gv-vars-label { font-size: 0.78rem; color: #8a7a5c; font-style: italic; margin-right: 0.25rem; }
+    .gv-var-move { display: inline-block; padding: 1px 5px; margin: 1px 2px;
+        border-radius: 3px; background: #f3e9cf; border: 1px solid #d9c7a0;
+        cursor: pointer; color: #5E151D; font-size: 0.85rem;
+        font-family: 'Helvetica Neue', Arial, sans-serif; }
+    .gv-var-move:hover { background: #e8dcb8; }
+    .gv-var-peek { background: #cdd16a !important; border-color: #b8bc4a !important; }
+    @media print { .gv-controls, .gv-hint, .gv-vars { display: none; } .gv-moves { max-height: none; } }
 """
+
+
+def _pv_to_fen_plies(fen_start: str, pv_san_numbered: str) -> list:
+    """Parse a numbered-SAN variation string into per-ply {san, fen, uci} dicts.
+
+    The input format is what pv_to_numbered_san() produces: '25. g5 exg5 26. fxg5'
+    or '24...Kg7 25. g5'. Move numbers are stripped, then each SAN is applied to a
+    copy of the board starting at fen_start. Returns [] on any parse error so the
+    viewer degrades gracefully when a variation can't be decoded.
+    """
+    clean = re.sub(r'\d+\.{1,3}\s*', '', pv_san_numbered or '').strip()
+    sans = clean.split() if clean else []
+    if not sans:
+        return []
+    try:
+        board = chess.Board(fen_start)
+        result = []
+        for san in sans:
+            move = board.parse_san(san)
+            uci = move.uci()
+            board.push(move)
+            result.append({"san": san, "fen": board.fen(), "uci": uci})
+        return result
+    except Exception:
+        return []
 
 
 def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
@@ -827,7 +903,7 @@ def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
     start_fen = game.moves[0].fen_before
     plies = [{"san": "", "fen": start_fen, "uci": "", "n": 0, "s": "", "ev": "", "cls": "", "br": False}]
     for m in game.moves:
-        plies.append({
+        d = {
             "san": m.san,
             "fen": m.fen_after,
             "uci": m.uci or "",
@@ -836,7 +912,22 @@ def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
             "ev": _viewer_eval_text(m.eval_after_cp, m.mate_after),
             "cls": m.classification,
             "br": bool(getattr(m, "is_brilliant", False)),
-        })
+        }
+        # Variation data: per-ply FENs so the viewer can play out engine lines.
+        # best_line starts from fen_before ("what to play instead").
+        # refutation_line starts from fen_after ("what your move runs into").
+        move_vars = []
+        if getattr(m, "best_line_san", ""):
+            best_plies = _pv_to_fen_plies(m.fen_before, m.best_line_san)
+            if best_plies:
+                move_vars.append({"tp": "best", "plies": best_plies})
+        if getattr(m, "refutation_line_san", ""):
+            ref_plies = _pv_to_fen_plies(m.fen_after, m.refutation_line_san)
+            if ref_plies:
+                move_vars.append({"tp": "ref", "plies": ref_plies})
+        if move_vars:
+            d["vars"] = move_vars
+        plies.append(d)
 
     payload = json.dumps({"flip": bool(flipped), "plies": plies}, ensure_ascii=True)
     # Defensive: never let a value end the <script> block early.
@@ -855,6 +946,7 @@ def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
 <button id="gv-flip" type="button" title="Flip board">&#8645; Flip</button>
 </div>
 <div id="gv-status" class="gv-status"></div>
+<div id="gv-vars" class="gv-vars"></div>
 </div>
 <div id="gv-moves" class="gv-moves"></div>
 </div>
