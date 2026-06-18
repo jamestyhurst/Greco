@@ -48,33 +48,36 @@ only path that makes Greco multi-user and phone-accessible, and it turns Greco f
 script-on-one-laptop into real, hosted software.
 
 The plan is **seven phases**, ordered so each one ships a Greco you'd want anyway and
-stands on its own (committed when done — a partial march still leaves Greco better):
+stands on its own (committed when done — a partial march still leaves Greco better).
+Target version numbers come from the PRD §7 milestone mapping.
 
-1. **Greco-on-localhost (the leap).** Put a web server in front of the existing pipeline:
-   browser → upload a PGN → HTML report, running on your machine first. Everything below
-   builds on this. The analysis pipeline stays unchanged behind it; this is the desktop →
-   web jump.
-2. **Async jobs + status page.** Stockfish analysis is slow, so run it in the background:
-   the page shows Queued → Analyzing → Narrating → Done → Failed, and reveals the report
-   when it's ready.
-3. **Accounts + roles.** Log in; each user sees their own games and reports; an admin
-   account can see all of them.
-4. **Database.** Replace the files-and-folders storage (`config.json`, the reports folder)
-   with a real database — SQLite locally to start, PostgreSQL once hosted — holding users,
-   games, reports, and jobs.
-5. **Phone-friendly UI + dashboard + export.** Make the web UI work well on a phone; add a
-   dashboard (your games, accuracy trend, recent reports) and CSV/PDF export. This absorbs
-   the old desktop-polish ideas: drag-and-drop upload and a recent-games list become web
-   features here, and "Save as PDF" becomes the export above. (PDF is a *static* snapshot for printing or
-   sharing — it can't carry the interactive board, so the interactive PGN viewer stays in
-   the HTML report and PDF is its lower-priority companion format; pursuing the viewer
-   doesn't rule out PDF. You can already "Print → Save as PDF" any HTML report from the
-   browser today, so a one-click PDF button is polish, not a blocker.)
-6. **Auto-import + "report ready" notification.** Generalize the Chess.com game finder
-   into "connect your account → auto-import new games → auto-analyze," and email you when a
-   report is ready.
-7. **Deploy it.** Host on Render or Railway with a real domain and HTTPS — Greco becomes a
-   live web app you can hand someone a link to.
+1. **Greco-on-localhost (the leap).** *(v0.10 — done)*
+   *After this phase: a user on this machine can generate a Greco report from a browser without opening a terminal.*
+   Put a web server in front of the existing pipeline: browser → upload a PGN → HTML report, running on your machine first. Everything below builds on this. The analysis pipeline stays unchanged behind it; this is the desktop → web jump.
+
+2. **Async jobs + status page.** *(target: v0.11)*
+   *After this phase: a user can submit a game and walk away — it processes in the background and the report appears when it's ready.*
+   Stockfish analysis is slow, so run it in the background: the page shows Queued → Analyzing → Narrating → Done → Failed, and reveals the report when it's ready.
+
+3. **Accounts + roles.** *(target: v0.12)*
+   *After this phase: a user has their own account and sees only their own games and reports.*
+   Log in; each user sees their own games and reports; an admin account can see all of them.
+
+4. **Database.** *(target: v0.13)*
+   *After this phase: games and reports survive a server restart and can be queried reliably.*
+   Replace the files-and-folders storage (`config.json`, the reports folder) with a real database — SQLite locally to start, PostgreSQL once hosted — holding users, games, reports, and jobs.
+
+5. **Phone-friendly UI + dashboard + export.** *(target: v0.14)*
+   *After this phase: a user can open Greco on their phone, see their game history, and export a report as PDF.*
+   Make the web UI work well on a phone; add a dashboard (your games, accuracy trend, recent reports) and CSV/PDF export. This absorbs the old desktop-polish ideas: drag-and-drop upload and a recent-games list become web features here, and "Save as PDF" becomes the export above. (PDF is a *static* snapshot for printing or sharing — it can't carry the interactive board, so the interactive PGN viewer stays in the HTML report and PDF is its lower-priority companion format; pursuing the viewer doesn't rule out PDF. You can already "Print → Save as PDF" any HTML report from the browser today, so a one-click PDF button is polish, not a blocker.)
+
+6. **Auto-import + "report ready" notification.** *(target: v0.15)*
+   *After this phase: a user can connect their Chess.com account and Greco will automatically analyze new games and email them when a report is ready.*
+   Generalize the Chess.com game finder into "connect your account → auto-import new games → auto-analyze," and email you when a report is ready.
+
+7. **Deploy it.** *(target: v1.0)*
+   *After this phase: anyone in the world can open a URL, sign up, upload a PGN, and get a Greco report — from any device, no install.*
+   Host on Render or Railway with a real domain and HTTPS — Greco becomes a live web app you can hand someone a link to.
 
 **Front-end layer (folded in from the old backlog):** the interactive PGN viewer and the
 in-browser "read aloud" are the front-end polish of Greco Online (backlog #8–#9).
@@ -102,14 +105,14 @@ was built stays visible.
 | # | Task | Size | Status |
 |---|------|------|--------|
 | 1 | **Greco Online · Phase 1** — web server over the pipeline: browser upload → report (localhost) — `web/main.py` + `run_greco_web.bat` (FastAPI; additive, desktop app untouched) | L | **done** |
-| 2 | **Greco Online · Phase 2** — async analysis jobs + status page (Queued → Analyzing → Done) | M | todo |
+| 2 | **Greco Online · Phase 2** — async analysis jobs + status page (Queued → Running → Done / Failed) — `web/jobs.py` (JobRegistry), `GET /job/{id}` JSON status, `GET /result/{id}` result page, `POST /analyze` now returns the `_WAITING` page immediately; background task drives the pipeline; JS polls every 2 s and auto-navigates on Done | M | **done** |
 | 3 | **Greco Online · Phase 3** — accounts + roles (login, per-user games, admin) | L | todo |
 | 4 | **Greco Online · Phase 4** — database (SQLite locally → PostgreSQL hosted) | M | todo |
 | 5 | **Greco Online · Phase 5** — phone-friendly UI + dashboard + CSV/PDF export | M | todo |
 | 6 | **Greco Online · Phase 6** — account auto-import + "report ready" email | M | todo |
 | 7 | **Greco Online · Phase 7** — deploy (Render/Railway, domain, HTTPS) | M | todo |
 | 8 | Interactive PGN viewer in the report HTML — *front-end layer of Greco Online* — self-contained JS board + move navigation, keyboard controls, color-coded move list, eval display, flip button | L | **done** |
-| 9 | "Read aloud" in the report HTML — *front-end layer of Greco Online* — Web Speech API (`speechSynthesis`), no extra files | M | todo |
+| 9 | "Read aloud" in the report HTML — *front-end layer of Greco Online* — Web Speech API (`speechSynthesis`), no extra files | M | **done** |
 | 10 | `knowledge/` corpus — public-domain chess books retrieved (RAG, SQLite FTS5) and wired into the narrator; themes detected from engine ground truth. **Infrastructure built & verified (`knowledge.py`); awaiting content** (deposit per `knowledge/README.md`). | M | **infra done · content todo** |
 | 11 | Bulk-gather more commentary transcripts (Agadmator + SammyChess) | M | todo |
 | 12 | Tighten the OTB classical-vs-rapid classifier (or use a curated source) | S | todo |
@@ -124,14 +127,15 @@ was built stays visible.
 | 21 | **Deterministic featured passage** — pick one best chunk and hand the model a finished, attributed, verbatim quote. | M | **done** (v0.9.0) |
 | 22 | **Clickable variations in the replay viewer** — emit per-ply FENs for `variations` so a written line plays out on the board (2A phase 2; the per-ply data is the only missing piece). | M | todo |
 | 23 | **Per-ply material trajectory along engine lines** — annotate captures in `best_pv`/variations so "show the money" is computed, not model-tallied. | M | todo |
-| 24 | **Computed decisive-moments block** — biggest eval swings + first-decisive ply, to ground the closing-summary claims in data rather than recollection. | S | todo |
+| 24 | **Computed decisive-moments block** — biggest eval swings + first-decisive ply, to ground the closing-summary claims in data rather than recollection. | S | **done** |
 | 25 | **Multi-move sacrifice detection** — flag a material-down / eval-up window across plies in code (today the model judges it from the trajectory). | M | todo |
-| 26 | **Auto-strip confabulated variation moves** — promote `find_unverified_variation_moves` from a warning to an enforced edit, once it is trusted not to mangle good prose. | S | todo |
-| 27 | **GUI/web per-player context fields** — let desktop/web users supply structured "White is my dad, an attacker" context (CLI-only via `--white-context` today). | S | todo |
+| 26 | **Auto-strip confabulated variation moves** — promote `find_unverified_variation_moves` from a warning to an enforced edit, once it is trusted not to mangle good prose. | S | **done** |
+| 27 | **GUI/web per-player context fields** — let desktop/web users supply structured "White is my dad, an attacker" context (CLI-only via `--white-context` today). | S | **done** |
 | 28 | **Output Fact-Gate predicate library** (`factgate.py`) — per-ply allow-set of engine-certified claims (fork, pin, rook-lift, outpost, passed-pawn, mate-threat) + scoped prompt rule. The output-side mirror of the input validation gate. | L | **done** (v0.10.0) |
 | 29 | **Layer-2 claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`) — deterministic CI-safe contradiction checks (exit-1 gate) + an advisory LLM-judge; runs off a saved analysis. | L | **done** (v0.10.0) |
 | 30 | **Grow the predicate library + chess glossary** — more certified claim types; definitions=corpus in `knowledge/`, detection=code predicates (James's output-gate doctrine). | M | todo |
-| 31 | **Wire `verify_report` into the release/CI loop** — run the deterministic gate on a sample report in `ship.py` / CI so a confabulation regression fails the build. | S | todo |
+| 31 | **Wire `verify_report` into the release/CI loop** — run the deterministic gate on a sample report in `ship.py` / CI so a confabulation regression fails the build. | S | **done** |
+| 32 | **Essay Mode** — candidate fourth mode; answers chess questions analytically using the knowledge corpus; PGN optional as illustrative material. Design spec pending — see `Developer Notes (Greco)/Handoffs/package-d-essay-mode.md` before implementing. | M | todo (design first) |
 
 **Folded in / superseded:**
 - *Polish (Save-as-PDF, drag-and-drop a PGN, recent-games list)* — absorbed into Greco

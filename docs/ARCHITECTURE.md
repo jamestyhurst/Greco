@@ -1,5 +1,20 @@
 # Greco Architecture (brief)
 
+## Governing documents
+
+The authoritative statement of what Greco is for and how it should behave lives outside
+this repo, in `Documents/Developer Notes (Greco)/`:
+
+| Document | Purpose |
+|---|---|
+| `greco-design-concept-v1.md` | Product design intent — the "what and why." When the codebase diverges from this, the document wins unless James decides otherwise. |
+| `greco-prd-v1.md` | Numbered requirements (R-codes) — the "how specifically." Check R-CM/R-CO/R-CMT requirements before changing voice prompts; check R-IN before changing inputs. |
+| `greco-retrospective-2026-06-17.md` | Gap analysis of v0.10.0 vs. the design concept; priority fixes table. |
+
+These are loaded automatically by `CLAUDE.md` in every Greco session.
+
+---
+
 Greco is a **pipeline**. The GUI and CLI are thin front-ends; all the analysis lives in
 the modules below. The front-ends add **no analysis logic**.
 

@@ -7,6 +7,75 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-06-17
+
+### Added
+- **Knowledge corpus expansion — 9 new public-domain texts (2026-06-17).** Corpus grew from
+  3 seed entries to 12 text sources (658 → 1223 FTS5 chunks). New books deposited, all
+  pre-1931 US public domain:
+  - `opening_theory` bucket: *Chess Generalship* (Young, 1910; Gutenberg #55278), *The Blue
+    Book of Chess* (Staunton ed., 1889; Gutenberg #16377), *Chess History and Reminiscences*
+    (Bird, 1893; Gutenberg #4902), *Chess Openings, Ancient and Modern* (Freeborough &
+    Ranken, 1896; archive.org, OCR-cleaned), *Studies of Chess* (Philidor ed. Pratt, 1803;
+    Gutenberg #78804), *The Exploits and Triumphs of Paul Morphy* (Edge, 1859; Gutenberg
+    #34180), *Morphy's Games of Chess* (Löwenthal ed., 1860; archive.org, OCR-cleaned).
+  - `chess_principles` bucket: *Chess Strategy* (Edward Lasker, 1915; Gutenberg #5614),
+    *Chess and Checkers: The Way to Mastership* (Edward Lasker, 1918; Gutenberg #4913).
+  - `SHOPPING_LIST.md` updated with acquisition dates; `MANIFEST.md` updated with legal basis
+    for all new entries. Fishburne FEN-database books (#4542, #4656) excluded.
+  - `tools/fetch_gutenberg.py` patched to use the OS truststore (`truststore.SSLContext`)
+    so downloads work behind the corporate TLS proxy on this machine.
+- **Greco Online Phase 2 — async jobs + status page** (#2, target v0.11). `POST /analyze`
+  now returns a `_WAITING` page immediately and submits the pipeline as a FastAPI
+  `BackgroundTask`. New module `web/jobs.py`: `JobStatus` enum (queued/running/done/failed),
+  `Job` dataclass, thread-safe `JobRegistry`. New `GET /job/{id}` JSON endpoint for polling.
+  New `GET /result/{id}` page renders the finished report or error. The waiting page polls
+  every 2 s via `fetch()` and auto-navigates when done. Fully tested (11 new tests in
+  `tests/test_web_jobs.py`; `tests/test_web.py` updated to test the async flow end-to-end).
+- **"Read aloud" button in report HTML** (#9). A floating `♪ Read aloud` toggle button
+  injected into every generated `.html` report via the Web Speech API (`speechSynthesis`).
+  Reads narrative paragraphs one by one with gold-highlight tracking; stops on the second
+  click or when the report ends. Hides itself gracefully when the API is absent (Safari iOS /
+  older browsers). `markdown_to_html` gains an opt-out `read_aloud=False` parameter.
+- **`strip_unverified_variations(md, game)`** in `outputs.py` — backlog #26. Promotes the
+  existing confabulation detector from a `stderr` warning to an enforced strip: any
+  parenthetical variation containing a move not in the engine lines is silently removed from
+  the Markdown before the report is assembled. The surrounding prose is preserved. Called
+  automatically in `assemble_report`; 8 new tests in `tests/test_strip_variations.py`.
+- **`build_user_prompt` structured context inputs** — backlog #27. `audience_level`,
+  `recipient`, `white_player`, `black_player` context blocks now thread from all three
+  front-ends (GUI, web form, CLI) into the narrator prompt. Audience-level selector and
+  recipient field added to both the Tkinter GUI and the FastAPI web form. Tested in
+  `tests/test_narrator_context.py` and `tests/test_web.py`.
+- **Computed decisive-moments block** in the narrator user prompt (#24). `_decisive_moments()`
+  pre-computes the biggest eval swings and first decisive ply; the result is injected into
+  every prompt to ground the closing summary. Tested in `tests/test_narrator_decisive.py`.
+- **`verify_report` integration tests and `ship.py` gate** (#31).
+  `tests/test_verify_integration.py` exercises the full `_move_to_dict → verify_report`
+  pipeline with synthetic data (no Stockfish, no API key). `scripts/ship.py` step 2b
+  optionally runs `tools/verify_report.py --no-llm` against saved fixtures when they exist.
+
+### Changed
+- **`VOICE_COMPANION` rewritten from "spectator-commentator" to "witness and gift".**
+  The opening no longer frames the AI as a chess commentator performing for an audience.
+  It now operates in one of two clearly defined orientations detected from the user's note:
+  Chess Witness (a private conversation with a knowledgeable friend who was there) and
+  Gift/Keepsake (a report addressed to a named recipient, scaled to their chess level and
+  relational context). Each orientation has explicit instructions; the closing no longer
+  mimics a commentator sign-off.
+- **`VOICE_COACHING` gains the affirmative human-chess principle.** An explicit paragraph
+  credits bluffing, demoralisation, and choosing positions that exploit a specific human
+  opponent as valid coaching concepts — not just "mistakes with understandable psychology"
+  but potentially correct decisions against a human. "Bluffing" and "demoralising the
+  opponent" added to the cognitive pattern vocabulary.
+- **`VOICE_COMMENTARY` gains spectator-event framing for personal games.** When the user
+  was a participant, the narration now frames the game as a watched event — creating the
+  social experience of having had an audience, even for a casual game.
+- **`docs/ROADMAP.md`:** each phase now opens with a user story ("after this phase, a user
+  can…") and a PRD-aligned version target (v0.11–v1.0). Essay Mode added as backlog #32.
+- **`docs/ARCHITECTURE.md`:** governing documents table added at the top, pointing to
+  the design concept, PRD, and retrospective as the design authority for this codebase.
+
 ## [0.10.0] — 2026-06-14
 
 The **Output Fact-Gate** and the **Layer-2 self-test** — the structural answer to the
