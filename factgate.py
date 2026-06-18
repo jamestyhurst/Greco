@@ -38,6 +38,7 @@ from typing import List, Optional, Set, Tuple
 import chess
 
 from analyzer import (  # pure board helpers — none touch Stockfish or the API key
+    detect_discovered_attack,
     detect_double_attack,
     detect_pin,
     detect_royal_alignment,
@@ -657,6 +658,21 @@ def creates_skewer(
     return (result is not None, result)
 
 
+def creates_discovered_attack(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[str]]:
+    """Certifies a 'discovered_attack': a friendly slider was blocked before the move and
+    now bears on an enemy target because the front piece vacated. Covers plain discovered
+    attacks, discovered check, and double check. Wraps analyzer.detect_discovered_attack
+    which enforces: castling/null-move veto, vacated-set + colinearity proof, before-clear
+    + was-occupied VETO 5, causation guard, pin-as-flag (not veto), king-first ranking."""
+    result = detect_discovered_attack(board_before, move, board_after, mover_color)
+    return (result is not None, result)
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -668,6 +684,7 @@ GATED_TAGS = (
     "royal_pin_setup",
     "pin",
     "skewer",
+    "discovered_attack",
     "rook_lift",
     "outpost",
     "passed_pawn",
@@ -741,6 +758,12 @@ def certified_claims(
     sk = _safe(lambda: creates_skewer(board_after, mover_color))
     if sk and sk[0]:
         tags.add("skewer")
+
+    da = _safe(
+        lambda: creates_discovered_attack(board_before, move, board_after, mover_color)
+    )
+    if da and da[0]:
+        tags.add("discovered_attack")
 
     op = _safe(lambda: is_outpost(board_after, move.to_square, mover_color))
     if op and op[0]:

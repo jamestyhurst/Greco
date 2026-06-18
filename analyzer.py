@@ -708,6 +708,198 @@ def detect_skewer(board: chess.Board, mover_color: bool) -> Optional[dict]:
     return None
 
 
+def detect_discovered_attack(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Optional[str]:
+    """Detect a discovered attack (plain, discovered check, or double check) after a move.
+
+    Returns an evidence string for the best revealed attack, or None. The rear piece is a
+    friendly slider that was blocked by a friendly piece before the move and now bears on an
+    enemy target. Rules follow docs/specs/predicates/03-discovered_attack.md.
+    """
+    # VETO 1: null / no-op — a discovery requires a piece to vacate a square
+    if move == chess.Move.null() or move.from_square == move.to_square:
+        return None
+
+    # VETO 2: castling — both royal pieces move; king-as-front-piece mislabels rook
+    # development as a discovery. Use board_before.is_castling for king-takes-rook encoding.
+    if board_before.is_castling(move):
+        return None
+
+    from_sq = move.from_square
+    to_sq = move.to_square
+    enemy = not mover_color
+
+    # VETO 3: collect vacated squares.
+    # Always the from-square; for en passant also the captured pawn's square (it disappears
+    # from a square that is neither from_sq nor to_sq, so a discovery on that diagonal/file
+    # would be missed if we only look at from_sq).
+    vacated = {from_sq}
+    if board_before.is_en_passant(move):
+        cap_sq = chess.square(chess.square_file(to_sq), chess.square_rank(from_sq))
+        vacated.add(cap_sq)
+
+    # VETO 4 + 5: enumerate candidate (b_sq, v_sq) pairs —
+    # rear slider B colinear with vacated square v_sq, B's ray clear to v_sq, v_sq occupied.
+    candidates = []
+    for v_sq in vacated:
+        vf = chess.square_file(v_sq)
+        vr = chess.square_rank(v_sq)
+        for piece_type in (chess.BISHOP, chess.ROOK, chess.QUEEN):
+            for b_sq in board_after.pieces(piece_type, mover_color):
+                # Moved/promoted piece is never the rear; v_sq already excluded
+                if b_sq == to_sq or b_sq == v_sq:
+                    continue
+                bf = chess.square_file(b_sq)
+                br = chess.square_rank(b_sq)
+                df = vf - bf
+                dr = vr - br
+                # VETO 4: colinearity gate per slider type
+                if piece_type == chess.BISHOP:
+                    if abs(df) != abs(dr) or df == 0:
+                        continue
+                elif piece_type == chess.ROOK:
+                    if df != 0 and dr != 0:
+                        continue  # rook cannot discover along a diagonal
+                else:  # QUEEN: accept diagonal or straight, reject off-axis
+                    is_diag = abs(df) == abs(dr) and df != 0
+                    is_straight = (df == 0) != (dr == 0)
+                    if not (is_diag or is_straight):
+                        continue
+                # VETO 5a: B's ray to v_sq was clear before (v_sq was the first blocker)
+                if not all(
+                    board_before.piece_at(s) is None
+                    for s in chess.SquareSet(chess.between(b_sq, v_sq))
+                ):
+                    continue
+                # VETO 5b: v_sq was occupied — that was the piece blocking B's ray
+                if board_before.piece_at(v_sq) is None:
+                    continue
+                candidates.append((b_sq, v_sq))
+
+    if not candidates:
+        return None
+
+    # CONFIRM: find the best revealed target across all candidates
+    enemy_king_sq = board_after.king(enemy)
+    best_priority: Optional[tuple] = None
+    best_result: Optional[tuple] = None
+
+    for b_sq, v_sq in candidates:
+        # CONFIRM 1: existence guard — same piece at b_sq in both boards
+        bp = board_before.piece_at(b_sq)
+        ap = board_after.piece_at(b_sq)
+        if bp is None or ap is None:
+            continue
+        if bp.piece_type != ap.piece_type or bp.color != ap.color:
+            continue
+
+        # CONFIRM 2: compute revealed = newly reachable squares
+        revealed = board_after.attacks(b_sq) - board_before.attacks(b_sq)
+        if not revealed:
+            continue
+
+        for t_sq in revealed:
+            t_piece = board_after.piece_at(t_sq)
+            if t_piece is None or t_piece.color != enemy:
+                continue
+
+            # CONFIRM 3: causation guard — v_sq must lie between b_sq and t_sq (binds
+            # the revealed target to this vacancy, not an unrelated change on another ray),
+            # and the path v_sq→t_sq must be clear in board_after (first piece B now sees).
+            if v_sq not in chess.SquareSet(chess.between(b_sq, t_sq)):
+                continue
+            if not all(
+                board_after.piece_at(s) is None
+                for s in chess.SquareSet(chess.between(v_sq, t_sq))
+            ):
+                continue
+
+            # CONFIRM 4: target typing
+            target_pt = t_piece.piece_type
+            is_dc = (t_sq == enemy_king_sq) and board_after.is_check()
+
+            # CONFIRM: double check — both the moved piece (to_sq) and rear slider (b_sq)
+            # must each be in board_after.attackers of the enemy king.
+            is_dbl = False
+            if is_dc and enemy_king_sq is not None:
+                atk = board_after.attackers(mover_color, enemy_king_sq)
+                is_dbl = to_sq in atk and b_sq in atk and b_sq != to_sq
+
+            # CONFIRM 6: pin handling — flag, do NOT veto. A pinned rear piece still
+            # delivers a geometrically real discovered attack; we certify and expose a flag.
+            rear_can_capture = True
+            if board_after.is_pinned(mover_color, b_sq):
+                if is_dc:
+                    rear_can_capture = True  # giving check: pin irrelevant
+                else:
+                    own_king = board_after.king(mover_color)
+                    if own_king is not None:
+                        # t_sq is on the pin ray iff b_sq lies between own king and t_sq
+                        rear_can_capture = (
+                            b_sq in chess.SquareSet(chess.between(own_king, t_sq))
+                        )
+                    else:
+                        rear_can_capture = False
+
+            rear_hanging = (
+                board_after.is_attacked_by(enemy, b_sq)
+                and not board_after.is_attacked_by(mover_color, b_sq)
+            )
+
+            # Priority: double check > discovered check > king-first then by piece value
+            # (PIECE_VALUES[KING]==0 would bury the king in a naive value-sort — explicit key)
+            if is_dbl:
+                priority: tuple = (0, 0, 0)
+            elif is_dc:
+                priority = (1, 0, 0)
+            else:
+                k_first = 0 if target_pt == chess.KING else 1
+                priority = (2, k_first, -PIECE_VALUES[target_pt])
+
+            if best_priority is None or priority < best_priority:
+                best_priority = priority
+                best_result = (b_sq, v_sq, t_sq, target_pt, is_dc, is_dbl,
+                               rear_can_capture, rear_hanging)
+
+    if best_result is None:
+        return None
+
+    b_sq, v_sq, t_sq, target_pt, is_dc, is_dbl, rear_can_capture, rear_hanging = best_result
+
+    # Build evidence string using PIECE_NAMES + chess.square_name (no re-derivation)
+    rear_name = PIECE_NAMES[board_after.piece_at(b_sq).piece_type]
+    front_before = board_before.piece_at(from_sq)
+    front_name = PIECE_NAMES[front_before.piece_type] if front_before else "piece"
+    target_name = PIECE_NAMES[target_pt]
+
+    b_name = chess.square_name(b_sq)
+    from_name = chess.square_name(from_sq)
+    to_name = chess.square_name(to_sq)
+    t_name = chess.square_name(t_sq)
+
+    opening = (
+        f"the {front_name} moves from {from_name} to {to_name},"
+        f" uncovering the {rear_name} on {b_name}"
+    )
+    if is_dc:
+        evidence = opening + f" which now gives check to the king on {t_name} (discovered check)"
+        if is_dbl:
+            evidence += f" — double check (both the {front_name} and the {rear_name} give check)"
+    else:
+        evidence = opening + f" which now attacks the {target_name} on {t_name} (discovered attack)"
+        if not rear_can_capture:
+            evidence += f" (though the {rear_name} is pinned and cannot capture)"
+
+    if rear_hanging:
+        evidence += f" — but the {rear_name} is itself hanging"
+
+    return evidence
+
+
 def _doubled_files(board: chess.Board, color: bool):
     counts: Dict[int, int] = {}
     for sq in board.pieces(chess.PAWN, color):

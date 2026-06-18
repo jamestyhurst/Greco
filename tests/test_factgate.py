@@ -734,3 +734,88 @@ def test_skewer_in_certified_claims():
     b, mv, a = _push("6kr/8/8/8/8/8/1R6/6K1 w - - 0 1", "b2b8")
     tags = F.certified_claims(b, mv, a, chess.WHITE)
     assert "skewer" in tags
+
+
+# --- creates_discovered_attack / detect_discovered_attack -------------------
+
+def test_discovered_check_knight_reveals_rook():
+    # Ne5-g4: knight vacates e5, rook e1 reveals check to e8 king (only the rook checks)
+    b, mv, a = _push("4k3/8/8/4N3/8/8/8/4R1K1 w - - 0 1", "e5g4")
+    ok, ev = F.creates_discovered_attack(b, mv, a, chess.WHITE)
+    assert ok
+    assert ev is not None
+    assert "discovered check" in ev
+    assert "double check" not in ev
+
+
+def test_double_check_knight_and_rook():
+    # Ne4-f6: knight checks e8 from f6 AND rook e1 reveals through vacated e4 — double check
+    b, mv, a = _push("4k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1", "e4f6")
+    ok, ev = F.creates_discovered_attack(b, mv, a, chess.WHITE)
+    assert ok
+    assert ev is not None
+    assert "double check" in ev
+    assert "discovered check" in ev
+
+
+def test_plain_discovered_attack_bishop_onto_queen():
+    # Nd4-f5: knight vacates d4 (on a1-h8 diagonal), bishop a1 reveals onto black queen e5
+    b, mv, a = _push("8/7k/8/4q3/3N4/8/8/B6K w - - 0 1", "d4f5")
+    ok, ev = F.creates_discovered_attack(b, mv, a, chess.WHITE)
+    assert ok
+    assert ev is not None
+    assert "discovered attack" in ev
+    assert "queen" in ev
+
+
+def test_pinned_rear_piece_still_certified():
+    # Bf4-e5: bishop leaves f-file, rook f1 reveals onto black rook f8.
+    # White rook is pinned to king a1 by black queen h1 along rank 1 (different from f-file).
+    # Discovery is geometrically real → certify; evidence names the pin constraint.
+    b, mv, a = _push("5r1k/8/8/8/5B2/8/8/K4R1q w - - 0 1", "f4e5")
+    ok, ev = F.creates_discovered_attack(b, mv, a, chess.WHITE)
+    assert ok
+    assert ev is not None
+    assert "pinned and cannot capture" in ev
+
+
+def test_en_passant_opens_discovery():
+    # d5xe6 en passant: captured black pawn on e5 disappears, opening bishop b2's diagonal
+    # to black rook on f6 (discovery via cap_sq, not from_sq).
+    b, mv, a = _push("7k/8/5r2/3Pp3/8/8/1B6/K7 w - e6 0 1", "d5e6")
+    ok, ev = F.creates_discovered_attack(b, mv, a, chess.WHITE)
+    assert ok
+    assert ev is not None
+    assert "discovered attack" in ev
+
+
+def test_negative_castling_vetoed():
+    # Castling is VETO 2 — not a classic front-piece discovery
+    b, mv, a = _push("4k3/8/8/8/8/8/8/4K2R w K - 0 1", "e1g1")
+    ok, ev = F.creates_discovered_attack(b, mv, a, chess.WHITE)
+    assert ok is False
+    assert ev is None
+
+
+def test_negative_null_move():
+    # Null move is VETO 1
+    board = chess.Board("4k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1")
+    result = F.creates_discovered_attack(board, chess.Move.null(), board, chess.WHITE)
+    ok, ev = result
+    assert ok is False
+    assert ev is None
+
+
+def test_negative_no_rear_slider():
+    # No white sliders exist: knight is the only white piece (besides king) — no discovery
+    b, mv, a = _push("8/4q3/8/8/8/3N4/8/K6k w - - 0 1", "d3f4")
+    ok, ev = F.creates_discovered_attack(b, mv, a, chess.WHITE)
+    assert ok is False
+    assert ev is None
+
+
+def test_discovered_attack_in_certified_claims():
+    # Double-check position: Ne4-f6 should certify "discovered_attack" in the full gate
+    b, mv, a = _push("4k3/8/8/8/4N3/8/8/4R1K1 w - - 0 1", "e4f6")
+    tags = F.certified_claims(b, mv, a, chess.WHITE)
+    assert "discovered_attack" in tags

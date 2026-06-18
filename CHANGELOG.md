@@ -7,6 +7,30 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.24.0] — 2026-06-18
+
+### Added
+- **`analyzer.detect_discovered_attack()`** — detects plain discovered attacks, discovered
+  check, and double check. Before/after attack-set diff (`board.attacks` set-difference) with
+  a causation guard that binds each revealed target to the specific vacated square that opened
+  B's ray. Key design choices vs the draft: (1) VETO 2 uses `board_before.is_castling()`
+  (robust to king-takes-own-rook encoding); (2) en passant cap_sq joins `vacated` so a line
+  opened solely by the captured pawn's disappearance is caught; (3) pinned rear piece is NOT
+  vetoed — geometry is real, a `rear_can_capture_target` flag (checked via `b_sq in
+  chess.between(own_king, t_sq)`) lets the narrator hedge; (4) king-first ranking uses an
+  explicit `(0 if KING else 1, -PIECE_VALUES[pt])` key because `PIECE_VALUES[KING]==0` would
+  bury the king in a naïve value-sort; (5) double-check upgrades discovered-check when both
+  `to_sq` and `b_sq` are in `board_after.attackers(mover, enemy_king)`. Evidence string
+  adapts per sub-case (plain / discovered check / double check) and appends pinned/hanging
+  qualifiers when relevant.
+- **`factgate.creates_discovered_attack()`** — thin wrapper; `"discovered_attack"` registered
+  in `GATED_TAGS` and wired into `certified_claims()`. Narrator whitelist updated with
+  guidance: name the front piece that moved, the rear slider that reveals, and the target;
+  distinguish discovered check from double check; never use the term without the tag.
+- 9 new tests covering: discovered check, double check, plain attack, pinned rear (certified
+  with note), en passant discovery, castling veto, null-move veto, no-slider negative, and
+  full `certified_claims` integration. 95/95 passing.
+
 ## [0.23.0] — 2026-06-18
 
 ### Added
