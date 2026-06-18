@@ -7,17 +7,22 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.39.2] — 2026-06-18
+
 ### Added
-- **Knowledge corpus expansion** (backlog #16) — 8 new public-domain chess books deposited and indexed in this session:
+- **Knowledge corpus expansion** (backlog #16) — 8 new public-domain chess books deposited and indexed:
   - *Common Sense in Chess* (Emanuel Lasker, 1896) — 12 lectures from the World Champion; chess_principles
   - *The Minor Tactics of Chess* (Young & Howell, 1894) — pattern-level tactics; chess_principles
   - *The Major Tactics of Chess* (Young & Howell, 1896) — companion tactics volume; chess_principles
   - *The Chess Openings* (H. E. Bird, 1880) — 222-page opening survey; opening_theory
   - *The Modern Chess Instructor* (Wilhelm Steinitz, 1889) — opening theory + method from the first World Champion (~98k words); opening_theory
-  - *Book of the Sixth American Chess Congress* (ed. Steinitz, 1891) — all games from 1889 NY International tournament, annotated; opening_theory
+  - *Book of the Sixth American Chess Congress* (ed. Steinitz, 1891) — 1889 NY International tournament games annotated; opening_theory
   - *The Hastings Chess Tournament 1895* (ed. Cheshire, 1896) — 230 annotated games (Pillsbury, Lasker, Tarrasch, Chigorin, Steinitz); opening_theory
   - *International Chess Tournament 1883* (ed. Minchin; annotated by Zukertort, Steinitz, Mason, Bird) — London 1883, 195k words; opening_theory
-  Corpus: 20 text works + 1 PGN + 1 terminology file, **2965 FTS5 chunks**. All archive.org OCR sources; double-spaces collapsed. `.gitignore` extended to cover `*.db-journal`, `*.db-wal`, `*.db-shm`.
+  Corpus: 20 text works + 1 PGN + 1 terminology file, **2965 FTS5 chunks**.
+
+### Changed
+- **Versioning protocol** — `feat:` now bumps PATCH (was MINOR); new `release:` type bumps MINOR and is used deliberately when a batch of changes forms a named milestone. Individual features and bug fixes accumulate as PATCH increments. Updated `bump_version.py`, `CLAUDE.md`, and `docs/ROADMAP.md`.
 
 ## [0.39.1] — 2026-06-18
 
