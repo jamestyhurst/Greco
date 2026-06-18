@@ -1625,6 +1625,69 @@ def is_zwischenzug(
 
 
 # --------------------------------------------------------------------------- #
+# Initiative — checking sequence (PV-dependent, wired in narrator._move_to_dict).
+# --------------------------------------------------------------------------- #
+def is_initiative(
+    fen_after: str,
+    refutation_line_san: str,
+    mover_color: bool,
+) -> Optional[dict]:
+    """Certifies 'initiative': the move gives check AND the mover's next move in the
+    engine PV is also a check — two consecutive checks indicating sustained forcing
+    pressure. The current check is confirmed from fen_after; the follow-up check is
+    read from the second SAN token of refutation_line_san (opponent's reply is token 0,
+    mover's continuation is token 1 — a '+' in token 1 is the confirm).
+
+    fen_after           — FEN after the move (opponent to move, in check).
+    refutation_line_san — numbered SAN of the engine's best line from fen_after
+                          (starts with the opponent's reply, then mover's next move).
+    mover_color         — True = White.
+    """
+    # VETO 1: current move must give check
+    try:
+        board_after = chess.Board(fen_after)
+    except Exception:
+        return None
+    if not board_after.is_check():
+        return None
+
+    # VETO 2: checkmate is the ultimate win, not a sustained initiative pattern
+    if board_after.is_checkmate():
+        return None
+
+    # VETO 3: no PV line to inspect
+    if not refutation_line_san:
+        return None
+
+    # Strip move-number markers ("15.", "15...") and collect bare SAN tokens
+    moves_only = [t for t in refutation_line_san.split() if not re.match(r'^\d+\.+$', t)]
+
+    # VETO 4: need opponent's reply (index 0) plus mover's next (index 1)
+    if len(moves_only) < 2:
+        return None
+
+    opp_reply = moves_only[0]
+    mover_next = moves_only[1]
+
+    # CONFIRM: mover's next move in the PV is a check ('+' in SAN token)
+    if '+' not in mover_next:
+        return None
+
+    side = "White" if mover_color == chess.WHITE else "Black"
+    evidence = (
+        f"{side} maintains the initiative — after {opp_reply}, "
+        f"{mover_next} delivers a second consecutive check, keeping {side} on the attack"
+    )
+    return {
+        "tag": "initiative",
+        "opp_reply": opp_reply,
+        "second_check": mover_next,
+        "side": side,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1655,6 +1718,7 @@ GATED_TAGS = (
     "tempo_gain",
     "weak_square",
     "zwischenzug",
+    "initiative",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a

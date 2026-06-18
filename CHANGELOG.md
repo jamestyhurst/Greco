@@ -7,6 +7,13 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.35.0] — 2026-06-18
+
+### Added
+- **`factgate.is_initiative(fen_after, refutation_line_san, mover_color)`** — sixth Tier-B certified claim. Certifies a checking sequence: the current move gives check AND the mover's next token in the engine PV line is also a check (contains `+`). Board-only logic (no engine calls); wired from narrator `_move_to_dict` Tier-1+ block (needs `refutation_line_san` from `MoveAnalysis`, so lives outside `certified_claims`). VETOs: not in check; checkmate; no PV line; PV has fewer than 2 tokens; second token lacks `+`. Evidence bundle `{tag, opp_reply, second_check, side, evidence}`. `"initiative"` added to `GATED_TAGS`; tag gates specifically the *consecutive-checking* claim — not the general positional concept of initiative.
+- **`initiative_evidence` serialized** as `d["initiative_evidence"]` in narrator.py `_move_to_dict` Tier-1+ block; adds `"initiative"` to `d["certified"]`; narrator clause gates "consecutive checking initiative" vocabulary to require the tag without restricting general use of the word "initiative."
+- 7 new tests (203 total factgate, 454 across the full suite).
+
 ## [0.34.0] — 2026-06-18
 
 ### Added

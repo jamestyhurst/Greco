@@ -1818,3 +1818,56 @@ def test_is_zwischenzug_integration_certified_claims():
     board_after.push(_ZWIG_MOVE_CHECK)
     tags = F.certified_claims(_ZWIG_BOARD_BEFORE, _ZWIG_MOVE_CHECK, board_after, chess.WHITE)
     assert "zwischenzug" in tags
+
+
+# --- is_initiative -----------------------------------------------------------
+# Position after White Rd8+: Black King e8 in check (escape squares e7, f7, d7 …).
+# White Rook d8 on 8th rank gives check; after Ke7, Rd7+ delivers the second check.
+_INIT_CHECK_FEN = "3Rk3/8/8/8/8/8/8/4K3 b - - 0 1"   # Black to move, in check
+
+
+def test_is_initiative_positive():
+    # PV: Black Ke7, then White Rd7+ — second check fires.
+    result = F.is_initiative(_INIT_CHECK_FEN, "1... Ke7 2. Rd7+", chess.WHITE)
+    assert result is not None
+    assert result["tag"] == "initiative"
+    assert result["second_check"] == "Rd7+"
+    assert result["opp_reply"] == "Ke7"
+
+
+def test_is_initiative_positive_keys_present():
+    result = F.is_initiative(_INIT_CHECK_FEN, "1... Ke7 2. Rd7+", chess.WHITE)
+    assert result is not None
+    for key in ("tag", "opp_reply", "second_check", "side", "evidence"):
+        assert key in result, f"missing key: {key}"
+
+
+def test_is_initiative_veto1_not_in_check():
+    # Quiet position — not in check.
+    quiet_fen = "8/8/8/8/8/8/8/4K2k b - - 0 1"
+    result = F.is_initiative(quiet_fen, "1... Kh2 2. Kd1+", chess.WHITE)
+    assert result is None
+
+
+def test_is_initiative_veto2_checkmate():
+    # Scholar's mate — Black is in checkmate, not a sustained initiative.
+    mate_fen = "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4"
+    result = F.is_initiative(mate_fen, "1... Ke8", chess.WHITE)
+    assert result is None
+
+
+def test_is_initiative_veto3_no_pv():
+    result = F.is_initiative(_INIT_CHECK_FEN, "", chess.WHITE)
+    assert result is None
+
+
+def test_is_initiative_veto4_only_one_pv_move():
+    # PV has only the opponent's reply — no mover follow-up.
+    result = F.is_initiative(_INIT_CHECK_FEN, "1... Ke7", chess.WHITE)
+    assert result is None
+
+
+def test_is_initiative_veto5_followup_not_check():
+    # Second move in PV is not a check (no '+').
+    result = F.is_initiative(_INIT_CHECK_FEN, "1... Ke7 2. Rd6", chess.WHITE)
+    assert result is None
