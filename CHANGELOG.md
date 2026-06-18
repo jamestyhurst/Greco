@@ -8,7 +8,7 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 ## [Unreleased]
 
 ### Added
-- **Knowledge corpus expansion** (backlog #16) — 6 new public-domain chess books deposited and indexed:
+- **Knowledge corpus expansion** (backlog #16) — 4 new public-domain chess books deposited and indexed (first batch; more in progress):
   - *Common Sense in Chess* (Emanuel Lasker, 1896) — 12 lectures on principles from the World Champion
   - *The Minor Tactics of Chess* (Young & Howell, 1894) — pattern-level tactics and combination themes
   - *The Chess Openings* (H. E. Bird, 1880) — 222-page opening survey from a 19th-century master

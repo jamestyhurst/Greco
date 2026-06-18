@@ -29,6 +29,8 @@ See `README.md` for the full deposit protocol.
 | `young-minor-tactics-chess` | The Minor Tactics of Chess | Franklin K. Young and Edwin C. Howell | 1894 | en | chess_principles | First published 1894; pre-1931, US copyright expired. | Original English — safe for verbatim quoting. | [archive.org](https://archive.org/details/minortacticsofch00youn) |
 | `bird-chess-openings` | The Chess Openings | H. E. Bird | 1880 | en | opening_theory | First published 1880; pre-1931, US copyright expired. | Original English — safe for verbatim quoting. | [archive.org](https://archive.org/details/chessopenings00bird) |
 | `steinitz-modern-chess-instructor` | The Modern Chess Instructor | Wilhelm Steinitz | 1889 | en | opening_theory | First published 1889 (Part I); pre-1931, US copyright expired. | Original English — safe for verbatim quoting. | [archive.org](https://archive.org/details/modernchessinstr00steirich) |
+| `ny1889-chess-congress` | The Book of the Sixth American Chess Congress | Wilhelm Steinitz (ed.) | 1891 | en | opening_theory | First published 1891; pre-1931, US copyright expired. | Original English — safe for verbatim quoting. | [archive.org](https://archive.org/details/booksixthameric00steigoog) |
+| `young-major-tactics-chess` | The Major Tactics of Chess | Franklin K. Young | 1896 | en | chess_principles | First published 1896; pre-1931, US copyright expired. | Original English — safe for verbatim quoting. | [archive.org](https://archive.org/details/majortacticsofch00younrich) |
 
 > The two `greco-seed-*` rows are **placeholder seed content**, written by the
 > Greco project and released CC0, present only so the retrieval system is testable

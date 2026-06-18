@@ -1,0 +1,5917 @@
+THE MAJOR TACTICS OF CHESS 
+
+THE ::;v-;;: :- :/. 
+
+MAJOR TACTICS OF CHESS 
+
+A TREATISE ON EVOLUTIONS 
+
+THE PROPER EMPLOYMENT OF THE FORCES 
+
+IN STRATEGIC, TACTICAL, AND 
+
+LOGISTIC PLANES 
+
+BY 
+
+FRANKLIN K. YOUNG 
+
+»* 
+
+AUTHOR OF "THE MINOR TACTICS OF CHESS" AND 
+"THE GRAND TACTICS OF CHESS" 
+
+BOSTON 
+
+LITTLE, BROWN, AND COMPANY 
+1919 
+
+Copyright, 1898, 
+BY FRANKLIN K. YOUNG. 
+
+All rights reserved. 
+
+Printed by 
+Louis E. CROSSCUP, BOSTON, U.S.A. 
+
+PREFACE. 
+
+, the second volume of the Chess Strategetics 
+series, may not improperly be termed a book of 
+chess tricks. 
+
+Its purpose is to elucidate those processes upon which 
+every ruse, trick, artifice, and stratagem known in chess- 
+play, is founded ; consequently, this treatise is devoted 
+to teaching the student how to win hostile pieces, to 
+queen his pawns, and to checkmate the adverse king. 
+
+All the processes herein laid down are determinate, 
+and if the opponent becomes involved in any one of them, 
+he should lose the game. 
+
+Each stratagem is illustrative of a principle of Tac- 
+tics ; it takes the form of a geometric proposition, and in 
+statement, setting and demonstration, is mathematically 
+exact. 
+
+The student, having once committed these plots and 
+counter-plots to memory, becomes equipped with a tech- 
+nique whereby he is competent to project and to execute 
+any design and to detect and foil every machination of 
+his antagonist. 
+
+BOSTON, 1898. 
+
+CONTENTS. 
+
+PAGE 
+
+INTRODUCTORY xv 
+
+MAJOR TACTICS 3 
+
+Definition of ...•. 3 
+
+Grand Law of 3 
+
+Evolutions of 3 
+
+GEOMETRIC SYMBOLS 4 
+
+Of the Pawn 5 
+
+" Knight 6 
+
+" Bishop 7 
+
+" Rook 8 
+
+" Queen 9 
+
+" King 10 
+
+SUB-GEOMETRIC SYMBOLS 11 
+
+Of the Pawn 12 
+
+" Knight 13 
+
+« Bishop 14 
+
+« Rook 15 
+
+" Queen 16 
+
+" King 17 
+
+LOGISTIC SYMBOLS 18 
+
+Of the Pawn 18 
+
+" Knight 19 
+
+« Bishop 20 
+
+« Rook 21 
+
+« Queen 22 
+
+« King 23 
+
+GEOMETRIC PLANES 24 
+
+Tactical 25 
+
+Logistic 26 
+
+Strategic 27 
+
+x CONTENTS. 
+
+PAG* 
+
+PLANE TOPOGRAPHY (a) 28 
+
+Zone of Evolution 31 
+
+Kindred Integers 32 
+
+Hostile Integers 33 
+
+Prime Tactical Factor 34 
+
+Supporting Factor 35 
+
+Auxiliary Factor 36 
+
+Piece Exposed 37 
+
+Disturbing Factor 38 
+
+Primary Origin 39 
+
+Supporting Origin 40 
+
+Auxiliary Origin 41 
+
+Point Material 42 
+
+Point of Interference 43 
+
+Tactical Front 44 
+
+Front Offensive 45 
+
+Front Defensive 46 
+
+Supporting Front 47 
+
+Front Auxiliary 48 
+
+Front of Interference 48 
+
+Point of Co-operation 49 
+
+Point of Command 50 
+
+Point Commanded 51, 52 
+
+Prime Radius of Offence 53 
+
+Tactical Objective 54 
+
+Tactical Sequence 54 
+
+TACTICAL PLANES 55 
+
+Simple 56 
+
+Compound 57 
+
+Complex 58, 59 
+
+LOGISTIC PLANES 60 
+
+Simple 61 
+
+Compound 62 
+
+Complex 63 
+
+PLANE TOPOGRAPHY (5) 64 
+
+The Logistic Horizon 64-66 
+
+Pawn Altitude 67 
+
+Point of Junction 68 
+
+CONTENTS. xi 
+
+PLANE TOPOGRAPHY (continued'). 
+
+Square of Progression 69 
+
+Corresponding Knight's Octagon 70 
+
+Point of Resistance 71 
+
+STRATEGIC PLANES 72 
+
+Simple 73 
+
+Compound 74, 75 
+
+Complex 76 
+
+PLANE TOPOGRAPHY (c) 77 
+
+The Objective Plane 78 
+
+Objective Plane Commanded 79 
+
+Point of Lodgment 80 
+
+Point of Impenetrability 81 
+
+Like Points 82 
+
+Unlike Points 83 
+
+BASIC PROPOSITIONS OF MAJOR TACTICS 84 
+
+Proposition I 85 
+
+•« II 91 
+
+III 97 
+
+" IV 103 
+
+« V 110 
+
+VI Ill 
+
+VII 112 
+
+« VIII 113 
+
+" IX 118 
+
+« X 119 
+
+XI 121 
+
+« XII 123 
+
+SIMPLE TACTICAL PLANES 124 
+
+Pawn vs. Pawn 124-127 
+
+Pawn vs. Knight 128 
+
+Knight vs. Knight 129 
+
+Bishop vs. Pawn 13° 
+
+Bishop vs. Knight . . . _. 131-133 
+
+Rook y5. Pawn i34 
+
+Rook vs. Knight 135-137 
+
+Queen vs. Pawn 138 
+
+Queen vs. Knight 139-142 
+
+King vs. Pawn 143 
+
+Xll CONTENTS. 
+
+SIMPLE TACTICAL PLANES (continued). 
+
+King vs. Knight 144 
+
+Two Pawns vs. Knight 145 
+
+Two Pawns vs. Bishop 146 
+
+Pawn and Knight vs. Knight 147 
+
+Pawn and Knight vs. Bishop 148 
+
+Pawn and Bishop vs. Bishop 149 
+
+Pawn and Rook vs. Rook ..150 
+
+Two Knights vs. Knight 151 
+
+Knight and Bishop vs. Knight 152 
+
+Knight and Rook vs. Knight 153 
+
+Knight and Queen vs. Knight 154 
+
+Knight and King vs. Knight 155 
+
+Bishop and Queen vs. Knight 156 
+
+Rook and Queen vs. Knight 157 
+
+King and Queen vs. Knight 158 
+
+COMPOUND TACTICAL PLANES 159 
+
+Pawn vs. Two Knights 159 
+
+Knight vs. Rook and Bishop 160 
+
+Knight vs. King and Queen 161 
+
+Bishop vs. Two Pawns 162 
+
+Bishop vs. King and Pawn 163 
+
+Bishop vs. King and Knight 164 
+
+Bishop vs. Two Knights 165 
+
+Bishop vs. King and Knight 166 
+
+Rook vs. Two Knights 167 
+
+Rook vs. Knight and Bishop 168, 169 
+
+Queen vs. Knight and Bishop 170,171 
+
+Queen us. Knight and Rook 172 
+
+Queen us. Bishop and Rook 173 
+
+King vs. Knight and Pawn 1 74 
+
+King vs. Bishop and Pawn 1 75 
+
+King vs. King and Pawn 176 
+
+Knight vs. Three Pawns 177 
+
+Bishop vs. Three Pawns 178 
+
+Rook vs. Three Pawns 179 
+
+King vs. Three Pawns 180 
+
+Knight vs. Bishop and Pawn 181 
+
+Bishop vs. Bishop and Pawn 187 
+
+CONTENTS. xiii 
+
+PAGE 
+
+COMPLEX TACTICAL PLANES 183 
+
+Knight and Pawn vs. King and Queen ..... 183, 184 
+
+Bishop and Pawn vs. King and Queen 185 
+
+Bishop and Knight vs. King and Queen 186-192 
+
+Rook and Knight vs. King and Queen 193-195 
+
+Queen and Bishop vs. King and Queen 196 
+
+Queen and Rook vs. King and Queen 197 
+
+Bishop and Pawn vs. King and Knight 198 
+
+Bishop and Pawn vs. King and Bishoj 199 
+
+Bishop and Pawn vs. Knight and Bishop 200 
+
+Bishop and Pawn vs. Knight and Rook 201 
+
+Bishop and Pawn vs. King and Queen 202 
+
+Rook and Pawn vs. King and Bishop 203 
+
+Rook and Pawn us. King and Rook 204 
+
+Rook and Pawn vs. King and Queen 205 
+
+Queen and Pawn vs. Rook and Bishop 206 
+
+Queen and Pawn vs. Rook and Knight 207 
+
+Queen and Pawn vs. Bishop and Knight 208 
+
+King and Pawn vs. Bishop and Knight 209 
+
+King and Pawn vs. Two Knights 210 
+
+SIMPLE LOGISTIC PLANES 211 
+
+Pawn vs. Pawn 211-213 
+
+Pawn us. Knight 214 
+
+Pawn vs. Bishop 215 
+
+Pawn vs. King 216 
+
+Knight and Pawn vs. Queen or Rook 217 
+
+Bishop and Pawn vs. King and Rook 218 
+
+Rook and Pawn vs. Rook 219 
+
+Knight and Pawn vs. King 220 
+
+Rook and Pawn vs. King 221 
+
+Bishop and Pawn us. King and Queen 222 
+
+COMPOUND LOGISTIC PLANES 223 
+
+Two Pawns vs. Pawn 223, 224 
+
+Two Pawns us. Knight 225, 226 
+
+Two Pawns us. Bishop 227, 228 
+
+Two Pawns us. Rook 229 
+
+Two Pawns iw. Kins 230, 231 
+
+xiv CONTENTS. 
+
+PAGE 
+
+COMPLEX LOGISTIC PLANES 23-2 
+
+Three Pawns vs. Three Pawns .........232 
+
+Three Pawns vs. King 233 
+
+Three Pawns vs. Queen 234 
+
+Three Pawns vs. King and Pawn 235 
+
+JSIMPLE STRATEGIC PLANES 236 
+
+Knight vs. Objective Plane 1 236 
+
+Knight vs. Objective Plane 2 237 
+
+Bishop vs. Objective Plane 2 ... 238 
+
+Bishop vs. Objective Plane 3 239 
+
+Rook vs. Objective Plane 2 240 
+
+Rook vs. Objective Plane 3 241 
+
+Queen vs. Objective Plane 2 242, 243 
+
+Queen vs. Objective Plane 3 244, 245 
+
+Queen vs. Objective Plane 4 246 
+
+COMPOUND STRATEGIC PLANES 247 
+
+Pawn and S. F. vs. Objective Plane 2 247 
+
+Bishop and S. F. vs. Objective Plane 3 248, 249 
+
+Rook and S. F. vs. Objective Plane 3 250 
+
+Rook and S. F. vs. Objective Plane 4 251 
+
+Rook and S. F. vs. Objective Plane 5 252 
+
+Queen and S. F. vs. Objective Plane 7 253, 254 
+
+COMPLEX STRATEGIC PLANES 255 
+
+Pawn Lodgment vs. Objective Plane 8 255 
+
+Knight Lodgment vs. Objective Plane 8 256 
+
+Bishop Lodgment rs. Objective Plane 8 257 
+
+Rook Lodgment vs. Objective Plane 8 258 
+
+Pawn Lodgment vs. Objective Plane 9 259 
+
+Bishop Lodgment vs. Objective Plane 9 260, 261 
+
+Rook Lodgment vs. Objective Plane 9 262 
+
+Vertical Pieces vs. Objective Plane 9 263 
+
+Oblique et al. Pieces vs. Objective Plane 9 263 
+
+Diagonal Pieces vs. Objective Plane 9 264 
+
+Horizontal Pieces vs. Objective Plane 9 265 
+
+LOGISTICS OF GEOMETRIC PLANES .... 266 
+
+INTEODUCTORY. 
+
+WHEN you walked into your office this morning, 
+you may have noticed that your senior partner 
+was even more than ordinarily out of sorts, which, of 
+course, is saying a good deal. 
+
+In fact, the prevailing condition in his vicinity was so 
+perturbed that, without even waiting for a response, 
+say nothing of getting any, to your very civil salutation, 
+you picked up your green bag again and went into court ; 
+leaving the old legal luminary, with his head drawn 
+down between his shoulders like a big sea-turtle, to 
+glower at the wall and fight it out with himself. 
+
+Furthermore, you may recollect, it was in striking 
+contrast that his Honor blandly regarded your arrival, 
+and that it was with an emphasized but strictly judicial 
+snicker that he inquired after the health of your vener- 
+able associate. 
+
+You replied in due form, of course, but being a bit 
+irritated, as is natural, you did not hesitate to insin- 
+uate that some kind of a blight seemed to have struck 
+in your partner's neighborhood during the night ; where- 
+upon you were astonished to see the judge tie himself up 
+into a knot, and then with face like an owl stare straight 
+before him, while the rest of his anatomy acted as if it 
+had the colic. 
+
+Were you a chess-player, you would understand all 
+this very easily. But as you do not practise the game, 
+
+xvi INTRODUCTORY. 
+
+and this is the first book you ever read on the subject, it 
+is necessary to inform you that your eminent partner 
+and the judge had a sitting at chess last night, and there 
+is reason to believe that your alter ego did not get all the 
+satisfaction out of it that he expected. 
+
+You have probably heard of that far-away country 
+whose chief characteristics are lack of water and good 
+society, and whose population is afflicted with an uncon- 
+trollable chagrin. These people have their duplicates 
+on earth, and your partner, about this time, is one of 
+them. 
+
+Therefore, while you are attending strictly to business 
+and doing your prettiest to uphold the dignity of your 
+firm, it may interest you to know what the eminent head 
+of your law concern is doing. Not being a chess-player, 
+you of course assume that he is still sitting in a pro- 
+found reverie, racking his brains on some project to 
+make more fame and more money for you both. 
+
+But he is doing nothing of the kind. As a matter of 
+fact, he still is sitting where you left him, morose and 
+ugly, and engaged in frescoing the wainscoting with the 
+nails in his bootheels. Yet nothing is further from his 
+mind than such low dross as money and such a perish- 
+able bauble as fame. At this moment he has but a 
+single object in life, and that is to concoct some Mach- 
+iavellian scheme by which to paralyze the judge when 
+they get together this evening. This, by the way, they 
+have a solemn compact to do. 
+
+Thus your partner is out of sorts, and with reason. 
+To be beaten by the judge, who (as your partner will 
+tell you confidentially) never wins a game except by 
+purest bull luck, is bad enough. Still, your partner, 
+buoyed up by the dictates of philosophy and the near 
+prospect of revenge, — a revenge the very anticipation of 
+
+INTRODUCTORY. xvil 
+
+which makes his mouth water, — could sustain even that 
+load of ignominy for at least twenty-four hours. But 
+what has turned loose the flood-gates of his bile is that 
+lot of books on the floor beside him. You saw these and 
+thought they were law books ; but they 're not, they are 
+analytical treatises on chess, which are all right if your 
+opponent makes the moves that are laid down for him 
+to make, and all wrong if he does not. Your partner 
+knows that these books are of no use to him, for the 
+judge does n't know a line in any chess-book, and prides 
+himself on the fact. 
+
+It seems that the judge, when he plays chess, prefers 
+to use his brains, and having of these a fair supply and 
+some conception of common-sense and of simple arith- 
+metic, he has the habit, a la Morphy, of making but one 
+move at a time, and of paying particular attention to 
+its quality. 
+
+Thus, in order to beat the judge to-night, your partner 
+realizes that he must get down to first principles in the 
+art of checkmating the adverse king, of queening his 
+own pawns, and of capturing hostile pieces. But in 
+the analytical volumes which he has been strewing 
+about the floor he can find nothing about first prin- 
+ciples, or about principles of any kind for that matter. 
+This makes your partner irritable, for he is one of those 
+men who, when they want a thing, want it badly and 
+want it quick. So if you are through with this book 
+you had better send it over to him by a boy. 
+
+MAJOR TACTICS. 
+
+MAJOR TACTICS. 
+
+MAJOR TACTICS is that branch of the science of 
+chess strategetics which treats of the evolutions 
+appertaining to any given integer of chess force when 
+acting either alone, or in co-operation with a kindred 
+integer, against any adverse integer of chess force ; the 
+latter acting alone, or, in combination with any of its 
+kindred integers. 
+
+An Evolution is that combination of the primary 
+elements — time, locality and force — whereby is made 
+a numerical gain ; either by the reduction of the ad- 
+verse material, or by the augmentation of the kindred 
+body of chess-pieces. 
+
+In every evolution, the primary elements time, 
+locality and force — are determinate and the proposi- 
+tion always may be mathematically demonstrated. 
+
+The object of an evolution always is either to check- 
+mate the adverse king ; or, to capture an adverse pawn 
+or piece ; or to promote a kindred pawn. 
+
+Grand Law of Major Tactics. — The offensive force of a 
+given piece is valid at any point against which it is 
+directed ; but the defensive force of a given piece is 
+valid for the support only of one point, except when 
+the points required to be defended are all contained in 
+the perimeter of that geometric figure which appertains 
+to the supporting piece. 
+
+GEOMETRIC SYMBOLS. 
+
+All integers of chess force are divided into six 
+classes ; the King, the Queen, the Rook, the Bishop, the 
+Knight and the Pawn. 
+
+Any one of these integers may properly be combined 
+with any other and the principle upon which such com- 
+bination is based governs all positions in which such 
+integers are combined. "This principle always assumes 
+a form similar to a geometric theorem and is susceptible 
+of exact -demonstration. 
+
+That geometric symbol which is the prime factor in 
+all evolutions which contemplates the action of a Pawn 
+is shown in Fig. 1. 
+
+This figure is an inverted triangle, whose base always 
+is coincident with one of the horizontals of the chess- 
+board; whose sides are diagonals and whose verux 
+always is that point which is occupied by the given 
+pawn. 
+
+GEOMETRIC SYMBOLS. 
+
+GEOMETRIC SYMBOL OF THE PAWN. 
+FIGURE l. 
+
+Black. 
+
+White. 
+
+PRINCIPLE. 
+
+Given a Pawn's triangle, the vertices of which are 
+occupied by one or more adverse pieces, then the pawn 
+may make a gain in adverse material. 
+
+MAJOR TACTICS. 
+
+That geometric symbol which is the prime factor in 
+all evolutions that contemplate the action of a Knight is 
+shown in Fig. 2. 
+
+This figure is an octagon, the centre of which is the 
+point occupied by the Knight and whose vertices are the 
+extremities of the obliques which radiate from the given 
+centre. 
+
+GEOMETRIC SYMBOL OF THE KNIGHT. 
+FIGURE 2. 
+
+Black. 
+
+White. 
+PRINCIPLE. 
+
+Given a Knight's octagon, the vertices of which are 
+occupied by one or more adverse pieces, then the Knight 
+may make a gain in adverse material. 
+
+GEOMETRIC SYMBOLS. , 7 
+
+The geometric symbol which is the prime factor in all 
+evolutions which contemplate the action ef a Bishop is 
+shown in Fig. 3. 
+
+This figure is a triangle, the vertex of which always 
+is that point which is occupied by the Bishop. 
+
+GEOMETRIC SYMBOL OF THE BISHOP. 
+
+FIGURE 3. 
+
+Black. 
+
+White. 
+
+PRINCIPLE. 
+
+Given a Bishop's triangle, the vertices of which are 
+occupied by one or more adverse pieces, then the Bishop 
+mav make a gain in adverse material. 
+
+8 
+
+MAJOR TACTICS 
+
+That geometric symbol which is a prime factor in 
+all evolutions which contemplate the action of a Rook 
+is shown in Fig. 4. 
+
+This figure is a quadrilateral, one angle of which is 
+the point occupied by the Rook. 
+
+GEOMETRIC SYMBOL OF THE BOOK. 
+
+FIGURE 4. 
+Black. 
+
+While. 
+
+PRINCIPLE. 
+
+Given a Rook's quadrilateral, one of whose sides is 
+occupied by two or more adverse pieces ; or two or more 
+of whose sides are occupied by one or more adverse 
+pieces ; then the Rook may make a gain in adverse 
+material. 
+
+GEOMETRIC SYMBOLS. 
+
+9 
+
+That geometric symbol which is a prime factor in all 
+evolutions that contemplate the action of the Queen is 
+shown in Fig. 5. 
+
+This figure is an irregular polygon of which the Queen 
+occupies the common vertex. 
+
+GEOMETRIC SYMBOL OF THE QUEEN. 
+FIGURE 5. 
+
+Black. 
+
+White. 
+
+NOTE. — This figure is composed of a rectangle, a 
+minor triangle, a major triangle, and a quadrilateral, and 
+shows that the Queen combines the offensive powers 
+of the Pawn, the Bishop, the Rook and the King. 
+PRINCIPLE. 
+
+Given one or more adverse pieces situated at the 
+vertices or on the sides of a Queen's polygon, then 
+the Queen may make a gain in adverse material. 
+
+10 
+
+MAJOR TACTICS. 
+
+That geometric symbol which is the prime factor in 
+all evolutions which contemplate the action of the King, 
+is shown in Fig. 6. 
+
+This figure is a rectangle of either four, six, or 
+nine squares. In the first case the King always is 
+situated at one of the angles ; in the second case he 
+always is situated on one of the sides and in the last 
+case he always is situated in the centre of the given 
+figure. 
+
+GEOMETRIC SYMBOL OF THE KING. 
+
+(a.) 
+FIGURE 6. 
+
+Slack. 
+
+White. 
+
+PRINCIPLE. 
+
+Given one or more adverse pieces situated on the 
+sides of a King's rectangle, then the King may make a 
+gain in adverse material. 
+
+GEOMETRIC SYMBOLS. 
+
+11 
+
+A Sub-G-eometric Symbol is that mathematical figure 
+which in a given situation appertains to the Prime 
+Tactical Factor, and whose centre is unoccupied by a 
+kindred piece, and whose periphery is occupied by the 
+given Prime Tactical Factor. 
+
+SUB-GEOMETRIC SYMBOL OF THE PAWN. 
+FIGURE 7. 
+
+White. 
+
+NOTE. — That point which is the centre of the geo- 
+metric symbol of a piece always is the centre of its 
+sub-geometric symbol. 
+
+12 
+
+MAJOR TACTICS. 
+
+SUB-GEOMETRIC SYMBOL OF THE PAWN. 
+
+FIGURE 8. 
+
+(b.) 
+
+Black. 
+
+White. 
+
+NOTE. — A piece always may reach the centre of its 
+sub-geometric symbol in one move. 
+
+GEOMETRIC SYMBOLS. 
+
+13 
+
+SUB-GEOMETRIC SYMBOL OF THE KNIGHT. 
+FIGURE 9. 
+
+Black. 
+
+White. 
+
+NOTE. — If the piece has the move, the sub-geometric 
+symbol is positive ; otherwise, it is negative. 
+
+14 
+
+MAJOR TACTICS. 
+
+SUB-GEOMETRIC SYMBOL OF THE BISHOP. 
+FIGURE 10. 
+
+Black. 
+
+White. 
+
+NOTE. — The sub-geometric symbol is the mathe- 
+matical figure common to situations in which the de- 
+cisive blow is preparing. 
+
+GEOMETRIC SYMBOLS. 
+
+15 
+
+SUB-GEOMETRIC SYMBOL OF THE ROOK. 
+
+FIGURE 11. 
+
+Black. 
+
+White. 
+
+NOTE. — The sub- geometric symbol properly should 
+eventuate into the geometric symbol. 
+
+16 
+
+MAJOR TACTICS. 
+
+SUB-GEOMETRIC SYMBOL OF THE QUEEN. 
+
+FIGURE 12. 
+
+Black. 
+
+White. 
+
+NOTE. — A piece always moves to the centre of its 
+sub-geometric symbol. 
+
+GEOMETRIC SYMBOLS. 
+
+17 
+
+SUB-GEOMETRIC SYMBOL OF THE KING. 
+FIGURE 13. 
+
+Black. 
+
+White. 
+
+NOTE. — An evolution based upon a sub-geometric 
+symbol always contemplates, as the decisive stroke, the 
+move which makes the sub-geometric symbol positive. 
+
+LOGISTIC SYMBOLS. 
+
+The Logistic Symbol of an integer of chess force 
+typifies its movement over the surface of the chess- 
+board and always is combined with the geometric 
+symbol or with the sub-geometric symbol in the execu- 
+tion of a given calculation. 
+
+LOGISTIC SYMBOL OF THE PAWN. 
+
+FIGURE 14. 
+
+Slack. 
+
+White. 
+
+NOTE. — A piece moves only in the direction of and 
+to the limit of its logistic radii. 
+
+LOGISTIC SYMBOLS. 
+
+19 
+
+LOGISTIC SYMBOL OF THE KNIGHT. 
+
+FIGURE 15. 
+
+Black. 
+
+White. 
+
+NOTE. — A piece having the move can proceed at the 
+given time along only one of its logistic radii. 
+
+20 
+
+MAJOR TACTICS. 
+
+LOGISTIC SYMBOL OF THE BISHOP. 
+FIGURE 16. 
+
+Black. 
+
+White. 
+
+NOTE. — The logistic radii of a piece all unite at the 
+centre of its geometric symbol. 
+
+LOGISTIC SYMBOLS. 
+
+21 
+
+LOGISTIC SYMBOL OF THE ROOK. 
+FIGURE 17. 
+
+Black. 
+
+White. 
+
+NOTE. — The termini of the logistic radii of a piece 
+always are the vertices of its geometric symbol. 
+
+22 
+
+MAJOR TACTICS. 
+
+LOGISTIC SYMBOL OF THE QUEEN. 
+FIGURE 18. 
+
+Black. 
+
+White. 
+
+NOTE. — The logistic radii of a piece always extend 
+from the centre of its geometric symbol to the perimeter. 
+
+LOGISTIC SYMBOLS. 
+
+23 
+
+LOGISTIC SYMBOL OF THE KING. 
+FIGURE 19. 
+
+Black. 
+
+White. 
+
+NOTE. — The logistic radii of a piece always are 
+straight lines, and always take the form of verticals, 
+horizontals, diagonals, or obliques. 
+
+GEOMETRIC PLANES. 
+
+Whenever the geometric symbols appertaining to one 
+or more kindred pieces and to one or more adverse 
+pieces are combined in the same evolution ; then that 
+part of the surface of the chessboard upon which such 
+evolution is executed is termed in this theory a G-eo' 
+metric Plane. 
+
+Geometric Planes are divided into three classes : 
+
+I. STRATEGIC. 
+II. TACTICAL. 
+III. LOGISTIC. 
+
+Whenever the object of a given evolution is to gain 
+adverse material, then that mathematical figure pro- 
+duced by the combination of the geometric symbols 
+appertaining to the integers of chess force thus engaged 
+is termed a Tactical Plane. 
+
+GEOMETRIC PLANES. 
+
+25 
+
+A TACTICAL PLANE. 
+FIGURE 20. 
+
+Black. 
+
+White. 
+
+White to play and win adverse material. 
+
+NOTE. — White having the move, wins by 1 P — K 6 
+(ck) followed by 2 Kt-K Kt 5 (ck) if Black plays 
+1 QxP; and by 2 Kt — Q B 5 (ck) if Black plays 
+IKxP. 
+
+26 
+
+MAJOR TACTICS. 
+
+Whenever the object of a given evolution is to queen 
+a kindred pawn, then that mathematical figure pro- 
+duced by the combination of the geometric symbols 
+appertaining to the integers of chess force thus en- 
+gaged is termed a Logistic Plane. 
+
+A LOGISTIC PLANE. 
+
+FIGURE 21. 
+Slack. 
+
+White. 
+
+White to play and queen a kindred pawn. 
+
+NOTE. — White having the move wins by 1 P — Q 6, 
+followed by 2 P - Q B 6, if Black plays 1 K P x P 
+and by 2 P - K 6, if Black plays 1 B P x P. 
+
+GEOMETRIC PLANES. 
+
+27 
+
+Whenever the object of a given evolution is to check, 
+mate tke adverse king, then that mathematical figure 
+produced by the combination of the geometric symbols 
+appertaining to the integers of chess force thus engaged 
+is termed a Strategic Plane. 
+
+A STRATEGIC PLANE. 
+FIGURE 22. 
+
+Black. 
+
+White. 
+White to play and checkmate the adverse king. 
+
+NOTE. — White having to move checkmates the black 
+King in one move by 1 R — K Kt 8 (ck). 
+
+PLANE TOPOGRAPHY. 
+
+Those verticals, horizontals, diagonals, and obliques, 
+and the points situated thereon, which are contained in 
+a given evolution, constitute, when taken collectively, 
+the Topography of a given plane. 
+
+Every plane, whether strategic, tactical, or logistic, 
+always contains the following topographical features : — 
+
+1. Zone of Evolution. 14. Tactical Front. 
+
+2. Kindred Integers. 15. Front Offensive. 
+
+3. Hostile Integers., 16. Front Defensive. 
+
+4. Prime Tactical Factor. 17. Supporting Front. 
+
+5. Supporting Factor. 18. Front Auxiliary. 
+
+6. Auxiliary Factor. 19. Front of Interference. 
+
+7. Piece Exposed. 20. Point of Co-operation. 
+
+8. Disturbing Integer. 21. Point of Command. 
+
+9. Primary Origin. 22. Point Commanded. 
+
+10. Supporting Origin. 23. Prime Radius of Offence, 
+
+11. Auxiliary Origin. 24. Tactical Objective. 
+
+12. Point Material. 25. The Tactical Sequence. 
+
+13. Point of Interference. 
+
+PLANE TOPOGRAPHY. 
+
+29 
+
+A COMPLEX TACTICAL PLANE. 
+FIGURE 23. 
+
+Black. 
+
+White. 
+White to play and win. 
+
+NOTE. — White wins by 1 R-K R 8 (ck), followed, 
+if Black plays 1 K x R, by 2 Kt - K B 7 (ck) ; and if 
+Black plays 1 K-Kt 2, by 2 R x R, for if now Black 
+plays 2 Q x R, then follows 3 Kt -K 6 (ck), and White 
+wins the black Q. 
+
+MAJOR TACTICS. 
+
+A SUB-GEOMETKIC SYMBOL POSITIVE. 
+(G. S. P.) 
+FIGURE 24. 
+
+Black. 
+
+White. 
+White to move. 
+
+NOTE. — White having to move, the geometric symbol 
+is positive ; had Black to move, the geometric symbol 
+would be negative. 
+
+PLANE TOPOGRAPHY. 
+
+31 
+
+The Zone of Evolution is composed of those verticals, 
+diagonals, horizontals, and obliques which are compre- 
+hended in the movements of those pieces which enter 
+into a given evolution. The principal figure in any 
+Zone of Evolution is that geometric symbol which ap- 
+pertains to the Prime Tactical Factor. 
+
+THE ZONE OF EVOLUTION. 
+
+(Z. E.) 
+FIGURE 25. 
+
+Black. 
+
+White 
+
+NOTE. — The letters A B C D E F mark the vertices 
+of an octagon, which is the principal figure in this evolu- 
+tion, as the Prime Tactical Factor is a Knight. 
+
+32 
+
+MAJOR TACTICS. 
+
+A Kindred Integer is any co-operating piece which 
+is contained in a given evolution. 
+
+KINDRED INTEGERS. 
+
+(K. I.) 
+FIGURE 26. 
+
+Black. 
+
+White, 
+
+NOTE. — The kindred Integers always have the move 
+in any given evolution, and always are of the same color 
+-as the Prime Tactical Factor. 
+
+PLANE TOPOGRAPHY. 
+
+33 
+
+A Hostile Integer is any adverse piece which is con- 
+tained in a given evolution. 
+
+HOSTILE INTEGERS. 
+
+(H. I.) 
+FIGURE 27. 
+
+Black. 
+
+White. 
+
+NOTE. — The Hostile Integers never have the move 
+in any evolution and always are opposite in color to the 
+Prime Tactical Factor. 
+
+34 
+
+MAJOR TACTICS. 
+
+The Prime Tactical Factor is that kindred Pawn or 
+Piece which in a given evolution either check-mates 
+the adverse King, or captures adverse material, or is 
+promoted to and utilized as some other kindred piece. 
+
+THE PRIME TACTICAL FACTOR. 
+(P. T. F.) 
+FIGURE 28. 
+
+Black. 
+
+White. 
+
+NOTE. — The Prime Tactical Factor always is situated 
+either at the centre or upon the periphery of the zone of 
+evolution. 
+
+PLANE TOPOGRAPHY. 
+
+35 
+
+The Supporting Factor is that kindred piece which 
+directly co-operates in an evolution with the Prime 
+Tactical Factor. 
+
+THE SUPPORTING FACTOR. 
+
+(S. F.) 
+FIGURE 29. 
+
+Black. 
+
+Wile. 
+
+NOTE. — The Supporting Factor always is situated 
+upon one of the sides of the zone of evolution. 
+
+36 
+
+MAJOR TACTICS. 
+
+An Auxiliary Factor is that kindred piece which 
+indirectly co-operates with the Prime Tactical Factor by 
+neutralizing the interference of hostile pieces not con- 
+tained in the immediate evolution. 
+
+AN AUXILIARY FACTOR. 
+
+(A. F.) 
+FIGURE 30. 
+
+Black. 
+
+White. 
+
+NOTE. — The Auxiliary Factor may be situated at 
+any point and either within or outside of the zone of 
+evolution. 
+
+PLANE TOPOGRAPHY. 
+
+37 
+
+The Piece Exposed is that adverse integer of chess 
+force whose capture in a given evolution may be 
+mathematically demonstrated. 
+
+THE PIECE EXPOSED. 
+
+(P. E.) 
+FIGURE 31. 
+
+Black. 
+
+While. 
+
+NOTE. — The Piece Exposed always is situated either 
+upon one of the sides or at one of the vertices of the 
+zone of evolution. 
+
+38 
+
+MAJOR TACTICS. 
+
+A Disturbing Integer is an adverse piece which 
+prevents the Prime Tactical Factor from occupying the 
+Point of Command, or the Supporting Factor from 
+occupying the Point of Co-operation. 
+
+A DISTURBING FACTOR. 
+
+(D. F.) 
+FIGURE 32. 
+
+Black. 
+
+White. 
+
+NOTE. — A Disturbing Factor may or may not be situ- 
+ated within the zone of evolution. 
+
+PLANE TOPOGRAPHY. 
+
+39 
+
+The Primary Origin is that point which, at the 
+beginning of an evolution, is occupied by the Prime 
+Tactical Factor. 
+
+THE PRIMARY ORIGIN. 
+
+(P. 0.) 
+FIGURE 33. 
+
+Black. 
+
+White. 
+
+NOTE. — The point A is the Primary Origin in this 
+evolution, as it is the original post of the Prime Tactical 
+Factor. 
+
+40 
+
+MAJOR TACTICS. 
+
+The Supporting Origin is the point occupied by the 
+Supporting Factor at the beginning of an evolution. 
+
+THE SUPPORTING ORIGIN. 
+
+(P. S.) 
+FIGURE 34. 
+
+Black. 
+
+White. 
+
+NOTE. — The point A is the Supporting Origin in this 
+evolution, as it is the original post of the Supporting 
+Factor. 
+
+PLANE TOPOGRAPHY 
+
+41 
+
+The Auxiliary Origin is the point occupied by the 
+Auxiliary Factor at the beginning of an evolution. 
+
+A POINT AUXILIARY. 
+
+(P. A.) 
+FIGURE 35. 
+
+Black. 
+
+White. 
+
+NOTE. — The Point A is the Auxiliary Origin in this 
+evolution, as it is the original post of the Auxiliary 
+Factor. 
+
+42 
+
+MAJOR TACTICS. 
+
+The Point Material is that point which is occupied by 
+the adverse piece which, in a given evolution, it is 
+proposed to capture. 
+
+POINTS MATERIAL. 
+(P. M.) 
+
+FIGURE 36. 
+
+Slack. 
+
+White. 
+
+NOTE. — A Point Material always is situated either 
+at one of the vertices or upon one of the sides of the 
+zone of evolution. 
+
+PLANE TOPOGRAPHY. 
+
+43 
+
+A Point of Interference is that point which is oc- 
+cupied by the Disturbing Integer. 
+
+A POINT OF INTERFERENCE. 
+
+(P. I.) 
+FIGURE 37. 
+
+Black. 
+
+White. 
+
+NOTE. — The point A is the Point of Interference in 
+this evolution, as it is the original post of the Disturbing 
+Factor. 
+
+44 
+
+MAJOR TACTICS. 
+
+The Tactical Front is composed of the Fronts Offen- 
+sive, Defensive, Auxiliary, Supporting, and of Inter- 
+ference. 
+
+THE TACTICAL FRONT. 
+
+(T. F.) 
+FIGURE 38. 
+
+Black. 
+
+While. 
+
+NOTE. — The Front Offensive extends from White's 
+K Kt 5 to K B 7 ; the Front Defensive from K Kt 1 to K 
+B 2 ; the Front of Interference from Q Kt 3 to K B 7 ; 
+the Front Supporting from KR7 to KR8; the Front 
+Auxiliary is at QB4. 
+
+PLANE TOPOGRAPHY. 
+
+45 
+
+The Front Offensive is that vertical, diagonal, hori- 
+zontal, or oblique which connects the Primary Origin 
+with the Point of Command. 
+
+THE FRONT OFFENSIVE. 
+FIGURE 39. 
+Black. 
+
+NOTE. — The Front Offensive extends from White's 
+KKt5toKB7. 
+
+46 
+
+MAJOR TACTICS. 
+
+The Front Defensive is that vertical, horizontal, diag- 
+onal, or oblique which extends from the Point of Com- 
+mand to any point occupied by a hostile integer con- 
+tained in the geometric symbol which appertains to the 
+Prime Tactical Factor. 
+
+THE FRONT DEFENSIVE. 
+
+(F. D.) 
+FIGURE 40. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Defensive in this evolution extends 
+from black K Kt 1 to K B 2. 
+
+PLANE TOPOGRAPHY. 
+
+47 
+
+TJie Supporting Front is that vertical, horizontal, di- 
+agonal, and oblique which unites the Supporting Origin 
+with the Point of Co-operation. 
+
+THE SUPPORTING FRONT. 
+FIGURE 41. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front of Support in this evolution ex- 
+tends from White's K R 7 to K R 8. 
+
+MAJOR TACTICS. 
+
+A Front Auxiliary is that vertical, horizontal, diag- 
+onal, or oblique which extends from the Point Auxiliary 
+to the Point of Interference ; or that point situated on 
+the Front of Interference which is occupied by the Aux- 
+iliary Factor. 
+
+The Front of Interference is that vertical, horizontal, 
+diagonal, or oblique which unites the Point of Inter- 
+ference with the Point of Command, or with the Point 
+of Co-operation. 
+
+A FRONT OF INTERFERENCE. 
+
+(F. I.) 
+FIGURE 42. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front of Interference in this evolution 
+extends from White's Q Kt 3 to K B 7. 
+
+PLANE TOPOGRAPHY. 
+
+49 
+
+The Point of Co-operation is that point which when 
+occupied by the Supporting Factor enables the Prime 
+Tactical Factor to occupy the Point of Command. 
+
+THE POINT OF CO-OPERATION. 
+FIGURE 43. 
+
+Black. 
+
+White. 
+
+NOTE. — The Point of Co-operation in this evolution 
+is the white square K R 8. 
+
+50 
+
+MAJOR TACTICS. 
+
+The Point of Command is the centre of that geomet- 
+ric symbol which appertains to the Prime Tactical 
+Factor, and which, when occupied by the latter, wins an 
+adverse piece, or checkmates the adverse king, or en- 
+sures the queening of a kindred pawn. 
+
+THE POINT OF COMMAND. 
+
+(P. C.) 
+FIGURE 44. 
+
+Slack. 
+
+White. 
+
+NOTE. — The Point of Command in this evolution is 
+the white square K B 7. 
+
+PLANE TOPOGRAPHY. 
+
+51 
+
+The Point Commanded is that point at which the 
+Piece Exposed is situated when the Prime Tactical 
+Factor occupies the Point of Command. 
+
+THE POINT COMMANDED. 
+
+(C. P.) 
+FIGURE 45. 
+
+(a.) 
+Black. 
+
+White. 
+
+NOTE. — White has occupied the Point of Co-operation 
+with the Supporting Factor, which latter has been cap- 
+tured by the black King, thus allowing the white Knight 
+to occupy the Point of Command. 
+
+52 
+
+MAJOR TACTICS. 
+
+THE POINT COMMANDED. 
+
+(C. P.) 
+FIGURE 46. 
+
+(6.) 
+Black. 
+
+White. 
+
+NOTE. — Black retired before the attack of the Sup- 
+porting Factor, still defending the Point of Command. 
+The Supporting Factor then captured the black Rook, 
+thus opening up a new and unprotected Point of Com- 
+mand, which is occupied by the white Knight. 
+
+Those interested in military science may, perhaps, 
+understand from these two diagrams why all the great 
+captains, from Tamerlane to Yon Moltke, so strenuously 
+recommended the study of chess to their officers. 
+
+PLAJSE TOPOGRAPHY. 
+
+53 
+
+The Prime Radius of Offence is the attacking power 
+radiated by the Prime Tactical Factor from the Point 
+of Command against the Point Commanded. 
+
+THE PRIME RADIUS OF OFFENCE. 
+
+(P. R. O.) 
+
+FIGURE 47. 
+
+Black. 
+
+White. 
+
+NOTE. — In this evolution the Prime Radii of Offence 
+extend from the white point K B 7 to K R 8, Q 6, and 
+
+Q8. 
+
+54 
+
+MAJOR TACTICS. 
+
+The Tactical Objective is that point on the chess-board 
+whose proper occupation is the immediate object of the 
+initiative in any given evolution. 
+
+THE TACTICAL OBJECTIVE. 
+
+(T. O.) 
+FIGURE 48. 
+
+Black. 
+
+White. 
+
+NOTE. In this evolution the point A is the Tactical 
+Objective, i.e. the initial movement in its execution is 
+to occupy the Point of Co-operation with the Supporting 
+Factor. 
+
+The Tactical Sequence is that series of moves which 
+comprehends the proper execution of any given 
+evolution. 
+
+TACTICAL PLANES. 
+
+A Tactical Plane is that mathematical figure pro- 
+duced by the combination of two or more kindred 
+geometric symbols in an evolution whose object is gain 
+of material. 
+
+Tactical Planes are divided into three classes, viz. : — 
+
+I. SIMPLE. 
+II. COMPOUND. 
+III. COMPLEX. 
+
+A Simple Tactical Plane consists of any kindred geo- 
+metric symbol combined with a Point Material. 
+
+PRINCIPLE. 
+
+I. Whenever in a simple Tactical Plane, the Primary 
+Origin and the Point Material are contained in the same 
+side of that geometric symbol which appertains to the 
+Prime Tactical Factor, then the latter, having the 
+move, will overcome the opposing force. 
+
+II. No evolution in a simple Tactical Plane is valid 
+if the opponent has the move, or if not having the move, 
+he can offer resistance to the march of the Prime Tacti- 
+cal Factor along the Front Offensive. 
+
+r>6 
+
+MAJOR TACTICS. 
+
+A SIMPLE TACTICAL PLANE. 
+FIGURE 49. 
+
+Black. 
+
+White. 
+White to play and win the adverse Kt in one move. 
+
+NOTE. — The decisive point is that at which the geo- 
+metric and the logistic symbols appertaining to the 
+Prime Tactical Factor intersect. 
+
+A Compound Tactical Plane consists of any kindred 
+geometric symbol combined with two or more Points 
+Material. 
+
+PRINCIPLE. 
+
+Whenever in a Compound Tactical Plane the Primary 
+Origin and two or more Points Material are situated at 
+
+TACTICAL PLANES. 
+
+57 
+
+the vertices of that geometric symbol which appertains 
+to the Prime Tactical Factor, then, if the value of each of 
+the Points Material exceeds the value of the Prime Tacti- 
+cal Factor ; or, if neither of the Pieces Exposed can sup- 
+port the other in one move, — the Prime Tactical Factor, 
+having the move, will overcome the opposing force. 
+
+II. No evolution in a Compound Tactical Plane is 
+valid if the opponent can offer resistance to the Prime 
+Tactical Factor. 
+
+A COMPOUND TACTICAL PLANE. 
+FIGURE 50. 
+
+Black. 
+
+While. 
+
+NOTE. — The decisive point is the centre of the geo- 
+metric symbol which appertains to the Prime Tactical 
+Factor. 
+
+58 MAJtjtft* TACTICS. 
+
+A Complex Tactical Plane consists of the combination 
+of any two or more kindred geometric symbols with one 
+or more Points Material. 
+
+PRINCIPLE. 
+
+I. No evolution in a Complex Tactical Plane is valid 
+unless it simplifies the position, either by reducing it to 
+a Compound Tactical Plane in which the opponent, even 
+with the move, can offer no resistance ; or to a Simple 
+Tactical Plane, in which the opponent has not the move 
+nor can offer any resistance. 
+
+II. To reduce a Complex Tactical Plane to a Com- 
+pound Tactical Plane, establish the Supporting Origin 
+at such a point and at such a time that, whether the 
+Supporting Factor be captured or not, the Primary 
+Origin and two or more of the Points Material will 
+become situated on that side of the geometric figure 
+which appertains to the Prime Tactical Factor, the 
+latter having to move. 
+
+III. To reduce a Complex Tactical Plane to a Simple 
+Tactical Plane, eliminate all the Points Material save 
+one, and all the Hostile Integers save one, and establish 
+the Primary Origin and the Point Material upon the 
+same side of that geometric figure which appertains to 
+the Prime Tactical Factor, the latter having to move. 
+
+TACTICAL PLANES. 
+
+59 
+
+A COMPLEX TACTICAL PLANE. 
+FIGURE 51. 
+
+Black. 
+
+White. 
+
+NOTE. — This diagram is elaborated to show the student 
+the Supplementary Knight's Octagon and the Supple- 
+mentary Point of Command at White's K 6. 
+
+LOGISTIC PLANES. 
+
+A LOGISTIC PLANE is that mathematical figure pro- 
+duced by the combination of two or more kindred geo- 
+metric symbols in an evolution whose object is to queen 
+a kindred pawn. 
+
+A LOGISTIC PLANE is composed of a given logistic 
+horizon, the adverse pawns, the adverse pawn altitudes, 
+and the kindred Points of Resistance. 
+
+Logistic Planes are divided into three classes : — 
+
+I. SIMPLE. 
+II. COMPOUND. 
+III. COMPLEX. 
+
+LOGISTIC PLANES. 
+
+61 
+
+A simple Logistic Plane consists of a pawn altitude, 
+combined adversely with that geometric figure which 
+appertains to either a P, Kt, B, R, Q, or K. 
+
+In a plane of this kind the pawn always is the Prime 
+Tactical Factor. 
+
+The following governs all logistic planes : — 
+
+PRINCIPLE. 
+
+Whenever the number of pawn altitudes exceeds the 
+number of Points of Resistance, the given pawn queens 
+without capture against any adverse piece. 
+
+A SIMPLE LOGISTIC PLANE. 
+
+FIGURE 52. 
+
+Black. 
+
+White. 
+
+White to move and queen a pawn without capture by an adverse 
+piece. 
+
+62 
+
+MAJOR TACTICS. 
+
+A Compound Logistic Plane is composed of two kin- 
+dred pawn altitudes combined adversely with the geo- 
+metric figures appertaining to one or more opposing 
+integers of chess force. 
+
+A COMPOUND LOGISTIC PLANE. 
+FIGURE 53. 
+
+Black. 
+
+White. 
+
+White to move and queen a pawn without capture by the adverse 
+King. 
+
+NOTE. — It will be easily seen that the black King 
+cannot stop both of the white Pawns. 
+
+LOGISTIC PLANES. 
+
+63 
+
+A Complex Logistic Plane consists of three kindred 
+pawn altitudes combined adversely with the geometric 
+figures appertaining to one or more opposing integers 
+of chess force. 
+
+A COMPLEX LOGISTIC PLANE. 
+FIGURE 64. 
+
+Black. 
+
+White. 
+
+White to move and queen a pawn without capture by the adverse 
+pieces. 
+
+NOTE. — The black King and the black Bishop are 
+each unable to stop more than one Pawn. 
+
+64 MAJOR TACTICS. 
+
+Plane Topography. — The following topographical 
+features are peculiar to Logistic Planes : - 
+
+1. Logistic Horizon. 
+
+2. Pawn Altitude. 
+
+3. Point of Junction. 
+
+4. Square of Progression. 
+
+5. Corresponding Knights Octagon. 
+
+6. Point of Resistance. 
+
+The Logistic Horizon is that extremity of the chess- 
+board, at which, upon arrival, a pawn may be promoted 
+to the rank of any kindred piece. The Logistic Horizon 
+of White always is the eighth horizontal ; that of Black 
+always is the first horizontal. 
+
+LOGISTIC PLANES. 
+
+65 
+
+THE LOGISTIC HORIZON. 
+
+(White). 
+FIGURE 55. 
+
+Black. 
+
+White. 
+
+NOTE. — The Points of Junction are designated by 
+black dots. 
+
+66 
+
+MAJOR TACTICS. 
+
+THE LOGISTIC HORIZON. 
+(Black.) 
+
+FIGURE 56. 
+
+Black. 
+
+White. 
+
+LOGISTIC PLANES, 
+
+67 
+
+A Pawn Altitude is composed of those verticals and 
+diagonals along which it is possible for a pawn to 
+pass to its logistic horizon. 
+
+A PAWN ALTITUDE 
+
+(P. A.) 
+FIGURE 57. 
+
+Black. 
+
+White. 
+
+68 
+
+MAJOR TACTICS. 
+
+A Point of Junction is that point at which an extremity 
+of a pawn altitude intersects the logistic horizon, i. e. the 
+queening point of a given pawn. 
+
+A POINT OF JUNCTION. 
+
+(P. J.) 
+FIGURE 58. 
+
+Black. 
+
+White. 
+
+LOGISTIC PLANES. 
+
+69 
+
+The Square of Progression is that part of the logistic 
+Plane of which the pawn's vertical is one side and whose 
+area is the square of the pawn's altitude. 
+
+A SQUARE OF PROGRESSION. 
+
+(S. P.) 
+FIGURE 59. 
+
+Black. 
+
+White. 
+
+70 
+
+MAJOR TACTICS. 
+
+The Corresponding Knight's Octagon is that Knight 
+octagon whose centre is the queening point of the pawn, 
+and whose radius consists of a number of Knight's moves 
+equal to the number of moves to be made by the pawn 
+in reaching its queening point. 
+
+THE CORRESPONDING KNIGHT'S OCTAGON. 
+(C. K. 0.) 
+
+FIGURE 60. 
+Black. 
+
+White. 
+
+NOTE. — The pawn has but two moves to make in order 
+to queen. The points ABODE are two Knight's moves 
+from the queening point. 
+
+LOGISTIC PLANES. 
+
+71 
+
+A Point of Resistance is that point on a pawn altitude 
+which is commanded by a hostile integer and which is 
+situated between the Primary Origin and the Point of 
+Junction. 
+
+POINT OF RESISTANCE. 
+(P. R.) 
+
+FIGURE 61. 
+fcfaafc 
+
+White. 
+
+NOTE. — In this evolution, the points A and B are 
+points of resistance, as they prevent the queening of the 
+Prime Tactical Factor. 
+
+STRATEGIC PLANES. 
+
+A STRATEGIC PLANE is that mathematical figure pro- 
+duced by the combination of two or more geometric 
+symbols in an evolution whose object is to checkmate 
+the adverse King. 
+
+A STRATEGIC PLANE is composed of a given Objective 
+Plane and of the Origins occupied by the attacking and 
+by the defending pieces. 
+
+Strategic planes are divided into three classes : — 
+
+I. SIMPLE. 
+II. COMPOUND. 
+III. COMPLEX. 
+
+STRATEGIC PLANES. 
+
+73 
+
+A Simple Strategic Plane is one which may be com- 
+manded by the Prime Tactical Factor. 
+
+Simple Strategic Planes are governed by the follow- 
+ing 
+
+PRINCIPLE. 
+
+Whenever the net value of the offensive force radiated 
+by a given piece is equal to the net mobility of the 
+Objective Plane ; then, the given piece may checkmate 
+the adverse King. 
+
+A SIMPLE STRATEGIC PLANE. 
+FIGURE 62. 
+
+Black. 
+
+White. 
+White to play and mate in one move. 
+
+74 
+
+MAJOR TACTICS. 
+
+A Compound Strategic Plane is one which may be 
+commanded by the Prime Tactical Factor with the aid 
+of either the supporting or the auxiliary Factor. 
+
+Compound Strategic Planes are governed by the 
+following 
+
+PRINCIPLE. 
+
+Whenever the net value of the offensive force radiated 
+by two kindred pieces is equal to the net mobility of the 
+Objective Plane, then the given pieces may checkmate 
+the adverse King. 
+
+A COMPOUND STRATEGIC PLANE. 
+
+(a.) 
+FIGURE 63. 
+
+Slack. 
+
+While. 
+White to play and mate in one move. 
+
+STRATEGIC PLANES. 
+
+75 
+
+A COMPOUND STRAGETIC PLANE. 
+
+FIGURE 64. 
+
+Black. 
+
+Whitf. 
+
+White to play and mate in one move. 
+
+76 
+
+MAJOR TACTICS. 
+
+A Complex Strategic Plane is one that can be com- 
+manded by the Prime Tactical Factor only when aided 
+by both the supporting and the Auxiliary Factors. 
+
+Complex Strategic Planes are governed by the follow- 
+ing 
+
+PRINCIPLE. 
+
+Whenever the net value of the offensive force radiated 
+by three or more kindred pieces is equal to the net 
+mobility of the Objective Plane, then the given kindred 
+pieces may checkmate the adverse King. 
+
+A COMPLEX STRATEGIC PLANE. 
+FIGURE 65. 
+
+Slack. 
+
+White. 
+White to play and mate in one move. 
+
+STRATEGIC PLANES. 7? 
+
+PLANE TOPOGRAPHY. 
+
+The following topographical features are peculiar to 
+Strategic Planes : — 
+
+1. Objective Plane. 
+
+2. Objective Plane Commanded. 
+
+3. Point of Lodgment. 
+
+4. Point of Impenetrability. 
+
+5. Like Point. 
+
+6. Unlike Point. 
+
+78 
+
+MAJOR TACTICS. 
+
+The Objective Plane is composed of the point oc- 
+cupied by the adverse King, together with the imme- 
+diately adjacent points. 
+
+THE OBJECTIVE PLANE. 
+FIGURE 66. 
+
+Black. 
+
+White. 
+
+NOTE. — The Objective Plane is commanded when it 
+contains no point open to occupation by the adverse 
+King, by reason of the radii of offence operated against 
+it by hostile pieces. 
+
+STRATEGIC PLANES. 
+
+79 
+
+AN OBJECTIVE PLANE COMMANDED. 
+
+FIGURE 67. 
+
+Black. 
+
+White. 
+
+80 
+
+MAJOR TACTICS. 
+
+A Point of Lodgment is a term used to signify that a 
+kindred piece other than the Prime Tactical Factor has 
+become posted upon a point which is contained within 
+the Objective Plane. 
+
+A POINT OF LODGMENT. 
+FIGURE 68. 
+Black. 
+
+White. 
+
+STRATEGIC PLANES. 
+
+81 
+
+A Point of Impenetrability is any point in the Objec- 
+tive Plane which in a given situation is occupied by an 
+adverse piece other than the King. 
+
+A POINT OF IMPENETRABILITY. 
+FIGURE 69. 
+
+Black. 
+
+Whitr. 
+
+82 
+
+MAJOR TACTICS. 
+
+A Like Point is any point in the Objective Plane of 
+the same color as that upon which the adverse King is 
+posted. 
+
+LIKE POINTS. 
+FIGURE 70. 
+
+Black. 
+
+White. 
+
+STRATEGIC PLANES. 
+
+83 
+
+An Unlike Point is any point in the Objective Plane 
+of opposite color to that upon which the adverse King 
+is posted. 
+
+UNLIKE POINTS. 
+FIGURE 71. 
+
+Black. 
+
+White. 
+
+BASIC PROPOSITIONS OF MAJOR 
+TACTICS. 
+
+Following are the twelve basic propositions of Major 
+Tactics. Upon these are founded all tactical combina- 
+tions which are possible in chess play. The first four 
+propositions govern all calculations whose object is to 
+win adverse pieces ; the next seven govern all calcula- 
+tions whose object is to queen one or more pawns ; and 
+the final one governs all those calculations whose object 
+is to checkmate the adverse King. 
+
+A Geometric Symbol is positive (G. S. P.) when the 
+piece to which it appertains has the right of move in 
+the given situation ; otherwise it is negative (G. S. N.) 
+
+In all situations wherein the Exposed Piece has the 
+right of move the Point Material is active (P. M. A.), 
+and in all other cases the Point Material is passive 
+(P. M. P.). 
+
+BASIC PROPOSITIONS. 
+
+85 
+
+PROPOSITION I. — THEOREM. 
+
+Given a Geometric Symbol Positive (G. S. P.) having 
+one or more Points Material (P. M.), then the kindred 
+Prime Tactical Factor (P. T. F.) wins an adverse piece. 
+
+FIGURE 72. 
+
+(a.) 
+
+£luck. 
+
+White. 
+Either to move and win a piece. 
+
+86 
+
+MAJOR TACTICS. 
+
+FIGURE 73. 
+(6.) 
+
+Black. 
+
+White. 
+Either to move and win a piece. 
+
+BASIC PROPOSITIONS. 
+
+87 
+
+FIGURE 74. 
+(c.) 
+
+Black. 
+
+While. 
+
+Either to move and win a piece. 
+
+88 
+
+MAJOR TACTICS. 
+
+FIGURE 75 
+
+Black. 
+
+White. 
+Either to move and win a piece. 
+
+BASIC PROPOSITIONS. 
+
+89 
+
+FIGURE 76. 
+
+Block. 
+
+White. 
+Either to move and win a piece. 
+
+90 
+
+MAJOR TACTICS. 
+
+FIGURE 77. 
+
+Black. 
+
+White. 
+Either to move and win a piece. 
+
+BASIC PROPOSITIONS. 
+
+91 
+
+PROPOSITION II. — THEOREM. 
+
+Given a Geometric Symbol Negative (G. S. N.) hav- 
+ing two or more Points Material Active (P. M. A.), then 
+the kindred Prime Tactical Factor (P. T. F.) wins an 
+adverse piece. 
+
+FIGURE 78. 
+
+(a.) 
+
+Black. 
+
+White. 
+Black to move, white to win a piece. 
+
+NOTE — Black, even with the move, can vacate only 
+one of the vertices of the white geometric symbol. 
+Therefore the remaining black piece is lost, according to 
+Prop. I. 
+
+92 
+
+MAJOR TACTICS. 
+
+FIGURE 79. 
+
+(6.) 
+Black. 
+
+White. 
+Black to move, white to win a piece. 
+
+NOTE. — Black, even with the move, cannot vacate 
+the perimeter of the white Knight's octagon ; conse- 
+quently the remaining black piece is lost, according to 
+Prop. I. 
+
+BASIC PROPOSITIONS. 
+
+93 
+
+FIGURE 80. 
+
+Black. 
+
+White. 
+
+Black to move, white to win a piece. 
+
+NOTE. — Black, even with the move, cannot vacate 
+the side of the white Bishop's triangle ; consequently 
+the remaining black piece is lost, according to Prop. I. 
+
+MAJOR TACTICS. 
+
+FIGURE 81. 
+(d.) 
+Black. 
+
+White. 
+
+Black to move, white to win a piece. 
+
+NOTE. — The Knight cannot in one move support the 
+Bishop, neither can the Bishop occupy its K 2 or K 8 to 
+support the Knight, as these points are commanded by 
+the white Rook. 
+
+BASIC PROPOSITIONS. 
+
+95 
+
+FIGURE 82. 
+
+Black. 
+
+White. 
+Black to move, white to win a piece. 
+
+NOTE. — Obviously all those points to which the black 
+Knight can move are commanded by the white Queen. 
+
+MAJOR TACTICS. 
+
+FIGURE 83. 
+
+Black. 
+
+White. 
+Black to move, white to win a piece. 
+
+NOTE. — The Bishop cannot support the Rook, neither 
+can the Rook occupy K B 4 in support of the Bishop, as 
+that point is commanded by the white King. 
+
+BASIC PROPOSITIONS. 
+
+97 
+
+PROPOSITION III.— THEOREM. 
+
+Given a Sub-Geometric Symbol Positive (S. G. S. P.) 
+having two or more Points Material Passive (P. M. P.), 
+then the kindred Prime Tactical Factor (P. T. F.) wins 
+an adverse piece. 
+
+FIGURE 84. 
+(a.) 
+Black. 
+
+White. 
+
+White to move and win a piece. 
+
+NOTE. — The pawn? having the move, advances along 
+its Front Offensive to that point where its logistic sym- 
+hr.j niul its frt'ometric symbol intersect. 
+
+98 
+
+MAJOR TACTICS. 
+
+FIGURE 85. 
+
+w 
+
+Black. 
+
+White. 
+White to move and win a piece. 
+
+NOTE. — The Point of Command is that centre or 
+vertex where the logistic symbol and the geometric 
+symbol intersect. 
+
+BASIC PROPOSITIONS. 
+
+FIGURE 86. 
+
+Black. 
+
+White. 
+White to move and win a piece. 
+
+NOTE. — The diagram illustrative of any position al- 
+ways should contain the logistic symbol and the geo- 
+metric symbol appertaining to the Prime Tactical 
+Factor. 
+
+100 
+
+MAJOR TACTICS. 
+
+FIGURE 87. 
+
+w 
+
+Black. 
+
+White. 
+White to move and win a piece. 
+
+NOTE. — The Point of Command and the points mate- 
+rial are all contained in the same sides of the Rook's 
+quadrilateral. 
+
+BASIC PROPOSITIONS. 
+
+101 
+
+FIGURE 88. 
+
+M 
+
+Black. 
+
+White. 
+White to move and win a piece. 
+
+NOTE. — The Point of Command is White's Q 5 as the 
+logistic radii at Q R 4 do not intersect the centre or a 
+vertex of the geometric symbol. 
+
+102 
+
+MAJOR TACTICS. 
+
+FIGURE 89. 
+
+Slack. 
+
+White. 
+White to move and win a piece. 
+
+NOTE. — The white King cannot move to Q 4 nor to 
+K 3, on account of the resistance of the black pieces. 
+But White wins, as the latter do not command K 4. 
+
+BASIC PROPOSITIONS. 
+
+103 
+
+PROPOSITION IV. — THEOREM. 
+
+Given a piece which is both attacked and supported, 
+to determine whether the given piece is defended. 
+
+DEFENDED PIECE. 
+
+FIGURE 90. 
+
+(a.) 
+
+Black. 
+
+•S/s/S/SSSSJ 'S/S'S"S'SS */SSSS"SSSi ,*"*•"*"* 
+
+m,w n. HI 
+
+NOTE. — With or without the move the white Q B P is 
+defended. (See Eule page 109.) 
+
+104 MAJOR TACTICS. 
+
+SOLUTION. 
+
+X = Any piece employed in the 
+
+given evolution. 
+Y = Piece attacked. 
+B+R+R+Q= Attacking Pieces. 
+B+R+R+Q= Supporting Pieces. 
+
+B+R+R+Q=B+R+R+Q= Construction of the inequality. 
+
+4 X = Number of terms contained in 
+
+left side. 
+4 X = Number of terms contained in 
+
+right side. 
+(B-l-R + R + Q) — (B + R + R + Q) = Value of unlike terms. 
+
+Thus, the given piece is defended, as the number of 
+terms and the sum of their potential complements are 
+equal. 
+
+BASIC PROPOSITIONS. 
+
+105 
+
+DEFENDED PIECE. 
+
+FIGURE 91. 
+
+(b.) 
+
+Black. 
+
+White. 
+
+NOTE. — With or without the move the white Q B P 
+
+is defended. 
+
+SOLUTION. 
+
+X = Any piece employed in the given 
+
+evolution. 
+
+Y = Piece attacked. 
+B+R+Q+R= Attacking Pieces. 
+
+B + R -f R = Supporting Pieces. 
+B + R + Q+R>B-|-R + R = Construction of the inequality. 
+
+4 X = Number of terms contained in left side. 
+3 X = Number of terms contained in right 
+
+side. 
+
+4 x — 3 X = Excess of left-side terms. 
+(B + R) - (B + R) = Value of like terms. 
+
+Q - R = Value of first unlike term. ? 
+
+106 
+
+MAJOR TACTICS. 
+
+Thus the given piece is defended, for, although the 
+number of terms contained in the left side of the in- 
+equality exceeds by one the number of terms contained 
+in the right side, the third term of the inequality is an 
+unlike term, of which the initial contained in the left 
+side is greater than the initial contained in the right 
+side. 
+
+UNDEFENDED PIECE. 
+
+FIGURE 92. 
+
+(a.) 
+
+Black. 
+
+White. 
+
+NOTE. — Without the move the white Q B P is unde- 
+fended. 
+
+BASIC PROPOSITIONS. '107 
+
+SOLUTION. 
+
+X = Any piece employed in the 
+
+given evolution. 
+Y = Piece attacked. 
+B+R+R+Q= Attacking Pieces. 
+B + R + R = Supporting Pieces. 
+
+B+R+R+Q>B+R+R= Construction of the inequality. 
+4 X = Number of terms contained in 
+
+left side. 
+3 X = Number of terms contained in 
+
+right side. 
+
+4 X — 3 X = Excess of left-side terms. 
+(B + R + R) - (B + R -|- R) = Value of unlike terms. 
+
+Thus, there being no unlike terms, and the number of 
+pieces contained in the left side exceeding the number 
+of pieces contained in the right side, the given piece is 
+undefended. 
+
+108 
+
+MAJOR TACTICS. 
+
+UNDEFENDED PIECE. 
+
+FIGURE 93. 
+
+(b.) 
+Black. 
+
+White. 
+
+NOTE. — Without the move the white Q B P is un- 
+defended. 
+
+SOLUTION. 
+
+X = Any piece employed in the 
+
+given evolution. 
+Y = Piece attacked. • 
+B+R+Q+R= Attacking Pieces. 
+
+B + R = Supporting Pieces. 
+Q-fR>B + R = Construction of the inequality. 
+4 X = Number of terms contained in 
+
+left side. 
+2 X = Number of terms contained in 
+
+right side. 
+
+4 X - 2 X = Excess of left-side terms. 
+(B + R) - (B + R) = Value of unlike terms. 
+
+BASIC PROPOSITIONS. 109 
+
+Thus the given piece is undefended as there are no 
+unlike terms, and the number of terms on the left side 
+exceeds the number of terms on the right side. 
+
+RULE. 
+
+I. Construct an algebraic inequality having on the 
+left side the initials of the attacking pieces arranged 
+in the order of their potential complements from left to 
+right; and on the right side the initials of the Support- 
+ing Pieces arranged in the order of their potential com- 
+plements, and also from left to right ; then, — 
+
+If the sum of any number of terms taken in order 
+from left to right on the left side of this inequality is 
+not greater than the sum of the same number of terms 
+taken in order from left to right on the right side, and if 
+none of the terms contained in the left side are less 
+than the like terms contained in the right side, the 
+given piece is defended. 
+
+II. In all cases wherein two or more of the Attacking 
+Pieces operate coincident radfi of offence, or two or 
+more of the Supporting Pieces operate coincident radii 
+of defence, those pieces must be arranged in the con- 
+struction of the inequality, not in the order of their 
+potential complements, but in the order of their proxim- 
+ity to the given piece. This applies only to the position 
+of their initials with respect to each other; the pieces 
+need not necessarily lie in sequence; but in all cases 
+the initial of that piece of highest potential complement 
+should be placed as far to the right on either side of the 
+equality as possible. 
+
+110 
+
+MAJOR TACTICS. 
+
+PROPOSITION V. THEOREM. 
+
+Given a Square of Progression (S. P.) whose net 
+area is equal to the net area of the adverse square of 
+Progression, then, if the Primary Origins (P. 0.) are 
+situated neither upon the same nor adjacent verticals, 
+and if the Points of Junction are situated not upon 
+the same diagonal, the kindred Prime Tactical Factor 
+(P. T. F.) queens against an adverse pawn. 
+
+FIGURE 94. 
+
+Black. 
+
+White. 
+Either to move and queen a pawn. 
+
+BASIC PROPOSITIONS. 
+
+Ill 
+
+PROPOSITION VI. THEOREM. 
+
+Given a Square of Progression Positive (S. P. P.) 
+whose net area is greater by not more than one hori- 
+zontal than the net area of the adverse Square of Pro- 
+gression Negative (S. P. N.), then, if the Primary Origins 
+(P. 0.) are situated neither upon the same nor adjacent 
+verticals, and the points of junction are situated not 
+upon the same diagonals, the kindred Prime Tactical 
+Factor (P. T. F.) queens against an adverse pawn. 
+
+FIGURE 95. 
+
+Slack. 
+
+White. 
+White to move, both to queen a pawn. 
+
+112 
+
+MAJOR TACTICS. 
+
+PROPOSITION VII. THEOREM. 
+
+Given a Square of Progression Positive (S. P. P.) 
+whose net area is less by one horizontal than the net 
+area of the adverse Square of Progression Negative 
+(S. P. N.), then, if the Primary Origins (P. 0.) are situ- 
+ated not upon the same nor adjacent verticals, the kin- 
+dred Prime Tactical Factor (P. T. F.) will queen and 
+will prevent the adverse pawn from queening. 
+
+FIGURE 96. 
+
+Black. 
+
+White. 
+
+White to move and queen a pawn and prevent the adverse pawn 
+from queening. 
+
+BASIC PROPOSITIONS. 
+
+113 
+
+PROPOSITION VIII.— THEOREM. 
+
+Given a Square of Progression Positive (S. P. P.) 
+opposed to a knight's octagon, then, if the Disturbing 
+Factor (D. F.) is situated without the corresponding 
+Knight's octagon, or within the corresponding Knight's 
+octagon, but without the Knight's octagon of next lower 
+radius and on a square of opposite color to the square 
+occupied by the kindred pawn, the Prime Tactical Factor 
+{P. T. F.) queens against the adverse Knight. 
+
+FIGURE 97. 
+
+(a.) 
+Black. 
+
+White. 
+
+White to move and queen a pawn. 
+
+114 
+
+MAJOR TACTICS. 
+
+FIGURE 98. 
+
+(60 
+Slack. 
+
+White. 
+White to move and queen a pawn. 
+
+DEMONSTRATION. — A pawn queens without capture 
+against an adverse Knight, if, in general, the Knight 
+is situated (1) without the corresponding Knight's octa- 
+gon, or (2) within the corresponding Knight's octagon, 
+but without the Knight's octagon of next lower radius 
+and on a square of opposite color to the square occupied 
+by the pawn. 
+
+In diagram No. 97, take the queening point (o) of 
+the pawn as a centre, and make a Knight's move to B, 
+
+BASIC PROPOSITIONS. 115 
+
+C, D, and E; connect these points by straight lines and 
+draw the vertical lines B A and E F ; then the figure 
+A B C D E F (or 1-1) is part of an eight-sided figure, 
+which may be called, for brevity's sake, a Knight's 
+octagon of single radius. 
+
+Similarly, describe the figure G H I J K (or 2-2) 
+whose sides are parallel to those of the figure 1-1, but 
+whose vertices are two Knight's moves distance from 
+the point o ; this figure may be called a Knight's octagon 
+of double radius. 
+
+Now, if the pawn has the first move it will be seen, 
+first, that a Knight situated anywhere within the octagon 
+1-1, provided it be not en prise of the pawn (an assump- 
+tion common to all situations), nor at K B 8 nor Q 8 (an 
+exception peculiar to this situation), will be able to stop 
+the pawn, either by preventing it from queening or by 
+capturing it after it has queened ; secondly, that a 
+Knight situated anywhere without the octagon 2-2 will 
+be unable to stop the pawn ; and thirdly, that a Knight 
+situated anywhere between the octagon 1-1 and 2-2, 
+will be able to stop the pawn if it starts from a square 
+of the same color as that occupied by the pawn (white, 
+in this instance), but unable to do so if it starts from 
+a square of the opposite color (in this instance, black). 
+
+From diagram No. 98, it is apparent that four 
+Knight's diagrams can be drawn on the surface of the 
+chess-board, and the perimeter of a fifth may be con- 
+sidered as passing through the lower left-hand corner. 
+In this diagram the white pawn is supposed to start 
+from a point on the King's Rook's file. 
+
+If the pawn starts from K R 6, a black square, and 
+having two moves to make in reaching the queening 
+point, the Knight must be situated as in Fig. No. 98, 
+within the octagon of single radius, or on a black square 
+
+116 MAJOR TACTICS. 
+
+between the octagon of single radius and the octagon of 
+double radius. 
+
+If the pawn starts from K R 5, a white square, and 
+having three moves to make, the Knight must be situated 
+within the octagon of double radius, or on a white 
+square between the octagon of double radius and the 
+octagon of triple radius (3-3). 
+
+If the pawn starts from K R 4, a black square, and 
+having four moves to make, the Knight must be situated 
+within the octagon of triple radius, or in a black square 
+between the octagon of triple radius and the octagon of 
+quadruple radius (4-4). 
+
+If the pawn starts from K R 3, a white square, having 
+five moves to make, the Knight must be situated within 
+the octagon of quadruple radius, or on a white square 
+between the octagon of quadruple radius and the 
+octagon of quintuple radius (5). In this last case it 
+appears that the only square from whence the Knight 
+can stop the pawn is Black's Q R 8. 
+
+If the pawn starts from K R 2, it may advance two 
+squares on the first move, and precisely the same con- 
+ditions exist as if it started from K R 3. 
+
+Still another octagon may be imagined to exist on the 
+board, — namely, the octagon of null radius, or simply 
+the queening point (o), which is the centre of each of 
+the other octagons. This being understood, it follows 
+that if the pawn starts from KR 7, a white square, and 
+having one move to make, the Knight must be situated 
+within the octagon of null radius (o), i. e. at White's 
+K R 8, or, on a white square between the octagon of 
+null radius and the octagon of single radius, i. e. at K 
+Kt 6 or at K B 7. 
+
+From these data a general law may be deduced. In 
+order to abbreviate the enunciation of this law, it is well 
+
+BASIC PROPOSITIONS. 117 
+
+to lay down these definitions : By " the Knight's octagon 
+corresponding to a pawn," is meant that Knight's 
+octagon whose centre is the queening point of the pawn, 
+and whose radius consists of a number of Knight's 
+moves equal to the number of moves to be made by 
+the pawn in reaching its queening point ; and by " the 
+Knight's octagon of next lower radius," is meant that 
+Knight's octagon whose centre is the queening point of 
+the pawn, and whose radius consists of a number of 
+Knight's moves one less than the number of moves to be 
+made by the pawn, in reaching its queening point. The 
+law, then, is as follows : — 
+
+A Knight can stop a pawn that has the move and is 
+advancing to queen, if the Knight is situated between 
+the Knight's octagon corresponding to the pawn and the 
+Knight's octagon of next lower radius, and on a square 
+of the same color as that occupied by the pawn, or if 
+the Knight is situated within the Knight's octagon of 
+next lower radius ; provided, that the Knight be not en 
+prise to the pawn, nor (if the pawn is at its sixth square) 
+en prise to the pawn after the latter's first move. 
+
+118 
+
+MAJOR TACTICS. 
+
+PROPOSITION IX.— THEOREM. 
+
+Given a Square of Progression Positive (S. P. P.) 
+opposed to a Bishop's triangle, then, if the given square 
+of progression is the smallest or the smallest but one, 
+and if the Point of Junction is a square of opposite color 
+to that occupied by the hostile integer, the kindred Prime 
+Tactical Factor (P. T. F.) queens without capture against 
+the adverse Bishop. 
+
+FIGURE 99. 
+
+Black. 
+
+White. 
+"White to move and queen a pawn. 
+
+BASIC PROPOSITIONS. 
+
+119 
+
+PROPOSITION X. — THEOREM. 
+
+Given a Square of Progression Positive (S. P. P.) 
+opposed to a Rook's quadrilateral or to a Queen's poly- 
+gon, then, if the square of progression is the smallest 
+possible, and if the hostile integer does not command 
+the Point of Junction, the kindred Prime Tactical Factor 
+queens without capture against the adverse Rook or 
+Queen. 
+
+FIGURE 100. 
+(a.) 
+
+White. 
+White to move and queen a pawn. 
+
+120 
+
+MAJOR TACTICS. 
+
+FIGURE 101. 
+(6.) 
+
+Slack. 
+
+White. 
+White to move and queen a pawn. 
+
+BASIC PROPOSITIONS. 
+
+121 
+
+PROPOSITION XI. 
+
+Given a Square of Progression Positive (S. P. P.) op- 
+posed to a King's rectangle ; then, if the given King is 
+not posted on a point within the given square of pro- 
+gression, the given pawn queens without capture against 
+the adverse King. 
+
+FlGUEE 102. 
+(a.) 
+Black. 
+
+White to move and.queen a pawn. 
+
+*"* 
+
+122 
+
+MAJOR TACTICS. 
+
+FIGURE 103. 
+(6.) 
+
+Black. 
+
+White. 
+White to move and queen a pawn. 
+
+BASIC PROPOSITIONS. 
+
+123 
+
+PROPOSITION XII. — THEOREM. 
+
+Given a Geometric Symbol Positive (G. S. P.) or a 
+combination of Geometric Symbols Positive which is 
+coincident with the Objective Plane ; then, if the Prime 
+Tactical Factor (P. T. F.) can be posted at the Point of 
+Command, the adverse King may be checkmated. 
+
+FIGURE 104. 
+
+Black. 
+
+WMts. 
+
+White to play and mate in one move. 
+
+SIMPLE TACTICAL PLANES. 
+
+EVOLUTION No. 1. 
+
+FIGURE 105. 
+Pawn vs. Pawn. 
+
+Black. 
+
+White. 
+
+When two opposing pawns are situated on adjacent 
+verticals and each on its Primary Base Line, that side 
+which has not the move wins the adverse pawn. 
+
+SIMPLE TACTICAL PLANES. 
+
+125 
+
+EVOLUTION No. 2. 
+FIGURE 106. 
+Pawn vs. Pawn. 
+Black. 
+
+White. 
+
+A pawn posted at its Primary Base Line and either 
+with or without the move, wins an adverse pawn situated 
+at the intersection of an adjacent vertical with the sixth 
+horizontal. 
+
+126 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 3. 
+
+FIGURE 107. 
+Pawn vs. Pawn. 
+
+Black. 
+
+4 
+
+TFMe. 
+
+When the number of horizontals between two opposing 
+pawns situated on adjacent verticals is even, that pawn 
+which has the move wins the adverse pawn. 
+
+SIMPLE TACTICAL PLANES. 
+
+127 
+
+EVOLUTION No. 4. 
+
+FIGURE 108. 
+
+Pawn vs. Pawn. 
+
+Black. 
+
+White 
+
+When the number of horizontals between two opposing 
+pawns situated on adjacent verticals, is odd, that pawn 
+which has not to move wins the adverse pawn ; provided 
+the position is not that of Evolution No. 2. 
+
+w 
+
+128 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 5. 
+
+FIGURE 109. 
+Pawn vs. Knight. 
+
+Slack. 
+
+White. 
+
+Whenever a pawn altitude is intersected by the per- 
+iphery of an adverse Knight's octagon, then, if the pawn 
+has not crossed the point of intersection, the adverse 
+Knight wins the given pawn. 
+
+SIMPLE TACTICAL PLANES. 
+
+129 
+
+EVOLUTION No. 6. 
+FIGURE 110. 
+
+Knight vs. Knight. 
+
+White. 
+
+A Knight posted at R 1 or R 8, and having to move, 
+is lost if all the points on its periphery are contained in 
+an adverse Knight's octagon. 
+
+130 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 7. 
+
+FIGURE 111. 
+Bishop vs. Pawn. 
+
+Black. 
+
+White. 
+
+Whenever a pawn's altitude intersects a Bishop's 
+triangle, then, if the pawn has not crossed the point of 
+intersection, the adverse Bishop wins the given pawn. 
+
+SIMPLE TACTICAL PLANES. 
+
+131 
+
+EVOLUTION No. 8. 
+
+FIGURE 112. 
+Bishop vs. Knight. 
+
+Black. 
+
+White. 
+
+A Knight posted at R 1 or R 8, and with or without 
+the move, is lost if all the points on its periphery are 
+contained in the same side of the Bishop's triangle. 
+
+NOTE. — The B will equally win if posted at Q 8. 
+
+132 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 9. 
+
+FIGURE 113. 
+
+Bishop vs. Knight. 
+
+Black. 
+
+White. 
+
+A Knight posted at R 2, R 7, Kt 1, or Kt 8, and having 
+to move, is lost, if all the points on its periphery are 
+contained in the sides of an adverse Bishop's triangle. 
+
+SIMPLE TACTICAL PLACES. 
+
+133 
+
+EVOLUTION No. 10. 
+
+FIGURE 114. 
+Bishop vs. Knight. 
+
+Black. 
+
+White. 
+
+A Knight posted at R 4, R 5, K 1, K 8, Q 1, or Q 8, 
+and having the move, is lost if all the points on its 
+periphery are contained in the sides of an adverse 
+Bishop's triangle. 
+
+134 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 11. 
+
+FIGURE 115. 
+
+Rook vs. Pawn. 
+
+Black. 
+
+White. 
+
+Whenever a pawn altitude intersects a Rook's quad- 
+rilateral, then, if the pawn has not crossed the point of 
+intersection, the adverse Rook wins the given pawn. 
+
+NOTE Obviously, whenever a pawn altitude is coin- 
+cident with one side of a Rook's quadrilateral, all the 
+points are points of intersection and the pawn is liable 
+to capture when crossing each one. 
+
+SIMPLE TACTICAL PLANES. 
+
+135 
+
+EVOLUTION No. 12. 
+
+FIGURE 116. 
+Rook vs. Knight. 
+
+Black. 
+
+A Knight posted at R 1 or R 8, and having to move, 
+is lost if all the points on its perimeter are contained in 
+the sides of an adverse Rook's quadrilateral. 
+
+NOTE. — Obviously the R would equally win if posted 
+-at Q B 6. 
+
+136 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 13 
+FIGURE 117. 
+Rook vs. Knight. 
+Black. 
+
+White. 
+
+A Knight posted at R 2, R 7, Kt 1, or Kt 8, and having 
+to move, is lost if all the points on its periphery are con- 
+tained in the sides of an adverse Rook's quadrilateral. 
+
+SIMPLE TACTICAL PLANES. 
+
+137 
+
+EVOLUTION No. 14. 
+
+FIGURE 118. 
+
+Rook vs. Knight. 
+
+Black. 
+
+While. 
+
+A Knight posted at Kt 2, or Kt 7, and having to move, 
+is lost if all the points on its perimeter are contained 
+in the sides of an adverse Rook's quadrilateral. 
+
+138 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 15. 
+
+FIGURE 119. 
+Queen vs. Pawn. 
+
+Black 
+
+White. 
+
+Whenever a pawn altitude intercepts an adverse 
+Queen's polygon, then, if the pawn has not crossed the 
+point of intersection, the adverse Queen wins the given 
+pawn. 
+
+NOTE. — The Q will equally win if posted at Q B 1, Q 
+R 1, K 1, K B 1, K Kt 1, K R 1, K 3, K B 4, K Kt 5, K R 
+6, Q B 3, Q Kt 2, Q R 3, Q B 4, Q B 5, Q B 6, Q B 7, or 
+Q B 8. 
+
+SIMPLE TACTICAL PLANES. 
+
+139 
+
+EVOLUTION No. 16. 
+
+FIGURE 120. 
+Queen vs. Knight. 
+
+Black. 
+
+White. 
+
+A Knight posted at R 1 or R 8, and having to move, is 
+lost if all the points in its perimeter are contained in 
+the sides of an adverse Queen's polygon. 
+
+NOTE. — The Q will equally win if posted at Q R 5, 
+Q R 7, Q Kt 8, Q B 6, Q B 5 or Q 8. 
+
+140 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 17. 
+FIGURE 121. 
+
+Queen vs. Knight. 
+Black. 
+
+White. 
+
+A Knight posted at R 2, R 7, Kt 1, or Kt 8, and having 
+to move, is lost if all the points on its perimeter are 
+contained in the sides of an adverse Queen's polygon. 
+
+NOTE. — The Q will equally win if posted at Q 7, K 8, 
+or Q B 5. 
+
+SIMPLE TACTICAL PLANES. 
+
+141 
+
+EVOLUTION No. 18. 
+
+FIGURE 122. 
+
+Queen vs. Knight. 
+
+Black. 
+
+White. 
+
+A Knight posted at R 4, R 5, K 1, K 8, Q 1, or Q 8, and 
+having to move, is lost if all the points on its perimeter 
+are contained in the sides of an adverse Queen's polygon. 
+
+NOTE. — The Q will equally win if posted at Q 5. 
+
+142 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 19. 
+
+FIGURE 123. 
+
+Queen vs. Knight. 
+
+Black. 
+
+White. 
+
+A Knight posted at Kt 2 or Kt 7, and having to move, 
+is lost if all the points on its periphery are contained in 
+the sides of an adverse Queen's polygon. 
+
+SIMPLE TACTICAL PLANES. 
+
+143 
+
+EVOLUTION No. 20. 
+
+FIGURE 124. 
+
+King vs. Pawn. 
+
+Black. 
+
+White. 
+
+Whenever the centre of a King's rectangle is con- 
+tained in the square of progression of a pawn; then 
+the adverse King wins the given pawn. 
+
+NOTE. — Obviously the King would equally win if 
+posted on any square from the first to the third hori- 
+zontal inclusive, the King's Rook's file excepted. 
+
+144 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 21. 
+
+FIGURE 125. 
+
+King vs. Knight. 
+
+Black. 
+
+While. 
+
+A Knight posted at El or E, 8, and having to move, 
+is lost if all the points on its periphery are contained in 
+the sides of an adverse King's rectangle. 
+
+NOTE. — The K would equally win if posted at Q B 6. 
+
+SIMPLE TACTICAL PLANES. 
+
+145 
+
+EVOLUTION No. 22. 
+
+FIGURE 126. 
+
+Two Pawns vs. Knight. 
+
+Black. 
+
+Whitt. 
+
+A Knight situated at R 1, and having to move, is lost 
+if all the points on its perimeter are contained in two 
+adverse pawn triangles. 
+
+NOTE. — The pawns will equally win if posted at Q 6 
+and Q B 5 ; or at Q R 5 and Q Kt 6. 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 23. 
+
+FIGURE 127. 
+
+Two Pawns vs. Bishop. 
+
+Black. 
+
+A Bishop posted at R 1, and with or without the move, 
+is lost if the point which it occupies is one of the verti- 
+ces of a pawn's triangle. 
+
+NOTE. — The pawns equally win if posted at QB6 
+and Q Kt 7. 
+
+SIMPLE TACTICAL PLANES. 
+
+147 
+
+EVOLUTION No. 24. 
+
+FIGURE 128. 
+
+Pawn and Knight vs. Knight. 
+Black. 
+
+Whenever a point of junction is the vertex of a mathe- 
+matical figure formed by the union of the logistic 
+symbol of a pawn with an oblique, diagonal, horizontal, 
+or vertical from the logistic symbol of any kindred 
+piece ; then the given combination of two kindred pieces 
+wins any given adverse piece. 
+
+NOTE. — Obviously it is immaterial what the kindred 
+piece may be, so long as it operates a radius of attack 
+against the point Q 8 ; nor what the adverse piece may 
+be, nor what its position, so long as it does not attack 
+the white pawn at Q 7. 
+
+148 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 25. 
+
+FIGURE 129. 
+
+Pawn and Knight vs. Bishop. 
+Black. 
+
+White. 
+
+Whenever a piece defending a hostile point of junc- 
+tion is attacked, then, if the point of junction and all 
+points on the periphery of the given piece wherefrom it 
+defends the point of junction, are contained in the 
+geometric symbol which appertains to the adverse piece, 
+the piece defending a hostile point of junction is lost. 
+
+SIMPLE TACTICAL PLANES. 
+
+149 
+
+EVOLUTION No. 26. 
+
+FIGURE 130. 
+
+Bishop and Pawn vs. Bishop. 
+Black. 
+
+White. 
+
+Whenever an adjacent Point of Junction is com- 
+manded by a kindred piece, the adverse defending piece 
+is lost. 
+
+NOTE. — Obviously, it is immaterial what may be 
+either the kindred piece or the adverse piece ; the white 
+pawn queens by force, and the kindred piece wins the 
+adverse piece, which, of course, is compelled to capture 
+the newly made Queen. 
+
+150 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 27. 
+
+FIGUKB 131. 
+
+Eook and Pawn vs. Rook. 
+Black. 
+
+? M 
+
+*» „ ...,y/'///"//',. 
+
+White. 
+
+NOTE. — White wins easily by R to K 7 supporting the 
+kindred pawn ; followed by R to K 8 upon the removal of 
+the black Rook from Q 1. 
+
+SIMPLE TACTICAL PLANES. 
+
+151 
+
+EVOLUTION No. 28. 
+
+FIGURE 132. 
+Two Knights vs. Knight. 
+
+Black. 
+
+White. 
+
+A Knight having to move is lost if all the points in its 
+periphery are commanded by adverse pieces. 
+
+152 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 29. 
+
+FIGURE 133. 
+
+Knight and Bishop vs. Knight. 
+Black. 
+
+White. 
+
+NOTE. — White wins by Kt to Q 6, or Kt to K 7, thus 
+preventing the escape of the adverse Knight via Q B 1. 
+
+SIMPLE TACTICAL PLANES. 
+
+153 
+
+EVOLUTION No. 30. 
+
+FIGURE 134. 
+
+Rook and Knight vs. Knight. 
+Black. 
+
+White 
+
+NOTE. — White wins by Kt to K 5, thus preventing the 
+escape of the adverse Knight via Q B 3 and Q B 5. 
+
+154 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 31. 
+
+FIGURE 135. 
+
+Queen and Knight vs. Knight. 
+Black. 
+
+White. 
+
+NOTE. — White wins if Black has to move. 
+
+SIMPLE TACTICAL PLANES. 
+
+155 
+
+EVOLUTION No. 32. 
+
+FIGURE 136. 
+
+King and Knight vs. Knight. 
+Black. 
+
+White. 
+
+NOTE. — White wins if Black has to move. 
+
+156 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 33. 
+
+FIGURE 137. 
+Queen and Bishop VB. Knight. 
+
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+SIMPLE TACTICAL PLANES 
+
+157 
+
+EVOLUTION No. 34. 
+
+FIGURE 138. 
+
+Queen and Rook rs. Knight. 
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+158 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 35. 
+
+FIGURE 139. 
+
+King and Queen vs. Knight. 
+Black, 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+COMPOUND TACTICAL PLANES. 
+
+EVOLUTION No. 36. 
+
+FIGURE 140. 
+Pawn vs. Two Knights. 
+
+Black. 
+
+VTiite. 
+
+Whenever two adverse pieces are posted on the verti- 
+ces of a pawn's triangle and on the same horizontal, 
+then if neither piece commands the remaining vertex, 
+the given pawn, having to move, wins one of the adverse 
+pieces. 
+
+NOTE. — White wins by P to K 4. The pawn would 
+equally win if posted at K 3. 
+
+160 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 37. 
+
+FIGURE 141. 
+
+Knight vs. Rook and Bishop. 
+Black. 
+
+White. 
+
+Whenever two adverse pieces are situated on the 
+perimeter of a Knight's octagon, then if neither piece 
+commands the centre point nor can support the other 
+only by occupying another point on the perimeter of the 
+said octagon, the given Knight, having to move, wins one 
+of the adverse pieces. 
+
+COMPOUND TACTICAL PLANES. 
+
+161 
+
+EVOLUTION No. 38. 
+
+FIGURE 142. 
+
+Knight rs. King and Queen. 
+Black. 
+
+WhUf. 
+
+Whenever the adverse King is situated on the perime- 
+ter of any opposing geometric symbol, another point on 
+which is occupied by an unsupported adverse piece which 
+the King cannot defend by a single move, or by another 
+adverse piece superior in value to the attacking piece, 
+then the given attacking piece makes a gain in adverse 
+material. 
+
+NOTE. — For after the check the white Knight takes 
+an adverse Queen or Rook, regardless of the fact that 
+itself is thereby lost. 
+
+162 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 39. 
+
+FIGURE 143. 
+Bishop vs. Two Pawns. 
+
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+COMPOUND TACTICAL PLANES. 
+
+163 
+
+EVOLUTION No. 40. 
+
+FIGURE 144. 
+Bishop vs. King and Pawn. 
+
+Black. 
+
+White. 
+
+NOTE. — White wins by checking at Q Kt 3, for the 
+black King is not able to defend the pawn in one move. 
+
+164 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 41. 
+
+FIGURE 145. 
+
+Bishop vs. King and Knight. 
+Black. 
+
+White. 
+
+NOTE. — White wins by B to Q Kt 3 for Black is un- 
+able to defend the Knight in one move. 
+
+COMPOUND TACTICAL PLANES. 
+
+165 
+
+EVOLUTION No. 42. 
+
+FIGURE 146. 
+Bishop vs. Two Knights. 
+
+Black. 
+
+White. 
+
+NOTE. — White wins by B to Q 5 as neither of the ad- 
+verse pieces are able to support the other in a single 
+move. 
+
+166 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 43. 
+
+FIGURE 147. 
+
+Bishop vs. King and Knight. 
+Black. 
+
+White. 
+
+NOTE. — White wins by B to Q B 4 (ck), for the ad- 
+verse King is unable to support the black Knight in a 
+single move. 
+
+COMPOUND TACTICAL PLANES. 
+
+167 
+
+EVOLUTION No. 44. 
+
+FIGURE 148. 
+
+Rook vs. Two Knights. 
+
+Black. 
+
+Whenever two Knights are simultaneously attacked 
+by an adverse piece, then if one of the Knights has to 
+move, the adverse piece wins one of the given Knights. 
+
+168 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 45. 
+
+FIGURE 149. 
+Rook vs. Knight and Bishop. 
+
+Black. 
+
+White. 
+
+Whenever a Knight and a Bishop occupying squares 
+opposite in color, or of like color but unable to support 
+each other in one move, are simultaneously attacked, 
+then, either with or without the move, the adverse piece 
+wins the given Bishop or the given Knight. 
+
+COMPOUND TACTICAL PLANES. 
+
+169 
+
+EVOLUTION No. 46. 
+
+FIGURE 150. 
+
+Rook vs. Knight and Bishop. 
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+170 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 47. 
+
+FIGURE 151. 
+
+Queen vs. Knight and Bishop. 
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+COMPOUND TACTICAL PLANES. 
+
+171 
+
+EVOLUTION No. 48. 
+
+FIGURE 152. 
+
+Queen vs. Knight and Bishop. 
+Black. 
+
+White 
+
+NOTE. — White wins either with or without the move. 
+
+172 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 49. 
+
+FIGURE 153. 
+Queen vs. Rook and Knight. 
+
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+COMPOUND TACTICAL PLANES. 
+
+173 
+
+EVOLUTION No. 50. 
+
+FIGURE 154. 
+Queen vs. Rook and Bishop. 
+
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+174 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 51. 
+FIGURE 155. 
+
+King vs. Knight and Pawn. 
+Slack. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+COMPOUND TACTICAL PLANES. 175 
+
+4% 
+
+DEVOLUTION No. 52. 
+
+FIGURE 156. 
+
+King vs. Bishop and Pawn. 
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+c^f-s 
+
+176 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 53. 
+
+FIGURE 157. 
+
+King vs. King and Pawn. 
+Black. 
+
+!JL 
+
+White. 
+
+NOTE. — White loses if he has to move, and wm& &e „, 
+if he has not to move. 
+
+COMPOUND TACTICAL PLANES. 
+
+Ill 
+
+EVOLUTION No. 54 
+
+FIGURE 158. 
+Knight vs. Three Pawns. 
+
+Black. 
+
+White. 
+
+NOTE. — White, if he has not to move, will win all the 
+adverse pawns. 
+
+178 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 55. 
+
+FIGURE 159. 
+Bishop vs. Three Pawns. 
+
+Black. 
+
+White. 
+
+NOTE. — White, if he has not to move, wins all the ad- 
+verse pawns. 
+
+COMPOUND TACTICAL PLANES. 
+
+179 
+
+EVOLUTION No. 56. 
+
+FIGURE 160. 
+Rook vs. Three Pawns. 
+
+Slack. 
+
+While. 
+
+NOTE. — White, if he has not to move, will win all 
+the adverse pawns, ^^ W«4t> »*<rv* *w< ^- fcKf /, 
+
+/ ' 
+
+130 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 57. 
+
+FIGURE 161. 
+King vs. Three Pawns. 
+
+Black. 
+
+White. 
+
+NOTE. — White, if he has not to move, will win all 
+the adverse pawns. 
+
+COMPOUND TACTICAL PLANES. 
+
+181 
+
+EVOLUTION No. 68. 
+
+FIGURE 162. 
+Knight vs. Bishop and Pawn. 
+
+Slack. 
+
+Wftitf. 
+
+<*' 
+
+. 
+
+NOTE. — White, with the move, wins' by Kt to K B 8, 
+as both the black pieces are simultaneously attacked 
+and will not mutually support each other after Black's 
+next move. 
+
+182 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 59. 
+
+FIGURE 163. 
+
+Bishop vs. Bishop and Pawn. 
+Black. 
+
+White. 
+
+NOTE. — White wins either with or without the move. 
+
+COMPLEX TACTICAL PLANES. 
+
+EVOLUTION No. 60. 
+
+FIGURE 164. 
+
+Knight and Pawn vs. King and Queen. 
+Black. 
+
+White. 
+
+NOTE. — By the sacrifice of the pawn by P to Q 5 (ck) 
+all the pieces become posted on the perimeter of the 
+same Knight's octagon, and White, having the move, 
+v. : n, in accordance with Prop. IV. 
+
+184 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 61. 
+
+FIGURE 165. 
+
+Knight and Pawn vs. King and Queen. 
+Slack. 
+
+White. 
+
+NOTE. — White, having the move, wins by P to Kt 8 
+(queening), followed by Kt to K B 6 (ck). 
+
+COMPLEX TACTICAL PLANES 
+
+185 
+
+EVOLUTION No. 62. 
+
+FIGURE 166. 
+Bishop and Pawn vs. King and Queen 
+
+Black. 
+
+White. 
+
+NOTE. — White, having the move, wins by sacrificing 
+the pawn by P to Q B 4 (ck) and thus bringing all the 
+pieces on the perimeter of the same Bishop's triangle. 
+
+186 
+
+MAJOR TACTICS. 
+
+EVOLUTION No 63. 
+
+FIGURE 167. 
+Knight and Bishop vs. King and Queen. 
+
+Slack. 
+
+vULf 
+
+White. 
+
+NOTE. — White, having the move, wins by B to K B 7 
+(ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+187 
+
+EVOLUTION No. 64. 
+
+FIGURE 168. 
+Bishop and Knight vs. King and Queen. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having the move, wins by B to Q 5 
+(ck), followed by Kt to K B 6 (ck). 
+
+188 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 65. 
+
+FIGURE 169. 
+
+Knight and Bishop vs. King and Queen. 
+Slack. 
+
+White. 
+
+NOTE. — White, having the move, wins by B to Q 5, 
+followed by Kt to K B 6 (ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+189 
+
+EVOLUTION No. 66. 
+
+FIGUKE 170. 
+
+Knight and Bishop vs. King and Queen. 
+Black. 
+
+While. 
+
+NOTE. — White, having the move, wins by B to K Kt 7 
+(ck), followed by Kt to K B 5 (ck). 
+
+190 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 67. 
+FIGURE 171. 
+
+Knight and Bishop vs. King and Queen. 
+Slack. 
+
+White. 
+
+NOTE. — White, having to move, wins by B to Q 6 (ck), 
+followed, if K x B, by Kt to K 4 (ck), and if Q x B, by 
+Kt to K B 5 (ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+191 
+
+EVOLUTION No, 68. 
+FIGURE 172. 
+
+Knight and Bishop vs. King and Queen. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by Kt to K Kt 5 
+(ck). 
+
+192 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 69. 
+
+FIGURE 173. 
+
+Knight and Bishop vs. King and Queen. 
+Black, 
+
+White. 
+
+NOTE. — White, having to move, wins by either Kt to 
+K B 2 or Kt to Q 5. 
+
+COMPLEX TACTICAL PLANES. 
+
+193 
+
+EVOLUTION No. 70. 
+
+FIGURE 174. 
+Knight and Rook vs. King and Queen. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by R to Q Kt 5, 
+followed by Kt to Q 4 (ck). 
+
+194 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 71. 
+
+FIGURE 175. 
+Rook and Knight vs. King and Queen. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by B, to Q 8 (ck), 
+followed by Kt to K 6 (ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+195 
+
+EVOLUTION No. 72. 
+
+FIGURE 176. 
+
+Rook and Knight vs. King and Queen. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by R to K B 5 
+(ck), followed by Kt to Q 4 (ck). 
+
+196 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 73. 
+
+FIGURE 177. 
+
+Queen and Bishop vs. King and Queen, 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by B to K Kt 4 
+(ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+197 
+
+EVOLUTION No. 74. 
+
+FIGURE 178. 
+Queen and Rook vs. King and Queen. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by R to K B 6 
+(ck). 
+
+198 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 75. 
+
+FIGURE 179. 
+
+Bishop and Pawn vs. King and Knight. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by P to Q 8 
+(queening), followed by B to K 7 (ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+199 
+
+EVOLUTION No. 76. 
+
+FIGURE 180. 
+Bishop and Pawn vs. King and Bishop. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by B to K B 
+(ck), followed by P to Q B 8 (queening). 
+
+200 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 77. 
+
+FIGURE 181. 
+Bishop and Pawn vs. Bishop and Knight. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins material by P 
+to Q 8 (queening). 
+
+COMPLEX TACTICAL PLANES. 
+
+201 
+
+EVOLUTION No. 78. 
+
+FIGURE 182. 
+Bishop and Pawn vs. Rook and Knight. 
+
+Black. 
+
+While. 
+
+NOTE. — White, having to move, wins material by P 
+to K 8 (queening), followed by B to Q 7. 
+
+202 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 79. 
+
+FIGURE 183. 
+
+Bishop and Pawn us. King and Queen. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by P to K B 8 
+(queening), followed by B to Q Kt 4 (ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+203 
+
+EVOLUTION No. 80. 
+
+FIGURE 184. 
+Hook and Pawn vs. King and Bishop. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by P to K 7, fol- 
+lowed, if B x P, by R to K 8. Otherwise, the pawn 
+queens and wins. 
+
+204 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 81. 
+
+FIGUBE 185. 
+
+Rook and Pawn vs. King and Rook. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by P to K 8 
+(queening), and followed, if K X Q, by R to R 8 (ck) and 
+RtoRT (ck). 
+
+COMPLEX TACTICAL PLANES. 
+
+205 
+
+EVOLUTION No. 82. 
+
+FIGURE 186. 
+
+Rook and Pawn r*. King and Queen. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by Rto K B 8 
+(ck), followed by P to Q 8 (queening). 
+
+206 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 83. 
+FIGURE 187. 
+
+Queen and Pawn vs. Rook and Bishop. 
+Black. 
+
+t m 
+
+White. 
+
+NOTE. — White, having to move, wins by P to Q 8 
+(queening), followed, if B x Q, by Q to Q 7. 
+
+COMPLEX TACTICAL PLANES. 
+
+207 
+
+EVOLUTION No. 84. 
+
+FIGURE 188. 
+
+Queen and Pawn vs. Rook and Knight. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by P to R 8 
+(queening), followed, if R x Q, by Q to K Kt 7. 
+
+208 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 85. 
+FIGURE 189. 
+
+Queen and Pawn vs. Bishop and Knight. 
+
+Black. 
+
+NOTE. — White, having to move, wins by P to K 6, 
+followed, if Kt x P, by either Q to K 4 or Q to K 8. 
+
+COMPLEX TACTICAL PLANES. 
+
+209 
+
+EVOLUTION No. 86. 
+
+FIGURE 190. 
+King and Pawn vs. Bishop and Knight. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by P to Q 8 
+(queening), followed, if B x Q, by K x Kt. 
+
+210 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 87. 
+FIGURE 191. 
+
+King and Pawn vs. Two Knights. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, wins by P to Q 8 
+(queening). 
+
+SIMPLE LOGISTIC PLANES. 
+
+EVOLUTION No. 88. 
+FIGURE 192. 
+
+Pawn vs. Pawn. 
+Black. 
+
+White. 
+
+NOTE. — Either to move and queen without capture. 
+
+212 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 89. 
+
+FIGURE 193. 
+
+Pawn vs. Pawn. 
+
+Black. 
+
+. 
+
+'//////////s. dH^ 
+
+White. 
+
+NOTE. — White, having to move, wins, first queening 
+his pawn and then with the newly made queen captur- 
+ing the adverse pawn. If white has not the move, the 
+black pawn queens without capture. 
+
+SIMPLE LOGISTIC PLANES. 
+
+213 
+
+EVOLUTION No. 90. 
+
+FIGURE 194. 
+Pawn vs. Pawn. 
+Black. 
+
+White. 
+
+XOTE. — White, either with or without the move, 
+queens and captures the adverse pawn. 
+
+214 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 91. 
+
+Fioure 195. 
+Pawn vs. Knight. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, queens without 
+capture. 
+
+SIMPLE LOGISTIC PLANES. 
+
+215 
+
+EVOLUTION No. 92. 
+
+FIGURE 196. 
+Pawn vs. Bishop. 
+
+Black. 
+
+White. 
+
+NOTE. — White, either with or without the move, 
+queens without capture. 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 93. 
+
+FIGURE 197. 
+
+Pawn vs. King. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having to move, queens without 
+capture. 
+
+SIMPLE LOGISTIC PLANES. 
+
+217 
+
+EVOLUTION No. 94. 
+
+FIGURE 198. 
+Pawn and Knight vs. Queen or Rook. 
+
+Black. 
+
+White. 
+
+Whenever a Queen or Rook defending a hostile Point 
+of Junction has not the move, then if an adverse piece 
+can be in one move posted on the adjacent vertex of the 
+pawn's triangle, the given pawn queens without capture. 
+
+XOTE. — It is, of course, immaterial what the kin- 
+dred piece may be, so long as it can occupy the point 
+K 8 ; or what the position of the defending piece, if it 
+does not attack the pawn at Q 7. 
+
+218 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 95. 
+
+FIGURE 199. 
+Bishop and Pawn vs. King and Rook. 
+
+Slack. 
+
+White. 
+
+NOTE. — White, having to move, wins by B to K R 3 
+(ck), followed by B to Q B 8. 
+
+SIMPLE LOGISTIC PLANES. 
+
+219 
+
+EVOLUTION No. 96. 
+
+FIGURE 200. 
+Rook and Pawn vs. Rook. 
+
+White. 
+
+White. 
+
+NOTE. — White wins, either with or without the more. 
+
+220 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 97. 
+
+FIGURE 201. 
+
+Knight and Pawn vs. King. 
+Black. 
+
+White. 
+
+NOTE. — White, either with or without, wins, as 
+the black King cannot gain command of the Point 
+of Junction. 
+
+SIMPLE LOGISTIC PLANES. 
+
+221 
+
+EVOLUTION No. 98. 
+
+FIGURE 202. 
+
+Rook and Pawn vs. King. 
+Black. 
+
+W/. 
+
+White. 
+
+NOTE. — White wins, either with or without the move, 
+as the adverse King cannot attack any point on the kin- 
+dred pawn's altitude. 
+
+222 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 99. 
+
+FIGURE 203. 
+Bishop and Pawn vs. King and Queen. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having the move, wins by P to Q 8, 
+queening and disclosing check from the kindred Bishop. 
+
+COMPOUND LOGISTIC PLANES. 
+
+EVOLUTION No. 100. 
+
+FIGURE 204. 
+
+Two Pawns vs. Pawn. 
+
+Black. 
+
+Hi 
+
+White. 
+
+NOTE. — White wins, either with or without the move, 
+by eliminating the adverse Point of Resistance by 
+P to Q 6, or by P to Q Kt 6 ; clearing the vertical of 
+one or the other of the kindred pawns. 
+
+224 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 101. 
+
+FIGURE 205. 
+Two Pawns vs. Pawn. 
+
+Black. 
+
+White. 
+
+NOTE. — White wins, either with or without the move. 
+
+COMPOUND LOGISTIC PLANES. 
+
+EVOLUTION No. 102. 
+
+FIGURE 206. 
+Two Pawns vs. Knight. 
+
+Black. 
+
+White. 
+
+NOTE. — White, having the move, will queen one of 
+the pawns without capture by the adverse Knight. 
+
+226 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 103. 
+
+FIGURE 207. 
+Two Pawns vs. Knight. 
+
+Black. 
+
+White. 
+
+NOTE. — White, either with or without the move, will 
+queen one of the pawns without capture by the adverse 
+Knight. 
+
+COMPOUND LOGISTIC PLANES. 
+
+227 
+
+EVOLUTION No. 104. 
+
+FIGURE 208. 
+Two Pawns vs. Bishop. 
+
+White. 
+
+NOTE. — White, either with or without the move, will 
+queen one of the pawns without capture by the adverse 
+Bishop. 
+
+228 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 105. 
+FIGURE 209. 
+
+Two Pawns vs. Bishop. 
+Slack. 
+
+White. 
+
+NOTE. — White, either with or without the move, will 
+queen one of the pawns without capture by the adverse 
+Bishop. 
+
+COMPOUND LOGISTIC PLANES. 
+
+229 
+
+EVOLUTION No. 106. 
+
+FIGURE 210. 
+Two Pawns vs. Rook 
+
+Black. 
+
+White. 
+
+NOTE. — White, either with or without the move, will 
+queen one of the pawns without capture by the adverse 
+Rook. 
+
+230 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 107. 
+
+FIGURE 211. 
+Two Pawns vs. King. 
+
+Black. 
+
+White. 
+
+NOTE. — White, either with or without the move, will 
+queen one of the pawns without capture by the adverse 
+King. 
+
+COMPOUND LOGISTIC PLANES. 
+
+231 
+
+EVOLUTION No. 108. 
+
+FIGURE 212. 
+
+Two Pawns vs. King. 
+
+Black. 
+
+While. 
+
+NOTE. — White, either with or without the move, will 
+queen one of the pawns without capture by the adverse 
+King. 
+
+COMPLEX LOGISTIC PLANES. 
+
+EVOLUTION No. 109. 
+
+FIGURE 213. 
+
+Three Pawns vs. Three Pawns. 
+Black. 
+
+White. 
+
+NOTE. — White, having to move, will queen a pawn 
+without capture by T'to Q 6^ followed, if K P x P, by P to 
+Q B 6 ; and if B P x P, by Pto K 6. 
+
+COMPLEX LOGISTIC PLANES. 
+
+233 
+
+EVOLUTION No. 110. 
+
+FIGURE 214. 
+
+Three Pawns vs. King. 
+Black. 
+
+White 
+
+NOTE. — If White moves, Black wins all the pawns 
+by moving the King in front of that pawn which ad- 
+vances ; but if Black has to move, one of the pawns 
+will queen without capture against the adverse King. 
+
+The key of the position is the posting of the King in 
+front of the middle pawn, with one point intervening, 
+when all are in a line and when it is the turn of the 
+pawns to move. Then the King must play to the point 
+
+in frnr.1. nf 
+
+Tinxvn <l-nt 
+
+234 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 111. 
+
+FIGURE 215. 
+Three Pawns vs. Queen. 
+
+Black. 
+
+White. 
+
+NOTE — Black wins, either with or without the move. 
+The key of this position is that the black Queen wins 
+if she is posted on any square opposite in color to those 
+occupied by the pawns, from whence she commands 
+the adjacent Point of Junction. 
+
+COMPLEX LOGISTIC PLANES. 
+
+235 
+
+EVOLUTION No. 112. 
+
+FIGURE 216. 
+
+Three Pawns vs. King and Pawn. 
+Black. 
+
+White. 
+
+NOTE. — White wins, either with or without the move. 
+
+SIMPLE STRATEGIC PLANES. 
+
+EVOLUTION No. 113. 
+
+FIGURE 217. 
+Knight vs. Objective Plane of Single Radius. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive always is an oblique, and 
+the Point of Command of unlike color to the Point 
+Material, and the radius a point on the perimeter of the 
+adverse Knight's octagon. 
+
+SIMPLE STRATEGIC PLANES. 
+
+237 
+
+EVOLUTION No. 114. 
+
+FIGURE 218. 
+
+Knight vs. Objective Plane of Two Radius. 
+Black. 
+
+NOTE. — The Front Offensive always is an oblique ; 
+the Point of Command of unlike color to the Point 
+Material, and the radius is a section of two points on 
+the adverse Knight's octagon. 
+
+238 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 115. 
+
+FIGURE 219. 
+Bishop vs. Objective Plane of Two Radius. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive always is a diagonal; 
+the Point of Command and the radius are of like color 
+to the Point Material, and the latter is situated on the 
+same side of the Bishop's triangle as the Point of 
+Command. 
+
+SIMPLE STRATEGIC PLANES, 
+
+239 
+
+EVOLUTION No. 116. 
+FIGURE 220. 
+
+Bishop vs. Objective Plane of Three Radius. 
+
+White 
+
+XOTE. — The Front Offensive always is a diagonal ; 
+the Point of Command and the radius are of like color 
+to the Point Material, and the latter is situated on 
+the same side of the Bishop's triangle as the Point of 
+Command. 
+
+240 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 117. 
+
+FIGURE 221. 
+
+Rook vs. Objective Plane of Two Radius. 
+Slack. 
+
+White. 
+
+NOTE. — The Front Offensive is a vertical or hori- 
+zontal; the radius is composed of one like and one 
+unlike point, and situated on one side of the adverse 
+Rook's quadrilateral. The Point of Command may be 
+either a like or an unlike point. 
+
+SIMPLE STRATEGIC PLANES. 
+
+241 
+
+EVOLUTION No. 118. 
+
+FIGURE 222. 
+Rook vs. Objective Plane of Three Radius. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive is a vertical or hori- 
+zontal ; the radius is composed of one like and two 
+unlike points and situated on one side of the adverse 
+Rook's quadrilateral. The Point of Command may be 
+either a like or an unlike point. 
+
+242 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 119. 
+
+FIGURE 223. 
+Queen vs. Objective Plane of Two Kadius. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive is a diagonal ; the radius 
+is composed of two like points situated on the same side 
+of the adverse Queen's polygon. The Point of Com- 
+mand and the Point Material are like points. 
+
+SIMPLE STRATEGIC PLANES. 
+
+243 
+
+EVOLUTION No. 120. 
+
+FIGDBE 224. 
+Queen vs. Objective Plane of Two Radius. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive is a vertical or a hori- 
+zontal ; the radius is composed of one like and one un- 
+like point, contained in the same side of the adverse 
+Queen's polygon. The Point of Command may be either 
+a like or an unlike point. 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 121. 
+
+FIGURE 225. 
+
+Queen us. Objective Plane of Three Radius. 
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive is a diagonal ; the radius 
+is composed of like points, contained in the same side 
+of the adverse Queen's polygon. The Point of Com- 
+mand and the Point Material are like points. 
+
+SIMPLE STRATEGIC PLANES. 
+
+245 
+
+EVOLUTION No. 122. 
+
+FIGURE 226. 
+
+Queen vs. Objective Plane of Three Radius. 
+Black. 
+
+iHi 
+
+White. 
+
+NOTE. — The Front Offensive is a vertical or hori- 
+zontal ; the radius is composed of one like and two un- 
+like points, contained in the same side of the adverse 
+Queen's polygon. The Point of Command may be 
+either a like or an unlike point. 
+
+246 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 123. 
+
+* FIGURE 227. 
+
+Queen vs. Objective Plane of Four Radius. 
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive is a vertical or hori- 
+zontal combined with a diagonal ; the radius is com- 
+posed of " two like and two unlike points, and these are 
+coincident with given sides of the Queen's polygon. 
+The Point of Command and the Point Material are like 
+points. 
+
+COMPOUND STRATEGIC PLANES. 
+
+EVOLUTION No. 124. 
+
+FIGURE 228. 
+Pawn and Supporting Factor vs. Objective Plane of Two Radius. 
+
+Black. 
+
+* 
+
+* 
+
+White. 
+
+NOTE. — A single Pawn cannot command any Ob- 
+jective Plane. In this situation, the Front Offensive is 
+a diagonal ; the radius is composed of two like points 
+and contained on the same side of the adverse Pawn's 
+triangle. The Point of Command and the Point Mate- 
+rial are like Points. 
+
+248 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 125. 
+
+FIGURE 229. 
+Bishop and Supporting Factor vs. Objective Plane of Three Radius 
+
+Black. 
+
+NOTE. — The Front Offensive is a diagonal ; the radius 
+is composed of two like points, contained in the same 
+side of the adverse Bishop's triangle, and one unlike 
+point contained in the perimeter of the supporting 
+Factor. The Point of Command is a like point. 
+
+COMPOUND STRATEGIC PLANES. 
+
+249 
+
+EVOLUTION No. 126. 
+
+FIGURE 230. 
+
+Bishop and Supporting Factor vs. Objective Plane of Three Radius. 
+
+Block. 
+
+While. 
+
+NOTE. — The Front Offensive is made up of a diago- 
+nal and an oblique ; the radius is composed of three 
+like points, all of which are contained in the adverse 
+diagonal. The Point of Command is a like point. 
+
+250 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 127. 
+
+FIGURE 231. 
+
+Rook and Supporting Factor vs. Objective Plane of Three Radius. 
+
+Slack. 
+
+While. 
+
+NOTE. — The Front Offensive is made up of a vertical 
+or horizontal and an oblique ; the radius is composed of 
+two like and one unlike point, two of which are contained 
+in one side of the adverse Rook's quadrilateral and the 
+other in the perimeter of the adverse Knight's octagon. 
+The Point of Command may be either a like or an 
+unlike point, and situated upon either the horizontal 
+or vertical. 
+
+COMPOUND STRATEGIC PLANES 
+
+251 
+
+EVOLUTION No. 128. 
+
+FIGURE 232. 
+Rook and Supporting Factor vs. Objective Plane of Four Radius. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive consists of a vertical or 
+horizontal and an oblique ; the radius is composed of two 
+like and two unlike points, two of which, both unlike, 
+are situated on the perimeter of an adverse Knight's 
+octagon, and one like and one unlike are situated on 
+one side of the adverse Rook's quadrilateral. The Point 
+of Command is an unlike point, and is that point in the 
+Objective Plane at which the given octagon and quadri- 
+lateral intersect. 
+
+252 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 129i 
+
+FIGUKE 233. 
+Rook and Supporting Factor vs. Objective Plane of Five Radius. 
+
+Slack. 
+
+White. 
+
+NOTE. — The Offensive Front consists of a vertical, a 
+horizontal, and an oblique. The radius is composed of 
+two like and of three unlike points, two like and one 
+unlike points being contained in the horizontal, one 
+like and two unlike points being contained in the hori- 
+zontal, and one unlike point in the oblique. The Point 
+of Command is an unlike point, and is that point at 
+which the adverse quadrilateral and octagon intersect. 
+
+COMPOUND STRATEGIC PLANES. 
+
+253 
+
+EVOLUTION No. 130. 
+
+FIGURE 234. 
+
+Queen and Supporting Factor vs. Objective Plane of Seven Radius. 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive consists of a horizontal, 
+a vertical, two diagonals, and two obliques. The radius 
+is composed of three like and four unlike points ; three 
+unlike points are contained in the diagonals, two unlike 
+and one like points in the vertical, one unlike and two 
+like points in the horizontal, and two unlike points in 
+the obliques. The Point of Command is an unlike point, 
+and is that point at which the adverse polygon and 
+octagon intersect. 
+
+254 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 131. 
+
+FIGURE 235. 
+Queen and Supporting Factor vs. Objective Plane of Seven Radius 
+
+Black. 
+
+White. 
+
+NOTE. — The Front Offensive consists of a vertical, a 
+horizontal, a diagonal, and an oblique. The radius is 
+composed of five like points and two unlike points, one 
+like and two unlike points, and contained in both the 
+vertical and the horizontal, three like points in the 
+diagonal, and one in the oblique. The Point of Com- 
+mand is a like point, and is that point at which the 
+adverse polygon and octagon intersect. 
+
+COMPLEX STRATEGIC PLANES. 
+
+255 
+
+COMPLEX STRATEGIC PLANES. 
+
+EVOLUTION No. 132. 
+FIGURE 236. 
+
+A Pawn Lodgment in an Objective Plane of Eight Radius. 
+Black. 
+
+White. 
+
+NOTE. — The Queen never occupies a Point of Lodg- 
+ment, and consequently she can only enter the Objec- 
+tive Plane as a Prime Tactical Factor. 
+
+256 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 183. 
+FIGURE 237. 
+
+A Knight Lodgment in an Objective Plane of Eight Radius. 
+Black. 
+
+White. 
+
+NOTE. — In evolutions combining a Knight lodg- 
+ment, the Supporting Factor always must be defended 
+by an Auxiliary Factor. 
+
+COMPLEX STRATEGIC PLANES 
+
+257 
+
+EVOLUTION No. 134. 
+FIGURE 238. 
+
+A Bishop Lodgment in an Objective Plane of Eight Radius. 
+Black. 
+
+White. 
+
+NOTE. — The Point of Lodgment must always be sup- 
+ported whenever it is established in any Objective Plane. 
+
+258 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 135. 
+
+FIGURE 239. 
+
+A Rook Lodgment in an Objective Plane of Eight Radius. 
+Black. 
+
+White. 
+
+NOTE. — This is the only manner by which the 0. P. 8 
+can be commanded by two pieces. 
+
+COMPLEX STRATEGIC PLANES 
+
+259 
+
+EVOLUTION No. 136. 
+
+FIGURE 240. 
+
+A Pawn Lodgment in Objective Plane of Nine Radius. 
+Black. 
+
+White. 
+
+NOTE. — The union of the kindred King with a pawn 
+lodgment is the most effective combination against an 
+Objective Plane of nine radii which does not contain 
+the Queen. 
+
+260 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 137. 
+FIGURE 241. 
+
+A Knight Lodgment in an Objective Plane of Nine Radius. 
+Black. 
+
+White. 
+
+NOTE. — The above position is suggestive of a very 
+pretty allegory. 
+
+COMPLEX STRATEGIC PLANES. 
+
+261 
+
+EVOLUTION No. 138. 
+
+FIGURE 242. 
+A Bishop Lodgment in an Objective Plane of Nine Radius. 
+
+Black. 
+
+White. 
+
+NOTE — This is the only manner in which this com- 
+bination of force can command the Objective Plane of 
+nine radii. 
+
+262 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 139. 
+FIGURE 243. 
+
+A Rook Lodgment in an Objective Plane of Nine Radius. 
+Black. 
+
+NOTE. — In an evolution against the 0. P. 9, and 
+whenever the kindred Queen is not present, three pieces 
+are necessary to effect checkmate. 
+
+COMPLEX STRATEGIC PLANES. 
+
+263 
+
+EVOLUTION No. 140. 
+FIGURE 244. 
+
+Command of an Objective Plane of Nine Radius by minor Diagonals 
+and Obliques. 
+
+Black. 
+
+White. 
+
+NOTE. — The student should observe that the power 
+of the white force is derived from the presence of the 
+pawn's diagonals. The white King is passive and un- 
+available for offence against the black King, and with 
+both Knights but without the pawns the Objective Plane 
+cannot be commanded. 
+
+264 
+
+MAJOR TACTICS. 
+
+EVOLUTION No. 141. 
+
+FIGURE 245. 
+Command of an Objective Plane of Nine Radius by Diagonals. 
+
+Black. 
+
+White. 
+
+NOTE. — In any combination of the diagonal pieces 
+against the 0. P. 9, the Queen is always the Prime 
+Tactical Factor. 
+
+COMPLEX STRATEGIC PLANES. 
+
+265 
+
+EVOLUTION No. 142. 
+FIGURE 246. 
+
+Command of an Objective Plane of Nine Radius by Verticals and 
+Horizontals. 
+
+Black. 
+
+White. 
+
+NOTE. — The 0. P. 9 never can be commanded by less 
+than three pieces. 
+
+LOGISTICS OF GEOMETRIC PLANES. 
+
+In each of the foregoing evolutions, there is depicted 
+one of the basic ideas of Tactics ; the motif of which is 
+either the capture of an opposing piece, the queening of 
+a kindred pawn, or the checkmate of the hostile King. 
+
+The material manifestation of each idea is given by 
+formations of opposing forces, upon specified points ; 
+and the execution of the plan — i. e. the practical ap- 
+plication of this basic idea in the art of chess-play — is 
+illustrated by the movements of the given forces, from 
+the given points to other given points, in given times. 
+
+Upon these movements, or evolutions, are based all 
+those combinations in chess-play wherein a given piece 
+co-operates with one or more kindred pieces, for the 
+purpose of reducing the adverse material, or of aug- 
+menting its own force, or of gaining command of the 
+Objective Plane ; and there is no combination of forces 
+for the producing of either or all of these results pos- 
+sible on the chess-board, in which one or more of these 
+basic ideas is not contained. 
+
+Furthermore, the opposing forces, the points at which 
+each is posted, and the result of the given evolution 
+being determinate, it follows that the movements of 
+the given forces equally are determinate, and that the 
+points to which the forces move and the verticals, hori- 
+zontals, diagonals, and obliques over which they move, 
+may be specified and described. 
+
+As the reader has seen, the movements of the pieces 
+in every evolution take the form of straight lines, ex- 
+
+LOGISTICS OF GEOMETRIC PLANES. 267 
+
+tending from originally specified points to other neces- 
+sary points ; which latter constitute the vertices of 
+properly described octagons, quadrilaterals, rectangles, 
+and triangles. 
+
+The validity of an evolution, i. e. its adaptability to 
+a given situation, once established, the execution is 
+purely mechanical, and its practical application in chess- 
+play is simple and easy ; but to determine the validity 
+of an evolution in any given situation is the test of 
+one's understanding of the true theory of the game. 
+
+The secret of Major Tactics is to attack an adverse 
+piece at a time when it cannot move, at a point where 
+it is defenceless, and with a force that is irresistible. 
+
+The first axiom of Major Tactics is : — 
+
+A piece exerts no force for the defence of the point 
+upon which it stands. 
+
+Consequently, so far as the occupying piece is con- 
+cerned, the point upon which a piece is posted is abj 
+solutely defenceless. 
+
+The second axiom of Major Tactics is : — 
+
+A piece exerts no force for the defence of any verti- 
+cal, horizontal, diagonal, or oblique, along which it does 
+not operate a radius of offence. 
+
+Hence it is obvious that a pawn defends only a minor 
+diagonal ; that it does not defend a vertical, a horizon- 
+tal, a major diagonal, nor an oblique ; that a Knight 
+defends an oblique, but not a vertical, a horizontal, nor 
+a diagonal ; that a Rook defends a vertical and a hori- 
+zontal, but not a diagonal nor an oblique ; that a Queen 
+defends a vertical, a horizontal, and a diagonal, but not 
+an oblique, and that a King defends only a minor verti- 
+cal, a minor horizontal, and a minor diagonal, and does 
+not defend a major vertical, a major horizontal, a major 
+diagonal, nor an oblique. 
+
+268 MAJOR TACTICS. 
+
+It also is evident that an attacking movement for the 
+purpose of capturing a hostile piece always should take 
+the direction of the point upon which the hostile piece 
+stands ; and that the attacking force should be directed 
+along that vertical, horizontal, diagonal, or oblique, 
+which is not defended by the piece it is proposed to 
+capture. 
+
+That is to say : the simple interpretation of Major 
+Tactics is that you creep up behind a man's back while 
+he is not looking, and before he can move, and while he 
+is utterly defenceless you off with his head. 
+
+This, of course, is the crude process. But it does not 
+appertain to savages alone ; in fact, it is the process 
+usually followed by so-called educated and civilized folk, 
+whether chess-players or soldiers ; furthermore, the 
+final situation of the uplifted sword and the unsuspect- 
+ing and defenceless victim is the invariable climax of 
+every evolution of Major Tactics, whether the latter be- 
+longs to war or to chess. 
+
+It is admitted that men, whether soldiers or chess- 
+players, have eyes in their heads, and that it is not 
+supposable that they would permit an enemy thus to 
+take them unawares and by such a simple and un- 
+sophisticated process. Nevertheless there is another 
+process which leads to the same result; and this pro- 
+cess is the quintessence of science, whether of war or 
+of chess. 
+
+These two methods, one the crudest and one the most 
+scientific possible, unite at the point at which the sword 
+is lifted to the full height over the head of the unsus- 
+pecting and defenceless enemy. From thence they act 
+as unity, for it needs no talent to cut off a man's head 
+who is incapable of resistance, to massacre an army 
+that is hopelessly routed, nor to checkmate the adverse 
+
+LOGISTICS OF GEOMETRIC PLANES. 269 
+
+King in one move. In such a circumstance a butcher 
+is equal to Arbuthnot ; a Zulu chief to Napoleon ; and 
+the merest tyro at chess to Paul Morphy. 
+
+To attack and capture an enemy who can neither fight 
+nor run is very elementary and not particularly edify- 
+ing strategetics ; but to attack simultaneously two hos- 
+tile bodies, at a time and at points whereat they cannot 
+be simultaneously defended, is the acme of chess and of 
+war. In either case the result is identical, and success 
+is attained by the same means. But the second process, 
+as compared with the first process, is transcendental; 
+for it consists in surprising and out-manoeuvring two 
+adversaries who have their eyes wide open. 
+
+The means by which success is attained in Major 
+Tactics is the proper use of time. 
+
+" He who gains time gains everything ! " is the dictum 
+of Frederic the Great, — a man who, as a major tac- 
+tician, has no equal in history. 
+
+To illustrate the truth of this maxim, the attention of 
+the student is called to the simple fact that if, at the 
+beginning of a game of chess, White had the privilege of 
+making four moves in succession and before Black 
+touched a piece, the first player would checkmate the 
+adverse King by making one move each with the K P 
+and the K B and two moves with the Q. 
+
+Again, in any subsequent situation, if either player 
+had the privilege of making two moves in succession, it 
+is evident that he would have no difficulty in winning 
+the game. To gain this one move, — with all due de- 
+ference to the shade of Philidor, — and not the play of 
+the pawns, is the soul of chess. 
+
+But it is easy to see that gain of time can be of little 
+advantage to a man who does not understand the proper 
+use of time ; and it is equally easy to see, if time is 
+
+270 MAJOR TACTICS. 
+
+to be properly utilized in an evolution of Major Tactics, 
+that a thorough knowledge of the forces and points con- 
+tained in the given evolution, and of their relative values 
+and relations to each other, is imperative. 
+
+Hence the student of Major Tactics should be en- 
+tirely familiar with these facts : — 
+
+Whatever the geometric plane, whether strategic, 
+tactical, or logistic, no evolution is valid unless there 
+exists in the adverse position what is termed in " The 
+Grand Tactics of Chess " a strategetic weakness. 
+
+Assuming, however, that such a defect exists in the 
+opposing force, and that an evolution is valid, it is 
+then necessary to determine the line of operations. 
+(See " Grand Tactics," p. 318.) If the object of the 
+latter is to checkmate the adverse King, it is a strategic 
+line of operations ; if its object is to queen a kindred 
+pawn, it is a logistic line of operations ; if its object is 
+to capture a hostile piece, it is a tactical line of 
+operations. 
+
+The line of operations being determined, it only re- 
+mains to indicate the initial evolution and the geometric 
+plane appertaining thereto. 
+
+Whatever may be the nature of the geometric plane 
+upon the surface of which it is required in any given 
+situation to execute an evolution, the following condi- 
+tions always exist : — 
+
+The Prime Tactical Factor always is that kindred 
+pawn or piece which captures the adverse Piece Ex- 
+posed ; or which becomes a Queen or any other desired 
+kindred piece by occupying the Point of Junction; or 
+which checkmates the adverse King. The Prime Tacti- 
+cal Factor always makes the final move in an evolution; 
+it always is posted either on the central point or on the 
+perimeter of its own geometric symbol, and its objective 
+
+LOGISTICS OF GEOMETRIC PLANES. 271 
+
+always is the Point of Command, which latter always is 
+the central point of the geometric symbol appertaining 
+to the Prime Tactical Factor. 
+
+The Prime Radii of Offence always extend from the 
+Point of Command, as a common centre, to the perimeter 
+of the geometric symbol appertaining to the Prime 
+Tactical Factor, and upon the vertices of this geometric 
+symbol are to be found the Points Material in every 
+valid evolution. 
+
+The Point of Co-operation always is either coincident 
+with a Point Material or is a point on the perimeter of 
+that geometric symbol appertaining to the Prime Tacti- 
+cal Factor of which the Point of Command is the central 
+point ; it always is an extremity of the Supporting 
+Front, and it always is united, either by a vertical, a 
+horizontal, a diagonal, or an oblique, with the Support- 
+ing Origin. 
+
+The nature of a Geometric Plane always is determined 
+by the nature of the existing tactical defect ; the nature 
+of the Geometric Plane determines the selection of the 
+Prime Tactical Factor, and the character of the geo- 
+metric symbol of the Prime Tactical Factor determines 
+the nature of the evolution. 
+
+The student, therefore, has only to locate a tactical 
+defect in the adverse position and to proceed as follows • 
+
+RULES OF MAJOR TACTICS. 
+
+Whenever a tactical defect exists in the adverse 
+position : — 
+
+I. Locate the Piece Exposed and the Prime Tactical 
+Factor. 
+
+II. Indicate the Primary Origin and the Points Mate- 
+rial and describe that geometric symbol which apper- 
+
+272 MAJOR TACTICS. 
+
+tains to the Prime Tactical Factor and upon the 
+perimeter of which the Points Material are situated. 
+
+III. Taking the Primary Origin, then indicate the 
+Point of Command and describe the Front Offensive. 
+
+IV. Taking the Point of Command as the centre and 
+the Points Material as the vertices of that logistic sym- 
+bol which appertains to the Prime Tactical Factor, 
+describe the Front Defensive and the Prime Radii of 
+Offence. 
+
+V. Locate the Supporting Factor, then indicate the 
+Point of Co-operation and the Supporting Origin, and 
+describe the Supporting Front. 
+
+VI. Locate the Disturbing Factors, then indicate 
+the Points of Interference and describe the Front of 
+Interference. 
+
+VII. Taking the Fronts of Interference, locate the 
+Auxiliary Factors ; then indicate the Auxiliary Origins 
+and describe the Auxiliary Fronts. 
+
+VIII. Taking the Front Offensive, the Front Defen- 
+sive, the Supporting Front, the Fronts Auxiliary, and 
+the Fronts of Interference, describe the Tactical Front. 
+
+Then, if the number of kindred radii of offence which 
+are directly or indirectly attacking the Point of Com- 
+mand, exceed the number of adverse radii of defence 
+which directly or indirectly are defending the Point of 
+Command, the Prime Tactical Factor may occupy the 
+Point of Command without capture, which latter is the 
+end and aim of every evolution of Major Tactics. 
+
+14 DAY USE 
+
+RETURN TO DESK FROM WHICH BORROWED 
+
+LOAN DEPT. 
+
+This book is due on the last date stamped below, 
+or on the date to which renewed. Renewals only: 
+
+Tel. No. 642-3405 
+
+Renewals may be made 4 days prior to date due. 
+Renewed books are subject to immediate recall. 
+
+LOAN 
+
+LD21A-20m-3,'73 
+(Q8677slO)476-A-31 
+
+General Library 
+
+University of California 
+
+Berkeley 
+
+I V 
+
+THE UNIVERSITY OF CALIFORNIA LIBRARY

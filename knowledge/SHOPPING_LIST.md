@@ -80,6 +80,7 @@ content the model does *not* reliably know:
 |---|---|---|---|---|---|---|
 | `[ ]` | New York 1924 (tournament book) | annot. Alekhine | 1925 | en | verify (archive.org) | Famous deep annotations |
 | `[ ]` | Hastings 1895 (tournament book) | — | 1896 | en | verify (archive.org) | Landmark event, annotated |
+| `[x]` | **Book of the Sixth American Chess Congress (New York 1889)** | Ed. Wilhelm Steinitz | 1891 | en | [archive.org](https://archive.org/details/booksixthameric00steigoog) | **Acquired 2026-06-18.** 1.04M chars; opening_theory bucket. All 210 games from 1889 NY International tournament, annotated by Steinitz. Archive.org djvu OCR; double-spaces collapsed. |
 | `[x]` | **The Exploits of Paul Morphy (Edge)** | Frederick Milnes Edge | 1859 | en | [Gutenberg #34180](https://www.gutenberg.org/ebooks/34180) | **Acquired 2026-06-17.** 54k words; opening_theory bucket. Morphy's games in Europe with narrative. |
 | `[x]` | **Morphy's Games of Chess (Löwenthal ed.)** | Johann Jacob Löwenthal (ed.) | 1860 | en | [archive.org](https://archive.org/details/morphysgamesches00lowe) | **Acquired 2026-06-17.** 156k words; opening_theory bucket. OCR cleaned. |
 | `[ ]` | Mr. Blackburne's Games at Chess | J. H. Blackburne | 1899 | en | verify (archive.org) | Attacking classics |
@@ -98,7 +99,7 @@ content the model does *not* reliably know:
 | Status | Title | Author | Year | Lang | Source | Notes |
 |---|---|---|---|---|---|---|
 | `[x]` | **The Minor Tactics of Chess** | Young & Howell | 1894 | en | [archive.org](https://archive.org/details/minortacticsofch00youn) | **Acquired 2026-06-18.** 235k chars; chess_principles bucket. Archive.org djvu OCR; double-spaces collapsed. |
-| `[ ]` | The Major Tactics of Chess | Young & Howell | 1896 | en | verify (archive.org) | Companion volume |
+| `[x]` | **The Major Tactics of Chess** | Young & Howell | 1896 | en | [archive.org](https://archive.org/details/majortacticsofch00younrich) | **Acquired 2026-06-18.** 114k chars; chess_principles bucket. Archive.org djvu OCR; double-spaces collapsed. |
 
 ## E. General principles / strategy / mastery — LOWER (model already knows most)  ·  `chess_principles`
 
