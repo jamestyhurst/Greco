@@ -97,6 +97,11 @@ class MoveAnalysis:
     # --- Engine-sourced variation lines (DATA-BACK: the narrator may only quote these, never invent moves) ---
     best_line_san: str = ""        # numbered SAN of the engine's best line from the PRE-move position ("what to play instead")
     refutation_line_san: str = ""  # numbered SAN of the engine's line AFTER the move actually played ("what your move runs into"); empty for best/forced moves
+    # --- Zugzwang detection (engine-dependent; null-move probe at the post-move position) ---
+    null_eval_cp: Optional[int] = None      # White-POV cp of null-move baseline at the post-move position
+    null_eval_mate: Optional[int] = None    # White-POV mate score of null-move baseline (None when cp applies)
+    opp_best_san: Optional[str] = None      # SAN of opponent's best move from post-move position (for zugzwang evidence)
+    opp_legal_move_count: int = 0           # legal move count at post-move position (for is_zugzwang veto + evidence)
 
 
 @dataclass
@@ -1212,12 +1217,48 @@ def analyze_pgn(
                 info = engine.analyse(board, limit, multipv=multipv)
                 if not isinstance(info, list):
                     info = [info]
+
+            # Hoist legal_moves so we reuse them in the null-move probe veto below
+            # and in the positions dict (avoids calling list(board.legal_moves) twice).
+            legal_moves_here = list(board.legal_moves)
+
+            # Null-move probe for zugzwang detection.
+            # Gated on vetoes matching is_zugzwang's VETO 1–5 so we only pay the cost
+            # on positions where zugzwang can possibly fire. Result stored White-POV.
+            null_eval_cp_raw: Optional[int] = None
+            null_eval_mate_raw: Optional[int] = None
+            if (
+                not board.is_game_over()
+                and not board.is_check()
+                and len(legal_moves_here) > 1
+                and not board.has_legal_en_passant()
+            ):
+                _non_kp = sum(
+                    len(board.pieces(pt, c))
+                    for pt in (chess.QUEEN, chess.ROOK, chess.BISHOP, chess.KNIGHT)
+                    for c in (chess.WHITE, chess.BLACK)
+                )
+                _phase = detect_phase(board, i)
+                if _phase == "endgame" or _non_kp <= 6:
+                    try:
+                        _null_board = board.copy()
+                        _null_board.push(chess.Move.null())
+                        _null_info = engine.analyse(_null_board, limit, multipv=1)
+                        if not isinstance(_null_info, list):
+                            _null_info = [_null_info]
+                        _null_score = _null_info[0]["score"].white()
+                        null_eval_cp_raw, null_eval_mate_raw = score_to_cp_mate(_null_score)
+                    except Exception:
+                        pass
+
             positions.append(
                 {
                     "fen": board.fen(),
                     "turn_white": board.turn == chess.WHITE,
                     "analyses": info,
-                    "legal_moves": list(board.legal_moves),
+                    "legal_moves": legal_moves_here,
+                    "null_eval_cp": null_eval_cp_raw,
+                    "null_eval_mate": null_eval_mate_raw,
                 }
             )
             if progress_cb:
@@ -1378,6 +1419,19 @@ def analyze_pgn(
             fen_after = board.fen()
             is_check = board.is_check()
 
+            # Opponent's best-move SAN from the post-move position (for zugzwang evidence).
+            opp_best_san = None
+            if post["analyses"] and post["analyses"][0].get("pv"):
+                try:
+                    opp_best_san = board.san(post["analyses"][0]["pv"][0])
+                except Exception:
+                    pass
+
+            # Null-move eval and legal move count from the first-pass post-move position dict.
+            null_eval_cp = post.get("null_eval_cp")
+            null_eval_mate = post.get("null_eval_mate")
+            opp_legal_move_count = len(post["legal_moves"])
+
             # Phase is computed on the RESULTING (post-move) position, so a capture
             # that empties the board is labelled with the phase it produced — keeping
             # phase consistent with the other post-move facts below.
@@ -1497,6 +1551,10 @@ def analyze_pgn(
                     still_winning=still_winning,
                     best_line_san=best_line_san,
                     refutation_line_san=refutation_line_san,
+                    null_eval_cp=null_eval_cp,
+                    null_eval_mate=null_eval_mate,
+                    opp_best_san=opp_best_san,
+                    opp_legal_move_count=opp_legal_move_count,
                 )
             )
 

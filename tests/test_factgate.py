@@ -1296,3 +1296,160 @@ def test_outpost_evidence_black_knight():
     assert ev["square_name"] == "d4"
     assert "Black" in ev["evidence"]
     assert "d4" in ev["evidence"]
+
+
+# --- is_zugzwang ------------------------------------------------------------
+
+def _zz(board, cp_best, cp_pass, phase, legal_count, san, mate_best=None, mate_pass=None):
+    """Helper: call is_zugzwang with keyword-defaulted mate arguments."""
+    return F.is_zugzwang(board, cp_best, mate_best, cp_pass, mate_pass, phase, legal_count, san)
+
+
+def test_zugzwang_trebuchet_white():
+    # Spec §3 example 2 (MANDATORY two-color test): trébuchet, White to move.
+    # White must abandon the e3 pawn; passing holds (reciprocal zugzwang).
+    # Manually-constructed scores: cp_best=-200 (losing after move), cp_pass=0 (holds if pass).
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    assert not board.is_game_over()
+    result = _zz(board, -200, 0, "endgame", 6, "Kd2")
+    assert result["is_zugzwang"] is True
+    assert result["strict"] is True
+    assert result["label"] == "zugzwang"
+    assert result["side_to_move"] == "White"
+    # sign=+1: eval_best = +1 * (-200) = -200; eval_pass = +1 * 0 = 0; delta = 200
+    assert result["eval_best_cp"] == -200
+    assert result["eval_pass_cp"] == 0
+    assert result["delta_cp"] == 200
+    assert result["threshold_cp"] == F.ZUGZWANG_CP
+    assert result["veto_reason"] is None
+    assert "zugzwang" in result["evidence"]
+    assert "White" in result["evidence"]
+    assert "Kd2" in result["evidence"]
+
+
+def test_zugzwang_trebuchet_black():
+    # Spec §3 example 2 (MANDATORY two-color test): same trébuchet, Black to move.
+    # White-POV scores: cp_best=+200 (White winning after Black's best move),
+    # cp_pass=0 (balanced if Black could pass — White would then also face zugzwang).
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 b - - 0 1")
+    assert not board.is_game_over()
+    result = _zz(board, 200, 0, "endgame", 6, "Kd4")
+    assert result["is_zugzwang"] is True
+    assert result["strict"] is True
+    assert result["label"] == "zugzwang"
+    assert result["side_to_move"] == "Black"
+    # sign=-1: eval_best = -1 * 200 = -200; eval_pass = -1 * 0 = 0; delta = 200
+    assert result["eval_best_cp"] == -200
+    assert result["eval_pass_cp"] == 0
+    assert result["delta_cp"] == 200
+    assert result["veto_reason"] is None
+    assert "zugzwang" in result["evidence"]
+    assert "Black" in result["evidence"]
+
+
+def test_zugzwang_near_label_when_pass_losing():
+    # NEAR case: delta ≥ threshold but the pass baseline is itself losing (< -50).
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    # cp_pass=-100, cp_best=-300 → eval_pass=-100, eval_best=-300 → delta=200 ≥ 100
+    # strict = eval_pass >= -50? → -100 < -50 → False → label = "near-zugzwang"
+    result = _zz(board, -300, -100, "endgame", 6, "Kd2")
+    assert result["is_zugzwang"] is True
+    assert result["strict"] is False
+    assert result["label"] == "near-zugzwang"
+    assert result["delta_cp"] == 200
+    assert "near-zugzwang" in result["evidence"]
+
+
+def test_zugzwang_below_threshold():
+    # Delta < ZUGZWANG_CP → no fire (below_threshold).
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    # cp_pass=0, cp_best=-50 → delta = 0 - (-50) = 50 < 100
+    result = _zz(board, -50, 0, "endgame", 6, "Kd2")
+    assert not result["is_zugzwang"]
+    assert result["veto_reason"] == "below_threshold"
+
+
+def test_zugzwang_veto1_game_over():
+    # VETO 1: stalemate is game over — never zugzwang.
+    # Black king on a8, White queen on c7, White king on c6 — Black is stalemated.
+    board = chess.Board("k7/2Q5/2K5/8/8/8/8/8 b - - 0 1")
+    assert board.is_game_over(), "FEN must be stalemate for this test"
+    result = _zz(board, -200, 0, "endgame", 0, "")
+    assert not result["is_zugzwang"]
+    assert result["veto_reason"] == "game_over"
+
+
+def test_zugzwang_veto2_in_check():
+    # VETO 2: side to move is in check — null-move baseline is garbage, abstain.
+    # White king on e1, Black rook on e8 giving check to White.
+    board = chess.Board("4r3/8/8/8/8/8/8/4K3 w - - 0 1")
+    assert board.is_check(), "FEN must put White in check for this test"
+    result = _zz(board, -200, 0, "endgame", 4, "Kd1")
+    assert not result["is_zugzwang"]
+    assert result["veto_reason"] == "in_check"
+
+
+def test_zugzwang_veto3_forced():
+    # VETO 3: legal_move_count <= 1 → no meaningful choice to degrade.
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    result = _zz(board, -200, 0, "endgame", 1, "Kd1")
+    assert not result["is_zugzwang"]
+    assert result["veto_reason"] == "forced"
+
+
+def test_zugzwang_veto4_phase_middlegame_many_pieces():
+    # VETO 4: middlegame phase AND > 6 non-KP pieces → phase gate fires.
+    board = chess.Board()  # 16 non-KP pieces, phase="middlegame"
+    result = _zz(board, -200, 0, "middlegame", 20, "e4")
+    assert not result["is_zugzwang"]
+    assert result["veto_reason"] == "phase"
+
+
+def test_zugzwang_veto4_passes_low_piece_count():
+    # VETO 4 does NOT fire for ≤6 non-KP pieces even with phase="middlegame".
+    # Trébuchet has 0 non-KP pieces → VETO 4 passes regardless of phase label.
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    result = _zz(board, -200, 0, "middlegame", 6, "Kd2")
+    assert result["is_zugzwang"] is True  # VETO 4 cleared by low piece count
+
+
+def test_zugzwang_veto5_en_passant():
+    # VETO 5: en-passant capture available — null-move baseline is polluted.
+    # White pawn on d4 (just advanced), Black pawn on e4 can capture en passant.
+    board = chess.Board("4k3/8/8/8/3Pp3/8/8/4K3 b - d3 0 1")
+    assert board.has_legal_en_passant(), "FEN must have en passant for this test"
+    result = _zz(board, 200, 0, "endgame", 4, "exd3")
+    assert not result["is_zugzwang"]
+    assert result["veto_reason"] == "en_passant"
+
+
+def test_zugzwang_no_null_scores():
+    # Both cp_pass and mate_pass None (null-move probe skipped upstream) → no fire.
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    result = F.is_zugzwang(board, -200, None, None, None, "endgame", 6, "Kd2")
+    assert not result["is_zugzwang"]
+    assert result["veto_reason"] == "below_threshold"
+
+
+def test_zugzwang_evidence_strict_format():
+    # Spec §5 STRICT evidence template verification.
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    result = _zz(board, -200, 0, "endgame", 6, "Kd2")
+    assert result["strict"] is True
+    ev = result["evidence"]
+    assert ev.startswith("White is in zugzwang:")
+    assert "passing would hold" in ev
+    assert "Kd2" in ev
+    assert "6 legal moves" in ev
+
+
+def test_zugzwang_evidence_near_format():
+    # Spec §5 NEAR evidence template verification.
+    board = chess.Board("8/8/8/8/4k3/4p3/4K3/8 w - - 0 1")
+    result = _zz(board, -300, -100, "endgame", 6, "Kd2")
+    assert result["strict"] is False
+    ev = result["evidence"]
+    assert ev.startswith("White is in near-zugzwang:")
+    assert "no useful waiting move" in ev
+    assert "Kd2" in ev
+    assert "centipawns" in ev

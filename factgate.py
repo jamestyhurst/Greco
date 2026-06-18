@@ -45,6 +45,7 @@ from analyzer import (  # pure board helpers — none touch Stockfish or the API
     detect_royal_alignment,
     detect_skewer,
     file_structure,
+    normalize_cp,
 )
 
 
@@ -1180,6 +1181,132 @@ def creates_discovered_attack(
 
 
 # --------------------------------------------------------------------------- #
+# Zugzwang (engine-dependent, pre-computed scores).
+# --------------------------------------------------------------------------- #
+ZUGZWANG_CP = 100  # minimum delta (pass - best) to certify; tune up to cut false positives
+
+
+def is_zugzwang(
+    board: chess.Board,
+    cp_best: Optional[int],
+    mate_best: Optional[int],
+    cp_pass: Optional[int],
+    mate_pass: Optional[int],
+    phase: str,
+    legal_move_count: int,
+    best_move_san: str,
+) -> dict:
+    """Approximate zugzwang detector (engine-dependent, pre-computed scores).
+
+    Takes Stockfish eval scores supplied by the caller — never calls the engine.
+    cp_best / mate_best: best-legal-move eval for the side to move (White-POV).
+    cp_pass / mate_pass: null-move pass-baseline (White-POV).
+    Both are converted to side-to-move POV internally via the sign procedure
+    specified in the detection spec §Rule 6.
+
+    Returns a dict with is_zugzwang, strict, label, evidence, and diagnostic fields.
+    The 'zugzwang' allow-set tag is in GATED_TAGS and is added to d['certified']
+    in narrator._move_to_dict when is_zugzwang=True (not via certified_claims, which
+    is engine-free by design).
+    """
+    side_to_move = "White" if board.turn == chess.WHITE else "Black"
+
+    def _no_fire(veto_reason: str) -> dict:
+        return {
+            "is_zugzwang": False,
+            "strict": False,
+            "label": "near-zugzwang",
+            "side_to_move": side_to_move,
+            "eval_pass_cp": 0,
+            "eval_best_cp": 0,
+            "delta_cp": 0,
+            "best_move_san": best_move_san,
+            "legal_move_count": legal_move_count,
+            "phase": phase,
+            "threshold_cp": ZUGZWANG_CP,
+            "veto_reason": veto_reason,
+            "evidence": "",
+        }
+
+    # VETO 1: game already over (stalemate, checkmate, draw — not zugzwang)
+    if board.is_game_over():
+        return _no_fire("game_over")
+
+    # VETO 2: side to move is in check (forced parry, not compulsion; null-move
+    # baseline would also be meaningless — the king stays in check)
+    if board.is_check():
+        return _no_fire("in_check")
+
+    # VETO 3: forced / single legal move (no choice to degrade)
+    if legal_move_count <= 1:
+        return _no_fire("forced")
+
+    # VETO 4: phase / scope gate — endgame OR ≤6 non-king non-pawn pieces (both colors)
+    non_kp = sum(
+        len(board.pieces(pt, c))
+        for pt in (chess.QUEEN, chess.ROOK, chess.BISHOP, chess.KNIGHT)
+        for c in (chess.WHITE, chess.BLACK)
+    )
+    if phase != "endgame" and non_kp > 6:
+        return _no_fire("phase")
+
+    # VETO 5: en-passant capture available (null-move baseline is polluted —
+    # push(Move.null()) silently forfeits the ep right, corrupting the delta)
+    if board.has_legal_en_passant():
+        return _no_fire("en_passant")
+
+    # Guard: null-move scores must be present (probe may have been skipped upstream)
+    if cp_pass is None and mate_pass is None:
+        return _no_fire("below_threshold")
+
+    # CONFIRM — Rule 6: sign-correct side-to-move POV conversion
+    # normalize_cp returns White-POV; sign flips to side-to-move POV for both values
+    sign = 1 if board.turn == chess.WHITE else -1
+    eval_best = sign * normalize_cp(cp_best, mate_best)
+    eval_pass = sign * normalize_cp(cp_pass, mate_pass)
+    delta_cp = eval_pass - eval_best
+
+    if delta_cp < ZUGZWANG_CP:
+        return _no_fire("below_threshold")
+
+    # Rule 7: strictness ladder — strict requires pass to be non-losing for the mover
+    strict = eval_pass >= -50
+    label = "zugzwang" if strict else "near-zugzwang"
+
+    move_name = best_move_san if best_move_san else "their best move"
+    if strict:
+        evidence = (
+            f"{side_to_move} is in zugzwang: passing would hold "
+            f"(about {eval_pass / 100:+.1f}), but every one of the "
+            f"{legal_move_count} legal moves loses ground — "
+            f"even the best, {move_name}, drops to about {eval_best / 100:+.1f}."
+        )
+    else:
+        evidence = (
+            f"{side_to_move} is in near-zugzwang: with no useful waiting move, "
+            f"every legal reply worsens the position — the best available, "
+            f"{move_name}, is about {delta_cp} centipawns worse than "
+            f"simply passing would be."
+        )
+
+    return {
+        "is_zugzwang": True,
+        "strict": strict,
+        "label": label,
+        "side_to_move": side_to_move,
+        "eval_pass_cp": eval_pass,
+        "eval_best_cp": eval_best,
+        "delta_cp": delta_cp,
+        "best_move_san": best_move_san,
+        "legal_move_count": legal_move_count,
+        "phase": phase,
+        "threshold_cp": ZUGZWANG_CP,
+        "veto_reason": None,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1204,6 +1331,7 @@ GATED_TAGS = (
     "backward_pawn",
     "infiltration",
     "fianchetto",
+    "zugzwang",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
