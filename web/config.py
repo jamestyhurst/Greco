@@ -21,7 +21,7 @@ CONFIG_PATH = GRECO_DIR / "config.json"
 
 # Option lists shared with the form and request validation (mirror gui.py).
 MODELS = ["claude-sonnet-4-6", "claude-opus-4-8", "claude-fable-5"]
-USE_CASES = ["companion", "coaching", "commentary"]
+USE_CASES = ["companion", "coaching", "commentary", "essay"]
 SPEED_LABELS = {"fast": 0.5, "normal": 0.8, "deep": 1.5}
 
 

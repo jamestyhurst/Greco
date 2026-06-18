@@ -732,6 +732,67 @@ def retrieve(themes: Sequence[str], opening_name: Optional[str] = None,
 
 
 # --------------------------------------------------------------------------- #
+# Essay Mode retrieval — free-text question → corpus passages.
+# --------------------------------------------------------------------------- #
+_ESSAY_STOPWORDS: frozenset = frozenset({
+    "the", "a", "an", "in", "on", "at", "to", "for", "of", "and", "or", "but",
+    "is", "are", "was", "were", "does", "do", "did", "this", "that", "these",
+    "those", "what", "why", "how", "when", "which", "who", "whose", "where",
+    "naturally", "generally", "often", "usually", "tend", "tends", "lean",
+    "leans", "about", "with", "from", "into", "toward", "towards", "between",
+    "after", "before", "can", "could", "should", "would", "will", "may",
+    "might", "has", "have", "had", "not", "no", "yes", "its", "it", "i",
+})
+
+
+def retrieve_for_question(question: str, top_k: int = 7) -> List[Passage]:
+    """Retrieve corpus passages relevant to a free-text chess question.
+
+    Used by Essay Mode. Unlike retrieve(), which expects structured themes from
+    game analysis, this function extracts terms directly from the question text
+    and retrieves the best-matching passages from the knowledge corpus.
+
+    Returns [] on any problem or empty corpus — callers need no error handling.
+    """
+    try:
+        ensure_index()
+    except Exception:
+        return []
+    if not DB_PATH.exists():
+        return []
+
+    words = [
+        w for w in _WORD_RE.findall(question.lower())
+        if w not in _ESSAY_STOPWORDS and len(w) >= 3
+    ]
+    if not words:
+        return []
+
+    phrases = list(dict.fromkeys(words[:8]))  # cap at 8 terms; de-duplicate
+    try:
+        conn = _connect()
+    except Exception:
+        return []
+    try:
+        if not _has_rows(conn):
+            return []
+        rows = _search(conn, phrases, top_k + 4)
+        seen_keys: set = set()
+        results: List[Passage] = []
+        for row in rows:
+            key = (row["book_id"], row["chunk_index"])
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            results.append(_row_to_passage(row))
+            if len(results) >= top_k:
+                break
+        return results
+    finally:
+        conn.close()
+
+
+# --------------------------------------------------------------------------- #
 # Theme extraction from the engine analysis (data-back: emit a theme ONLY when
 # the analyzer actually detected the corresponding ground-truth feature)
 # --------------------------------------------------------------------------- #

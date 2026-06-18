@@ -27,7 +27,7 @@ from web.db import User, create_report_ownership, get_user_by_id
 from web.email_utils import send_report_ready
 from web.jobs import JobStatus, _registry
 from web import ngrok_tunnel, publish as pub
-from web.pipeline import report_html_path, run_analysis
+from web.pipeline import report_html_path, run_analysis, run_essay
 from web.templates import render_error, render_result, render_waiting
 
 router = APIRouter()
@@ -79,6 +79,30 @@ def _run_background(job_id: str, owner_id: Optional[int] = None, **kwargs) -> No
             _send_completion_email(owner_id, result.rid, result.base)
     except Exception as exc:
         _log.exception("Background job %s failed", job_id)
+        _registry.update(job_id, status=JobStatus.FAILED, error=_friendly_error(exc))
+        _registry.append_log(job_id, f"Failed: {exc}")
+
+
+def _run_essay_background(
+    job_id: str,
+    owner_id: Optional[int] = None,
+    **kwargs,
+) -> None:
+    """Execute the Essay Mode pipeline and update the job status when done."""
+    _registry.update(job_id, status=JobStatus.RUNNING)
+    _registry.append_log(job_id, "Searching the classical corpus…")
+    try:
+        result = run_essay(
+            **kwargs,
+            progress_cb=lambda msg: _registry.append_log(job_id, msg),
+        )
+        _registry.append_log(job_id, "Saving essay…")
+        if owner_id is not None:
+            create_report_ownership(result.rid, owner_id, base=result.base)
+        _registry.update(job_id, status=JobStatus.DONE, report_id=result.rid)
+        _registry.append_log(job_id, "Done!")
+    except Exception as exc:
+        _log.exception("Essay job %s failed", job_id)
         _registry.update(job_id, status=JobStatus.FAILED, error=_friendly_error(exc))
         _registry.append_log(job_id, f"Failed: {exc}")
 
@@ -193,14 +217,57 @@ async def analyze(
     recipient: str = Form(""),
     white_context: str = Form(""),
     black_context: str = Form(""),
+    essay_question: str = Form(""),
 ) -> HTMLResponse:
-    """Accept a PGN, register a background job, and return the waiting page."""
+    """Accept a PGN or essay question, register a background job, and return the waiting page."""
     s = resolve_settings()
-    if not s.ready:
+    if not s.key_ok:
         return HTMLResponse(
             render_error(
-                "Stockfish path or API key not set. Open the desktop app's "
-                "settings once, then reload."
+                "API key not set. Open the desktop app's settings once, then reload."
+            ),
+            status_code=400,
+        )
+
+    # Validate / normalise options (untrusted form input).
+    use_case = use_case if use_case in USE_CASES else "companion"
+    model = model if model in MODELS else s.model
+
+    # --- Essay Mode branch (no Stockfish; PGN optional) ---
+    if use_case == "essay":
+        question = (essay_question or "").strip()
+        if not question:
+            return HTMLResponse(
+                render_error("Please enter a chess question for Essay Mode."),
+                status_code=400,
+            )
+        if len(question) < 10:
+            return HTMLResponse(
+                render_error("Your question is too short. Please be more specific."),
+                status_code=400,
+            )
+        pgn_for_essay: Optional[str] = None
+        if pgn_text.strip():
+            pgn_for_essay = pgn_text.strip()
+
+        job = _registry.create()
+        background_tasks.add_task(
+            _run_essay_background,
+            job.id,
+            owner_id=current_user.id if current_user else None,
+            question=question,
+            pgn_text=pgn_for_essay,
+            model=model,
+            audience_level=(audience_level or "").strip() or None,
+            note=(note or "").strip() or None,
+        )
+        return HTMLResponse(render_waiting(job.id, essay_mode=True))
+
+    # --- Standard analysis branch (PGN required) ---
+    if not s.engine_ok:
+        return HTMLResponse(
+            render_error(
+                "Stockfish path not set. Open the desktop app's settings once, then reload."
             ),
             status_code=400,
         )
@@ -233,11 +300,8 @@ async def analyze(
     if pgn_err:
         return HTMLResponse(render_error(pgn_err, detail=_pgn_hint(text)), status_code=400)
 
-    # Validate / normalise options (untrusted form input).
-    use_case = use_case if use_case in USE_CASES else "companion"
     user_is = side.lower() if side.lower() in ("white", "black") else "neither"
     time_limit = SPEED_LABELS.get(speed, 0.8)
-    model = model if model in MODELS else s.model
     note_val = (note or "").strip() or None
 
     job = _registry.create()

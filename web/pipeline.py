@@ -11,6 +11,7 @@ real job queue + status page).
 from __future__ import annotations
 
 import os
+import re
 import tempfile
 import threading
 from pathlib import Path
@@ -28,6 +29,7 @@ from outputs import (
     report_basename,
     default_reports_dir,
 )
+import essay_mode as _essay
 
 # In-memory registry: report id -> absolute .html path. Integer ids keep report
 # URLs pure-ASCII (the reports folder path contains non-ASCII characters). It is
@@ -112,6 +114,49 @@ def run_analysis(
         rid = _NEXT_ID[0]
         _NEXT_ID[0] += 1
         _REPORTS[rid] = str(Path(html_path).resolve())
+
+    return AnalysisResult(rid=rid, base=base, out_dir=str(out_dir), html_path=str(html_path))
+
+
+def run_essay(
+    *,
+    question: str,
+    pgn_text: Optional[str] = None,
+    model: str,
+    audience_level: Optional[str] = None,
+    note: Optional[str] = None,
+    progress_cb=None,
+) -> AnalysisResult:
+    """Run the Essay Mode pipeline and return a registered AnalysisResult.
+
+    No Stockfish analysis is performed. The essay is generated from the knowledge
+    corpus and stored as a self-contained HTML in the reports directory.
+    """
+    _cb = progress_cb or (lambda msg: None)
+    _cb("Searching the classical corpus…")
+
+    result = _essay.generate_essay(
+        question=question,
+        pgn_text=pgn_text,
+        audience_level=audience_level or "club",
+        note=note or "",
+        model=model,
+    )
+    _cb("Generating essay with Claude…")
+
+    html_content = _essay.essay_to_html(result)
+
+    title_safe = re.sub(r"[^\w\-]", "_", result["title"][:40]).strip("_") or "essay"
+    base = f"essay_{title_safe}"
+    out_dir = default_reports_dir() / base
+    out_dir.mkdir(parents=True, exist_ok=True)
+    html_path = out_dir / f"{base}.html"
+    html_path.write_text(html_content, encoding="utf-8")
+
+    with _LOCK:
+        rid = _NEXT_ID[0]
+        _NEXT_ID[0] += 1
+        _REPORTS[rid] = str(html_path.resolve())
 
     return AnalysisResult(rid=rid, base=base, out_dir=str(out_dir), html_path=str(html_path))
 

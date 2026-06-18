@@ -142,12 +142,17 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
     <textarea name="pgn_text" placeholder="[Event &quot;...&quot;]&#10;1. e4 e5 2. Nf3 Nc6 ..."></textarea>
     <div class="row">
       <div>
-        <label title="Companion = personal coaching tone. Agadmator = YouTube-style commentary. Spectator = objective analysis for games you didn&apos;t play.">Voice <span class="hint" style="display:inline;">(hover for info)</span></label>
-        <select name="use_case">{% for u in use_cases %}<option value="{{ u }}">{{ u }}</option>{% endfor %}</select>
+        <label title="Companion = personal tone. Coaching = analytical debrief. Commentary = broadcast-style. Essay = answer a chess question from the classical corpus.">Mode <span class="hint" style="display:inline;">(hover for info)</span></label>
+        <select name="use_case" id="use_case_sel" onchange="toggleEssayFields()">{% for u in use_cases %}<option value="{{ u }}">{{ u }}</option>{% endfor %}</select>
       </div>
-      <div><label>You played</label><select name="side"><option value="neither">neither</option><option value="white">white</option><option value="black">black</option></select></div>
+      <div id="side_row"><label>You played</label><select name="side"><option value="neither">neither</option><option value="white">white</option><option value="black">black</option></select></div>
     </div>
-    <div class="row">
+    <div id="essay_question_row" style="display:none;">
+      <label>Your chess question</label>
+      <textarea name="essay_question" id="essay_question" rows="2" placeholder="e.g. Does the Scandinavian Defense naturally lean toward queenside castling?"></textarea>
+      <p class="hint" style="margin-top:4px;">Greco searches its classical corpus and synthesises an answer. The PGN/game above is optional — if provided, specific moves may be cited as examples.</p>
+    </div>
+    <div class="row" id="speed_row">
       <div>
         <label title="Fast = 0.5 s/move. Normal = 0.8 s/move. Deep = 1.5 s/move. Deep gives more precise evaluations for complex positions.">Engine depth <span class="hint" style="display:inline;">(hover)</span></label>
         <select name="speed"><option value="fast">Fast (0.5&thinsp;s/move)</option><option value="normal" selected>Normal (0.8&thinsp;s/move)</option><option value="deep">Deep (1.5&thinsp;s/move)</option></select>
@@ -197,8 +202,19 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
   <p class="sub">Stockfish is evaluating every move and Claude is writing the report.<br>This can take a minute or two &mdash; keep this tab open.</p>
 </div></div>
 <script>
+function toggleEssayFields(){
+  var sel=document.getElementById('use_case_sel');
+  var isEssay=sel&&sel.value==='essay';
+  var eqRow=document.getElementById('essay_question_row');
+  var sideRow=document.getElementById('side_row');
+  var speedRow=document.getElementById('speed_row');
+  if(eqRow)eqRow.style.display=isEssay?'':'none';
+  if(sideRow)sideRow.style.display=isEssay?'none':'';
+  if(speedRow)speedRow.style.display=isEssay?'none':'';
+}
+document.addEventListener('DOMContentLoaded',toggleEssayFields);
 var _FORM_KEY='greco_form_state';
-var _FORM_FIELDS=['lichess_url','use_case','side','speed','model','note','audience_level','recipient','white_context','black_context','pgn_text'];
+var _FORM_FIELDS=['lichess_url','use_case','side','speed','model','note','audience_level','recipient','white_context','black_context','pgn_text','essay_question'];
 function saveFormState(){
   try{
     var vals={};
@@ -357,18 +373,18 @@ _WAITING = Template("""<!doctype html><html lang="en"><head>
 </style></head><body>
 {{ nav|safe }}
 <div class="wrap">
-  <div class="banner ok" id="s-banner">Analysing your game&hellip;</div>
+  <div class="banner ok" id="s-banner">{% if essay_mode %}Searching the classical corpus&hellip;{% else %}Analysing your game&hellip;{% endif %}</div>
   <div class="card status-wrap">
     <div class="spinner"><img src="/static/greco.png" style="width:52px;height:52px;border-radius:8px;animation:spin 3s linear infinite;" alt=""></div>
     <p class="sub" id="s-text" style="margin-top:14px;">
-      Stockfish is evaluating every move, then Claude writes the report.
-      This usually takes 1&ndash;3 minutes.
+      {% if essay_mode %}Greco is searching its classical corpus and writing your essay. This usually takes 10&ndash;20 seconds.{% else %}Stockfish is evaluating every move, then Claude writes the report. This usually takes 1&ndash;3 minutes.{% endif %}
     </p>
     <div class="progress-wrap">
       <div class="stage-list" id="s-stages">
         <span class="stage active" id="st-0">Queued</span>
-        <span class="stage" id="st-1">&#8594; Stockfish</span>
-        <span class="stage" id="st-2">&#8594; Claude</span>
+        {% if essay_mode %}<span class="stage" id="st-1">&#8594; Corpus</span>
+        <span class="stage" id="st-2">&#8594; Claude</span>{% else %}<span class="stage" id="st-1">&#8594; Stockfish</span>
+        <span class="stage" id="st-2">&#8594; Claude</span>{% endif %}
         <span class="stage" id="st-3">&#8594; Done</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" id="s-bar" style="width:5%;"></div></div>
@@ -689,8 +705,10 @@ def render_error(message: str, detail: str = "", user=None) -> str:
     )
 
 
-def render_waiting(job_id: str, user=None) -> str:
-    return _WAITING.render(base_css=BASE_CSS, job_id=job_id, nav=_make_nav(user))
+def render_waiting(job_id: str, user=None, essay_mode: bool = False) -> str:
+    return _WAITING.render(
+        base_css=BASE_CSS, job_id=job_id, nav=_make_nav(user), essay_mode=essay_mode
+    )
 
 
 def render_dashboard(user, reports) -> str:
