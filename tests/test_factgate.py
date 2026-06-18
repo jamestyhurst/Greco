@@ -9,7 +9,7 @@ detectors so the allow-set can never drift from the fact packet.
 import chess
 
 import factgate as F
-from analyzer import detect_double_attack, detect_royal_alignment, file_structure
+from analyzer import detect_double_attack, detect_royal_alignment, file_structure, detect_overloaded_defender_full
 
 
 # --- threatens_mate_in_one --------------------------------------------------
@@ -1529,3 +1529,84 @@ def test_creates_overloaded_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "overloaded_piece" in tags
+
+
+# --- is_compensation --------------------------------------------------------
+# Helpers use the same calling convention as the zugzwang helpers above.
+
+def _comp(material_balance: float, eval_cp, mate, mover_white: bool):
+    return F.is_compensation(material_balance, eval_cp, mate, mover_white)
+
+
+def test_compensation_positive_pawn_sac_level_eval():
+    # White sacrificed a pawn (material_balance = -1.5, White behind), eval near 0.
+    result = _comp(-1.5, 20, None, True)
+    assert result is not None
+    assert result["tag"] == "compensation"
+    assert result["side"] == "White"
+    assert result["down_pawns"] == 1.5
+    assert result["eval_cp"] == 20
+    assert result["mechanism"] is None
+    assert result["approximate"] is False
+    assert "compensation" in result["evidence"].lower()
+
+
+def test_compensation_positive_exchange_sac_black():
+    # Black sacrificed an exchange (R for B, ≈ 2 pawns). material_balance = +2.0
+    # (White is 2 up), eval_cp = +30 from White's POV = -30 from Black's = -30 for Black mover.
+    # Black mover: mover_material = -1 * 2.0 = -2.0 (≤ -1.5 ✓); mover_eval = -1 * 30 = -30 (≥ -50 ✓)
+    result = _comp(2.0, 30, None, False)
+    assert result is not None
+    assert result["side"] == "Black"
+    assert result["down_pawns"] == 2.0
+
+
+def test_compensation_evidence_keys_present():
+    result = _comp(-1.5, -30, None, True)
+    assert result is not None
+    for key in ("tag", "side", "down_pawns", "eval_cp", "mechanism", "approximate", "evidence"):
+        assert key in result, f"missing key: {key}"
+
+
+def test_compensation_evidence_no_internal_field_names():
+    result = _comp(-1.5, 10, None, True)
+    assert result is not None
+    ev = result["evidence"].lower()
+    for bad in ("compensation_evidence", "eval_cp", "down_pawns", "mechanism"):
+        assert bad not in ev, f"internal key '{bad}' leaked into evidence string"
+
+
+def test_compensation_veto2_not_down_enough():
+    # Only down 1.0 pawn — below the 1.5-pawn threshold.
+    assert _comp(-1.0, 10, None, True) is None
+
+
+def test_compensation_veto2_mover_ahead():
+    # White is ahead in material — not compensation.
+    assert _comp(1.5, 100, None, True) is None
+
+
+def test_compensation_veto3_eval_too_bad():
+    # Down 2.0 pawns and eval is -200 (clearly lost) — no compensation.
+    assert _comp(-2.0, -200, None, True) is None
+
+
+def test_compensation_veto3_border_just_below():
+    # Exactly at the border: eval = -51 (below -50 threshold) — veto.
+    assert _comp(-1.5, -51, None, True) is None
+
+
+def test_compensation_veto3_border_at_threshold():
+    # Exactly at threshold: eval = -50 (≥ -50) — certify.
+    result = _comp(-1.5, -50, None, True)
+    assert result is not None
+
+
+def test_compensation_veto1_mate_score_abstain():
+    # Under a mate score (forcing line) — abstain regardless of material.
+    assert _comp(-2.0, None, 5, True) is None
+
+
+def test_compensation_veto0_no_eval_data():
+    # No eval data at all — abstain.
+    assert _comp(-2.0, None, None, True) is None

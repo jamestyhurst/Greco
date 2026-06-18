@@ -1318,6 +1318,79 @@ def is_zugzwang(
 
 
 # --------------------------------------------------------------------------- #
+# Compensation (eval-dependent, pre-computed scores).
+# --------------------------------------------------------------------------- #
+COMPENSATION_MATERIAL_MIN = -1.5   # mover-POV pawns down (threshold: ≤ this to qualify)
+COMPENSATION_EVAL_MIN = -50        # mover-POV cp (threshold: ≥ this = near-level or better)
+
+
+def is_compensation(
+    material_balance: float,
+    eval_after_cp: Optional[int],
+    mate_after: Optional[int],
+    mover_color: bool,
+) -> Optional[dict]:
+    """Certifies 'compensation': the mover is down material (≥ ~1.5 pawns) yet the
+    engine eval does not reflect that deficit (mover-POV ≥ −50cp). Both signals are
+    pre-computed by the caller from MoveAnalysis fields.
+
+    material_balance — White-POV pawns (+ = White ahead); sign-corrected internally.
+    eval_after_cp   — White-POV centipawns after the move.
+    mate_after      — White-POV mate score after the move (None when cp applies).
+    mover_color     — True = White.
+
+    Returns a dict evidence bundle or None.
+    """
+    # VETO 0: no eval data — cannot make the assessment
+    if eval_after_cp is None and mate_after is None:
+        return None
+
+    # VETO 1: under a mate score — the cp comparison is undefined; abstain
+    if eval_after_cp is None and mate_after is not None:
+        return None
+
+    sign = 1 if mover_color == chess.WHITE else -1
+    mover_material = sign * material_balance   # mover-POV; negative = mover is down
+
+    # VETO 2: mover is not materially down by enough (≤ -1.5 required)
+    if mover_material > COMPENSATION_MATERIAL_MIN:
+        return None
+
+    mover_eval = sign * normalize_cp(eval_after_cp, mate_after)  # mover-POV cp
+
+    # VETO 3: eval is bad for the mover — the material loss is not compensated
+    if mover_eval < COMPENSATION_EVAL_MIN:
+        return None
+
+    # All checks passed — compensation is certified.
+    side = "White" if mover_color == chess.WHITE else "Black"
+    down_pawns = round(abs(mover_material), 1)
+    plural = "s" if down_pawns >= 2.0 else ""
+
+    if mover_eval >= 50:
+        eval_desc = f"the position favors {side}"
+    elif mover_eval >= -20:
+        eval_desc = "the engine rates the position as roughly equal"
+    else:
+        eval_desc = "the engine rates the position as nearly level"
+
+    evidence = (
+        f"{side} is down about {down_pawns:.1f} pawn{plural} in material "
+        f"but {eval_desc} — full compensation."
+    )
+
+    return {
+        "tag": "compensation",
+        "side": side,
+        "down_pawns": down_pawns,
+        "eval_cp": mover_eval,
+        "mechanism": None,
+        "approximate": False,
+        "evidence": evidence,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1344,6 +1417,7 @@ GATED_TAGS = (
     "fianchetto",
     "zugzwang",
     "overloaded_piece",
+    "compensation",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a

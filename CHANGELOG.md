@@ -7,6 +7,14 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.31.0] — 2026-06-18
+
+### Added
+- **`factgate.is_compensation(material_balance, eval_after_cp, mate_after, mover_color)`** — second Tier-B certified claim; eval-dependent like `is_zugzwang`. Certifies that the mover is down ≥ 1.5 pawns in material yet the engine eval is ≥ −50cp (near-level or better). VETO ladder: no eval data → abstain; under mate score → abstain; not materially down enough → None; eval too bad → None. Returns evidence bundle `{tag, side, down_pawns, eval_cp, mechanism, approximate, evidence}` where `mechanism` is always `null` (the reason is not proven, only the fact). `"compensation"` added to `GATED_TAGS`; wired from `_move_to_dict` Tier-1+ block (not `certified_claims` — needs pre-computed eval).
+- **`compensation_evidence` serialized** as `d["compensation_evidence"]` in narrator.py `_move_to_dict`, extending `d["certified"]` with `"compensation"` when it fires.
+- **Narrator fact-gate clause** for `compensation`: gates the word "compensation" to require the tag; instructs to use `eval_cp` to calibrate the prose degree (full / reasonable); prohibits inventing the mechanism unless another certified fact supplies it.
+- 11 new tests (173 total, 424 across the full suite).
+
 ## [0.30.0] — 2026-06-18
 
 ### Added
