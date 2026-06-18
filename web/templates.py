@@ -1,10 +1,12 @@
 """HTML pages for Greco Web (server-rendered with Jinja2).
 
-Carried over from the Flask version's pages, with Flask `url_for(...)` calls
-replaced by plain paths. Phase 4A formalises these into a `templates/` directory;
-inlining them keeps Phase 1 a single dependency-light step.
+Phase 4 will formalise these into a templates/ directory; inlining keeps
+dependency count low for local development. Phase 3 adds login and register
+forms plus a per-user header on the main analysis form.
 """
 from __future__ import annotations
+
+from typing import Optional
 
 from jinja2 import Template
 
@@ -101,7 +103,7 @@ _FORM = Template("""<!doctype html><html lang="en"><head>
     <button id="go" type="submit">Analyze game</button>
     <p class="hint">Runs on your computer. Analysis takes ~1&ndash;3 minutes; keep this tab open.</p>
   </form>
-  <p class="foot">Greco Online &middot; Phase 1 (local FastAPI). Interactive API docs at <a href="/docs">/docs</a>. Desktop app, CLI and Greco.exe are unaffected.</p>
+  <p class="foot">Greco Online &middot; v{{ version }}. Interactive API docs at <a href="/docs">/docs</a>. Logged in as <b>{{ username }}</b> &middot; <form style="display:inline" method="post" action="/auth/logout"><button type="submit" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:.78rem;padding:0;text-decoration:underline;">Log out</button></form></p>
 </div>
 <div id="overlay"><div><h2>Analyzing&hellip;</h2>
   <p class="sub">Stockfish is evaluating every move and Claude is writing the report.<br>This can take a minute or two &mdash; keep this tab open.</p></div></div>
@@ -254,11 +256,12 @@ _WAITING = Template("""<!doctype html><html lang="en"><head>
 </body></html>""")
 
 
-def render_form(s: Settings) -> str:
+def render_form(s: Settings, user=None) -> str:
     return _FORM.render(
         base_css=BASE_CSS, version=__version__, ready=s.ready,
         engine_ok=s.engine_ok, key_ok=s.key_ok, model=s.model,
         use_cases=USE_CASES, models=MODELS,
+        username=user.username if user else "?",
     )
 
 
@@ -272,3 +275,63 @@ def render_error(message: str, detail: str = "") -> str:
 
 def render_waiting(job_id: str) -> str:
     return _WAITING.render(base_css=BASE_CSS, job_id=job_id)
+
+
+# ---------------------------------------------------------------------------
+# Auth pages (Phase 3)
+# ---------------------------------------------------------------------------
+
+_AUTH = Template("""<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Greco &mdash; {{ title }}</title><style>{{ base_css|safe }}</style></head><body>
+<div class="wrap" style="max-width:420px;">
+  <h1>&#9818; Greco</h1>
+  <p class="sub">{{ subtitle }}</p>
+  {% if error %}<div class="banner warn">{{ error }}</div>{% endif %}
+  <form class="card" method="post" action="{{ action }}">
+    {% if mode == 'register' %}
+    <label>Username</label>
+    <input type="text" name="username" value="{{ prefill.username }}" required
+           pattern="[A-Za-z0-9_]{3,30}" title="3–30 characters: letters, digits, underscores"
+           autocomplete="username">
+    <label>Email</label>
+    <input type="email" name="email" value="{{ prefill.email }}" required autocomplete="email">
+    {% else %}
+    <label>Username or email</label>
+    <input type="text" name="username" value="{{ prefill.username }}" required autocomplete="username">
+    {% endif %}
+    <label>Password</label>
+    <input type="password" name="password" required autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" minlength="8">
+    {% if mode == 'register' %}
+    <label>Confirm password</label>
+    <input type="password" name="confirm" required autocomplete="new-password" minlength="8">
+    {% endif %}
+    <button type="submit">{{ btn }}</button>
+  </form>
+  <p style="text-align:center;margin-top:12px;font-size:.88rem;color:var(--gold);">
+    {% if mode == 'register' %}
+    Already have an account? <a href="/auth/login" style="color:var(--gold);">Log in</a>
+    {% else %}
+    Don&rsquo;t have an account? <a href="/auth/register" style="color:var(--gold);">Register</a>
+    {% endif %}
+  </p>
+  <p class="foot">Greco Online &middot; v{{ version }}</p>
+</div></body></html>""")
+
+
+def render_auth(
+    mode: str,  # 'login' or 'register'
+    error: str = "",
+    prefill: Optional[dict] = None,
+) -> str:
+    is_register = mode == "register"
+    return _AUTH.render(
+        base_css=BASE_CSS, version=__version__,
+        mode=mode,
+        title="Register" if is_register else "Log in",
+        subtitle="Create your Greco account." if is_register else "Welcome back.",
+        action=f"/auth/{mode}",
+        btn="Create account" if is_register else "Log in",
+        error=error,
+        prefill=prefill or {},
+    )

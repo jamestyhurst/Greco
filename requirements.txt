@@ -14,6 +14,10 @@ uvicorn[standard]>=0.29
 python-multipart>=0.0.9
 jinja2>=3.1
 
+# Greco Web — auth
+bcrypt>=4.0           # password hashing for user accounts (used directly, not via passlib)
+starlette>=0.36       # SessionMiddleware (transitive via fastapi, listed for clarity)
+
 # Greco Web — sharing features
 pyngrok>=7.2      # "Share now" ephemeral public URL via ngrok tunnel
 boto3>=1.34       # "Publish permanently" upload to Cloudflare R2 (S3-compatible)

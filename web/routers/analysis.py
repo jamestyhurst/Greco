@@ -14,11 +14,13 @@ import logging
 import socket
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from outputs import export_shareable_html
+from web.auth import require_login
 from web.config import MODELS, SPEED_LABELS, USE_CASES, resolve_settings
+from web.db import User, create_report_ownership
 from web.jobs import JobStatus, _registry
 from web import ngrok_tunnel, publish as pub
 from web.pipeline import report_html_path, run_analysis
@@ -52,11 +54,13 @@ def lan_url() -> dict:
 _log = logging.getLogger("greco.web")
 
 
-def _run_background(job_id: str, **kwargs) -> None:
+def _run_background(job_id: str, owner_id: Optional[int] = None, **kwargs) -> None:
     """Execute the analysis pipeline and update the job status when done."""
     _registry.update(job_id, status=JobStatus.RUNNING)
     try:
         result = run_analysis(**kwargs)
+        if owner_id is not None:
+            create_report_ownership(result.rid, owner_id)
         _registry.update(job_id, status=JobStatus.DONE, report_id=result.rid)
     except Exception as exc:
         _log.exception("Background job %s failed", job_id)
@@ -66,6 +70,7 @@ def _run_background(job_id: str, **kwargs) -> None:
 @router.post("/analyze", response_class=HTMLResponse)
 async def analyze(
     background_tasks: BackgroundTasks,
+    current_user: User = Depends(require_login),
     pgn_file: Optional[UploadFile] = File(None),
     pgn_text: str = Form(""),
     use_case: str = Form("companion"),
@@ -113,6 +118,7 @@ async def analyze(
     background_tasks.add_task(
         _run_background,
         job.id,
+        owner_id=current_user.id,
         pgn_text=text, engine=s.engine, time_limit=time_limit,
         user_is=user_is, use_case=use_case, model=model, note=note_val,
         audience_level=(audience_level or "").strip() or None,

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import secrets
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -36,6 +37,11 @@ class Settings(BaseModel):
     # ngrok — "Share now" ephemeral public tunnel
     ngrok_auth_token: str = ""
 
+    # Session signing secret (Phase 3 — accounts + roles)
+    # Set "web_secret_key" in config.json for persistent sessions across restarts.
+    # If absent, a random key is generated at startup (sessions die on restart).
+    secret_key: str = ""
+
     # Cloudflare R2 — "Publish permanently" cloud storage
     r2_account_id: str = ""
     r2_access_key_id: str = ""
@@ -56,6 +62,25 @@ class Settings(BaseModel):
         return all([self.r2_account_id, self.r2_access_key_id,
                     self.r2_secret_access_key, self.r2_bucket_name,
                     self.r2_public_url])
+
+
+_EPHEMERAL_SECRET: str = ""   # module-level cache so it's stable within a process
+
+
+def _ephemeral_secret() -> str:
+    """Return a process-stable random key when no persistent secret is configured.
+    Logs a one-time warning because logged-in sessions won't survive a server restart.
+    Add 'web_secret_key' to config.json (or GRECO_SECRET_KEY env var) to fix this."""
+    global _EPHEMERAL_SECRET
+    if not _EPHEMERAL_SECRET:
+        _EPHEMERAL_SECRET = secrets.token_hex(32)
+        import sys as _sys
+        print(
+            "  [auth] no web_secret_key in config.json — using a random session key.\n"
+            "  Sessions will not survive a server restart. Add 'web_secret_key' to config.json to fix.",
+            file=_sys.stderr,
+        )
+    return _EPHEMERAL_SECRET
 
 
 def _load_config() -> dict:
@@ -80,12 +105,17 @@ def resolve_settings() -> Settings:
     if reports_dir:
         # so outputs.default_reports_dir() writes where the desktop app does
         os.environ["GRECO_REPORTS_DIR"] = reports_dir
+    secret_key = (cfg.get("web_secret_key") or os.environ.get("GRECO_SECRET_KEY") or "")
+    if not secret_key:
+        secret_key = _ephemeral_secret()
+
     return Settings(
         engine=engine,
         model=model if model in MODELS else "claude-sonnet-4-6",
         reports_dir=reports_dir,
         engine_ok=bool(engine) and os.path.isfile(engine),
         key_ok=bool(api_key),
+        secret_key=secret_key,
         ngrok_auth_token=cfg.get("ngrok_auth_token") or os.environ.get("NGROK_AUTH_TOKEN") or "",
         r2_account_id=cfg.get("r2_account_id") or os.environ.get("R2_ACCOUNT_ID") or "",
         r2_access_key_id=cfg.get("r2_access_key_id") or os.environ.get("R2_ACCESS_KEY_ID") or "",

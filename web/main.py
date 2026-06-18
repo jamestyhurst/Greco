@@ -1,10 +1,9 @@
-"""Greco Web — FastAPI application entry point (Greco Online, Phase 1).
+"""Greco Web — FastAPI application entry point (Greco Online, Phase 1–3).
 
-Replaces the previous Flask `webapp.py`. Same behaviour from a user's point of
-view — open http://127.0.0.1:5000, upload or paste a PGN, get the report — but
-on FastAPI, so Greco now gets Pydantic request validation, async endpoints, and
-auto-generated interactive API docs at /docs. It binds to 127.0.0.1 only, so the
-API key stays server-side; the desktop GUI, CLI and Greco.exe are unaffected.
+Phase 3 adds: user accounts (register/login/logout), session-based auth, and
+per-user report scoping. The SessionMiddleware signs the session cookie with the
+secret key from config.json (or an ephemeral random key if not set). Init the
+SQLite DB on startup (idempotent).
 
 Run:   run_greco_web.bat        (or:  venv\\Scripts\\python -m web.main)
 Open:  http://127.0.0.1:5000    (API docs: http://127.0.0.1:5000/docs)
@@ -14,12 +13,16 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
 
 from version import __version__
+from web.auth import NotAuthenticated, get_current_user
 from web.config import resolve_settings
+from web.db import init_db
 from web.routers import analysis
+from web.routers import auth as auth_router
 from web import ngrok_tunnel
 from web.templates import render_form
 
@@ -27,6 +30,8 @@ from web.templates import render_form
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     s = resolve_settings()
+    # Ensure DB tables exist before serving any request.
+    init_db()
     if s.ngrok_ready:
         tunnel_url = ngrok_tunnel.start_tunnel(s.ngrok_auth_token)
         if tunnel_url:
@@ -40,12 +45,33 @@ app = FastAPI(
     description="Engine-backed, AI-narrated chess reports over the shared Greco pipeline.",
     lifespan=lifespan,
 )
-app.include_router(analysis.router)
 
+# Session middleware must be added before the routers so the session is available
+# in all request handlers. The secret key signs the cookie (tamper-evident).
+_s = resolve_settings()
+app.add_middleware(SessionMiddleware, secret_key=_s.secret_key, https_only=False)
+
+app.include_router(analysis.router)
+app.include_router(auth_router.router)
+
+
+# ---------------------------------------------------------------------------
+# Global exception handlers
+# ---------------------------------------------------------------------------
+
+@app.exception_handler(NotAuthenticated)
+async def not_authenticated_handler(request: Request, exc: NotAuthenticated):
+    """Redirect unauthenticated users to the login page."""
+    return RedirectResponse("/auth/login", status_code=303)
+
+
+# ---------------------------------------------------------------------------
+# Core routes
+# ---------------------------------------------------------------------------
 
 @app.get("/health")
 def health() -> dict:
-    """Liveness + readiness probe (also handy for the future status page)."""
+    """Liveness + readiness probe."""
     s = resolve_settings()
     return {
         "status": "ok",
@@ -56,9 +82,12 @@ def health() -> dict:
 
 
 @app.get("/", response_class=HTMLResponse)
-def index() -> str:
-    """The upload form."""
-    return render_form(resolve_settings())
+async def index(request: Request) -> HTMLResponse:
+    """The upload form (requires login)."""
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse("/auth/login", status_code=303)
+    return HTMLResponse(render_form(resolve_settings(), user=user))
 
 
 if __name__ == "__main__":
@@ -73,6 +102,4 @@ if __name__ == "__main__":
     if not s.ready:
         print("  Heads up: Stockfish path or API key not set — open the desktop app's settings once.")
     print("  Press Ctrl+C to stop.")
-    # Bind to all interfaces so devices on the same WiFi can open share links.
-    # The API key is never sent to the browser; reports are read-only to guests.
     uvicorn.run(app, host="0.0.0.0", port=5000)

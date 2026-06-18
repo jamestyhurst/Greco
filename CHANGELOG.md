@@ -7,6 +7,41 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-06-18
+
+### Added
+- **Greco Online Phase 3 — accounts + roles** (target v0.12). Users can register, log in,
+  and log out. The first registered user automatically becomes an admin; all others are
+  regular users. Report submissions are tied to the submitting user so per-user scoping
+  is ready for Phase 5. Public report links (GET /report/{id}) remain accessible without
+  login per PRD requirement R-OUT11.
+  - `web/db.py` — SQLite persistence layer (stdlib sqlite3, WAL mode, foreign keys ON).
+    Two tables: `users` (id, username, email, password_hash, role, created_at) and
+    `report_ownership` (report_id, user_id). All DB access is encapsulated here — no
+    raw SQL elsewhere. The DB file (`greco_web.db`) is gitignored.
+  - `web/auth.py` — password hashing via `bcrypt` directly (passlib dropped: its compat
+    shim fails on Python 3.14 + bcrypt ≥ 4.x). Session helpers (set/clear) and two
+    FastAPI dependencies: `get_current_user` (optional) and `require_login` (enforced,
+    raises `NotAuthenticated` which the app handler converts to a login redirect).
+  - `web/routers/auth.py` — `/auth/register`, `/auth/login`, `/auth/logout` routes.
+    Registration validates: username regex (3–30 chars, alphanumeric+underscore), email
+    format, min 8-char password, max 72-byte password (bcrypt hard limit), no duplicate
+    username or email. Login accepts username *or* email.
+  - `web/templates.py` — `_AUTH` Jinja2 template (register + login forms, wine/ivory/gold
+    theme). `render_auth(mode, error, prefill)` function. Main form footer shows
+    "Logged in as X" and a logout button.
+  - `web/config.py` — `secret_key` field on `Settings`; loaded from `web_secret_key`
+    in config.json or `GRECO_SECRET_KEY` env var; falls back to a process-stable
+    ephemeral random key (with a startup warning).
+  - `web/main.py` — `SessionMiddleware` added (signed cookie, tamper-evident);
+    `init_db()` called in lifespan; `NotAuthenticated` app-level exception handler.
+  - `requirements.txt` — `bcrypt>=4.0` added.
+- **34 new auth tests** in `tests/test_auth.py`: password hashing round-trips, DB CRUD,
+  first-user-admin logic, login by username or email, registration validation, logout,
+  report ownership, unauthenticated redirect. All 230 tests pass.
+- `tests/test_web.py` — `bypass_auth` autouse fixture so existing route tests remain
+  focused on the pipeline/HTTP layer rather than auth.
+
 ## [0.11.0] — 2026-06-17
 
 ### Added

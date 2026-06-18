@@ -8,6 +8,10 @@ Phase 2 behaviour: POST /analyze now returns a waiting page immediately and
 runs the pipeline in a BackgroundTask. The TestClient runs background tasks
 synchronously before returning, so tests can poll /job/{id} right after the
 POST and find the job already in a terminal state.
+
+Phase 3: all analysis routes now require login. The bypass_auth autouse
+fixture injects a fake user so these tests stay focused on pipeline/HTTP
+behaviour. Auth-specific coverage lives in test_auth.py.
 """
 from __future__ import annotations
 
@@ -17,13 +21,36 @@ import pytest
 from fastapi.testclient import TestClient
 
 import web.routers.analysis as analysis
+import web.main as web_main
+from web.auth import require_login
 from web.config import Settings
+from web.db import User as DbUser
 from web.main import app
 from web.pipeline import AnalysisResult
 
 client = TestClient(app)
 
 _UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+
+_FAKE_USER = DbUser(id=1, username="testuser", email="test@example.com", role="user")
+
+
+@pytest.fixture(autouse=True)
+def bypass_auth(monkeypatch):
+    """Bypass auth for all tests in this module.
+
+    - Replaces get_current_user (used in GET /) with a function returning the fake user.
+    - Overrides the require_login dependency (used in POST /analyze).
+    - No-ops create_report_ownership so tests don't need a real DB with a user row.
+    """
+    async def _fake_current_user(request):
+        return _FAKE_USER
+
+    monkeypatch.setattr(web_main, "get_current_user", _fake_current_user)
+    monkeypatch.setattr(analysis, "create_report_ownership", lambda rid, uid: None)
+    app.dependency_overrides[require_login] = lambda: _FAKE_USER
+    yield
+    app.dependency_overrides.pop(require_login, None)
 
 
 def _ready(monkeypatch):
