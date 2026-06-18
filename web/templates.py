@@ -344,6 +344,7 @@ _DASHBOARD = Template("""<!doctype html><html lang="en"><head>
   <div class="nav">
     <a class="btn go" href="/">&#43; Analyze a game</a>
     {% if reports %}<a class="btn alt" href="/my-reports/export">&#11015; Export CSV</a>{% endif %}
+    <a class="btn alt" href="/profile">&#128100; Profile</a>
     {% if is_admin %}<a class="btn alt" href="/admin/users">&#128100; Admin: users</a>{% endif %}
     <form method="post" action="/auth/logout" style="margin:0;">
       <button type="submit" style="background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-family:inherit;">Log out</button>
@@ -451,4 +452,85 @@ def render_auth(
         btn="Create account" if is_register else "Log in",
         error=error,
         prefill=prefill or {},
+    )
+
+
+_PROFILE = Template("""<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile &mdash; Greco</title><style>{{ base_css|safe }}
+.nav{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+#games-list{margin-top:16px;}
+.game-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.9rem;}
+.game-row:last-child{border-bottom:none;}
+.game-players{flex:1;color:var(--ink);}
+.game-meta{color:var(--muted);font-size:.8rem;}
+</style></head><body>
+<div class="wrap">
+  <h1>&#9818; Greco</h1>
+  <p class="sub">Profile &mdash; {{ username }}</p>
+  <div class="nav">
+    <a class="btn alt" href="/my-reports">&#8592; My Reports</a>
+    <a class="btn go" href="/">&#43; Analyze a game</a>
+    <form method="post" action="/auth/logout" style="margin:0;">
+      <button type="submit" style="background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:.88rem;font-family:inherit;">Log out</button>
+    </form>
+  </div>
+  {% if saved %}
+  <div class="banner ok">&#10003; Profile saved.</div>
+  {% endif %}
+  <form class="card" method="post" action="/profile">
+    <label>Lichess username (optional)</label>
+    <input type="text" name="lichess_username"
+           value="{{ lichess_username or '' }}"
+           placeholder="e.g. DrNykterstein">
+    <p class="hint">Enter your Lichess username to see your recent games on the My Reports page for one-click analysis.</p>
+    <button type="submit">Save profile</button>
+  </form>
+  {% if lichess_username %}
+  <div class="card" style="margin-top:20px;">
+    <b>Recent Lichess games for {{ lichess_username }}</b>
+    <div id="games-list"><p class="hint">Loading&hellip;</p></div>
+  </div>
+  <script>
+  fetch('/profile/lichess-games')
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      const el = document.getElementById('games-list');
+      if (!data.games || !data.games.length) {
+        el.innerHTML = '<p class="hint">No recent games found.</p>';
+        return;
+      }
+      el.innerHTML = data.games.map(g => `
+        <div class="game-row">
+          <div class="game-players">${g.white} vs ${g.black}</div>
+          <div class="game-meta">${g.speed}</div>
+          <form method="post" action="/analyze" style="margin:0;">
+            <input type="hidden" name="lichess_url" value="${g.lichess_url}">
+            <input type="hidden" name="use_case" value="companion">
+            <input type="hidden" name="side" value="neither">
+            <input type="hidden" name="speed" value="normal">
+            <input type="hidden" name="model" value="">
+            <button type="submit" class="btn go"
+                    style="padding:5px 14px;font-size:.8rem;display:inline-block;width:auto;cursor:pointer;">
+              Analyze
+            </button>
+          </form>
+        </div>`).join('');
+    })
+    .catch(() => {
+      document.getElementById('games-list').innerHTML =
+        '<p class="hint">Could not load games &mdash; check your Lichess username.</p>';
+    });
+  </script>
+  {% endif %}
+  <p class="foot">Greco Online &middot; v{{ version }}</p>
+</div></body></html>""")
+
+
+def render_profile(user, saved: bool = False) -> str:
+    return _PROFILE.render(
+        base_css=BASE_CSS, version=__version__,
+        username=user.username,
+        lichess_username=getattr(user, "lichess_username", None),
+        saved=saved,
     )

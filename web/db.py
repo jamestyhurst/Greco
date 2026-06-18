@@ -105,6 +105,15 @@ def get_all_users() -> List[User]:
         return list(session.scalars(select(User).order_by(User.id)).all())
 
 
+def update_user_lichess_username(user_id: int, lichess_username: Optional[str]) -> None:
+    """Set or clear the Lichess username for a user."""
+    with SessionLocal() as session:
+        user = session.get(User, user_id)
+        if user is not None:
+            user.lichess_username = lichess_username or None
+            session.commit()
+
+
 def get_user_password_hash(user_id: int) -> Optional[str]:
     with SessionLocal() as session:
         user = session.get(User, user_id)
