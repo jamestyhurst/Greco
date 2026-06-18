@@ -7,11 +7,23 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
-- **Lichess URL input** — the analysis form now accepts a Lichess game URL or 8-character
-  game ID directly. `load_from_lichess()` fetches the PGN before passing it to the
-  pipeline. Priority: Lichess URL > file upload > pasted text. Returns 400 with a
+### Added
+- **Lichess URL input (R-IN1)** — the analysis form now accepts a Lichess game URL or
+  8-character game ID directly. `load_from_lichess()` fetches the PGN before passing it
+  to the pipeline. Priority: Lichess URL > file upload > pasted text. Returns 400 with a
   human-readable error if the game cannot be fetched. Three new tests cover the happy
   path, error path, and priority over pasted PGN text.
+- **Report-ready email notification (Phase 6 / F15)** — Greco can now email the user
+  when an analysis job completes. Uses stdlib `smtplib` (no new dependencies). Silently
+  skipped if `smtp_host` is not configured. Configured via `config.json` (or
+  `GRECO_SMTP_*` env vars): `smtp_host`, `smtp_port`, `smtp_user`, `smtp_password`,
+  `smtp_from`, `app_base_url`. Graceful no-op on delivery failure. 7 new tests.
+- **Lichess account integration (Phase 6)** — users can save their Lichess username in
+  their profile (`GET/POST /profile`). When set, the My Reports page shows their 10 most
+  recent Lichess games with one-click "Analyze" buttons (POSTs directly to `/analyze`).
+  `GET /profile/lichess-games` returns recent games as JSON (Lichess NDJSON API).
+  `lichess_username` column added to the `users` table (Alembic migration 003).
+  8 new tests. 263 tests pass total.
 
 ## [0.15.0] — 2026-06-18
 
