@@ -6,17 +6,19 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.10.0
+## Where we are — v0.16.0
 
-> See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. Highlights since
-> v0.3.0: engine-sourced variation lines the narrator may only quote (never invent),
-> a wasted-tempo coaching concept, player names usable in every voice, a real
-> daily/correspondence register, a guaranteed verbatim "featured passage", GitHub
-> Actions CI, a large correctness sweep, and — the structural answer to the
-> "LLM vs. engine" trust problem — the **Output Fact-Gate** (`factgate.py`: the
-> narrator may assert only claims the engine certified) plus the **Layer-2
-> claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`). The
-> bullets below describe the original v0.3.0 baseline they build on.
+> See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. **All seven Greco
+> Online phases through Phase 6 are complete.** The web layer is a full multi-user FastAPI
+> app with accounts, roles, a SQLite database with Alembic migrations, a phone-friendly
+> dashboard with CSV export, Lichess account integration (recent-games panel, one-click
+> analysis), and report-ready email notifications. Phase 7 (deploy) is the remaining
+> milestone on the path to v1.0. Earlier highlights: engine-sourced variation lines the
+> narrator may only quote (never invent), a wasted-tempo coaching concept, player names
+> usable in every voice, a real daily/correspondence register, a guaranteed verbatim
+> "featured passage", GitHub Actions CI, a large correctness sweep, and — the structural
+> answer to the "LLM vs. engine" trust problem — the **Output Fact-Gate** (`factgate.py`)
+> plus the **Layer-2 claim-verification self-test** (`factcheck.py` / `tools/verify_report.py`).
 
 ### Baseline (v0.3.0)
 - Working Tkinter GUI over the full pipeline (importers → analyzer → triage → narrator
@@ -55,25 +57,25 @@ Target version numbers come from the PRD §7 milestone mapping.
    *After this phase: a user on this machine can generate a Greco report from a browser without opening a terminal.*
    Put a web server in front of the existing pipeline: browser → upload a PGN → HTML report, running on your machine first. Everything below builds on this. The analysis pipeline stays unchanged behind it; this is the desktop → web jump.
 
-2. **Async jobs + status page.** *(target: v0.11)*
+2. **Async jobs + status page.** *(v0.11 — done)*
    *After this phase: a user can submit a game and walk away — it processes in the background and the report appears when it's ready.*
    Stockfish analysis is slow, so run it in the background: the page shows Queued → Analyzing → Narrating → Done → Failed, and reveals the report when it's ready.
 
-3. **Accounts + roles.** *(target: v0.12)*
+3. **Accounts + roles.** *(v0.12 — done)*
    *After this phase: a user has their own account and sees only their own games and reports.*
    Log in; each user sees their own games and reports; an admin account can see all of them.
 
-4. **Database.** *(target: v0.13)*
+4. **Database.** *(v0.13 — done)*
    *After this phase: games and reports survive a server restart and can be queried reliably.*
    Replace the files-and-folders storage (`config.json`, the reports folder) with a real database — SQLite locally to start, PostgreSQL once hosted — holding users, games, reports, and jobs.
 
-5. **Phone-friendly UI + dashboard + export.** *(target: v0.14)*
+5. **Phone-friendly UI + dashboard + export.** *(v0.14–v0.15 — done)*
    *After this phase: a user can open Greco on their phone, see their game history, and export a report as PDF.*
    Make the web UI work well on a phone; add a dashboard (your games, accuracy trend, recent reports) and CSV/PDF export. This absorbs the old desktop-polish ideas: drag-and-drop upload and a recent-games list become web features here, and "Save as PDF" becomes the export above. (PDF is a *static* snapshot for printing or sharing — it can't carry the interactive board, so the interactive PGN viewer stays in the HTML report and PDF is its lower-priority companion format; pursuing the viewer doesn't rule out PDF. You can already "Print → Save as PDF" any HTML report from the browser today, so a one-click PDF button is polish, not a blocker.)
 
-6. **Auto-import + "report ready" notification.** *(target: v0.15)*
-   *After this phase: a user can connect their Chess.com account and Greco will automatically analyze new games and email them when a report is ready.*
-   Generalize the Chess.com game finder into "connect your account → auto-import new games → auto-analyze," and email you when a report is ready.
+6. **Auto-import + "report ready" notification.** *(v0.16 — done)*
+   *After this phase: a user can connect their Lichess account and Greco will show recent games for one-click analysis and email them when a report is ready.*
+   Lichess account integration (profile page, recent-games panel with one-click analysis), Lichess URL direct input in the upload form, and SMTP email notification when a report finishes processing.
 
 7. **Deploy it.** *(target: v1.0)*
    *After this phase: anyone in the world can open a URL, sign up, upload a PGN, and get a Greco report — from any device, no install.*
@@ -106,10 +108,10 @@ was built stays visible.
 |---|------|------|--------|
 | 1 | **Greco Online · Phase 1** — web server over the pipeline: browser upload → report (localhost) — `web/main.py` + `run_greco_web.bat` (FastAPI; additive, desktop app untouched) | L | **done** |
 | 2 | **Greco Online · Phase 2** — async analysis jobs + status page (Queued → Running → Done / Failed) — `web/jobs.py` (JobRegistry), `GET /job/{id}` JSON status, `GET /result/{id}` result page, `POST /analyze` now returns the `_WAITING` page immediately; background task drives the pipeline; JS polls every 2 s and auto-navigates on Done | M | **done** |
-| 3 | **Greco Online · Phase 3** — accounts + roles (login, per-user games, admin) | L | todo |
-| 4 | **Greco Online · Phase 4** — database (SQLite locally → PostgreSQL hosted) | M | todo |
-| 5 | **Greco Online · Phase 5** — phone-friendly UI + dashboard + CSV/PDF export | M | todo |
-| 6 | **Greco Online · Phase 6** — account auto-import + "report ready" email | M | todo |
+| 3 | **Greco Online · Phase 3** — accounts + roles (login, per-user games, admin) | L | **done** (v0.12.0) |
+| 4 | **Greco Online · Phase 4** — database (SQLite locally → PostgreSQL hosted) | M | **done** (v0.13.0) |
+| 5 | **Greco Online · Phase 5** — phone-friendly UI + dashboard + CSV/PDF export | M | **done** (v0.14–v0.15) |
+| 6 | **Greco Online · Phase 6** — Lichess account integration + "report ready" email | M | **done** (v0.16.0) |
 | 7 | **Greco Online · Phase 7** — deploy (Render/Railway, domain, HTTPS) | M | todo |
 | 8 | Interactive PGN viewer in the report HTML — *front-end layer of Greco Online* — self-contained JS board + move navigation, keyboard controls, color-coded move list, eval display, flip button | L | **done** |
 | 9 | "Read aloud" in the report HTML — *front-end layer of Greco Online* — Web Speech API (`speechSynthesis`), no extra files | M | **done** |
@@ -143,18 +145,25 @@ was built stays visible.
 - *Private GitHub repo for phone ↔ laptop* — **superseded** by Greco Online: once Greco is
   a website, you just open it on your phone, so there's nothing to git-sync.
 
-**Recently shipped** (newest first): **v0.10.0** — the Output Fact-Gate predicate library
-+ per-ply allow-set + scoped prompt rule (#28), and the Layer-2 claim-verification self-test
-(deterministic CI gate + advisory LLM-judge + `tools/verify_report.py`) (#29) — verified by
-catching the king-on-g-file bug automatically. **v0.9.0** — engine-sourced variation lines + the
-"only quote provided lines" rule + confabulation validator (#17); wasted-tempo coaching
-concept (#18); player names across all modes + filename fallback (#19); daily/correspondence
-voice detection + humaniser fix (#20); deterministic featured passage (#21); GitHub Actions
-CI (#14); and a correctness sweep (terminal-mate sign, still-winning clamp, pawn-fork
-legality, pin-aware forks, diagram-set drift, HTML escaping, web traceback redaction).
-Earlier: settings panel (config.json, model selector, reports folder picker); SVG
-chronological ordering (ply-prefixed filenames, data-ply attributes, sorted placement);
-developer auto-`similar` hook + folder cap; voice refinements (relationship framing,
+**Recently shipped** (newest first): **v0.16.0** — Phase 6: Lichess account integration
+(profile page, recent-games panel, one-click analysis), Lichess URL direct input in the
+upload form, SMTP "report ready" email notification, `web/email_utils.py`, Alembic migration
+003 (`lichess_username` column), full test coverage (`test_profile.py`, `test_email_utils.py`).
+**v0.15.0** — CSV export (all reports) + per-report delete (admin only) in the dashboard.
+**v0.14.0** — Phase 5: phone-friendly responsive web UI, per-user dashboard (accuracy trend,
+recent reports, game history), star-rating accuracy display. **v0.13.0** — Phase 4: SQLite
+database with SQLAlchemy 2.0 ORM (`web/models.py`, `web/db.py`) and Alembic migrations
+(`alembic/`); report + game persistence across restarts. **v0.12.0** — Phase 3: accounts +
+roles (bcrypt hashing, SessionMiddleware cookies, `require_login` dep, admin RBAC, per-user
+report scoping). **v0.11.0** — Phase 2: async analysis jobs + status page
+(`web/jobs.py` JobRegistry, Queued→Analyzing→Narrating→Done→Failed state machine, JS polling).
+**v0.10.0** — Output Fact-Gate predicate library + per-ply allow-set + scoped prompt rule
+(#28), and Layer-2 claim-verification self-test (deterministic CI gate + advisory LLM-judge +
+`tools/verify_report.py`) (#29). **v0.9.0** — engine-sourced variation lines + confabulation
+validator (#17); wasted-tempo coaching concept (#18); player names across all modes (#19);
+daily/correspondence voice detection (#20); deterministic featured passage (#21); GitHub
+Actions CI (#14); correctness sweep.
+Earlier: settings panel; SVG chronological ordering; voice refinements (relationship framing,
 reader-level language, keepsake mode, timid first moves, winning-a-piece ≠ a trade);
 standalone `Greco.exe`; game finders (Chess.com + PGN Mentor); commentary-learning;
 report naming; versioning + docs.
