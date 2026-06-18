@@ -353,11 +353,11 @@ def test_logout_redirects_to_login(tmp_db, web_client):
     })
     r = web_client.post("/auth/logout", follow_redirects=False)
     assert r.status_code == 303
-    assert "login" in r.headers["location"]
+    assert r.headers["location"] in ("/", "http://testserver/")
 
 
-def test_unauthenticated_index_redirects_to_login(web_client):
-    """GET / without a session should redirect to /auth/login (PRD requirement)."""
+def test_unauthenticated_index_shows_home(web_client):
+    """GET / without a session should serve the home page (guest access)."""
     r = web_client.get("/", follow_redirects=False)
-    assert r.status_code in (303, 307)
-    assert "login" in r.headers["location"]
+    assert r.status_code == 200
+    assert b"Greco" in r.content

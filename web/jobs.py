@@ -14,7 +14,7 @@ import threading
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 
 class JobStatus(str, Enum):
@@ -30,6 +30,7 @@ class Job:
     status: JobStatus = JobStatus.QUEUED
     report_id: Optional[int] = None
     error: Optional[str] = None
+    logs: List[str] = field(default_factory=list)
 
 
 class JobRegistry:
@@ -59,6 +60,13 @@ class JobRegistry:
                 return
             for key, value in kwargs.items():
                 setattr(job, key, value)
+
+    def append_log(self, job_id: str, message: str) -> None:
+        """Append a progress message to the job's log list."""
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is not None:
+                job.logs.append(message)
 
 
 # The application-wide singleton. Routes import this directly.

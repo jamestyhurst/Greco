@@ -74,7 +74,8 @@ def test_health_ok():
 def test_index_serves_form():
     r = client.get("/")
     assert r.status_code == 200
-    assert "Greco Web" in r.text
+    assert "Greco" in r.text
+    assert "analyze" in r.text.lower()
 
 
 def test_unknown_report_is_404():

@@ -13,8 +13,11 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from version import __version__
@@ -26,7 +29,7 @@ from web.routers import auth as auth_router
 from web.routers import dashboard as dashboard_router
 from web.routers import profile as profile_router
 from web import ngrok_tunnel
-from web.templates import render_form
+from web.templates import render_home
 
 
 @asynccontextmanager
@@ -58,6 +61,11 @@ app.include_router(auth_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(profile_router.router)
 
+# Serve assets (icon, etc.) — mount after routers so /static never shadows a route
+_assets_dir = Path(__file__).resolve().parent.parent / "assets"
+if _assets_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=str(_assets_dir)), name="static")
+
 
 # ---------------------------------------------------------------------------
 # Global exception handlers
@@ -87,11 +95,9 @@ def health() -> dict:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    """The upload form (requires login)."""
+    """Home page — accessible to guests and logged-in users."""
     user = await get_current_user(request)
-    if user is None:
-        return RedirectResponse("/auth/login", status_code=303)
-    return HTMLResponse(render_form(resolve_settings(), user=user))
+    return HTMLResponse(render_home(resolve_settings(), user=user))
 
 
 if __name__ == "__main__":

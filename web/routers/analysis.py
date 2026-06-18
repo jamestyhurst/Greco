@@ -14,11 +14,11 @@ import logging
 import socket
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from outputs import export_shareable_html
-from web.auth import require_login
+from web.auth import get_current_user, require_login
 from web.config import MODELS, SPEED_LABELS, USE_CASES, resolve_settings
 from web.db import User, create_report_ownership, get_user_by_id
 from web.email_utils import send_report_ready
@@ -58,16 +58,23 @@ _log = logging.getLogger("greco.web")
 def _run_background(job_id: str, owner_id: Optional[int] = None, **kwargs) -> None:
     """Execute the analysis pipeline and update the job status when done."""
     _registry.update(job_id, status=JobStatus.RUNNING)
+    _registry.append_log(job_id, "Starting Stockfish analysis...")
     try:
-        result = run_analysis(**kwargs)
+        result = run_analysis(
+            **kwargs,
+            progress_cb=lambda msg: _registry.append_log(job_id, msg),
+        )
+        _registry.append_log(job_id, "Saving report...")
         if owner_id is not None:
             create_report_ownership(result.rid, owner_id, base=result.base)
         _registry.update(job_id, status=JobStatus.DONE, report_id=result.rid)
+        _registry.append_log(job_id, "Done!")
         if owner_id is not None:
             _send_completion_email(owner_id, result.rid, result.base)
     except Exception as exc:
         _log.exception("Background job %s failed", job_id)
         _registry.update(job_id, status=JobStatus.FAILED, error=str(exc))
+        _registry.append_log(job_id, f"Error: {exc}")
 
 
 def _send_completion_email(owner_id: int, report_id: int, base: Optional[str]) -> None:
@@ -86,7 +93,7 @@ def _send_completion_email(owner_id: int, report_id: int, base: Optional[str]) -
 @router.post("/analyze", response_class=HTMLResponse)
 async def analyze(
     background_tasks: BackgroundTasks,
-    current_user: User = Depends(require_login),
+    current_user: Optional[User] = Depends(get_current_user),
     pgn_file: Optional[UploadFile] = File(None),
     pgn_text: str = Form(""),
     lichess_url: str = Form(""),
@@ -144,7 +151,7 @@ async def analyze(
     background_tasks.add_task(
         _run_background,
         job.id,
-        owner_id=current_user.id,
+        owner_id=current_user.id if current_user else None,
         pgn_text=text, engine=s.engine, time_limit=time_limit,
         user_is=user_is, use_case=use_case, model=model, note=note_val,
         audience_level=(audience_level or "").strip() or None,
@@ -166,25 +173,27 @@ def job_status(job_id: str) -> dict:
         "status": job.status,
         "report_id": job.report_id,
         "error": job.error,
+        "logs": job.logs,
     }
 
 
 @router.get("/result/{job_id}", response_class=HTMLResponse)
-def result_page(job_id: str) -> HTMLResponse:
+async def result_page(request: Request, job_id: str) -> HTMLResponse:
     """Show the finished-report page for a completed job (replaces the old
     blocking result page). Redirects to the report if done; shows an error
     if failed; shows the waiting page if still running."""
+    current_user = await get_current_user(request)
     job = _registry.get(job_id)
     if job is None:
-        return HTMLResponse(render_error("Job not found."), status_code=404)
+        return HTMLResponse(render_error("Job not found.", user=current_user), status_code=404)
     if job.status == JobStatus.DONE and job.report_id is not None:
         p = report_html_path(job.report_id)
         if p is None:
-            return HTMLResponse(render_error("Report file not found."), status_code=404)
-        return HTMLResponse(render_result("Report", job.report_id, str(p.parent)))
+            return HTMLResponse(render_error("Report file not found.", user=current_user), status_code=404)
+        return HTMLResponse(render_result("Report", job.report_id, str(p.parent), user=current_user))
     if job.status == JobStatus.FAILED:
-        return HTMLResponse(render_error(job.error or "Analysis failed."), status_code=500)
-    return HTMLResponse(render_waiting(job_id))
+        return HTMLResponse(render_error(job.error or "Analysis failed.", user=current_user), status_code=500)
+    return HTMLResponse(render_waiting(job_id, user=current_user))
 
 
 @router.get("/report/{rid}", response_class=HTMLResponse)

@@ -7,6 +7,22 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added (web UI overhaul — 12-item James request)
+- **Guest access** — `POST /analyze` and `GET /` now accept unauthenticated users. Accounts are optional (save history only); guests can generate reports immediately.
+- **Home page** — `/` now serves a marketing landing page with Greco's feature pitch, the analysis form, and input tooltips. Guests see a hero section explaining what Greco does; logged-in users see the form directly.
+- **Consistent navigation** — every page now shows a persistent top nav bar with Sign in / Register (guests) or username + Sign out + My Reports (logged-in). Admin users also see an Admin link.
+- **Actual desktop icon** — all pages now display the Greco logo from `assets/greco.png` via a `/static/` static file route instead of the generic chess king character.
+- **Progress bar + log window on waiting page** — shows live stage indicators (Queued → Stockfish → Claude → Done) with a time-animated progress fill and a scrollable log box that displays messages from the background pipeline.
+- **TTS voice selection** — `tts.py` now accepts a `voice=` parameter in `speak_text()` and `save_audio()`; `python tts.py --list-voices` shows all installed options; Windows 10/11 "Desktop" voices (OneCore) sound noticeably more natural.
+- Auth pages now include a "Continue without an account" link so the guest flow is discoverable.
+
+### Changed
+- **Result page UX** — clarifies that the generated file is a self-contained HTML you should open in a browser. Preview iframe is now collapsed by default (toggle button). Dominant CTA is "Open report" rather than just showing a link.
+- **Logout** now returns to `/` (home) instead of the login page.
+- **SAN capitalization in reports fixed** — `outputs.py` now restricts Cinzel font to `h1` only; `h2`/`h3`/`h4` section headings (which contain move notation) use EB Garamond Bold instead of Cinzel, preventing the all-caps rendering bug.
+- **RAG citation format** — narrator prompt updated to attribute quotes with author's last name only ("As Capablanca wrote, …" not "As Capablanca writes in Chess Fundamentals, …").
+- **Archaic pawn notation filter** — `knowledge.py` now converts old-style notation ("Pe3" → "e3") in retrieved corpus passages before they reach the narrator, preventing OCR artifacts from 19th-century books appearing in reports.
+
 ## [0.39.2] — 2026-06-18
 
 ### Added

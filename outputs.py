@@ -1012,9 +1012,11 @@ def markdown_to_html(
     body { font-family: 'EB Garamond', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
            max-width: 820px; margin: 2rem auto; padding: 0 1.2rem; line-height: 1.65;
            color: #2e2117; background: #fbf6e7; }
-    h1, h2, h3, h4 { font-family: 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif;
-                     line-height: 1.25; color: #5E151D; }
-    h1 { border-bottom: 3px double #C9A23A; padding-bottom: 0.3rem; color: #7A1C26; }
+    h1, h2, h3, h4 { line-height: 1.25; color: #5E151D; }
+    h1 { font-family: 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif;
+         border-bottom: 3px double #C9A23A; padding-bottom: 0.3rem; color: #7A1C26; }
+    h2, h3, h4 { font-family: 'EB Garamond', 'Palatino Linotype', Palatino, Georgia, serif;
+                 font-weight: 700; }
     h2 { border-bottom: 1px solid #e3d2a6; padding-bottom: 0.2rem; }
     h3 { color: #7A1C26; margin-top: 1.6rem; }
     a { color: #7A1C26; }

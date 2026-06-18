@@ -115,4 +115,4 @@ async def login_submit(
 @router.post("/logout")
 async def logout(request: Request) -> RedirectResponse:
     clear_session(request)
-    return RedirectResponse("/auth/login", status_code=303)
+    return RedirectResponse("/", status_code=303)

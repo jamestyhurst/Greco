@@ -96,6 +96,17 @@ THEME_QUERIES: Dict[str, List[str]] = {
 }
 
 
+_ARCHAIC_PAWN_RE = re.compile(r'\bP([a-h][1-8])\b')
+
+
+def _filter_archaic_notation(text: str) -> str:
+    """Convert old-style pawn notation to SAN: 'Pe3' → 'e3', 'Pd4' → 'd4'.
+
+    19th-century books wrote pawn moves with an explicit 'P' prefix (Pe3, Pd4).
+    Modern SAN omits it. This keeps quoted passages readable for end-users."""
+    return _ARCHAIC_PAWN_RE.sub(r'\1', text)
+
+
 @dataclass
 class Passage:
     """One retrieved excerpt, with everything needed to attribute it."""
@@ -108,6 +119,9 @@ class Passage:
     chunk_index: int
     matched_theme: str = ""
     matched_phrases: List[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.text = _filter_archaic_notation(self.text)
 
     def attribution(self) -> str:
         bits = [b for b in (self.author, self.title) if b]

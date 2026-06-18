@@ -50,17 +50,25 @@ def to_speakable_text(markdown: str) -> str:
     return text.strip()
 
 
-def _run_powershell_speech(text: str, wav_path: Optional[Path], rate: int) -> None:
-    """
-    Drive System.Speech via a temp PowerShell script. If wav_path is given the
-    speech is written there; otherwise it plays on the default audio device.
+def _run_powershell_speech(
+    text: str, wav_path: Optional[Path], rate: int, voice: Optional[str] = None
+) -> None:
+    """Drive System.Speech via a temp PowerShell script.
+
+    If wav_path is given the speech is written there; otherwise it plays on the
+    default audio device.
+
+    Voice quality tip: run `python tts.py --list-voices` to see all installed
+    voices. On Windows 10/11 look for voices ending in "Desktop" (e.g.
+    "Microsoft David Desktop") — they use the newer OneCore engine and sound
+    significantly more natural than the legacy defaults. You can install
+    additional languages/voices via Settings > Time & Language > Speech.
     """
     if platform.system() != "Windows":
         raise RuntimeError(
             "Greco's text-to-speech currently requires Windows (System.Speech)."
         )
 
-    # Write the narration text to a UTF-8 temp file so we avoid all quoting issues.
     txt_file = Path(tempfile.gettempdir()) / "greco_tts_input.txt"
     txt_file.write_text(text, encoding="utf-8")
 
@@ -73,10 +81,16 @@ def _run_powershell_speech(text: str, wav_path: Optional[Path], rate: int) -> No
     else:
         output_setup = "$s.SetOutputToDefaultAudioDevice()"
 
+    voice_setup = ""
+    if voice:
+        safe = voice.replace('"', '')
+        voice_setup = f'$s.SelectVoice("{safe}")'
+
     ps_script = f"""
 Add-Type -AssemblyName System.Speech
 $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
 $s.Rate = {rate}
+{voice_setup}
 {output_setup}
 $text = [System.IO.File]::ReadAllText("{txt_file}", [System.Text.Encoding]::UTF8)
 $s.Speak($text)
@@ -91,15 +105,20 @@ $s.Dispose()
     )
 
 
-def speak_text(text: str, rate: int = 0) -> None:
-    """Read `text` aloud on the default audio device (blocks until finished)."""
-    _run_powershell_speech(text, wav_path=None, rate=rate)
+def speak_text(text: str, rate: int = 0, voice: Optional[str] = None) -> None:
+    """Read `text` aloud on the default audio device (blocks until finished).
+
+    Pass voice="Microsoft David Desktop" (or any name from list_voices()) to
+    select a specific voice. Voices ending in "Desktop" use the OneCore engine
+    and sound noticeably more natural on Windows 10/11.
+    """
+    _run_powershell_speech(text, wav_path=None, rate=rate, voice=voice)
 
 
-def save_audio(text: str, out_path: Path, rate: int = 0) -> Path:
+def save_audio(text: str, out_path: Path, rate: int = 0, voice: Optional[str] = None) -> Path:
     """Synthesize `text` to a .wav file and return its path."""
     out_path = Path(out_path)
-    _run_powershell_speech(text, wav_path=out_path, rate=rate)
+    _run_powershell_speech(text, wav_path=out_path, rate=rate, voice=voice)
     return out_path
 
 
@@ -121,7 +140,13 @@ def list_voices() -> str:
 
 
 if __name__ == "__main__":
-    # Quick manual test: python tts.py "Hello from Greco"
-    sample = sys.argv[1] if len(sys.argv) > 1 else "Hello, this is Greco."
-    print("Installed voices:\n", list_voices())
-    speak_text(sample)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("text", nargs="?", default="Hello, this is Greco.")
+    ap.add_argument("--voice", default=None, help="Voice name (from --list-voices)")
+    ap.add_argument("--list-voices", action="store_true")
+    args = ap.parse_args()
+    if args.list_voices:
+        print("Installed voices:\n" + list_voices())
+    else:
+        speak_text(args.text, voice=args.voice)
