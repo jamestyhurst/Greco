@@ -916,10 +916,11 @@ def markdown_to_html(
         html_path = md_path.with_suffix(".html")
 
     css = """
-    body { font-family: 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
-           max-width: 820px; margin: 2rem auto; padding: 0 1.2rem; line-height: 1.6;
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+    body { font-family: 'EB Garamond', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+           max-width: 820px; margin: 2rem auto; padding: 0 1.2rem; line-height: 1.65;
            color: #2e2117; background: #fbf6e7; }
-    h1, h2, h3, h4 { font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    h1, h2, h3, h4 { font-family: 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif;
                      line-height: 1.25; color: #5E151D; }
     h1 { border-bottom: 3px double #C9A23A; padding-bottom: 0.3rem; color: #7A1C26; }
     h2 { border-bottom: 1px solid #e3d2a6; padding-bottom: 0.2rem; }

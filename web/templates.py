@@ -14,12 +14,14 @@ from version import __version__
 from web.config import Settings, USE_CASES, MODELS
 
 BASE_CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 :root{--wine:#7A1C26;--wine-dark:#5E151D;--ivory:#F5EDD4;--parch:#FBF6E7;--gold:#C9A23A;--ink:#3A2A1A;--muted:#8a7a5c;--line:#d9c7a0;}
 *{box-sizing:border-box;}
-body{margin:0;font-family:'Palatino Linotype',Palatino,Georgia,'Book Antiqua',serif;color:var(--ivory);background:var(--wine);line-height:1.55;}
+body{margin:0;font-family:'EB Garamond','Palatino Linotype',Palatino,Georgia,'Book Antiqua',serif;color:var(--ivory);background:var(--wine);line-height:1.6;}
 .wrap{max-width:640px;margin:0 auto;padding:24px 16px 64px;}
-h1{font-size:1.95rem;margin:0 0 4px;color:var(--ivory);font-weight:700;letter-spacing:.5px;}
-.sub{color:var(--gold);margin:0 0 20px;font-size:.95rem;font-style:italic;}
+h1{font-size:1.95rem;margin:0 0 4px;color:var(--ivory);font-weight:700;letter-spacing:.5px;font-family:'Cinzel','Palatino Linotype',Palatino,Georgia,serif;}
+h2,h3{font-family:'Cinzel','Palatino Linotype',Palatino,Georgia,serif;color:var(--ivory);}
+.sub{color:var(--gold);margin:0 0 20px;font-size:.95rem;font-style:italic;font-family:'EB Garamond','Palatino Linotype',Palatino,Georgia,serif;}
 .card{background:var(--parch);border:1px solid var(--gold);border-radius:10px;padding:18px;color:var(--ink);box-shadow:0 2px 12px rgba(0,0,0,.28);}
 label{display:block;font-weight:700;margin:14px 0 6px;font-size:.9rem;color:var(--wine-dark);}
 input[type=file],textarea,select,input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-family:inherit;background:#fffdf6;color:var(--ink);}
