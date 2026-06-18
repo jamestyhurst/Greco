@@ -232,3 +232,175 @@ def test_promotion_threat_in_certified_claims():
     b, mv, a = _push("7k/8/4P3/8/8/8/8/4K3 w - - 0 1", "e6e7")
     tags = F.certified_claims(b, mv, a, chess.WHITE)
     assert "promotion_threat" in tags
+
+
+# --- is_isolated_pawn -------------------------------------------------------
+
+def test_isolated_pawn_iqp_white_d4():
+    # Textbook IQP structure: White d4 pawn, c- and e-files have no White pawn.
+    # FEN from spec positive example 1.
+    board = chess.Board("rnbqkb1r/pp3ppp/4pn2/8/3P4/2N2N2/PP3PPP/R1BQKB1R w KQkq - 0 7")
+    ok, ev = F.is_isolated_pawn(board, chess.D4, chess.WHITE)
+    assert ok
+    assert ev["is_isolani"] is True
+    assert ev["file"] == "d"
+    assert ev["color"] == "White"
+    assert "isolani" in ev["evidence_str"]
+
+
+def test_isolated_pawn_edge_file_a_pawn_black():
+    # Black a7 is isolated — only adjacent b-file has no Black pawn.
+    board = chess.Board("8/p7/8/8/8/5k2/5P2/6K1 b - - 0 1")
+    ok, ev = F.is_isolated_pawn(board, chess.A7, chess.BLACK)
+    assert ok
+    assert ev["color"] == "Black"
+    assert ev["adjacent_files"] == ["b"]
+    assert "b-file" in ev["evidence_str"]
+
+
+def test_isolated_pawn_doubled_isolated_white_c():
+    # White c3 and c4 with no b- or d-pawn: both isolated doubled.
+    board = chess.Board("6k1/8/8/8/2P5/2P5/6PP/6K1 w - - 0 1")
+    ok4, ev4 = F.is_isolated_pawn(board, chess.C4, chess.WHITE)
+    ok3, ev3 = F.is_isolated_pawn(board, chess.C3, chess.WHITE)
+    assert ok4
+    assert ev4["is_doubled"] is True
+    assert set(ev4["doubled_squares"]) == {"c3", "c4"}
+    assert ok3
+    assert ev3["is_doubled"] is True
+
+
+def test_isolated_pawn_passed_and_isolated():
+    # White e5, g2, h2 — d and f empty; no Black pawns → isolated AND passed.
+    board = chess.Board("8/6k1/8/4P3/8/8/6PP/6K1 w - - 0 1")
+    ok, ev = F.is_isolated_pawn(board, chess.E5, chess.WHITE)
+    assert ok
+    assert ev["is_passed"] is True
+    assert "isolated passed pawn" in ev["evidence_str"]
+
+
+def test_isolated_pawn_false_adjacent_file_occupied():
+    # White b3 has White a2 on the adjacent a-file — NOT isolated.
+    board = chess.Board("8/8/8/8/1p6/1P6/P7/6K1 w - - 0 1")
+    ok, _ = F.is_isolated_pawn(board, chess.B3, chess.WHITE)
+    assert ok is False
+
+
+def test_isolated_pawn_false_hanging_pawns():
+    # White c4 and d4 together — each has the other on an adjacent file.
+    board = chess.Board("4k3/8/8/8/2PP4/8/8/4K3 w - - 0 1")
+    ok_c, _ = F.is_isolated_pawn(board, chess.C4, chess.WHITE)
+    ok_d, _ = F.is_isolated_pawn(board, chess.D4, chess.WHITE)
+    assert ok_c is False
+    assert ok_d is False
+
+
+def test_isolated_pawn_false_non_pawn():
+    # Non-pawn piece: knight on d4.
+    board = chess.Board("4k3/8/8/8/3N4/8/8/4K3 w - - 0 1")
+    ok, ev = F.is_isolated_pawn(board, chess.D4, chess.WHITE)
+    assert ok is False
+    assert ev == {}
+
+
+def test_isolated_pawn_false_enemy_pawn():
+    # Black pawn on d4; asking for WHITE → veto fires (wrong color).
+    board = chess.Board("4k3/8/8/8/3p4/8/8/4K3 w - - 0 1")
+    ok, ev = F.is_isolated_pawn(board, chess.D4, chess.WHITE)
+    assert ok is False
+    assert ev == {}
+
+
+def test_isolated_pawn_pinned_still_certifies():
+    # White d2 absolutely pinned by Bb4 against Ke1; c and e files empty → still isolated.
+    board = chess.Board("4k3/8/8/8/1b6/8/3P4/4K3 w - - 0 1")
+    ok, ev = F.is_isolated_pawn(board, chess.D2, chess.WHITE)
+    assert ok
+    assert ev["is_isolani"] is True
+
+
+def test_isolated_pawn_in_certified_claims():
+    # White lone d-pawn advances: d4→d5. No White pawns on c or e → isolated IQP.
+    b, mv, a = _push("4k3/8/8/8/3P4/8/8/4K3 w - - 0 1", "d4d5")
+    tags = F.certified_claims(b, mv, a, chess.WHITE)
+    assert "isolated_pawn" in tags
+
+
+# --- is_doubled_pawn --------------------------------------------------------
+
+def test_doubled_pawn_simple_white_c_file():
+    # White pawns c2 and c3 — doubled on c-file.
+    board = chess.Board("4k3/8/8/8/8/2P5/2P5/6K1 w - - 0 1")
+    ok, ev = F.is_doubled_pawn(board, chess.C3, chess.WHITE)
+    assert ok
+    assert ev["count"] == 2
+    assert ev["descriptor"] == "doubled"
+    assert ev["file"] == "c"
+    assert set(ev["square_names"]) == {"c2", "c3"}
+    assert "doubled pawns on the c-file" in ev["evidence_str"]
+
+
+def test_doubled_pawn_tripled():
+    # White pawns c2, c3, c4 — tripled.
+    board = chess.Board("4k3/8/8/8/2P5/2P5/2P5/6K1 w - - 0 1")
+    ok, ev = F.is_doubled_pawn(board, chess.C4, chess.WHITE)
+    assert ok
+    assert ev["count"] == 3
+    assert ev["descriptor"] == "tripled"
+    assert "tripled pawns" in ev["evidence_str"]
+
+
+def test_doubled_pawn_false_adjacent_files():
+    # White e4 and f4 — a phalanx/duo, NOT doubled.
+    board = chess.Board("4k3/8/8/8/4PP2/8/8/4K3 w - - 0 1")
+    ok_e, _ = F.is_doubled_pawn(board, chess.E4, chess.WHITE)
+    ok_f, _ = F.is_doubled_pawn(board, chess.F4, chess.WHITE)
+    assert ok_e is False
+    assert ok_f is False
+
+
+def test_doubled_pawn_false_lone_pawn():
+    # White e4 only — no same-file companion.
+    board = chess.Board("4k3/8/8/8/4P3/8/8/4K3 w - - 0 1")
+    ok, ev = F.is_doubled_pawn(board, chess.E4, chess.WHITE)
+    assert ok is False
+    assert ev == {}
+
+
+def test_doubled_pawn_false_enemy_pawn_same_file():
+    # White e4, Black e6 — enemy pawn on same file does not make White's doubled.
+    board = chess.Board("4k3/8/4p3/8/4P3/8/8/4K3 w - - 0 1")
+    ok, _ = F.is_doubled_pawn(board, chess.E4, chess.WHITE)
+    assert ok is False
+
+
+def test_doubled_pawn_false_non_pawn():
+    # A rook on c3 is not a pawn.
+    board = chess.Board("4k3/8/8/8/8/2R5/2P5/6K1 w - - 0 1")
+    ok, ev = F.is_doubled_pawn(board, chess.C3, chess.WHITE)
+    assert ok is False
+    assert ev == {}
+
+
+def test_doubled_pawn_false_single_pawn_veto():
+    # Only one White pawn on the board — step-2 veto fires.
+    board = chess.Board("4k3/8/8/8/3P4/8/8/4K3 w - - 0 1")
+    ok, _ = F.is_doubled_pawn(board, chess.D4, chess.WHITE)
+    assert ok is False
+
+
+def test_doubled_pawn_black_certified():
+    # Black pawns f6 and f7 — doubled for Black.
+    board = chess.Board("4k3/5p2/5p2/8/8/8/8/4K3 b - - 0 1")
+    ok, ev = F.is_doubled_pawn(board, chess.F6, chess.BLACK)
+    assert ok
+    assert ev["color"] == "Black"
+    assert ev["file"] == "f"
+
+
+def test_doubled_pawn_in_certified_claims():
+    # White bxc5 recapture: White b4 captures Black c5; White also has c2.
+    # After the capture White has c2 and c5 on the same file.
+    b, mv, a = _push("4k3/8/8/2p5/1P6/8/2P5/4K3 w - - 0 1", "b4c5")
+    tags = F.certified_claims(b, mv, a, chess.WHITE)
+    assert "doubled_pawn" in tags

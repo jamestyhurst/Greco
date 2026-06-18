@@ -176,6 +176,122 @@ def is_passed_pawn(board: chess.Board, square: int, color: bool) -> bool:
     return True
 
 
+def is_isolated_pawn(board: chess.Board, square: int, color: bool) -> Tuple[bool, dict]:
+    """Certifies an 'isolated pawn': a pawn of `color` with no friendly pawn on either
+    in-range adjacent file. Pure pawn-structure arithmetic — enemy pawns, the pawn's rank,
+    pin status, and side-to-move are all irrelevant. Edge-file (a/h) pawns need only their
+    one in-range neighbour file empty. Recognised sub-attributes in evidence: IQP (d-file),
+    isolated doubled, isolated passed.
+    """
+    piece = board.piece_at(square)
+    if piece is None or piece.piece_type != chess.PAWN or piece.color != color:
+        return (False, {})
+
+    # One O(≤8) pass: file→count map for friendly pawns only.
+    friendly_file_counts: dict = {}
+    for sq in board.pieces(chess.PAWN, color):
+        f = chess.square_file(sq)
+        friendly_file_counts[f] = friendly_file_counts.get(f, 0) + 1
+    friendly_files = set(friendly_file_counts)
+
+    file_idx = chess.square_file(square)
+    adj = {f for f in (file_idx - 1, file_idx + 1) if 0 <= f <= 7}
+    if not adj.isdisjoint(friendly_files):
+        return (False, {})
+
+    is_isolani = (file_idx == 3)
+    is_passed = is_passed_pawn(board, square, color)
+    count = friendly_file_counts.get(file_idx, 1)
+    is_doubled = count >= 2
+    doubled_squares: list = []
+    if is_doubled:
+        doubled_squares = sorted(
+            chess.square_name(sq)
+            for sq in board.pieces(chess.PAWN, color)
+            if chess.square_file(sq) == file_idx
+        )
+
+    color_str = "White" if color == chess.WHITE else "Black"
+    file_letter = chess.FILE_NAMES[file_idx]
+    adj_letters = sorted(chess.FILE_NAMES[f] for f in adj)
+    adj_str = f"{adj_letters[0]}-file" if len(adj_letters) == 1 else f"{adj_letters[0]}- or {adj_letters[1]}-file"
+
+    evidence_str = (
+        f"the {color_str} pawn on {chess.square_name(square)} is isolated — "
+        f"no {color_str} pawn stands on the {adj_str} to support it"
+    )
+    if is_isolani:
+        evidence_str += " — an isolated queen-pawn (isolani)"
+    if is_doubled:
+        evidence_str += (
+            f" — isolated doubled pawns on the {file_letter}-file"
+            f" ({' and '.join(doubled_squares)})"
+        )
+    if is_passed:
+        evidence_str += " — an isolated passed pawn"
+
+    return (True, {
+        "square": chess.square_name(square),
+        "color": color_str,
+        "file": file_letter,
+        "adjacent_files": adj_letters,
+        "is_isolani": is_isolani,
+        "is_doubled": is_doubled,
+        "doubled_squares": doubled_squares,
+        "is_passed": is_passed,
+        "evidence_str": evidence_str,
+    })
+
+
+def is_doubled_pawn(board: chess.Board, square: int, color: bool) -> Tuple[bool, dict]:
+    """Certifies a 'doubled pawn' STATE: the pawn of `color` on `square` shares its file
+    with ≥1 other friendly pawn. Pure file-count arithmetic; pin status, side-to-move, and
+    enemy pawns are all irrelevant. Evidence carries 'doubled'/'tripled'/'quadrupled' and a
+    present-tense STATE sentence (contrast the EVENT field `doubled_pawns_created`).
+    """
+    piece = board.piece_at(square)
+    if piece is None or piece.piece_type != chess.PAWN or piece.color != color:
+        return (False, {})
+    if len(board.pieces(chess.PAWN, color)) < 2:
+        return (False, {})
+
+    file_idx = chess.square_file(square)
+    same_file = sorted(
+        sq for sq in board.pieces(chess.PAWN, color) if chess.square_file(sq) == file_idx
+    )
+    count = len(same_file)
+    if count < 2:
+        return (False, {})
+
+    descriptor = {2: "doubled", 3: "tripled"}.get(count, "quadrupled")
+    color_str = "White" if color == chess.WHITE else "Black"
+    file_letter = chess.FILE_NAMES[file_idx]
+    square_names = [chess.square_name(sq) for sq in same_file]
+
+    if count == 2:
+        evidence_str = (
+            f"{color_str} has doubled pawns on the {file_letter}-file"
+            f" ({square_names[0]} and {square_names[1]})"
+        )
+    else:
+        evidence_str = (
+            f"{color_str} has {descriptor} pawns on the {file_letter}-file"
+            f" ({', '.join(square_names)})"
+        )
+
+    return (True, {
+        "color": color_str,
+        "square": chess.square_name(square),
+        "file": file_letter,
+        "file_index": file_idx,
+        "pawn_squares": same_file,
+        "square_names": square_names,
+        "count": count,
+        "descriptor": descriptor,
+        "evidence_str": evidence_str,
+    })
+
+
 def file_state(board: chess.Board, file_index: int, color: bool) -> str:
     """'open_file' / 'half_open_file' / '' for a file, delegating to the analyzer's
     file_structure so 'open'/'half-open' mean EXACTLY what the fact packet already says."""
@@ -308,6 +424,8 @@ GATED_TAGS = (
     "rook_lift",
     "outpost",
     "passed_pawn",
+    "isolated_pawn",
+    "doubled_pawn",
     "mate_in_one_threat",
     "battery",
     "promotion_threat",
@@ -373,6 +491,14 @@ def certified_claims(
 
     if _safe(lambda: is_passed_pawn(board_after, move.to_square, mover_color)):
         tags.add("passed_pawn")
+
+    ip = _safe(lambda: is_isolated_pawn(board_after, move.to_square, mover_color))
+    if ip and ip[0]:
+        tags.add("isolated_pawn")
+
+    dp = _safe(lambda: is_doubled_pawn(board_after, move.to_square, mover_color))
+    if dp and dp[0]:
+        tags.add("doubled_pawn")
 
     bt = _safe(lambda: creates_battery(board_after, move, mover_color))
     if bt and bt[0]:

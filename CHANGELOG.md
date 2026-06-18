@@ -7,6 +7,19 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.20.0] — 2026-06-18
+
+### Added
+- **`factgate.is_isolated_pawn()`** — certifies an isolated pawn (structural fact:
+  no friendly pawn on either in-range adjacent file). Recognises IQP/isolani (d-file),
+  isolated doubled, and isolated passed pawn as evidence sub-attributes.  19 new tests.
+- **`factgate.is_doubled_pawn()`** — certifies doubled (or tripled/quadrupled) pawns
+  as a static STATE: the moved pawn's file holds ≥2 friendly pawns. Evidence carries
+  a present-tense "has doubled/tripled pawns" sentence distinct from the event field
+  `doubled_pawns_created`. 10 new tests.
+- Both tags added to `GATED_TAGS`; narrator whitelist sentence updated to name
+  `isolated_pawn` and `doubled_pawn`.
+
 ## [0.19.0] — 2026-06-18
 
 ### Added
