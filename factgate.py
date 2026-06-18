@@ -41,6 +41,7 @@ from analyzer import (  # pure board helpers — none touch Stockfish or the API
     detect_double_attack,
     detect_pin,
     detect_royal_alignment,
+    detect_skewer,
     file_structure,
 )
 
@@ -645,6 +646,17 @@ def creates_pin(
     return (result is not None, result)
 
 
+def creates_skewer(
+    board_after: chess.Board, mover_color: bool
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies a 'skewer': mover's sliding piece attacks an enemy piece (king or
+    higher-value) with a lesser enemy piece directly behind it. Wraps analyzer.detect_skewer
+    which enforces: pinned/hanging attacker guard, ray-type gate, edge-clamped rear walk,
+    front>back value ordering, and check requirement for the absolute case."""
+    result = detect_skewer(board_after, mover_color)
+    return (result is not None, result)
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -655,6 +667,7 @@ GATED_TAGS = (
     "fork",
     "royal_pin_setup",
     "pin",
+    "skewer",
     "rook_lift",
     "outpost",
     "passed_pawn",
@@ -724,6 +737,10 @@ def certified_claims(
     pn = _safe(lambda: creates_pin(board_after, mover_color))
     if pn and pn[0]:
         tags.add("pin")
+
+    sk = _safe(lambda: creates_skewer(board_after, mover_color))
+    if sk and sk[0]:
+        tags.add("skewer")
 
     op = _safe(lambda: is_outpost(board_after, move.to_square, mover_color))
     if op and op[0]:

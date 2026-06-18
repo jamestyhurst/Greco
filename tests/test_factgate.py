@@ -649,3 +649,88 @@ def test_pin_in_certified_claims():
     b, mv, a = _push("4k3/8/2n5/8/2B5/8/8/4K3 w - - 0 1", "c4b5")
     tags = F.certified_claims(b, mv, a, chess.WHITE)
     assert "pin" in tags
+
+
+# --- creates_skewer ---------------------------------------------------------
+
+def test_skewer_true_absolute_rook_rank():
+    # Rook b8 checks black king g8 along 8th rank; black rook h8 behind — absolute skewer
+    board = chess.Board("1R4kr/8/8/8/8/8/8/6K1 b - - 0 1")
+    ok, ev = F.creates_skewer(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "absolute"
+    assert ev["forced"] is True
+    assert ev["front_piece"] == "king"
+    assert ev["back_piece"] == "rook"
+    assert ev["line"] == "rank"
+
+
+def test_skewer_true_relative_bishop_queen_rook_diagonal():
+    # Bishop b2 (defended by rook a2) skewers black queen d4 to black rook f6
+    # on the b2–f6 diagonal; bishop is not pinned/hanging thanks to rook on a2
+    board = chess.Board("7k/8/5r2/8/3q4/8/RB5K/8 w - - 0 1")
+    ok, ev = F.creates_skewer(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "relative"
+    assert ev["front_piece"] == "queen"
+    assert ev["back_piece"] == "rook"
+    assert ev["line"] == "diagonal"
+
+
+def test_skewer_true_absolute_queen_file():
+    # Queen e1 checks black king e7 along e-file; black rook e8 behind — absolute file skewer
+    board = chess.Board("4r3/4k3/8/8/8/8/8/4Q1K1 b - - 0 1")
+    ok, ev = F.creates_skewer(board, chess.WHITE)
+    assert ok
+    assert ev["kind"] == "absolute"
+    assert ev["front_piece"] == "king"
+    assert ev["back_piece"] == "rook"
+    assert ev["line"] == "file"
+
+
+def test_skewer_false_pin_king_behind():
+    # Rook e1 → black knight e5 → black king e8: king is rear → absolute PIN, not skewer
+    board = chess.Board("4k3/8/8/8/8/4n3/8/4RK2 w - - 0 1")
+    ok, _ = F.creates_skewer(board, chess.WHITE)
+    assert ok is False
+
+
+def test_skewer_false_equal_value_rook_rook():
+    # Rook d1 → black rook d5 → black rook d8: equal value → no cert (strict >)
+    board = chess.Board("3r3k/8/8/3r4/8/8/8/3RK3 w - - 0 1")
+    ok, _ = F.creates_skewer(board, chess.WHITE)
+    assert ok is False
+
+
+def test_skewer_false_hanging_attacker():
+    # Bishop f3 attacked by black pawn g4 and undefended — rule 2 vetoes
+    board = chess.Board("7k/1r6/8/3q4/6p1/5B2/8/7K w - - 0 1")
+    ok, _ = F.creates_skewer(board, chess.WHITE)
+    assert ok is False
+
+
+def test_skewer_false_back_pawn_relative():
+    # Rook d1 → black queen d5 → black pawn d8: back is pawn → relative worth gate vetoes
+    board = chess.Board("3p3k/8/8/3q4/8/8/8/3RK3 w - - 0 1")
+    ok, _ = F.creates_skewer(board, chess.WHITE)
+    assert ok is False
+
+
+def test_skewer_evidence_bundle_keys():
+    # All documented evidence bundle keys must be present on a certified skewer
+    board = chess.Board("1R4kr/8/8/8/8/8/8/6K1 b - - 0 1")
+    ok, ev = F.creates_skewer(board, chess.WHITE)
+    assert ok
+    for key in ("kind", "forced", "mover_color", "attacker_square", "attacker_piece",
+                "front_square", "front_piece", "back_square", "back_piece", "back_is_pawn",
+                "line", "coord", "evidence"):
+        assert key in ev, f"missing evidence key: {key}"
+    assert ev["kind"] in ("absolute", "relative")
+    assert "skewer" in ev["evidence"].lower() or "check" in ev["evidence"].lower()
+
+
+def test_skewer_in_certified_claims():
+    # Rook moves b2→b8 giving check to g8 king, winning h8 rook
+    b, mv, a = _push("6kr/8/8/8/8/8/1R6/6K1 w - - 0 1", "b2b8")
+    tags = F.certified_claims(b, mv, a, chess.WHITE)
+    assert "skewer" in tags

@@ -550,6 +550,164 @@ def detect_pin(board: chess.Board, mover_color: bool) -> Optional[dict]:
     return None
 
 
+def detect_skewer(board: chess.Board, mover_color: bool) -> Optional[dict]:
+    """Detect an absolute (king in front) or relative (front strictly more valuable than back)
+    skewer by the mover's sliding pieces. The skewer is the 'pin run backwards': same
+    ray-alignment primitive as detect_pin with the value ordering of the screened pair
+    reversed. Rules follow docs/specs/predicates/02-skewer.md (9-rule veto-then-confirm).
+    """
+    enemy = not mover_color
+
+    # Rule 1: sliding attacker must exist
+    attacker_squares = (
+        board.pieces(chess.BISHOP, mover_color)
+        | board.pieces(chess.ROOK, mover_color)
+        | board.pieces(chess.QUEEN, mover_color)
+    )
+    if not attacker_squares:
+        return None
+
+    for asq in attacker_squares:
+        attacker_piece = board.piece_at(asq)
+        if attacker_piece is None:
+            continue
+        attacker_type = attacker_piece.piece_type
+
+        # Rule 2: skip if attacker is pinned to own king OR hanging
+        if board.is_pinned(mover_color, asq):
+            continue
+        if (board.is_attacked_by(enemy, asq)
+                and not board.is_attacked_by(mover_color, asq)):
+            continue
+
+        # Rule 3: front candidates = enemy non-pawn pieces directly attacked (first on ray)
+        for fsq in board.attacks(asq):
+            front_piece = board.piece_at(fsq)
+            if front_piece is None:
+                continue
+            if front_piece.color != enemy:
+                continue
+            if front_piece.piece_type == chess.PAWN:
+                continue  # a skewered pawn in front is not a tactic
+
+            # Rule 4: ray-type gate + compute unit step (df, dr)
+            af, ar = chess.square_file(asq), chess.square_rank(asq)
+            ff, fr = chess.square_file(fsq), chess.square_rank(fsq)
+            df = (ff > af) - (ff < af)
+            dr = (fr > ar) - (fr < ar)
+
+            if attacker_type == chess.ROOK:
+                if df != 0 and dr != 0:
+                    continue  # rook cannot skewer along a diagonal
+            elif attacker_type == chess.BISHOP:
+                if df == 0 or dr == 0:
+                    continue  # bishop cannot skewer along a rank or file
+
+            # Rule 4 continued: edge-clamped ray walk past fsq to find bsq
+            bsq = None
+            cur_f = ff + df
+            cur_r = fr + dr
+            while 0 <= cur_f <= 7 and 0 <= cur_r <= 7:
+                sq = chess.square(cur_f, cur_r)
+                if board.piece_at(sq) is not None:
+                    bsq = sq
+                    break
+                cur_f += df
+                cur_r += dr
+
+            if bsq is None:
+                continue  # no piece behind the front — nothing to skewer
+
+            # Rule 5: clear line attacker→front AND front→back
+            if any(
+                board.piece_at(s) is not None
+                for s in chess.SquareSet(chess.between(asq, fsq))
+            ):
+                continue
+            if any(
+                board.piece_at(s) is not None
+                for s in chess.SquareSet(chess.between(fsq, bsq))
+            ):
+                continue
+
+            # Rule 6: both screened pieces are the enemy's
+            back_piece = board.piece_at(bsq)
+            if back_piece is None or back_piece.color != enemy:
+                continue
+
+            # Rule 7: skewer value ordering (opposite of pin)
+            if front_piece.piece_type == chess.KING:
+                # Absolute skewer: king in front, must be in check along this ray
+                if not board.is_check():
+                    continue
+                if asq not in board.attackers(mover_color, fsq):
+                    continue
+                if back_piece.piece_type == chess.KING:
+                    continue  # impossible (two kings on one ray)
+                kind = "absolute"
+                back_is_pawn = (back_piece.piece_type == chess.PAWN)
+            elif back_piece.piece_type == chess.KING:
+                continue  # king behind front → this is a PIN, not a skewer
+            else:
+                # Relative skewer: front strictly more valuable than back
+                if PIECE_VALUES[front_piece.piece_type] <= PIECE_VALUES[back_piece.piece_type]:
+                    continue  # equal or lesser front → not a skewer
+                if back_piece.piece_type not in FORK_TARGET_TYPES:
+                    continue  # back pawn alone is narration noise in relative case
+                kind = "relative"
+                back_is_pawn = False
+
+            # Build evidence bundle
+            if df == 0:
+                line = "file"
+                coord = chess.FILE_NAMES[ff]
+            elif dr == 0:
+                line = "rank"
+                coord = chess.RANK_NAMES[fr]
+            else:
+                line = "diagonal"
+                coord = chess.FILE_NAMES[af]
+
+            mover_str = "white" if mover_color == chess.WHITE else "black"
+            attacker_name = PIECE_NAMES[attacker_type]
+            front_name = PIECE_NAMES[front_piece.piece_type]
+            back_name = PIECE_NAMES[back_piece.piece_type]
+            asq_name = chess.square_name(asq)
+            fsq_name = chess.square_name(fsq)
+            bsq_name = chess.square_name(bsq)
+
+            if kind == "absolute":
+                evidence_str = (
+                    f"your {attacker_name} on {asq_name} checks the king on {fsq_name}"
+                    f" along the {coord}-{line} — a skewer: the king must move and the"
+                    f" {back_name} on {bsq_name} is won"
+                )
+            else:
+                evidence_str = (
+                    f"your {attacker_name} on {asq_name} skewers the {front_name} on {fsq_name}"
+                    f" to the {back_name} on {bsq_name} along the {coord}-{line}"
+                    f" — the {front_name} must move and the {back_name} is won"
+                )
+
+            return {
+                "kind": kind,
+                "forced": (kind == "absolute"),
+                "mover_color": mover_str,
+                "attacker_square": asq_name,
+                "attacker_piece": attacker_name,
+                "front_square": fsq_name,
+                "front_piece": front_name,
+                "back_square": bsq_name,
+                "back_piece": back_name,
+                "back_is_pawn": back_is_pawn,
+                "line": line,
+                "coord": coord,
+                "evidence": evidence_str,
+            }
+
+    return None
+
+
 def _doubled_files(board: chess.Board, color: bool):
     counts: Dict[int, int] = {}
     for sq in board.pieces(chess.PAWN, color):
