@@ -783,7 +783,18 @@ def _humanize_time_control(tc: str) -> str:
             if base_sec >= DAY:
                 return f"{tc} (Daily / correspondence — a day or more per move)"
             mins = base_sec // 60
-            return f"{tc} ({mins} min + {inc_sec} sec increment)"
+            # Classify using the 40-moves-per-game estimate (matches time_control_category).
+            # This correctly identifies OTB classical controls like 90+30 as "classical".
+            est = base_sec + 40 * inc_sec
+            if est >= 3600:
+                label = "classical"
+            elif est >= 600:
+                label = "rapid"
+            elif est >= 180:
+                label = "blitz"
+            else:
+                label = "bullet"
+            return f"{tc} ({mins} min + {inc_sec} sec increment — {label})"
         base_sec = int(tc)
         if base_sec >= DAY:  # raw-seconds daily, e.g. '86400' — not 24-hr "classical"
             return f"{tc} (Daily / correspondence — a day or more per move)"

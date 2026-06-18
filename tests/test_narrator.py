@@ -40,6 +40,12 @@ def test_humanize_time_control():
     assert "increment" in _humanize_time_control("600+5")
     assert _humanize_time_control("?") == "?"
     assert _humanize_time_control("") == ""
+    # OTB classical controls (backlog #12): increment must include category label.
+    assert "classical" in _humanize_time_control("5400+30")   # 90+30 — standard FIDE classical
+    assert "classical" in _humanize_time_control("3600+30")   # 60+30
+    assert "rapid" in _humanize_time_control("600+5")         # 10+5 — online rapid
+    assert "blitz" in _humanize_time_control("180+2")         # 3+2 — FIDE blitz
+    assert "bullet" in _humanize_time_control("60+1")         # 1+1 — bullet
 
 
 # --- resolve_player_names (feature 5) ---------------------------------------

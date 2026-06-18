@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Fixed
+- **`_humanize_time_control` now classifies increment time controls** (backlog #12). OTB classical controls like `90+30` previously showed "90 min + 30 sec increment" with no category label; the narrator had no way to know whether a game was a casual rapid or a serious classical. The fix applies the same 40-moves-per-game estimate already used by `time_control_category` to label every increment control: `5400+30` → "classical", `600+5` → "rapid", `180+2` → "blitz", `60+1` → "bullet". 5 new assertions added to `test_humanize_time_control`.
+
+## [0.39.0] — 2026-06-18
+
 ### Added
 - **`compute_pv_material_delta(board, pv)`** — engine-free function in `analyzer.py` that computes the net material gain (in pawns) for the side-to-move if they follow the engine's PV to its end. Positive = mover gains material; negative = mover comes out down. Handles en passant and promotions via the existing `material_balance()` function. New `MoveAnalysis` field `pv_material_delta` populated in the second pass. Serialized in narrator `_move_to_dict` at Tier 2+ (when non-zero). Narrator system-prompt rule added: use `pv_material_delta` instead of counting from the SAN string when writing about what the best line wins.
 - 6 new engine-free tests (481 total).
