@@ -2,9 +2,17 @@
 
 > **STATUS: IN REVIEW (paused 2026-06-15).** Definitions are being approved term-by-term with
 > James. `[A]` geometric terms: **13 approved (✅), 2 open (⏸ infiltration, fianchetto), ~6
-> unreviewed**; `[B]`/`[C]` pending. **To resume, read `RESUME_HERE.md` in this folder first.**
-> Date: 2026-06-15. Author: Greco project. The human- and code-facing reference the narrator's
-> vocabulary and the fact-gate predicates are built from.
+> unreviewed**; `[B]`/`[C]` and all supporting vocabulary pending.
+> **To resume, read `RESUME_HERE.md` in this folder first.**
+> Date: 2026-06-15. Author: Greco project.
+>
+> **Review convention used in this file:**
+> - `✅ approved YYYY-MM-DD` — James has explicitly approved this definition.
+> - `⏸` — James has seen this term but a specific ruling is still pending.
+> - `⚠️ NEEDS JAMES REVIEW` — written by Claude; James has **not** approved this definition.
+>   Do not treat it as settled or write code that depends on this wording until James signs off.
+> - No marker at all — same as ⚠️ (unreviewed); applies to all supporting/descriptive vocabulary
+>   below each numbered section header.
 
 ---
 
@@ -80,6 +88,10 @@ already supplies, or descriptive terms with no standalone claim).
 
 ## 1. Tactical motifs
 
+> **Review status:** Fork ✅, Pin ✅, Battery ✅, Skewer ✅, Discovered attack ✅,
+> Discovered check ✅, Double check ✅ — approved by James 2026-06-15.
+> All other terms in this section **⚠️ NEED JAMES REVIEW** (written by Claude; not yet approved).
+
 **Fork** *[A] — ✅ approved 2026-06-15* — One piece attacks two or more enemy targets at once
 such that the opponent cannot parry them all. Precisely: after the move a single friendly piece
 attacks ≥2 enemy pieces (or a piece plus a mate/promotion threat), and **at least one target
@@ -115,7 +127,7 @@ the pin dissolving once a defender arrives.
 → *Internal variant labels (absolute / relative / "x-ray") are code-side only — not narrator
 phrasing. Report wording is TBD (per James).*
 
-**Skewer** *[A]* — The same three-in-a-line geometry as a pin, but *reversed*: the more
+**Skewer** *[A] — ✅ approved 2026-06-15* — The same three-in-a-line geometry as a pin, but *reversed*: the more
 valuable piece (or the king) is in **front**, and when it moves off the line the lesser piece
 behind it is captured. An *absolute skewer* has the king in front; a *relative skewer* a
 higher-value piece in front.
@@ -123,16 +135,16 @@ higher-value piece in front.
 collinear on the slider's line with a clear path; distinguished from a pin purely by the
 front/back value ordering.
 
-**Discovered attack** *[A]* — A move of one piece that *unmasks* an attack by a friendly bishop,
+**Discovered attack** *[A] — ✅ approved 2026-06-15* — A move of one piece that *unmasks* an attack by a friendly bishop,
 rook, or queen that the moved piece had been blocking. The power is that two things happen at
 once: the moved piece can make its own threat while the unmasked piece makes another.
 → **Verifiable as:** comparing the unmasking friendly slider's attack set before vs. after the
 move, a new enemy target appears on the vacated line that the slider could not previously reach.
 
-**Discovered check** *[A]* — A discovered attack whose unmasked line hits the enemy king.
+**Discovered check** *[A] — ✅ approved 2026-06-15* — A discovered attack whose unmasked line hits the enemy king.
 → **Verifiable as:** the discovered-attack test where the newly-attacked piece is the king.
 
-**Double check** *[A]* — A check delivered by *two* pieces simultaneously: the moving piece
+**Double check** *[A] — ✅ approved 2026-06-15* — A check delivered by *two* pieces simultaneously: the moving piece
 gives check and *also* unmasks a checking piece behind it. The defender **must move the king**
 (no block or capture can stop two checkers at once).
 → **Verifiable as:** after the move, the side to move is in check from ≥2 attackers.
@@ -199,6 +211,9 @@ counter-threats; withheld.
 ---
 
 ## 2. Pawn structure
+
+> **Review status:** Isolated pawn ✅, Doubled pawns ✅, Backward pawn ✅, Passed pawn ✅ —
+> approved by James 2026-06-15. All other terms in this section **⚠️ NEED JAMES REVIEW**.
 
 **Isolated pawn** *[A] — ✅ approved 2026-06-15* — A pawn with **no friendly pawn on either adjacent file**. It cannot be
 defended by a pawn, so pieces must guard it, and the square in front of it is a natural enemy
@@ -286,6 +301,10 @@ cannot attack the piece on it. Needs a passed/isolated-pawn-plus-occupancy test;
 ---
 
 ## 3. Pieces & activity
+
+> **Review status:** Outpost ✅, Rook lift ✅ — approved by James 2026-06-15.
+> Infiltration ⏸, Fianchetto ⏸ — pending James's ruling on the open questions.
+> All other terms in this section **⚠️ NEED JAMES REVIEW**.
 
 **Outpost** *[A] — ✅ approved 2026-06-15 (v2)* — Distinguish two things. An **outpost square** is a
 square **defended by a friendly pawn** that **no enemy pawn can ever advance to attack** (no
@@ -391,11 +410,13 @@ controls few squares.
 
 ## 4. Files, ranks, lines & the board (mostly engine-supplied facts)
 
-**Open file** *[A]* — A file with no pawns of either color; the ideal highway for a rook or
+> **Review status:** No terms in this section have been approved by James. All **⚠️ NEED JAMES REVIEW**.
+
+**Open file** *[A] — ⚠️ NEEDS JAMES REVIEW* — A file with no pawns of either color; the ideal highway for a rook or
 queen.
 → **Verifiable as:** no pawn of either color on the file. (Greco computes `open_files`.)
 
-**Half-open file** *[A]* — A file with only the *enemy's* pawn(s) on it (none of yours); a
+**Half-open file** *[A] — ⚠️ NEEDS JAMES REVIEW* — A file with only the *enemy's* pawn(s) on it (none of yours); a
 natural avenue to pressure that enemy pawn.
 → **Verifiable as:** the file has ≥1 enemy pawn and no friendly pawn. (Greco computes
 `half_open_*`.)
@@ -415,7 +436,9 @@ the basic geometry along which rooks (file/rank), bishops (diagonal) and queens 
 
 ## 5. King safety, attack & mating patterns
 
-**Back-rank weakness** *[A]* — A king stuck on its back rank behind its own unmoved pawns, with
+> **Review status:** No terms in this section have been approved by James. All **⚠️ NEED JAMES REVIEW**.
+
+**Back-rank weakness** *[A] — ⚠️ NEEDS JAMES REVIEW* — A king stuck on its back rank behind its own unmoved pawns, with
 no escape square, so an enemy rook or queen reaching that rank threatens mate. Certifies the
 *vulnerability* (a standing weakness), distinct from an actual forced mate.
 → **Verifiable as:** the friendly king is on its back rank, its forward escape squares are
@@ -425,7 +448,7 @@ the back rank.
 **Back-rank mate** — The mate itself: a rook or queen checkmates along the back rank because the
 king is fenced in by its own pawns.
 
-**Luft** *[A]* — "Air" for the king: a pawn move that opens an escape square so the king cannot
+**Luft** *[A] — ⚠️ NEEDS JAMES REVIEW* — "Air" for the king: a pawn move that opens an escape square so the king cannot
 be mated on the back rank. **Side-agnostic** — for a kingside-castled king (g1/g8) the luft pawns
 are the f/g/h pawns; for a **queenside-castled** king (c1/c8) they are the a/b/c pawns. Not a
 fixed file list.
@@ -433,7 +456,7 @@ fixed file list.
 newly creates an empty, non-fatal flight square the king could step to which did not exist
 before the move.
 
-**Mate-in-one threat** *[A]* — The side to move threatens a checkmate on the next move that the
+**Mate-in-one threat** *[A] — ⚠️ NEEDS JAMES REVIEW* — The side to move threatens a checkmate on the next move that the
 opponent must prevent.
 → **Verifiable as:** a null-move probe — if the opponent "passed," the mover would have a legal
 move delivering checkmate (excluded when the mover is currently in check). Greco has
@@ -472,6 +495,8 @@ compensation (an outpost, a color complex, an attack).
 ---
 
 ## 6. Strategic & evaluation concepts
+
+> **Review status:** No terms in this section have been approved by James. All **⚠️ NEED JAMES REVIEW**.
 
 **Material** *[A — engine fact]* — The total value of the pieces; "up/down material" is the
 running balance. Greco computes `material_balance` directly; the claim is gated on that number,
@@ -518,7 +543,9 @@ choosing among the two or three most promising tries.
 
 ## 7. Endgame concepts
 
-**Zugzwang** *[A\*]* — A position where **every** legal move worsens the player's position, so
+> **Review status:** No terms in this section have been approved by James. All **⚠️ NEED JAMES REVIEW**.
+
+**Zugzwang** *[A\*] — ⚠️ NEEDS JAMES REVIEW* — A position where **every** legal move worsens the player's position, so
 they would prefer to pass but the rules forbid it. It is *not* the same as merely being worse —
 the defining feature is that *all* moves hurt. Common in king-and-pawn endgames, rare with many
 pieces (more pieces → more harmless moves). **Only partly decidable** — Greco can flag it only by
@@ -553,6 +580,9 @@ apparently solid enemy pawn wall.
 
 ## 8. Register, aesthetic & "human" vocabulary *[Tier B — gated, default-deny]*
 
+> **Review status:** No terms in this section have been approved by James. All **⚠️ NEED JAMES REVIEW.**
+> (The tier placement was corrected by James 2026-06-15, but the individual definitions were not reviewed.)
+>
 > **Corrected 2026-06-15 (per James).** These were wrongly filed as "free register." They are
 > **not** free: nearly every one makes a claim a board could prove wrong, so each is **gated**
 > (default-deny until a detector ships). They split by the kind of detector required.
