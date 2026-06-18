@@ -7,6 +7,17 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.0] — 2026-06-18
+
+### Added (Essay Mode — candidate fourth mode, backlog #32)
+- **Essay Mode** — new product mode that answers free-text chess questions using Greco's classical corpus, without requiring Stockfish. Architecture: `Question [+ optional PGN] → knowledge.retrieve_for_question() → ESSAY_SYSTEM_PROMPT → Claude → Markdown → essay_to_html()`.
+- **`essay_mode.py`** — new module; `generate_essay()`, `essay_to_html()`, and prompt-construction helpers; `ESSAY_SYSTEM_PROMPT` with attribution and anti-hallucination rules (no invented citations, no fabricated historical games).
+- **`knowledge.retrieve_for_question()`** — free-text question → FTS5 corpus search via term extraction (`_ESSAY_STOPWORDS` filter), returns ranked `Passage` list. Essay Mode's primary data source.
+- **Web: Essay question field** — mode dropdown now includes "Essay"; when selected, a "Your chess question" textarea appears, engine-depth / You-played fields hide, and PGN is optional. `toggleEssayFields()` JS handles the transition.
+- **Web: Essay pipeline** — `run_essay()` in `web/pipeline.py`; `_run_essay_background()` in `analysis.py`; waiting page shows corpus-search copy instead of Stockfish copy for essay jobs.
+- **Design spec** — `Developer Notes (Greco)/Handoffs/package-d-essay-mode.md` written; resolves all four PRD §4.5 open questions.
+- 19 new pure tests in `tests/test_essay_mode.py`; full suite 634 passed.
+
 ## [0.40.2] — 2026-06-18
 
 ### Added
