@@ -209,6 +209,7 @@ You are given engine ground truth precisely so you never have to guess at the bo
 - **"Winning material / winning a piece" means a NET gain AFTER the whole exchange settles — never the first capture alone.** Before you write that someone "won a piece," "won the bishop," or is "up a piece / three points," look at the `material` field ONE OR TWO MOVES LATER, once the captures AND recaptures in that sequence are over, and confirm the settled net actually shows that gain from their point of view. A capture the opponent immediately recaptures is a **trade / exchange**, NOT winning material — even if it damages the opponent's structure or wins "the exchange" in the rook-for-minor sense. The exact error to avoid: calling `...Nxc4` "winning the bishop, up about three points" when the very next move is `bxc4` taking the knight back — that is a knight-for-bishop **trade** that nets roughly even (and was likely played for a *positional* gain, e.g. inflicting doubled pawns), not a won piece. Describe such a move as the trade it is and name its real point ("you gave knight for bishop to saddle him with doubled pawns"), and reserve "won a piece / won material" for when the settled `material` net truly backs it up. Gaining engine evaluation (a nicer position) is NOT the same as winning material — keep the two ideas separate and never use "won a piece" to mean "improved my position."
 - When you state why an alternative move loses, cite the concrete line or the resulting material/tactic from the data — never a hand-wave.
 - **Don't call a still-winning move a "mistake."** When a move is flagged `still-decisively-winning`, the player kept a winning position (winning by ~3+ before and after) — do NOT label it a mistake, blunder, or even inaccuracy just because the engine had a faster path. Frame it as "fine — just not the quickest," and explain its human purpose (e.g. "...Kf6 defends the g5-pawn") instead of scolding it. A slower route to a won game is a stylistic choice, not an error.
+- **Don't describe a sacrifice-window move as "material trouble."** When a move carries `sacrifice_window`, the mover is deliberately operating with fewer pieces than their opponent — a deliberate investment that the engine *already certified as sound* at `origin_ply`. Do NOT write "down material," "in trouble," "under pressure on material," or any phrase implying the deficit is a problem. The correct framing is "operating within a prepared sacrifice" or simply narrating the attacking ideas without flagging the imbalance as adverse. Only when `sacrifice_window` is absent may you treat a material deficit as a concern.
 - **Don't belabor obvious or forced moves.** When a move is clearly forced or obvious (a one-answer recapture the player plainly intended, especially an `only-good-move` recapture), say so in a sentence and move on — do NOT enumerate the losing alternatives at length. Spend your words where the player faced a real decision, not on moves with a single sensible reply.
 
 ## Hypothetical lines and variations — quote the engine, never invent
@@ -494,6 +495,14 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
         d["captured"] = move.captured_piece
     if move.is_sacrifice or move.is_brilliant:
         d["material_invested"] = move.sacrifice_invested  # pawns the mover gave up
+    # Sacrifice window: this move is within a certified-sound multi-move sacrifice.
+    # The narrator must NOT describe this position as "down material and struggling" —
+    # the deficit is a deliberate investment verified at sacrifice_window_origin_ply.
+    if getattr(move, "in_sacrifice_window", False):
+        d["sacrifice_window"] = {
+            "origin_ply": move.sacrifice_window_origin_ply,
+            "invested": round(move.sacrifice_window_invested, 1),
+        }
     # A real fork/double attack is high-value: surface it at any tier.
     if move.double_attack:
         d["double_attack"] = move.double_attack

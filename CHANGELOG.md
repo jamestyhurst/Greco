@@ -7,6 +7,12 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added
+- **`propagate_sacrifice_windows(moves)`** — second-pass mutator in `analyzer.py` that tags each ply lying within a certified-sound multi-move sacrifice. When `is_sacrifice` fires at ply M with `sacrifice_invested ≥ 1.5`, subsequent plies are tagged `in_sacrifice_window=True` while the material deficit from the sacrificing side's perspective is still ≥ 0.5 pawns AND the eval from that side's perspective is ≥ −150 cp. The window closes silently when either gate fails, or after at most `_MAX_SACRIFICE_WINDOW_PLIES = 8` plies. New `MoveAnalysis` fields: `in_sacrifice_window`, `sacrifice_window_origin_ply`, `sacrifice_window_invested`.
+- **`sacrifice_window` serialized** in narrator.py `_move_to_dict` when `in_sacrifice_window` is True: emits `{origin_ply, invested}` so the narrator knows the sacrifice was engine-certified. Narrator system-prompt rule added: do NOT write "down material," "in trouble," or "under pressure on material" when `sacrifice_window` is present; correct framing is "operating within a prepared sacrifice."
+- 7 new tests (475 total); `test_sacrifice_window.py` is engine-free (constructs `MoveAnalysis` lists directly).
+- **ROADMAP updated** to reflect v0.37.0 baseline and Tier-B completion (v0.30.0–v0.37.0, 8 predicates).
+
 ## [0.37.0] — 2026-06-18
 
 ### Added

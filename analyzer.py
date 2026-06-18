@@ -102,6 +102,10 @@ class MoveAnalysis:
     null_eval_mate: Optional[int] = None    # White-POV mate score of null-move baseline (None when cp applies)
     opp_best_san: Optional[str] = None      # SAN of opponent's best move from post-move position (for zugzwang evidence)
     opp_legal_move_count: int = 0           # legal move count at post-move position (for is_zugzwang veto + evidence)
+    # --- Multi-move sacrifice window (second pass; backlog #25) ---
+    in_sacrifice_window: bool = False        # True when this ply is within a certified-sound sacrifice sequence
+    sacrifice_window_origin_ply: int = -1   # ply number where the sacrifice was certified sound (is_sacrifice fired)
+    sacrifice_window_invested: float = 0.0  # pawns invested at the window origin (mover's POV)
 
 
 @dataclass
@@ -1108,6 +1112,48 @@ def detect_sacrifice(
     return is_sac, is_brilliant, round(invested, 1)
 
 
+_MAX_SACRIFICE_WINDOW_PLIES = 8
+
+
+def propagate_sacrifice_windows(moves: "List[MoveAnalysis]") -> None:
+    """Second-pass mutator: tag plies that sit within a certified-sound sacrifice.
+
+    When ``is_sacrifice`` fires at ply M, each subsequent ply is tagged
+    ``in_sacrifice_window=True`` while:
+      - the material deficit from the sacrificing side's perspective is still ≥ 0.5
+        pawns (the material has not been recovered), AND
+      - the eval from the sacrificing side's perspective is still ≥ -150 cp
+        (the position has not collapsed).
+
+    The window ends silently when either condition is violated.  Up to
+    ``_MAX_SACRIFICE_WINDOW_PLIES`` plies ahead are inspected.
+
+    The narrator uses this to avoid describing intermediate post-sacrifice moves
+    as "down material in trouble" — the imbalance is a deliberate investment.
+    """
+    for i, origin in enumerate(moves):
+        if not origin.is_sacrifice or origin.sacrifice_invested < 1.5:
+            continue
+        # Reconstruct the pre-sacrifice material balance (White-POV).
+        # origin.material_balance is White-POV *after* the sacrifice.
+        # sacrifice_invested is always mover's-POV-positive.
+        sign = 1 if origin.side == "White" else -1
+        pre_balance = origin.material_balance + origin.sacrifice_invested * sign
+        for j in range(i + 1, min(i + _MAX_SACRIFICE_WINDOW_PLIES + 1, len(moves))):
+            later = moves[j]
+            # Stop when the material deficit is recovered (within 0.5 pawns).
+            deficit = (pre_balance - later.material_balance) * sign
+            if deficit < 0.5:
+                break
+            # Stop when eval collapses for the sacrificing side.
+            later_eval = normalize_cp(later.eval_after_cp, later.mate_after) * sign
+            if later_eval < -150:
+                break
+            later.in_sacrifice_window = True
+            later.sacrifice_window_origin_ply = origin.ply
+            later.sacrifice_window_invested = origin.sacrifice_invested
+
+
 def _enemy_pawn_can_attack(board: chess.Board, target_sq: int, piece_color: bool) -> bool:
     """Can an enemy pawn, in one push, reach a square from which it attacks target_sq?"""
     enemy = not piece_color
@@ -1602,6 +1648,9 @@ def analyze_pgn(
                     opp_legal_move_count=opp_legal_move_count,
                 )
             )
+
+        # Second pass: propagate sacrifice windows.
+        propagate_sacrifice_windows(moves_analysis)
 
         final_score = positions[-1]["analyses"][0]["score"].white()
         final_eval_cp, final_mate = score_to_cp_mate(final_score)
