@@ -7,6 +7,31 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.27.0] — 2026-06-18
+
+### Added
+- **`factgate.is_fianchetto(board, color)`** — certifies a fianchetto structure for a given
+  color: a friendly bishop on the flank square (g2/b2 for White, g7/b7 for Black) with a
+  friendly pawn on the opened knight-pawn square (g3/b3 for White, g6/b6 for Black). Key
+  design choices from the adversarially-reviewed spec (11): (1) **both-colors loop** — a
+  standing structural feature is side-to-move independent; `certified_claims` now evaluates
+  both White and Black so the non-mover's fianchetto is never silently dropped; (2) **pin
+  never suppresses** — a pinned fianchettoed bishop still certifies (pin is a piece-interaction
+  fact, not a structural one); (3) **no `move.to_square` dependency** — the predicate takes
+  only `(board, color)`, unlike move-delta predicates like `is_outpost`; (4) conservative on
+  damaged structures — a bishop with the knight-pawn captured/not on the open square is not
+  certified (veto 2, precision over recall). Evidence bundle per flank: `color`, `side`,
+  `flank`, `bishop_square`, `pawn_square`, `long_diagonal`, `aims_at`, `current_rake`,
+  `king_behind`, `evidence`. Returns a list of per-flank dicts (2 elements for a double
+  fianchetto), or `(False, None)`.
+- **`"fianchetto"` added to `GATED_TAGS`**, wired into `certified_claims()` via a both-colors
+  loop, registered in the narrator fact-gate system prompt with per-tag usage guidance, and
+  serialized as `fianchetto_evidence` in the Tier-1+ `_move_to_dict` block.
+- 15 new tests (136 total), covering all 5 spec positive examples (including double fianchetto
+  and king-behind), pinned-bishop anti-false-negative, 7 negative/edge cases (two-square push,
+  destroyed, bishop-not-on-flank, wrong piece, enemy pawn, reversed color, starting position),
+  current_rake shape, and the `certified_claims` integration.
+
 ## [0.26.0] — 2026-06-18
 
 ### Added

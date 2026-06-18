@@ -1058,3 +1058,165 @@ def test_infiltration_in_certified_claims():
     b, mv, a = _push("6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1", "a1a7")
     tags = F.certified_claims(b, mv, a, chess.WHITE)
     assert "infiltration" in tags
+
+
+# --- is_fianchetto ----------------------------------------------------------
+
+def test_fianchetto_white_kingside_basic():
+    # Spec example 1: KIA setup — White bishop on g2, pawn on g3.
+    board = chess.Board("rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPPBP/RNBQK1NR w KQkq - 0 3")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok
+    assert ev_list is not None and len(ev_list) == 1
+    ev = ev_list[0]
+    assert ev["flank"] == "kingside"
+    assert ev["bishop_square"] == "g2"
+    assert ev["pawn_square"] == "g3"
+    assert ev["long_diagonal"] == "h1-a8"
+    assert ev["aims_at"] == "a8"
+    assert ev["king_behind"] is False
+    assert "fianchettoed" in ev["evidence"]
+    assert "g2" in ev["evidence"] and "g3" in ev["evidence"]
+    assert "h1-a8" in ev["evidence"] and "a8" in ev["evidence"]
+
+
+def test_fianchetto_black_kingside_non_mover():
+    # Spec example 2: White to move; both-colors loop certifies Black's g7/g6 fianchetto.
+    board = chess.Board("rnbqk2r/ppppppbp/5np1/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 4")
+    ok, ev_list = F.is_fianchetto(board, chess.BLACK)
+    assert ok
+    assert ev_list is not None and len(ev_list) == 1
+    ev = ev_list[0]
+    assert ev["flank"] == "kingside"
+    assert ev["bishop_square"] == "g7"
+    assert ev["pawn_square"] == "g6"
+    assert ev["long_diagonal"] == "a1-h8"
+    assert ev["aims_at"] == "a1"
+    assert ev["side"] == "Black"
+
+
+def test_fianchetto_white_queenside():
+    # Spec example 3: Nimzo-Larsen — White bishop on b2, pawn on b3.
+    board = chess.Board("rnbqkbnr/pppppppp/8/8/8/1P6/PBPPPPPP/RN1QKBNR b KQkq - 1 2")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok
+    assert ev_list is not None and len(ev_list) == 1
+    ev = ev_list[0]
+    assert ev["flank"] == "queenside"
+    assert ev["bishop_square"] == "b2"
+    assert ev["pawn_square"] == "b3"
+    assert ev["long_diagonal"] == "a1-h8"
+    assert ev["aims_at"] == "h8"
+    assert "b2" in ev["evidence"] and "b3" in ev["evidence"]
+
+
+def test_fianchetto_black_queenside():
+    # Spec example 4: Queen's Indian — Black bishop on b7, pawn on b6.
+    board = chess.Board("rn1qkb1r/pbpp1ppp/1p2pn2/8/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 2 5")
+    ok, ev_list = F.is_fianchetto(board, chess.BLACK)
+    assert ok
+    assert ev_list is not None and len(ev_list) == 1
+    ev = ev_list[0]
+    assert ev["flank"] == "queenside"
+    assert ev["bishop_square"] == "b7"
+    assert ev["pawn_square"] == "b6"
+    assert ev["long_diagonal"] == "h1-a8"
+    assert ev["aims_at"] == "h1"
+    assert ev["side"] == "Black"
+
+
+def test_fianchetto_double_white():
+    # Spec example 5: White bishops on b2 and g2, pawns on b3 and g3 — 2-element list.
+    board = chess.Board("rnbqk1nr/pp1p1ppp/8/8/8/1PP3P1/PB1PPPBP/RN1QK1NR w KQkq - 0 5")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok
+    assert ev_list is not None and len(ev_list) == 2
+    flanks = {ev["flank"] for ev in ev_list}
+    assert flanks == {"kingside", "queenside"}
+    squares = {ev["bishop_square"] for ev in ev_list}
+    assert squares == {"b2", "g2"}
+
+
+def test_fianchetto_king_behind_true():
+    # White bishop on g2, pawn on g3, king on g1 (castled KS) → king_behind = True.
+    board = chess.Board("4k3/8/8/8/8/6P1/6B1/6K1 w - - 0 1")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok
+    assert ev_list is not None
+    ev = ev_list[0]
+    assert ev["king_behind"] is True
+    assert "castled king on g1" in ev["evidence"]
+
+
+def test_fianchetto_current_rake_is_sorted_list():
+    # current_rake is a sorted list of square names actually attacked by the bishop now.
+    board = chess.Board("rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPPBP/RNBQK1NR w KQkq - 0 3")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok
+    ev = ev_list[0]
+    assert isinstance(ev["current_rake"], list)
+    assert ev["current_rake"] == sorted(ev["current_rake"])
+    assert len(ev["current_rake"]) > 0
+
+
+def test_fianchetto_pinned_bishop_still_certifies():
+    # Spec §1: pin never suppresses the verdict. Bishop on g2 pinned by Black rook g8 to king g1.
+    board = chess.Board("6rk/8/8/8/8/6P1/6B1/6K1 w - - 0 1")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok
+    assert ev_list is not None
+    assert ev_list[0]["flank"] == "kingside"
+
+
+def test_fianchetto_negative_two_square_pawn_push():
+    # Pawn on g4 (not g3) — g3 is empty, veto 2 fires.
+    board = chess.Board("7k/8/8/8/6P1/8/6B1/7K w - - 0 1")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok is False
+    assert ev_list is None
+
+
+def test_fianchetto_negative_destroyed_no_bishop():
+    # Pawn on g3 but no bishop on g2 (destroyed / pre-development) — veto 1 fires.
+    board = chess.Board("7k/8/8/8/8/6P1/8/7K w - - 0 1")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok is False
+    assert ev_list is None
+
+
+def test_fianchetto_negative_bishop_not_on_flank_square():
+    # White bishop on e4 (on the long diagonal but not the exact flank square) — veto 1.
+    board = chess.Board("7k/8/8/8/4B3/8/8/7K w - - 0 1")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok is False
+    assert ev_list is None
+
+
+def test_fianchetto_negative_wrong_piece_on_flank_square():
+    # Starting position: g2 holds a White pawn, not a bishop — veto 1 (piece_type != BISHOP).
+    board = chess.Board()
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok is False
+    assert ev_list is None
+
+
+def test_fianchetto_negative_enemy_pawn_on_open_square():
+    # Black pawn on g3 with White bishop on g2 — veto 2 color check rejects it.
+    board = chess.Board("7k/8/8/8/8/6p1/6B1/7K w - - 0 1")
+    ok, ev_list = F.is_fianchetto(board, chess.WHITE)
+    assert ok is False
+    assert ev_list is None
+
+
+def test_fianchetto_negative_reversed_rank_color_trap():
+    # White bishop deep on g7 — neither color certifies a fianchetto (color-parameterized squares).
+    board = chess.Board("7k/6B1/8/8/8/8/8/7K w - - 0 1")
+    assert F.is_fianchetto(board, chess.WHITE) == (False, None)
+    assert F.is_fianchetto(board, chess.BLACK) == (False, None)
+
+
+def test_fianchetto_in_certified_claims():
+    # Integration: d4 from KIA setup — "fianchetto" appears in the allow-set (both-colors loop).
+    b, mv, a = _push("rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPPBP/RNBQK1NR w KQkq - 0 3", "d2d4")
+    tags = F.certified_claims(b, mv, a, chess.WHITE)
+    assert "fianchetto" in tags

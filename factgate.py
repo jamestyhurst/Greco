@@ -889,6 +889,114 @@ def is_infiltration(
     })
 
 
+def is_fianchetto(
+    board: chess.Board, color: bool
+) -> Tuple[bool, Optional[List[dict]]]:
+    """Certifies a 'fianchetto' structural feature for `color`: the friendly bishop
+    sits on its flank square (g2/b2 for White, g7/b7 for Black) and a friendly pawn
+    occupies the opened knight-pawn square (g3/b3 for White, g6/b6 for Black).
+
+    Pure standing structural predicate — side-to-move independent. Evaluated for BOTH
+    colors in certified_claims (not just the mover). Returns (True, list_of_dicts) if
+    at least one flank certifies, (False, None) otherwise; a double fianchetto produces
+    a 2-element list. Pinned bishops still certify (pin is a piece-interaction fact,
+    not a structural one).
+    """
+    side = "White" if color == chess.WHITE else "Black"
+
+    # Per-flank constants (verified empirically against python-chess)
+    if color == chess.WHITE:
+        flanks = [
+            {
+                "flank": "kingside",
+                "bishop_sq": chess.G2,
+                "pawn_open_sq": chess.G3,
+                "long_diagonal": "h1-a8",
+                "aims_at": "a8",
+                "king_behind_sqs": frozenset({chess.G1, chess.H1}),
+            },
+            {
+                "flank": "queenside",
+                "bishop_sq": chess.B2,
+                "pawn_open_sq": chess.B3,
+                "long_diagonal": "a1-h8",
+                "aims_at": "h8",
+                "king_behind_sqs": frozenset({chess.C1, chess.B1}),
+            },
+        ]
+    else:
+        flanks = [
+            {
+                "flank": "kingside",
+                "bishop_sq": chess.G7,
+                "pawn_open_sq": chess.G6,
+                "long_diagonal": "a1-h8",
+                "aims_at": "a1",
+                "king_behind_sqs": frozenset({chess.G8, chess.H8}),
+            },
+            {
+                "flank": "queenside",
+                "bishop_sq": chess.B7,
+                "pawn_open_sq": chess.B6,
+                "long_diagonal": "h1-a8",
+                "aims_at": "h1",
+                "king_behind_sqs": frozenset({chess.C8, chess.B8}),
+            },
+        ]
+
+    results: List[dict] = []
+
+    for fl in flanks:
+        # VETO 1: friendly bishop on the flank square
+        bp = board.piece_at(fl["bishop_sq"])
+        if bp is None or bp.piece_type != chess.BISHOP or bp.color != color:
+            continue
+
+        # VETO 2: friendly pawn on the opened knight-pawn square
+        pp = board.piece_at(fl["pawn_open_sq"])
+        if pp is None or pp.piece_type != chess.PAWN or pp.color != color:
+            continue
+
+        # CONFIRM: both O(1) vetoes passed — build evidence dict
+        bishop_square = chess.square_name(fl["bishop_sq"])
+        pawn_square = chess.square_name(fl["pawn_open_sq"])
+        long_diagonal = fl["long_diagonal"]
+        aims_at = fl["aims_at"]
+        flank = fl["flank"]
+        current_rake = sorted(chess.square_name(s) for s in board.attacks(fl["bishop_sq"]))
+
+        king_sq = board.king(color)
+        king_behind = king_sq is not None and king_sq in fl["king_behind_sqs"]
+
+        base = (
+            f"{side}'s bishop is fianchettoed on {bishop_square} ({flank}), "
+            f"the knight-pawn on {pawn_square} opening the {long_diagonal} long diagonal "
+            f"toward {aims_at}"
+        )
+        evidence = (
+            f"{base}, behind the castled king on {chess.square_name(king_sq)}"
+            if king_behind
+            else base
+        )
+
+        results.append({
+            "color": color,
+            "side": side,
+            "flank": flank,
+            "bishop_square": bishop_square,
+            "pawn_square": pawn_square,
+            "long_diagonal": long_diagonal,
+            "aims_at": aims_at,
+            "current_rake": current_rake,
+            "king_behind": king_behind,
+            "evidence": evidence,
+        })
+
+    if not results:
+        return (False, None)
+    return (True, results)
+
+
 def creates_battery(
     board_after: chess.Board, move: chess.Move, mover_color: bool
 ) -> Tuple[bool, Optional[str]]:
@@ -1055,6 +1163,7 @@ GATED_TAGS = (
     "promotion_threat",
     "backward_pawn",
     "infiltration",
+    "fianchetto",
 )
 # (Open / half-open files are NOT gated here: they already have their own ground-truth
 # packet fields — open_files / half_open_for_white / half_open_for_black — and a
@@ -1165,5 +1274,10 @@ def certified_claims(
     inf = _safe(lambda: is_infiltration(board_after, move.to_square, mover_color, phase))
     if inf and inf[0]:
         tags.add("infiltration")
+
+    for col in (chess.WHITE, chess.BLACK):
+        fz = _safe(lambda c=col: is_fianchetto(board_after, c))
+        if fz and fz[0]:
+            tags.add("fianchetto")
 
     return tags
