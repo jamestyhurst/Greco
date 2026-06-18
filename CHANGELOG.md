@@ -7,6 +7,25 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.18.0] — 2026-06-18
+
+### Added
+- **`factgate.creates_battery()`** — certifies a battery: the moved rook or queen is
+  aligned with another friendly major piece on the same file or rank with no blockers
+  between them. Classic examples: doubled rooks on an open file, R+Q aiming at the
+  seventh rank.
+- **`factgate.threatens_promotion()`** — certifies a promotion threat: the mover has a
+  pawn on its seventh rank that can advance to an empty square or capture a non-king
+  enemy piece to promote on the very next move. Physically blocked pawns and pawns with
+  nothing to capture are correctly not certified.
+- Both tags (`battery`, `promotion_threat`) added to `GATED_TAGS` and wired into
+  `certified_claims()`. 10 new tests; 273 tests pass total.
+
+### Fixed
+- `threatens_promotion()` now excludes the enemy king from diagonal-capture candidates
+  (capturing the king is not a legal chess move; previously a pawn with only the king
+  on its capture diagonal would be falsely certified as a promotion threat).
+
 ## [0.17.0] — 2026-06-18
 
 ### Added
