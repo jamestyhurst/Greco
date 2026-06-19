@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.41] — 2026-06-19
+
+### Added
+- **`has_rook_file_battery` factgate predicate** (`rook_file_battery` tag) — fires when a move newly aligns two of the mover's major pieces (R+R or R+Q) on the same file with no pieces blocking between them. Inner `_file_batteries` helper collects all unobstructed same-file major-piece pairs for a given color; set-difference of after-minus-before detects only newly formed batteries. Evidence carries `file` (file letter), `mover`, and a ready-to-quote `evidence` string. Distinct from `rook_doubled` (R+R only) and `connected_rooks` (ranks too) — specifically covers file-aligned R+R and R+Q batteries. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with firepower-concentration and column-domination framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 447 passed.
+
 ## [0.41.40] — 2026-06-19
 
 ### Added

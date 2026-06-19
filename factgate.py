@@ -3260,6 +3260,49 @@ def has_pawn_majority(
     }
 
 
+def has_rook_file_battery(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _file_batteries(board: chess.Board, color: bool) -> Set[int]:
+        majors = (
+            list(board.pieces(chess.ROOK, color))
+            + list(board.pieces(chess.QUEEN, color))
+        )
+        batteries: Set[int] = set()
+        for i, sq1 in enumerate(majors):
+            for sq2 in majors[i + 1:]:
+                if chess.square_file(sq1) != chess.square_file(sq2):
+                    continue
+                between = chess.SquareSet(chess.between(sq1, sq2))
+                if not any(board.piece_at(s) for s in between):
+                    batteries.add(chess.square_file(sq1))
+        return batteries
+
+    after_bats = _file_batteries(board_after, mover_color)
+    if not after_bats:
+        return False, None
+    before_bats = _file_batteries(board_before, mover_color)
+    new_bats = after_bats - before_bats
+    if not new_bats:
+        return False, None
+
+    file_idx = next(iter(new_bats))
+    file_letter = "abcdefgh"[file_idx]
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "file": file_letter,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} lines up a battery of major pieces on the {file_letter}-file — "
+            f"rooks or a rook and queen aligned without obstruction on the same file "
+            f"concentrate their firepower and overwhelm any defence on that column"
+        ),
+    }
+
+
 def has_pawn_duo(
     board_before: chess.Board,
     move: chess.Move,
@@ -3375,6 +3418,7 @@ GATED_TAGS = (
     "shelter_pawn_capture",
     "queen_centralization",
     "pawn_duo",
+    "rook_file_battery",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3676,5 +3720,9 @@ def certified_claims(
     pd = _safe(lambda: has_pawn_duo(board_before, move, board_after, mover_color))
     if pd and pd[0]:
         tags.add("pawn_duo")
+
+    rfb = _safe(lambda: has_rook_file_battery(board_before, move, board_after, mover_color))
+    if rfb and rfb[0]:
+        tags.add("rook_file_battery")
 
     return tags

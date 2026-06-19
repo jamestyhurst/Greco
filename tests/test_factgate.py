@@ -4116,3 +4116,60 @@ def test_pawn_duo_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "pawn_duo" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_rook_file_battery
+# ---------------------------------------------------------------------------
+
+def _rfbat(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_rook_file_battery(board_before, move, board_after, color)
+
+
+def test_rook_file_battery_rook_joins_rook_true():
+    # White Ra1→d1 joins Rd4 — R+R battery on d-file, newly formed.
+    # FEN: kings on e1/e8, rooks on a1 and d4 for White.
+    ok, ev = _rfbat("4k3/8/8/8/3R4/8/8/R3K3 w - - 0 1", "a1d1", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["file"] == "d"
+
+
+def test_rook_file_battery_queen_joins_rook_true():
+    # White Qe2→e5 joins Re8... wait, Re8 is enemy rank. Let me use a simpler position.
+    # White Qa1→d1 joins Rd4: Q+R battery on d-file.
+    ok, ev = _rfbat("4k3/8/8/8/3R4/8/8/Q3K3 w - - 0 1", "a1d1", chess.WHITE)
+    assert ok
+    assert ev["file"] == "d"
+
+
+def test_rook_file_battery_already_existed_false():
+    # Ra1 and Rd1 already on d-file (R+R already there); Ke1→e2 doesn't change it.
+    ok, _ = _rfbat("4k3/8/8/8/3R4/8/8/3RK3 w - - 0 1", "e1e2", chess.WHITE)
+    assert not ok
+
+
+def test_rook_file_battery_different_files_false():
+    # Ra1→a4, but second rook is on d1 — different files, no file battery formed.
+    ok, _ = _rfbat("4k3/8/8/8/8/8/8/R2RK3 w - - 0 1", "a1a4", chess.WHITE)
+    assert not ok
+
+
+def test_rook_file_battery_piece_between_false():
+    # White Ra1→d1, but there is a White pawn on d3 blocking the path to Rd5.
+    ok, _ = _rfbat("4k3/8/8/3R4/8/3P4/8/R3K3 w - - 0 1", "a1d1", chess.WHITE)
+    assert not ok
+
+
+def test_rook_file_battery_in_certified_claims():
+    fen = "4k3/8/8/8/3R4/8/8/R3K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1d1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_file_battery" in tags
