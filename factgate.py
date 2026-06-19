@@ -2527,6 +2527,48 @@ def captures_hanging(
     }
 
 
+def is_royal_fork(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies the moved piece simultaneously gives check (attacks the enemy king)
+    AND attacks the enemy queen from its landing square — a royal fork. The king must
+    flee, leaving the queen to be taken next move.
+    evidence keys: piece, piece_square, king_square, queen_square, evidence.
+    """
+    if not board_after.is_check():
+        return False, None
+    enemy_color = not mover_color
+    enemy_queen_sqs = list(board_after.pieces(chess.QUEEN, enemy_color))
+    if not enemy_queen_sqs:
+        return False, None
+    if move.to_square not in board_after.checkers():
+        return False, None
+    attacked = board_after.attacks(move.to_square)
+    forked_queen_sqs = [sq for sq in enemy_queen_sqs if sq in attacked]
+    if not forked_queen_sqs:
+        return False, None
+    piece = board_after.piece_at(move.to_square)
+    piece_name = PIECE_NAMES[piece.piece_type] if piece else "piece"
+    enemy_king_sq = board_after.king(enemy_color)
+    king_sq_name = chess.square_name(enemy_king_sq) if enemy_king_sq is not None else "?"
+    queen_sq_name = chess.square_name(forked_queen_sqs[0])
+    dest_name = chess.square_name(move.to_square)
+    return True, {
+        "piece": piece_name,
+        "piece_square": dest_name,
+        "king_square": king_sq_name,
+        "queen_square": queen_sq_name,
+        "evidence": (
+            f"{piece_name.capitalize()} on {dest_name} forks the king on "
+            f"{king_sq_name} and the queen on {queen_sq_name} — "
+            f"the king must move, leaving the queen to be taken"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2583,6 +2625,7 @@ GATED_TAGS = (
     "checkmate",
     "pawn_on_seventh",
     "captures_queen",
+    "royal_fork",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2808,5 +2851,9 @@ def certified_claims(
     cq = _safe(lambda: captures_queen(board_before, move, board_after, mover_color))
     if cq and cq[0]:
         tags.add("captures_queen")
+
+    rf = _safe(lambda: is_royal_fork(board_before, move, board_after, mover_color))
+    if rf and rf[0]:
+        tags.add("royal_fork")
 
     return tags

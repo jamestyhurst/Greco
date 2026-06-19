@@ -3070,3 +3070,55 @@ def test_captures_queen_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "captures_queen" in tags
+
+
+# --- is_royal_fork ------------------------------------------------------------
+# Certifies the moved piece simultaneously gives check (attacks the enemy king)
+# AND attacks the enemy queen from its landing square — the king must flee,
+# leaving the queen to be taken next move.
+def _rf(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_royal_fork(board_before, move, board_after, color)
+
+
+def test_is_royal_fork_knight_true():
+    # White knight d5→e7: attacks g8 (king) AND c8 (queen) simultaneously.
+    ok, ev = _rf("2q3k1/8/8/3N4/8/8/8/5K2 w - - 0 1", "d5e7", chess.WHITE)
+    assert ok
+    assert ev["piece"] == "knight"
+    assert ev["queen_square"] == "c8"
+    assert ev["king_square"] == "g8"
+
+
+def test_is_royal_fork_rook_true():
+    # White rook d1→d4: checks along d-file (king on d8) AND attacks queen on g4
+    # along the 4th rank.
+    ok, ev = _rf("3k4/8/8/8/6q1/8/8/3RK3 w - - 0 1", "d1d4", chess.WHITE)
+    assert ok
+    assert ev["piece"] == "rook"
+    assert ev["queen_square"] == "g4"
+
+
+def test_is_royal_fork_no_queen_false():
+    # Knight gives check but no enemy queen on the board.
+    ok, _ = _rf("6k1/8/8/3N4/8/8/8/5K2 w - - 0 1", "d5e7", chess.WHITE)
+    assert not ok
+
+
+def test_is_royal_fork_attacks_queen_no_check_false():
+    # Knight attacks the queen but does NOT give check — quiet move, no fork.
+    ok, _ = _rf("7k/3q4/8/8/2N5/8/8/5K2 w - - 0 1", "c4e5", chess.WHITE)
+    assert not ok
+
+
+def test_is_royal_fork_in_certified_claims():
+    # Knight d5→e7 royal fork: certified_claims must include the royal_fork tag.
+    board_before = chess.Board("2q3k1/8/8/3N4/8/8/8/5K2 w - - 0 1")
+    move = chess.Move.from_uci("d5e7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "royal_fork" in tags

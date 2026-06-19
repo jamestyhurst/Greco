@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.22] — 2026-06-19
+
+### Added
+- **`is_royal_fork` factgate predicate** (`royal_fork` tag) — move predicate certifying the moved piece simultaneously gives check AND attacks the enemy queen from its landing square (a royal fork). Uses `board_after.checkers()` to confirm the moved piece is the direct checker, then `board_after.attacks(to_square)` to check for an enemy queen in the attack set. Evidence carries `piece`, `piece_square`, `king_square`, `queen_square`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with composition guidance distinguishing it from the general `fork` tag. 5 new pure tests; full suite 336 passed.
+
 ## [0.41.21] — 2026-06-19
 
 ### Added
