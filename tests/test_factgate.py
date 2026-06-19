@@ -4450,3 +4450,59 @@ def test_passed_pawn_race_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "passed_pawn_race" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_seventh_rank_battery
+# ---------------------------------------------------------------------------
+
+def _s7b(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_seventh_rank_battery(board_before, move, board_after, color)
+
+
+def test_seventh_rank_battery_white_rook_joins_rook_true():
+    # White Rd1→d7 joins Rh7: both on rank 7, no pieces between d7 and h7.
+    ok, ev = _s7b("4k3/7R/8/8/8/8/8/3RK3 w - - 0 1", "d1d7", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "seventh" in ev["rank"]
+
+
+def test_seventh_rank_battery_black_rooks_on_second_rank_true():
+    # Black Ra6→a2 joins Rd2: both on rank 2, no pieces between a2 and d2.
+    ok, ev = _s7b("4k3/8/r7/8/8/8/3r4/4K3 b - - 0 1", "a6a2", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert "second" in ev["rank"]
+
+
+def test_seventh_rank_battery_already_existed_false():
+    # White Rg7+Rh7 already formed; king move changes nothing.
+    ok, _ = _s7b("4k3/6RR/8/8/8/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_seventh_rank_battery_only_one_piece_on_seventh_false():
+    # White Ra1→a7: only one piece on rank 7 after the move.
+    ok, _ = _s7b("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a7", chess.WHITE)
+    assert not ok
+
+
+def test_seventh_rank_battery_blocked_between_pieces_false():
+    # White Ra1→a7 and Rh7 on rank 7, but Black Be7 blocks between them.
+    ok, _ = _s7b("4k3/4b2R/8/8/8/8/8/R3K3 w - - 0 1", "a1a7", chess.WHITE)
+    assert not ok
+
+
+def test_seventh_rank_battery_in_certified_claims():
+    fen = "4k3/7R/8/8/8/8/8/3RK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "seventh_rank_battery" in tags

@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.47] — 2026-06-19
+
+### Added
+- **`has_seventh_rank_battery` factgate predicate** (`seventh_rank_battery` tag) — fires when the move newly places at least two of the mover's major pieces (rooks and/or queens) on the mover's 7th rank (rank index 6 for White) or 2nd rank (rank index 1 for Black) with no pieces blocking between any pair, where that battery did not exist before the move. Inner `_seventh_rank_battery` helper collects all same-rank majors and checks for an unobstructed pair using `chess.between`. Set-difference pattern (after-state TRUE, before-state FALSE) ensures only the newly formed battery fires. Evidence carries `rank` ('seventh' or 'second'), `mover`, and a ready-to-quote evidence string invoking the "pigs on the seventh" motif. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 483 passed.
+
 ## [0.41.46] — 2026-06-19
 
 ### Added

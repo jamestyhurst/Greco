@@ -3564,6 +3564,46 @@ def has_pawn_duo(
     }
 
 
+def has_seventh_rank_battery(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _seventh_rank_battery(board: chess.Board, color: bool) -> bool:
+        rank = 6 if color == chess.WHITE else 1
+        majors = (
+            list(board.pieces(chess.ROOK, color))
+            + list(board.pieces(chess.QUEEN, color))
+        )
+        on_rank = [sq for sq in majors if chess.square_rank(sq) == rank]
+        if len(on_rank) < 2:
+            return False
+        for i, sq1 in enumerate(on_rank):
+            for sq2 in on_rank[i + 1:]:
+                between = chess.SquareSet(chess.between(sq1, sq2))
+                if not any(board.piece_at(s) for s in between):
+                    return True
+        return False
+
+    if not _seventh_rank_battery(board_after, mover_color):
+        return False, None
+    if _seventh_rank_battery(board_before, mover_color):
+        return False, None
+
+    rank_name = "seventh" if mover_color == chess.WHITE else "second"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "rank": rank_name,
+        "evidence": (
+            f"{mover_name} doubles major pieces on the {rank_name} rank — "
+            f"the classic 'pigs on the seventh' — creating devastating pressure "
+            f"on the enemy pawns and a constant back-rank mating threat"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -3645,6 +3685,7 @@ GATED_TAGS = (
     "bishop_long_diagonal",
     "castling_rights_forfeited",
     "passed_pawn_race",
+    "seventh_rank_battery",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3970,5 +4011,9 @@ def certified_claims(
     ppr = _safe(lambda: has_passed_pawn_race(board_before, move, board_after, mover_color))
     if ppr and ppr[0]:
         tags.add("passed_pawn_race")
+
+    s7b = _safe(lambda: has_seventh_rank_battery(board_before, move, board_after, mover_color))
+    if s7b and s7b[0]:
+        tags.add("seventh_rank_battery")
 
     return tags
