@@ -6734,3 +6734,58 @@ def test_queen_vs_three_minors_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_vs_three_minors" in tags
 
+
+# ── has_two_rooks_vs_three_minors ─────────────────────────────────────────
+
+
+def _trvtm(fen, uci, mover_color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_two_rooks_vs_three_minors(board_before, move, board_after, mover_color)
+
+
+def test_two_rooks_vs_three_minors_white_rooks_true():
+    # White Ra1 captures Black Ra4 → White 2R vs Black B+N+N (newly created)
+    ok, info = _trvtm("4k3/8/8/1b1nn3/r7/8/8/RR2K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert ok
+    assert info["two_rook_side"] == "White"
+    assert info["three_minor_side"] == "Black"
+
+
+def test_two_rooks_vs_three_minors_black_rooks_true():
+    # Black Ra8 captures White Ra5 → Black 2R vs White B+N+N (newly created)
+    ok, info = _trvtm("rr2k3/8/8/R7/1BNN4/8/8/4K3 b - - 0 1", "a8a5", chess.BLACK)
+    assert ok
+    assert info["two_rook_side"] == "Black"
+    assert info["three_minor_side"] == "White"
+
+
+def test_two_rooks_vs_three_minors_rook_side_has_queen_false():
+    # Rook side also has a queen — not clean 2R
+    ok, _ = _trvtm("4k3/8/8/1b1nn3/r7/8/8/RRQ1K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_three_minors_imbalance_pre_existed_false():
+    # Already 2R vs 3 minors before the move — set-difference must not fire
+    ok, _ = _trvtm("4k3/8/8/1b1nn3/8/8/8/RR2K3 w - - 0 1", "a1a3", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_three_minors_minor_side_has_extra_rook_false():
+    # Minor side retains an extra rook after capture — not clean 3 minors
+    ok, _ = _trvtm("4k3/2r5/8/1b1nn3/r7/8/8/RR2K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_three_minors_in_certified_claims():
+    fen = "4k3/8/8/1b1nn3/r7/8/8/RR2K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "two_rooks_vs_three_minors" in tags
+
