@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.52] — 2026-06-19
+
+### Added
+- **`has_knight_on_rim` factgate predicate** (`knight_on_rim` tag) — fires when the mover's knight newly lands on the a or h file (the rim), where the knight was not already on the rim before the move. Checks moving piece is a knight, landing file is 0 (a) or 7 (h), and from-file is not also 0 or 7. Evidence carries `square`, `file` ('a'/'h'), and `mover`, plus a ready-to-quote evidence string referencing the "a knight on the rim is dim" principle. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 513 passed.
+
 ## [0.41.51] — 2026-06-19
 
 ### Added

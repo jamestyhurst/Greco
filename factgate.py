@@ -3564,6 +3564,39 @@ def has_pawn_duo(
     }
 
 
+def has_knight_on_rim(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.KNIGHT:
+        return False, None
+
+    to_file = chess.square_file(move.to_square)
+    if to_file not in (0, 7):
+        return False, None
+
+    if chess.square_file(move.from_square) in (0, 7):
+        return False, None
+
+    file_letter = "a" if to_file == 0 else "h"
+    sq_name = chess.square_name(move.to_square)
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "square": sq_name,
+        "file": file_letter,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s knight lands on the rim at {sq_name} — "
+            f"on the {file_letter}-file it controls at most four squares, "
+            f"half its usual reach; a knight on the rim is typically passive "
+            f"and may need several tempi to re-enter the game"
+        ),
+    }
+
+
 def has_open_center(
     board_before: chess.Board,
     move: chess.Move,
@@ -3824,6 +3857,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "knight_on_rim",
     "open_center",
     "rook_on_sixth",
     "tripled_pawns",
@@ -4160,6 +4194,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    knr = _safe(lambda: has_knight_on_rim(board_before, move, board_after, mover_color))
+    if knr and knr[0]:
+        tags.add("knight_on_rim")
 
     oc = _safe(lambda: has_open_center(board_before, move, board_after, mover_color))
     if oc and oc[0]:

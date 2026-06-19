@@ -4732,3 +4732,60 @@ def test_open_center_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "open_center" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_knight_on_rim
+# ---------------------------------------------------------------------------
+
+
+def _knr(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_knight_on_rim(board_before, move, board_after, color)
+
+
+def test_knight_on_rim_white_to_h_file_true():
+    # White knight f3→h4 — lands on the h-file (rim).
+    ok, ev = _knr("4k3/8/8/8/8/5N2/8/4K3 w - - 0 1", "f3h4", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["file"] == "h"
+
+
+def test_knight_on_rim_black_to_a_file_true():
+    # Black knight b6→a4 — lands on the a-file (rim).
+    ok, ev = _knr("4k3/8/1n6/8/8/8/8/4K3 b - - 0 1", "b6a4", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["file"] == "a"
+
+
+def test_knight_on_rim_already_on_rim_false():
+    # White knight already on h4; moves to g2 — was already on the rim, no new event.
+    ok, _ = _knr("4k3/8/8/8/7N/8/8/4K3 w - - 0 1", "h4g2", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_rim_goes_to_central_square_false():
+    # White knight f3→d4 — moves to the centre, not the rim.
+    ok, _ = _knr("4k3/8/8/8/8/5N2/8/4K3 w - - 0 1", "f3d4", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_rim_bishop_not_knight_false():
+    # White bishop f3→h1 — not a knight; piece guard vetoes.
+    ok, _ = _knr("4k3/8/8/8/8/5B2/8/4K3 w - - 0 1", "f3h1", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_rim_in_certified_claims():
+    fen = "4k3/8/8/8/8/5N2/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("f3h4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "knight_on_rim" in tags
