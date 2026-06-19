@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.12] — 2026-06-18
+
+### Added
+- **`is_rook_on_seventh` factgate predicate** (`rook_on_seventh` tag) — move predicate certifying that the mover's rook just landed on the opponent's second rank (7th rank for White, 2nd rank for Black), the classic invasive-rook motif. Evidence carries `square` (landing square name), `rank` ('7th'/'2nd'), and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with "pigs on the seventh" and back-rank pressure guidance. 5 new pure tests; full suite 286 passed.
+
 ## [0.41.11] — 2026-06-18
 
 ### Added

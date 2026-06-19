@@ -2587,3 +2587,51 @@ def test_opposite_bishops_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "opposite_colored_bishops" in tags
+
+
+# --- is_rook_on_seventh -------------------------------------------------------
+# 7th rank for White = rank index 6; 7th (opponent's 2nd) for Black = rank index 1.
+def _r7(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_rook_on_seventh(board_before, move, board_after, color)
+
+
+def test_rook_on_seventh_white_true():
+    # White rook e2 → e7 (7th rank). Should certify.
+    ok, ev = _r7("r3k3/8/8/8/8/8/4R3/4K3 w - - 0 1", "e2e7", chess.WHITE)
+    assert ok
+    assert ev["square"] == "e7"
+    assert "7th" in ev["evidence"]
+
+
+def test_rook_on_seventh_black_true():
+    # Black rook a8 → a2 (Black's 7th = White's 2nd rank). Should certify.
+    ok, ev = _r7("r3k3/8/8/8/8/8/8/4K3 b - - 0 1", "a8a2", chess.BLACK)
+    assert ok
+    assert ev["square"] == "a2"
+    assert "2nd" in ev["evidence"]
+
+
+def test_rook_on_seventh_wrong_rank_false():
+    # White rook e2 → e6 (6th rank, not 7th). Should NOT certify.
+    ok, _ = _r7("r3k3/8/8/8/8/8/4R3/4K3 w - - 0 1", "e2e6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_seventh_not_rook_false():
+    # White queen f1 → f7 (7th rank but it's a queen, not a rook). Should NOT certify.
+    ok, _ = _r7("r3k3/8/8/8/8/8/8/4KQ2 w - - 0 1", "f1f7", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_seventh_in_certified_claims():
+    # White rook e2 → e7: rook_on_seventh tag should appear in certified_claims.
+    board_before = chess.Board("r3k3/8/8/8/8/8/4R3/4K3 w - - 0 1")
+    move = chess.Move.from_uci("e2e7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_on_seventh" in tags

@@ -2271,6 +2271,31 @@ def is_opposite_bishops(board: chess.Board) -> Tuple[bool, Optional[dict]]:
     }
 
 
+def is_rook_on_seventh(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that this move places the mover's rook on the opponent's back rank
+    (7th rank for White, 2nd rank for Black), the classic invasive-rook motif.
+    evidence keys: square (landing square name), rank ('7th'/'2nd'), evidence.
+    """
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.ROOK:
+        return False, None
+    seventh_rank = 6 if mover_color == chess.WHITE else 1
+    if chess.square_rank(move.to_square) != seventh_rank:
+        return False, None
+    rank_label = "7th" if mover_color == chess.WHITE else "2nd"
+    sq_name = chess.square_name(move.to_square)
+    return True, {
+        "square": sq_name,
+        "rank": rank_label,
+        "evidence": f"Rook invades the {rank_label} rank at {sq_name}",
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2317,6 +2342,7 @@ GATED_TAGS = (
     "passer_created",
     "wins_exchange",
     "opposite_colored_bishops",
+    "rook_on_seventh",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2502,5 +2528,9 @@ def certified_claims(
     ocb = _safe(lambda: is_opposite_bishops(board_after))
     if ocb and ocb[0]:
         tags.add("opposite_colored_bishops")
+
+    r7 = _safe(lambda: is_rook_on_seventh(board_before, move, board_after, mover_color))
+    if r7 and r7[0]:
+        tags.add("rook_on_seventh")
 
     return tags
