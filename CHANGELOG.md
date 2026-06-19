@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.101] — 2026-06-19
+
 ### Changed
 - **Variation policy moved from engine-membership to legal-from-branch** (un-kills the
   instructive-counterfactual feature; spec `docs/specs/VARIATION_VALIDATOR.md`). The
