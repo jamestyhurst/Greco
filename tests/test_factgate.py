@@ -5125,3 +5125,56 @@ def test_rook_on_back_rank_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_on_back_rank" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_queen_on_sixth
+# ---------------------------------------------------------------------------
+
+def _qo6(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_on_sixth(board_before, move, board_after, color)
+
+
+def test_queen_on_sixth_white_true():
+    ok, ev = _qo6("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d6", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "sixth"
+    assert ev["square"] == "d6"
+
+
+def test_queen_on_sixth_black_true():
+    ok, ev = _qo6("3qk3/8/8/8/8/8/8/4K3 b - - 0 1", "d8d3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "third"
+    assert ev["square"] == "d3"
+
+
+def test_queen_on_sixth_already_on_sixth_false():
+    ok, _ = _qo6("4k3/8/3Q4/8/8/8/8/4K3 w - - 0 1", "d6e6", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_sixth_goes_to_seventh_not_sixth_false():
+    ok, _ = _qo6("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d7", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_sixth_rook_not_queen_false():
+    ok, _ = _qo6("4k3/8/8/8/8/8/8/3RK3 w - - 0 1", "d1d6", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_sixth_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/3QK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_on_sixth" in tags

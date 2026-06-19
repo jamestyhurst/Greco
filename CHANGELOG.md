@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.59] — 2026-06-19
+
+### Added
+- **`has_queen_on_sixth` factgate predicate** (`queen_on_sixth` tag) — fires when the mover's queen newly lands on the 6th rank (rank idx 5 for White, idx 2 for Black), where the queen was not already on that rank. Completes the rank-penetration family alongside `rook_on_sixth` and `knight_on_sixth`. Checks moving piece is a queen, landing rank is target, from-rank is different. Evidence carries `square`, `rank` ('sixth'/'third'), and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 555 passed.
+
 ## [0.41.58] — 2026-06-19
 
 ### Added
