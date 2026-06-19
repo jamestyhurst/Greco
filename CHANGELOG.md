@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.79] — 2026-06-19
+
+### Added
+- **`has_queen_vs_rook` factgate predicate** (`queen_vs_rook` tag) — fires when a move newly creates a queen-vs-lone-rook imbalance: one side has exactly one queen (no rooks, bishops, or knights), the other has exactly one rook (no queens, bishops, or knights). Set-difference via inner `_state()` returning 'white_queen'/'black_queen'/None. Evidence carries `queen_side`, `rook_side`, and `mover`; commentary frames the queen's ~2-pawn edge while calibrating to fortress and perpetual-check drawing resources for the rook side. Extends the material-imbalance predicate series; complements `two_rooks_vs_queen`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 675 passed.
+
 ## [0.41.78] — 2026-06-19
 
 ### Added

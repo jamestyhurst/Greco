@@ -6195,3 +6195,57 @@ def test_two_knights_vs_rook_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "two_knights_vs_rook" in tags
+
+
+# ── has_queen_vs_rook ────────────────────────────────────────────────────────
+
+def _qvr(fen, uci, color):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = b.copy(); ba.push(mv)
+    return F.has_queen_vs_rook(b, mv, ba, color)
+
+
+def test_queen_vs_rook_white_queen_true():
+    # Qe4xBd4 captures Black bishop → White Q vs Black R (no other pieces)
+    ok, d = _qvr("r3k3/8/8/8/3bQ3/8/8/4K3 w - - 0 1", "e4d4", chess.WHITE)
+    assert ok
+    assert d["queen_side"] == "White"
+    assert d["rook_side"] == "Black"
+
+
+def test_queen_vs_rook_black_queen_true():
+    # Qh7xNd3 captures White knight → Black Q vs White R (no other pieces)
+    ok, d = _qvr("4k3/7q/8/8/8/3N4/8/4KR2 b - - 0 1", "h7d3", chess.BLACK)
+    assert ok
+    assert d["queen_side"] == "Black"
+    assert d["rook_side"] == "White"
+
+
+def test_queen_vs_rook_queen_also_has_rook_false():
+    # White has Q+R after capture — not a clean Q:R imbalance
+    ok, _ = _qvr("r3k3/8/8/8/3bQR2/8/8/4K3 w - - 0 1", "e4d4", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_rook_imbalance_pre_existed_false():
+    # Q vs R already before the move
+    ok, _ = _qvr("r3k3/8/8/8/4Q3/8/8/4K3 w - - 0 1", "e4e3", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_rook_no_rook_after_false():
+    # White Q captures Black's rook — leaves White Q vs nothing (not Q:R)
+    ok, _ = _qvr("r3k3/8/8/8/3bQ3/8/8/4K3 w - - 0 1", "e4a8", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_rook_in_certified_claims():
+    fen = "r3k3/8/8/8/3bQ3/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e4d4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_vs_rook" in tags
+
