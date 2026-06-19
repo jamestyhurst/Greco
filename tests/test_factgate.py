@@ -2685,3 +2685,52 @@ def test_captures_hanging_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "captures_hanging" in tags
+
+
+# --- is_double_check ----------------------------------------------------------
+# Double check: two pieces simultaneously give check; only a king move can escape.
+# FEN: k7/8/8/RN6/8/8/8/6K1 w - - 0 1
+#   White: Ra5, Nb5, Kg1  |  Black: Ka8
+#   Nb5→c7: knight on c7 attacks a8 AND rook on a5 revealed along the a-file → double check.
+def _dc(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_double_check(board_before, move, board_after, color)
+
+
+def test_double_check_true():
+    # Knight b5→c7 gives double check: Nc7 attacks a8, Ra5 revealed on a-file.
+    ok, ev = _dc("k7/8/8/RN6/8/8/8/6K1 w - - 0 1", "b5c7", chess.WHITE)
+    assert ok
+    assert len(ev["checking_squares"]) == 2
+
+
+def test_double_check_single_check_false():
+    # Rook moves to give ordinary check — not double check.
+    ok, _ = _dc("k7/8/8/R7/8/8/8/6K1 w - - 0 1", "a5a8", chess.WHITE)
+    assert not ok
+
+
+def test_double_check_quiet_move_false():
+    # Quiet king move — no check at all.
+    ok, _ = _dc("k7/8/8/R7/8/8/8/6K1 w - - 0 1", "g1f2", chess.WHITE)
+    assert not ok
+
+
+def test_double_check_evidence_string():
+    # Evidence string must mention "double" or list two squares.
+    ok, ev = _dc("k7/8/8/RN6/8/8/8/6K1 w - - 0 1", "b5c7", chess.WHITE)
+    assert ok
+    assert "double" in ev["evidence"].lower() or len(ev["checking_squares"]) >= 2
+
+
+def test_double_check_in_certified_claims():
+    # The double_check tag should appear in certified_claims for the double-check move.
+    board_before = chess.Board("k7/8/8/RN6/8/8/8/6K1 w - - 0 1")
+    move = chess.Move.from_uci("b5c7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "double_check" in tags

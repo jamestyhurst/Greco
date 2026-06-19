@@ -2296,6 +2296,31 @@ def is_rook_on_seventh(
     }
 
 
+def is_double_check(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move gives a double check — two of the mover's pieces
+    simultaneously attack the enemy king. Only a king move can escape double check.
+    evidence keys: checking_squares (list of square names), evidence.
+    """
+    if not board_after.is_check():
+        return False, None
+    checkers = list(board_after.checkers())
+    if len(checkers) < 2:
+        return False, None
+    sq_names = sorted([chess.square_name(sq) for sq in checkers])
+    return True, {
+        "checking_squares": sq_names,
+        "evidence": (
+            f"Double check from {sq_names[0]} and {sq_names[1]} — "
+            "the king cannot block or interpose, only flee"
+        ),
+    }
+
+
 def captures_hanging(
     board_before: chess.Board,
     move: chess.Move,
@@ -2375,6 +2400,7 @@ GATED_TAGS = (
     "opposite_colored_bishops",
     "rook_on_seventh",
     "captures_hanging",
+    "double_check",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2568,5 +2594,9 @@ def certified_claims(
     ch = _safe(lambda: captures_hanging(board_before, move, board_after, mover_color))
     if ch and ch[0]:
         tags.add("captures_hanging")
+
+    dc = _safe(lambda: is_double_check(board_before, move, board_after, mover_color))
+    if dc and dc[0]:
+        tags.add("double_check")
 
     return tags

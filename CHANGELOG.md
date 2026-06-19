@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.14] — 2026-06-18
+
+### Added
+- **`is_double_check` factgate predicate** (`double_check` tag) — move predicate certifying the move gives a double check: two of the mover's pieces simultaneously attack the enemy king, so the only legal escape is a king move. Evidence carries `checking_squares` (list of two square names) and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with "cannot block two lines at once" guidance and discovered-double-check framing. 5 new pure tests; full suite 296 passed.
+
 ## [0.41.13] — 2026-06-18
 
 ### Added
