@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.9] — 2026-06-18
+
+### Added
+- **`creates_passer` factgate predicate** (`passer_created` tag) — move predicate certifying that a move established a new passed pawn for the mover. Correctly handles pawn advances (the pawn at `from_square` is compared to the pawn at `to_square` so an advance of an already-passed pawn doesn't fire). Evidence carries `squares` (list of new passer square names) and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with guidance distinguishing the `passer_created` event tag from the `passed_pawn` state tag. 5 new pure tests; full suite 271 passed.
+
 ## [0.41.8] — 2026-06-18
 
 ### Added

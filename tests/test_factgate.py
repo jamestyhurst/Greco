@@ -2445,3 +2445,49 @@ def test_castling_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "castling" in tags
+
+
+# ---------------------------------------------------------------------------
+# creates_passer
+# ---------------------------------------------------------------------------
+def _passer(fen, uci, color=chess.WHITE):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.creates_passer(b, mv, after, color)
+
+
+def test_creates_passer_rook_removes_blocker():
+    # White rook Rf2xf7 removes Black's f7 pawn that was blocking White's e5 passer.
+    ok, ev = _passer("4k3/5p2/8/4P3/8/8/5R2/4K3 w - - 0 1", "f2f7")
+    assert ok
+    assert "e5" in ev["squares"]
+
+
+def test_creates_passer_pawn_capture():
+    # White e4xd5 captures Black's d5 pawn; the promoted White pawn on d5 is now a passer.
+    ok, ev = _passer("4k3/8/8/3p1p2/4P3/8/8/4K3 w - - 0 1", "e4d5")
+    assert ok
+    assert "d5" in ev["squares"]
+
+
+def test_creates_passer_false_already_passer():
+    # White e5 is already a passer; advancing to e6 does not CREATE a new passer.
+    ok, _ = _passer("4k3/8/8/4P3/8/8/8/4K3 w - - 0 1", "e5e6")
+    assert not ok
+
+
+def test_creates_passer_false_quiet_move():
+    # Rook retreats — no change to passer status.
+    ok, _ = _passer("4k3/5p2/8/4P3/8/8/5R2/4K3 w - - 0 1", "f2f1")
+    assert not ok
+
+
+def test_creates_passer_in_certified_claims():
+    board_before = chess.Board("4k3/5p2/8/4P3/8/8/5R2/4K3 w - - 0 1")
+    move = chess.Move.from_uci("f2f7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "passer_created" in tags

@@ -2173,6 +2173,40 @@ def is_castling(
 
 
 # --------------------------------------------------------------------------- #
+# Creates passer — a move that establishes a new passed pawn for the mover.
+# --------------------------------------------------------------------------- #
+def creates_passer(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move created at least one new passed pawn for the mover.
+
+    "New" means the pawn is a passer after the move but was NOT a passer before.
+    Advances of already-passed pawns do not qualify — the pawn at `move.from_square`
+    is compared to the pawn at `move.to_square` so an advance doesn't double-count.
+    """
+    new_passers = []
+    for sq in board_after.pieces(chess.PAWN, mover_color):
+        if not is_passed_pawn(board_after, sq, mover_color):
+            continue
+        prev_sq = move.from_square if sq == move.to_square else sq
+        if not is_passed_pawn(board_before, prev_sq, mover_color):
+            new_passers.append(sq)
+
+    if not new_passers:
+        return False, None
+
+    side = "White" if mover_color == chess.WHITE else "Black"
+    passer_names = sorted([chess.square_name(sq) for sq in new_passers])
+    return True, {
+        "squares": passer_names,
+        "evidence": f"{side}'s move creates a passed pawn on {', '.join(passer_names)}",
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -2215,6 +2249,7 @@ GATED_TAGS = (
     "promotion",
     "en_passant",
     "castling",
+    "passer_created",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2388,5 +2423,9 @@ def certified_claims(
     cst = _safe(lambda: is_castling(board_before, move, board_after))
     if cst and cst[0]:
         tags.add("castling")
+
+    ps = _safe(lambda: creates_passer(board_before, move, board_after, mover_color))
+    if ps and ps[0]:
+        tags.add("passer_created")
 
     return tags
