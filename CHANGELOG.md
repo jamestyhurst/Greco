@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.49] — 2026-06-19
+
+### Added
+- **`has_tripled_pawns` factgate predicate** (`tripled_pawns` tag) — fires when the move newly creates a tripled pawn formation: the mover now has ≥3 pawns on the same file, where this was not the case before the move. Inner `_find_tripled` helper builds a file→count dict from `board.pieces(PAWN, color)` and returns files with count ≥ 3; set-difference fires only on newly tripled files. Evidence carries `file` (the letter) and `mover`, plus a ready-to-quote evidence string describing the severity. Distinct from `doubled_pawn` STATE tag (which certifies any stacked pawns and already notes tripling in its evidence descriptor). Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 495 passed.
+
 ## [0.41.48] — 2026-06-19
 
 ### Added

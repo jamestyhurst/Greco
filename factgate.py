@@ -3564,6 +3564,41 @@ def has_pawn_duo(
     }
 
 
+def has_tripled_pawns(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _find_tripled(board: chess.Board, color: bool) -> Set[int]:
+        file_counts: dict = {}
+        for sq in board.pieces(chess.PAWN, color):
+            f = chess.square_file(sq)
+            file_counts[f] = file_counts.get(f, 0) + 1
+        return {f for f, cnt in file_counts.items() if cnt >= 3}
+
+    after_tripled = _find_tripled(board_after, mover_color)
+    if not after_tripled:
+        return False, None
+    before_tripled = _find_tripled(board_before, mover_color)
+    new_tripled = after_tripled - before_tripled
+    if not new_tripled:
+        return False, None
+
+    file_idx = next(iter(new_tripled))
+    file_letter = "abcdefgh"[file_idx]
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "file": file_letter,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} creates tripled pawns on the {file_letter}-file — "
+            f"three pawns stacked on the same file; a severe structural concession "
+            f"since they cannot defend each other and the file yields no passed-pawn potential"
+        ),
+    }
+
+
 def has_isolated_queen_pawn(
     board_before: chess.Board,
     move: chess.Move,
@@ -3723,6 +3758,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "tripled_pawns",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -4056,5 +4092,9 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    tpw = _safe(lambda: has_tripled_pawns(board_before, move, board_after, mover_color))
+    if tpw and tpw[0]:
+        tags.add("tripled_pawns")
 
     return tags

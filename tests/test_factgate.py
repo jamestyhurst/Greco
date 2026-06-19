@@ -4563,3 +4563,60 @@ def test_isolated_queen_pawn_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "isolated_queen_pawn" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_tripled_pawns
+# ---------------------------------------------------------------------------
+
+
+def _tpw(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_tripled_pawns(board_before, move, board_after, color)
+
+
+def test_tripled_pawns_white_bxc6_creates_triple_true():
+    # White b5xc6: White already has c4,c5; after bxc6 White has c4,c5,c6.
+    ok, ev = _tpw("4k3/8/2p5/1PP5/2P5/8/8/4K3 w - - 0 1", "b5c6", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["file"] == "c"
+
+
+def test_tripled_pawns_black_dxc3_creates_triple_true():
+    # Black d4xc3: Black already has c5,c7; after dxc3 Black has c3,c5,c7.
+    ok, ev = _tpw("4k3/2p5/8/2p5/3p4/2P5/8/4K3 b - - 0 1", "d4c3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["file"] == "c"
+
+
+def test_tripled_pawns_already_existed_false():
+    # White already has tripled pawns on c-file; king move doesn't create new ones.
+    ok, _ = _tpw("4k3/8/2P5/2P5/2P5/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_tripled_pawns_only_doubles_false():
+    # White b5xc6 but White only had c5; result is c5+c6 — doubled not tripled.
+    ok, _ = _tpw("4k3/8/2p5/1PP5/8/8/8/4K3 w - - 0 1", "b5c6", chess.WHITE)
+    assert not ok
+
+
+def test_tripled_pawns_normal_advance_false():
+    # Normal pawn advance; no file reaches count 3.
+    ok, _ = _tpw("4k3/8/8/8/3P4/8/3P4/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_tripled_pawns_in_certified_claims():
+    fen = "4k3/8/2p5/1PP5/2P5/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("b5c6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "tripled_pawns" in tags
