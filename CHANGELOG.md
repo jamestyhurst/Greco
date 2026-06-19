@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.66] — 2026-06-19
+
+### Added
+- **`has_knight_on_fifth` factgate predicate** (`knight_on_fifth` tag) — fires when the mover's knight newly lands on the mover's 5th rank (rank idx 4 for White, idx 3 for Black), by advance or capture, where the knight was not already on that rank. Extends the knight-rank series (`knight_on_sixth`, `knight_on_seventh`). Evidence carries `square`, `rank` ('fifth'/'fourth', algebraic naming), and `mover`; commentary frames it as a central outpost landing — controls both flanks, difficult to chase, threatens deeper penetration. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 597 passed.
+
 ## [0.41.65] — 2026-06-19
 
 ### Added

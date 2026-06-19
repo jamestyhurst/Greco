@@ -3587,6 +3587,29 @@ def has_knight_on_seventh(
     )}
 
 
+def has_knight_on_fifth(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.KNIGHT:
+        return False, None
+    to_sq = move.to_square
+    target_rank = 4 if mover_color == chess.WHITE else 3  # 0-indexed: rank 5=4, rank 4=3
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+    rank_name = "fifth" if mover_color == chess.WHITE else "fourth"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {"square": sq_name, "rank": rank_name, "mover": mover_name, "evidence": (
+        f"{mover_name}'s knight plants itself on the {rank_name} rank at {sq_name} — "
+        f"an outpost in the heart of the board; from here the knight controls key squares "
+        f"on both flanks, cannot easily be chased by enemy pawns, "
+        f"and threatens to spring forward to even deeper penetration"
+    )}
+
+
 def has_two_bishops_vs_two_knights(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4255,6 +4278,7 @@ GATED_TAGS = (
     "seventh_rank_battery",
     "isolated_queen_pawn",
     "knight_on_seventh",
+    "knight_on_fifth",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -4608,6 +4632,10 @@ def certified_claims(
     kn7 = _safe(lambda: has_knight_on_seventh(board_before, move, board_after, mover_color))
     if kn7 and kn7[0]:
         tags.add("knight_on_seventh")
+
+    kn5 = _safe(lambda: has_knight_on_fifth(board_before, move, board_after, mover_color))
+    if kn5 and kn5[0]:
+        tags.add("knight_on_fifth")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:
