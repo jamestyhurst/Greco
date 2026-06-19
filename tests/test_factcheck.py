@@ -161,13 +161,17 @@ def test_verify_report_skips_hypothetical_sentence():
     assert verify_report(report, [pk]) == []
 
 
-# --- variation check (delegates to the reviewed validator) ------------------
-def test_check_variations_flags_invented_move(make_move, make_game):
-    m = make_move(side="Black", move_number=24, san="Kg7",
-                  refutation_line_san="25. g5 Kxf6 26. gxf6")
+# --- variation check (delegates to the legal-from-branch validator) ---------
+# Real FENs: the validator replays moves on actual boards (Qh8 is illegal here — no
+# queen exists), so it FLAGs the line. See docs/specs/VARIATION_VALIDATOR.md.
+def test_check_variations_flags_illegal_move(make_move, make_game):
+    m = make_move(side="Black", move_number=24, san="Kg7", uci="g8g7",
+                  fen_before="6k1/5p1p/8/8/8/8/5PPP/6K1 b - - 0 24",
+                  fen_after="8/5pkp/8/8/8/8/5PPP/6K1 w - - 1 25")
     game = make_game([m])
-    report = "This runs into *(25. g5 Kxf6 26. Qh8)*."
+    report = "This runs into *(25. Qh8 winning)*."
     found = FC.check_variations(report, game)
+    assert any(f.check == "variation" and f.confidence == "high" for f in found)
     assert any("Qh8" in f.claim for f in found)
 
 

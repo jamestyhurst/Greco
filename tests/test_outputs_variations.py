@@ -39,27 +39,35 @@ def test_boards_tier3_includes_periodic(make_move, make_game):
     assert 6 in plies and 12 in plies  # periodic snapshots survive
 
 
-# --- variation validator (2A) -----------------------------------------------
-def test_validator_passes_clean_quoted_line(make_move, make_game):
+# --- variation validator (legal-from-branch reframe) ------------------------
+# Semantics changed (docs/specs/VARIATION_VALIDATOR.md): the validator now replays
+# the line on REAL branch boards, so these fixtures carry real FENs. A line that is
+# LEGAL from a plausible branch passes (engine-membership no longer required); only a
+# line that is illegal from every candidate board is flagged. The fuller §8 matrix
+# lives in test_variation_validator.py.
+def test_validator_passes_clean_legal_line(make_move, make_game):
+    # A legal line the engine did NOT pre-compute — passes purely on legality.
     m = make_move(
-        side="Black", move_number=24, san="Kg7",
-        best_line_san="24...Rf8 25. g5",
-        refutation_line_san="25. g5 Kxf6 26. gxf6",
+        side="White", move_number=28, san="Kh1", uci="g1h1",
+        fen_before="3r2k1/5ppp/8/8/8/8/4QPPP/5RK1 w - - 0 28",
+        fen_after="3r2k1/5ppp/8/8/8/8/4QPPP/5R1K b - - 1 28",
     )
     g = make_game([m])
-    report = "Better was *(24...Rf8 25. g5)*, and *(25. g5 Kxf6 26. gxf6)* punishes it."
+    report = "Also possible was *(28. Rd1 Rxd1 29. Qxd1)*."
     assert find_unverified_variation_moves(report, g) == []
 
 
-def test_validator_flags_invented_move(make_move, make_game):
+def test_validator_flags_illegal_move(make_move, make_game):
+    # An illegal move (a knight move with no knight on the board) is flagged.
     m = make_move(
-        side="Black", move_number=24, san="Kg7",
-        refutation_line_san="25. g5 Kxf6 26. gxf6",
+        side="White", move_number=25, san="Kf1", uci="e1f1",
+        fen_before="4k3/8/8/8/8/8/4P3/4K3 w - - 0 25",
+        fen_after="4k3/8/8/8/8/8/4P3/5K2 b - - 1 25",
     )
     g = make_game([m])
-    report = "This runs into *(25. g5 Kxf6 26. Qh8 winning)*."
+    report = "This runs into *(25. Nf3 and wins)*."
     flagged = find_unverified_variation_moves(report, g)
-    assert "Qh8" in flagged
+    assert "Nf3" in flagged
 
 
 # --- header HTML escaping (#29) ---------------------------------------------

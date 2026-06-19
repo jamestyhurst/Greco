@@ -6,8 +6,15 @@ phone), with no install. Today Greco runs as a standalone Windows desktop app; t
 foundation we're building out from. Versioning is [Semantic](https://semver.org/)
 (`MAJOR.MINOR.PATCH`); see [../CHANGELOG.md](../CHANGELOG.md) for what has shipped.
 
-## Where we are — v0.37.0
+## Where we are — v0.41.x
 
+> **2026-06-19 redirect (design grill).** Current priority is **canon → critic → Maia +
+> counterfactuals → deploy**, governed by `AUTONOMOUS_DEVELOPMENT_DOCTRINE.md` (auto-loaded
+> via `CLAUDE.md`). These four **supersede the backlog's top-down ordering** as what to work on
+> next. Predicate-grinding is halted — the 74 `PENDING_APPROVAL` predicates are frozen for a
+> later batch review, not extended. Full record: `Developer Notes (Greco)/greco-grill-harvest-2026-06-19.md`.
+> (The "v0.37.0" header was stale; `version.py` is at v0.41.x.)
+>
 > See [../CHANGELOG.md](../CHANGELOG.md) for the per-version detail. **All seven Greco
 > Online phases through Phase 6 are complete.** The web layer is a full multi-user FastAPI
 > app with accounts, roles, a SQLite database with Alembic migrations, a phone-friendly
@@ -149,6 +156,10 @@ was built stays visible.
 | 30 | **Grow the predicate library + chess glossary** — Tier-A predicates (18) and Tier-B predicates (8: overloaded piece, compensation, tempo gain, weak square, zwischenzug, initiative, space advantage, prophylaxis) all done. Next: multi-move sacrifice window detection (#25) and per-ply material trajectory (#23). | M | **done** (Tier-A v0.29.0; Tier-B v0.37.0) |
 | 31 | **Wire `verify_report` into the release/CI loop** — run the deterministic gate on a sample report in `ship.py` / CI so a confabulation regression fails the build. | S | **done** |
 | 32 | **Essay Mode** — candidate fourth mode; answers chess questions analytically using the knowledge corpus; PGN optional as illustrative material. Design spec pending — see `Developer Notes (Greco)/Handoffs/package-d-essay-mode.md` before implementing. | M | todo (design first) |
+| 33 | **Canon pass (priority #1)** — write *James' Theory of Chess* + *Design Concept v2* + *PRD v2* from the 2026-06-19 grill harvest; ideally after a short follow-up grill to capture vision elements James hadn't yet recalled. | L | todo (Opus + James; design) |
+| 34 | **Counterfactual variation reframe (priority #3a)** — implement `docs/specs/VARIATION_VALIDATOR.md` (legality-replay; un-kill instructive counterfactuals like "if Black hadn't played …f6, Qxg7#") + loosen the narrator IRON RULE in lockstep (tag `PENDING_APPROVAL`). | M | **done (validator, 2026-06-19); narrator IRON-RULE wording tagged `PENDING_APPROVAL` — awaiting James** |
+| 35 | **Maia integration (priority #3b)** — implement `docs/specs/MAIA_INTEGRATION.md` (human-vs-engine second engine; `engine_move`/`humanly_findable`/`predictable_human_error`). | L | todo — **Phase 0 blocked on James manually downloading lc0 + Maia weights** |
+| 36 | **Greco Critic (priority #2)** — qualitative quality system; spec at `Documents/Greco Critic/CRITIC_SPEC.md`. Not yet ready for autonomous build — definition needs sharpening first. | L | todo (design-refine first) |
 
 **Folded in / superseded:**
 - *Polish (Save-as-PDF, drag-and-drop a PGN, recent-games list)* — absorbed into Greco

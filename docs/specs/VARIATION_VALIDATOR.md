@@ -5,8 +5,9 @@
 `C:\Users\詹天哲\Documents\greco\factcheck.py` (the `check_variations` wrapper + reusable `bind_span_to_ply`),
 `C:\Users\詹天哲\Documents\greco\narrator.py` (the IRON-RULE prompt rule at line 218).
 
-**Status:** design only — no code written.
-**Date:** 2026-06-15.
+**Status:** IMPLEMENTED 2026-06-19 (validator + narrator IRON-RULE loosening). The
+narrator-rule wording is tagged `⚠️ PENDING_APPROVAL` in `narrator.py` pending James's review.
+**Date:** 2026-06-15 (design); 2026-06-19 (implementation).
 
 ---
 

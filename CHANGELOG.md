@@ -7,6 +7,45 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Changed
+- **Variation policy moved from engine-membership to legal-from-branch** (un-kills the
+  instructive-counterfactual feature; spec `docs/specs/VARIATION_VALIDATOR.md`). The
+  written-variation validator no longer requires every SAN token to appear verbatim in an
+  engine PV — which wrongly deleted legitimate counterfactuals the engine never
+  pre-analysed (e.g. "if Black had not played …f6, White would have had Qxg7#"). It now
+  reconstructs a small ranked set of candidate **branch boards** from the per-ply FENs
+  (C1 `fen_after` / C2 `fen_before` / C3-C4 off-by-one, plus a `fen_before` + null-move
+  **turn-flip** variant for "if X had NOT been played" counterfactuals), replays the line
+  via `board.parse_san`, and accepts if **any** anchoring is fully legal. Malformed or
+  ambiguous SAN (e.g. the non-adjacent pawn capture `exg5`) **ABSTAINS** (low-confidence
+  note); only a well-formed line illegal from every candidate board AND absent from the
+  engine's lines is **FLAGGED** (high). Verbatim engine lines remain the highest-trust
+  path (demoted to a provenance signal). **Failure action is warn-and-annotate, never
+  strip** — `assemble_report` no longer mutates the prose, so a legitimate instructive
+  line always survives (`strip_unverified_variations` is retained but disabled by default).
+- **`outputs.py`:** new `validate_parenthetical_variations()` (+ `UnverifiedVariation`,
+  `_san_sequence`, `replay_variation_legal`, candidate-board builders, provenance
+  fallback); `find_unverified_variation_moves()` is now a thin shim returning the
+  first-illegal SAN of each FLAGGED line (**breaking semantic change**: "illegal", not
+  "engine-absent").
+- **`factcheck.py`:** `check_variations()` delegates to the new validator and now fills
+  `ply` + `move_ref` + `confidence` (high FLAG / low ABSTAIN) instead of `ply=None,
+  move_ref=""`; `verify_report` threads its `fact_packets` through for the sentence→ply
+  binding fallback.
+- **`narrator.py` (⚠️ PENDING_APPROVAL — narrator-rule wording, awaiting James):** the
+  variation IRON RULE is loosened from "every move must be verbatim in `variations`" to
+  "every move must be **legal from the position the line branches from**", spelling out the
+  branch convention (continuation = after the move; "instead of"/"if not" = before it).
+  Fixed the malformed `exg5` example in that prompt section to `hxg5`.
+- Tests: new `tests/test_variation_validator.py` (the §8 worked-example matrix —
+  counterfactual survival incl. a full-assemble output check, illegal-move and
+  illegal-sequence FLAGs, engine-absent-legal survival, malformed-SAN ABSTAIN, shim
+  contract); existing variation tests in `test_outputs_variations.py`,
+  `test_factcheck.py`, and `test_narrator_concepts.py` updated to the new semantics. Full
+  suite 1217 passed. Verified at the output level on the Morphy Opera Game (real FENs):
+  a legal engine-absent sideline survives end-to-end while an illegal `Nf7+` line is
+  flagged.
+
 ## [0.41.100] — 2026-06-19
 
 ### Added

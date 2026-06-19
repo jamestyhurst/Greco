@@ -12,10 +12,14 @@ def _voice(use_case):
     return _build_system_prompt(use_case, with_style_guide=False, with_references=False)
 
 
-# --- 2A: variations iron rule -----------------------------------------------
-def test_2a_iron_rule_present():
-    assert "IRON RULE" in SYSTEM_PROMPT_BASE
-    assert "verbatim in that move's `variations` data" in SYSTEM_PROMPT_BASE
+# --- 2A: variations legality rule (loosened from the old iron rule) ----------
+def test_2a_legality_rule_present():
+    # The reframe (docs/specs/VARIATION_VALIDATOR.md): the rule is now LEGALITY from
+    # the branch position, not verbatim engine-membership — so legal counterfactuals
+    # the engine never pre-analysed may be written.
+    assert "IRON RULE" in SYSTEM_PROMPT_BASE  # the (loosened) rule is still labelled
+    assert "LEGAL from the position" in SYSTEM_PROMPT_BASE
+    assert "branches from the position" in SYSTEM_PROMPT_BASE
 
 
 def test_2a_truncation_rule_present():

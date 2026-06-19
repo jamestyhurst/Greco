@@ -279,20 +279,38 @@ def check_material(packet: dict, sentence: str) -> Iterator[Contradiction]:
         )
 
 
-def check_variations(report_md: str, game) -> List[Contradiction]:
-    """Wrap the existing, already-reviewed outputs.find_unverified_variation_moves:
-    any move written in a parenthetical variation that is not in this game's engine
-    lines is a confabulated move."""
+def check_variations(report_md: str, game, fact_packets: Optional[List[dict]] = None) -> List[Contradiction]:
+    """Position-anchored variation legality check — delegates to
+    outputs.validate_parenthetical_variations (the legal-from-branch reframe).
+
+    Emits a HIGH-confidence Contradiction for a line that is illegal from every candidate
+    branch board (confabulation/illegality) and a LOW-confidence note for a line that
+    ABSTAINED (malformed/ambiguous SAN, or an unmet mate/check annotation). A legal
+    counterfactual the engine never pre-analysed produces NOTHING — that is the point of
+    the reframe (docs/specs/VARIATION_VALIDATOR.md). Now fills ply + move_ref (the position
+    detail the old flat-set wrapper could not). `fact_packets` (optional) feed the
+    sentence->ply binding fallback; built lazily from `game` when omitted.
+    """
     try:
-        from outputs import find_unverified_variation_moves
-        tokens = find_unverified_variation_moves(report_md, game)
+        from outputs import validate_parenthetical_variations
+        records = validate_parenthetical_variations(report_md, game, fact_packets=fact_packets)
     except Exception:
         return []
-    return [
-        Contradiction(check="variation", ply=None, move_ref="", claim=f"variation move {t}",
-                      contradicted_fact="not present in any engine line for this game", snippet=t)
-        for t in tokens
-    ]
+    out: List[Contradiction] = []
+    for v in records:
+        if v.verdict == "FLAG":
+            out.append(Contradiction(
+                check="variation", ply=v.anchor_ply, move_ref=v.first_illegal_san or "",
+                claim=f"variation move {v.first_illegal_san} is illegal from the branch position",
+                contradicted_fact="no legal anchoring of this line in the game, and not an engine line",
+                snippet=v.paren, confidence="high"))
+        else:  # ABSTAIN — advisory low note, never strip-eligible
+            out.append(Contradiction(
+                check="variation", ply=v.anchor_ply, move_ref=v.first_illegal_san or "",
+                claim=f"variation line could not be verified: ({v.paren})",
+                contradicted_fact="malformed/ambiguous SAN or no anchorable branch — abstained, not flagged",
+                snippet=v.paren, confidence="low"))
+    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -317,7 +335,7 @@ def verify_report(report_md: str, fact_packets: List[dict], *, game=None) -> Lis
         found.extend(check_piece_square(packet, sentence))
         found.extend(check_material(packet, sentence))
     if game is not None:
-        found.extend(check_variations(report_md, game))
+        found.extend(check_variations(report_md, game, fact_packets=fact_packets))
     return found
 
 

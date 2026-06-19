@@ -19,8 +19,9 @@ import html
 import json
 import os
 import re
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from urllib.parse import unquote
 
 import chess
@@ -363,55 +364,422 @@ def _san_tokens(text: str) -> set:
     return {tok.rstrip("+#") for tok in _SAN_TOKEN_RE.findall(text or "")}
 
 
-def find_unverified_variation_moves(report_md: str, game: GameAnalysis) -> List[str]:
-    """Data-back trust boundary for written variations (the 2A safety net).
+# ===========================================================================
+# Variation legality validator — the "legal-from-branch" reframe
+# (docs/specs/VARIATION_VALIDATOR.md).
+#
+# OLD policy (find_unverified_variation_moves, pre-v0.42): a parenthetical was valid
+# only if every SAN token appeared verbatim in some engine PV. That wrongly deleted
+# legitimate instructive counterfactuals the engine never pre-analysed ("if Black had
+# NOT played ...f6, White would have had Qxg7#").
+#
+# NEW policy: reconstruct a small ranked set of candidate BRANCH BOARDS from the per-ply
+# FENs (incl. a fen_before + null-move turn-flip variant for "if X had NOT been played"),
+# replay the line via board.parse_san, and ACCEPT if ANY anchoring is fully legal.
+# Malformed/ambiguous SAN -> ABSTAIN; only a well-formed line with no legal anchoring
+# anywhere (and not a verbatim engine line) -> FLAG. Failure action is WARN-AND-ANNOTATE,
+# never strip — a legitimate instructive line always survives.
+# ===========================================================================
 
-    The narrator may write hypothetical lines only by quoting the engine-sourced
-    `variations` data. This scans the finished report for move-bearing parenthetical
-    spans and returns any SAN move in them that does NOT appear in this game's
-    engine lines (best line, refutation line, alternatives) or its actual moves —
-    i.e. a move the model invented rather than quoted. Empty list = clean.
+# A move-number prefix ("25." -> White, "24..." -> Black) OR a SAN token, scanned in
+# textual order so the line can be replayed move by move (a set would destroy order).
+_SEQ_SCAN_RE = re.compile(
+    r"(?P<num>\d+)\s*(?P<dots>\.\.\.|\.)"
+    r"|(?P<san>(?:O-O-O|O-O|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?)[+#]?)"
+)
+# A pawn capture: a leading file, 'x', then the destination square (no piece letter).
+_PAWN_CAPTURE_RE = re.compile(r"^([a-h])x([a-h])[1-8](?:=[QRBN])?$")
 
-    Used by `assemble_report` to emit a non-fatal warning, and exercised directly in
-    tests. (It detects/flags; it deliberately does not mutate the prose, so a clean
-    report is never mangled — auto-stripping is a possible future hardening.)
+
+@dataclass
+class UnverifiedVariation:
+    """One parenthetical line the validator could not bless. Detect-and-report only;
+    nothing here mutates the report. The position-anchored detail (anchor ply, first
+    illegal SAN, the candidate FENs tried) is what the old flat-set check could not
+    produce. `verdict` is 'FLAG' (well-formed, illegal from every branch, not an engine
+    line) or 'ABSTAIN' (malformed/ambiguous SAN, or an unmet mate/check annotation)."""
+    paren: str                                  # the parenthetical text inspected
+    verdict: str                                # 'FLAG' | 'ABSTAIN'
+    first_illegal_san: Optional[str] = None     # the SAN that first proved illegal
+    anchor_ply: Optional[int] = None            # the ply the line was anchored to
+    candidate_fens: List[str] = field(default_factory=list)  # branch boards tried
+    confidence: str = "high"                    # 'high' for a FLAG; 'low' for ABSTAIN
+
+
+def _is_malformed_pawn_capture(san: str) -> bool:
+    """True for a pawn capture whose source and destination files are not adjacent
+    (e.g. 'exg5'): well-shaped to the token regex but geometrically impossible in ANY
+    position. We route these to ABSTAIN, never to a confabulation FLAG — a typo is not
+    proof the model invented a move (the documented exg5 false-positive)."""
+    m = _PAWN_CAPTURE_RE.match(san.rstrip("+#"))
+    return bool(m) and abs(ord(m.group(1)) - ord(m.group(2))) != 1
+
+
+def _san_sequence(text: str) -> Tuple[List[Tuple[Optional[int], Optional[str], str]], bool]:
+    """Parse a parenthetical into an ORDERED list of (move_number, side_hint, san) plus
+    a `had_unparseable` flag.
+
+    side_hint is 'White' after 'N.' and 'Black' after 'N...', else None — it is ADVISORY
+    only (legality replay is the sole arbiter; a counterfactual legitimately inverts the
+    printed side). had_unparseable is True when a SAN-shaped run cannot be legal in any
+    position (a non-adjacent pawn capture) -> drives ABSTAIN, never FLAG. The +/# suffix
+    is retained on the token (stripped at replay, checked post-hoc for mate/check claims).
     """
-    allowed: set = set()
-    for m in game.moves:
-        allowed |= _san_tokens(m.san)
-        allowed |= _san_tokens(getattr(m, "best_line_san", "") or "")
-        allowed |= _san_tokens(getattr(m, "refutation_line_san", "") or "")
-        for alt in (m.top_alternatives or []):
-            allowed |= _san_tokens(alt.get("pv_numbered", "") or alt.get("pv_san", ""))
-
-    seen: set = set()
-    unverified: List[str] = []
-    for paren in re.findall(r"\(([^)]*)\)", report_md):
-        # Only inspect genuine variation notation: a move number ('25.' or '24...')
-        # immediately followed by the start of a SAN move. This deliberately ignores
-        # decimal evals ('1.5 better') and prose like 'by move 24, the d5 break', so
-        # the warning doesn't cry wolf on ordinary parenthetical asides.
-        if not re.search(r"\d+\.(?:\.\.)?\s*[OKQRBNa-h]", paren):
+    seq: List[Tuple[Optional[int], Optional[str], str]] = []
+    had_unparseable = False
+    pending_num: Optional[int] = None
+    pending_side: Optional[str] = None
+    for m in _SEQ_SCAN_RE.finditer(text or ""):
+        if m.group("num") is not None:
+            pending_num = int(m.group("num"))
+            pending_side = "White" if m.group("dots") == "." else "Black"
             continue
-        for tok in _san_tokens(paren):
-            if tok not in allowed and tok not in seen:
-                seen.add(tok)
-                unverified.append(tok)
-    return unverified
+        san = m.group("san")
+        if not san:
+            continue
+        if _is_malformed_pawn_capture(san):
+            had_unparseable = True
+        seq.append((pending_num, pending_side, san))
+        pending_num, pending_side = None, None
+    return seq, had_unparseable
+
+
+def replay_variation_legal(
+    sequence: List[Tuple[Optional[int], Optional[str], str]],
+    candidate_boards: List["chess.Board"],
+) -> Tuple[bool, Optional[str], bool, bool]:
+    """Replay the SAN sequence on each candidate board (a fresh .copy() per attempt).
+
+    Returns (legal, first_illegal_san, ambiguous, soft_fail):
+      legal     — True the instant SOME candidate replays the WHOLE sequence legally.
+      first_illegal_san — on total failure, the SAN that first proved illegal on the
+                  candidate that got FURTHEST (most informative); None if no candidates.
+      ambiguous — a candidate hit an ambiguous / malformed SAN (not flatly illegal).
+      soft_fail — a candidate replayed fully, but the trailing '#'/'+' annotation held on
+                  NO fully-legal candidate (claimed mate/check unmet) — a low note, not a flag.
+
+    board.parse_san validates against board.legal_moves AND resolves disambiguation in
+    that exact position. python-chess raises IllegalMoveError for a well-formed-but-illegal
+    move (-> FLAG candidate) and AmbiguousMoveError / InvalidMoveError for ambiguity /
+    malformed SAN (-> ABSTAIN); all are ValueError subclasses, so order matters.
+    """
+    if not sequence:
+        return (True, None, False, False)  # an empty line replays trivially
+    last_san = sequence[-1][2]
+    wants_mate = last_san.endswith("#")
+    wants_check = last_san.endswith("+")
+    best_illegal: Optional[Tuple[int, str]] = None
+    saw_ambiguous = False
+    soft_fail_seen = False
+    for board0 in candidate_boards:
+        board = board0.copy()
+        illegal_san: Optional[str] = None
+        ambiguous = False
+        prefix = 0
+        for (_num, _side, san) in sequence:
+            core = san.rstrip("+#")
+            try:
+                move = board.parse_san(core)
+            except chess.IllegalMoveError:
+                illegal_san = core       # well-formed SAN, no legal move -> confab/illegal
+                break
+            except (chess.AmbiguousMoveError, chess.InvalidMoveError):
+                ambiguous = True         # underspecified or malformed -> ABSTAIN
+                illegal_san = core
+                break
+            except ValueError:
+                illegal_san = core       # any other parse failure -> treat as illegal
+                break
+            board.push(move)
+            prefix += 1
+        else:
+            # whole sequence replayed legally on this candidate
+            ok = True
+            if wants_mate and not board.is_checkmate():
+                ok = False
+            elif wants_check and not board.is_check():
+                ok = False
+            if ok:
+                return (True, None, False, False)
+            soft_fail_seen = True
+            continue
+        if ambiguous:
+            saw_ambiguous = True
+        if best_illegal is None or prefix > best_illegal[0]:
+            best_illegal = (prefix, illegal_san)
+    if soft_fail_seen:
+        return (True, None, False, True)
+    if best_illegal is not None:
+        return (False, best_illegal[1], saw_ambiguous, False)
+    return (False, None, saw_ambiguous, False)
+
+
+def _board_or_none(fen: str):
+    """A chess.Board from `fen`, or None if the FEN is unusable (e.g. the dummy FENs
+    tests sometimes pass). Used so a bad FEN never raises mid-validation."""
+    if not fen:
+        return None
+    try:
+        return chess.Board(fen)
+    except (ValueError, IndexError):
+        return None
+
+
+def _index_of_ply(game, ply: int) -> Optional[int]:
+    for i, m in enumerate(game.moves):
+        if m.ply == ply:
+            return i
+    return None
+
+
+def _anchor_index_from_number(game, number: int, side: Optional[str]) -> Optional[int]:
+    """Index of the game move with this move-number (and side, if given). Mirrors the
+    match bind_span_to_ply does, MINUS the SAN-equality requirement — a variation's
+    first move is not the played move."""
+    for i, m in enumerate(game.moves):
+        if m.move_number == number and (side is None or m.side == side):
+            return i
+    return None
+
+
+def _anchor_candidate_boards(game, idx: Optional[int], hypothetical: bool) -> List["chess.Board"]:
+    """Boards C1-C4 around anchor index `idx` (deduped by FEN), plus a counterfactual
+    turn-flip variant of C2 when the line is hypothetical (spec §3b/§3c):
+
+      C1 fen_after(p)            continuation ("25. g5 ..."), branches AFTER the move
+      C2 fen_before(p)           "instead of" / "if X had NOT been played", branches BEFORE
+      C3 fen_before(p+1)         numbering off-by-one one way
+      C4 fen_after(p-1)          numbering off-by-one the other way
+      turn-flip  null move on C2 the side that would have played X passes -> opponent to move
+                                 (this is what makes "if Black had NOT played ...f6, Qxg7#" replay)
+    """
+    boards: List[chess.Board] = []
+    seen: set = set()
+
+    def add(board) -> None:
+        if board is None:
+            return
+        key = board.fen()
+        if key in seen:
+            return
+        seen.add(key)
+        boards.append(board)
+
+    if idx is None:
+        return boards
+    mv = game.moves[idx]
+    add(_board_or_none(mv.fen_after))    # C1
+    add(_board_or_none(mv.fen_before))   # C2
+    if idx + 1 < len(game.moves):
+        add(_board_or_none(game.moves[idx + 1].fen_before))  # C3
+    if idx - 1 >= 0:
+        add(_board_or_none(game.moves[idx - 1].fen_after))   # C4
+    if hypothetical:
+        probe = _board_or_none(mv.fen_before)
+        if probe is not None and not probe.is_check():   # a null move is illegal in check
+            probe.push(chess.Move.null())
+            add(probe)
+    return boards
+
+
+def _all_plies_candidate_boards(game) -> List["chess.Board"]:
+    """Every per-ply fen_before/fen_after as a branch board (deduped). The last-resort
+    sweep — only ever consulted to GRANT validity (find some legal anchoring), never to
+    deny it; a confab line legal from an unrelated position is harmlessly accepted under
+    warn-don't-strip (spec §6 asymmetry)."""
+    boards: List[chess.Board] = []
+    seen: set = set()
+    for m in game.moves:
+        for fen in (m.fen_before, m.fen_after):
+            b = _board_or_none(fen)
+            if b is None:
+                continue
+            key = b.fen()
+            if key in seen:
+                continue
+            seen.add(key)
+            boards.append(b)
+    return boards
+
+
+def _engine_pv_token_lists(game) -> List[List[str]]:
+    """Each engine line (best / refutation / alternative) as an ordered SAN-token list,
+    for the demoted provenance fallback."""
+    lists: List[List[str]] = []
+    for m in game.moves:
+        candidates = [getattr(m, "best_line_san", "") or "",
+                      getattr(m, "refutation_line_san", "") or ""]
+        for alt in (m.top_alternatives or []):
+            candidates.append(alt.get("pv_numbered", "") or alt.get("pv_san", "") or "")
+        for line in candidates:
+            seq, _ = _san_sequence(line)
+            sans = [s.rstrip("+#") for (_n, _s, s) in seq]
+            if sans:
+                lists.append(sans)
+    return lists
+
+
+def _line_is_engine_pv(seq, pv_lists) -> bool:
+    """True if the line's SAN tokens appear as a verbatim CONTIGUOUS subsequence of some
+    engine PV — the demoted provenance signal (strongest trust). Deliberately stricter
+    than the old flat per-token pooling, so an illegal SEQUENCE recombined from
+    individually-real tokens is NOT rescued here."""
+    target = [s.rstrip("+#") for (_n, _s, s) in seq]
+    if not target:
+        return False
+    n = len(target)
+    for pv in pv_lists:
+        for i in range(len(pv) - n + 1):
+            if pv[i:i + n] == target:
+                return True
+    return False
+
+
+def _resolve_anchor_index(seq, sentence, game, fact_packets) -> Optional[int]:
+    """Find the game-move index the parenthetical branches from (spec §3a): primary =
+    the first (number, side) inside the paren; fallback = bind the enclosing sentence to
+    a ply via its BOLD game-move reference (the counterfactual case, where the paren
+    itself carries no move number)."""
+    first_num, first_side = None, None
+    for (num, side, _san) in seq:
+        if num is not None:
+            first_num, first_side = num, side
+            break
+    if first_num is not None:
+        idx = _anchor_index_from_number(game, first_num, first_side)
+        if idx is None and first_side is not None:
+            idx = _anchor_index_from_number(game, first_num, None)  # try either side
+        if idx is not None:
+            return idx
+    from factcheck import bind_span_to_ply  # lazy: avoid a load-time import cycle
+    pk = bind_span_to_ply(sentence, fact_packets)
+    if pk is not None and pk.get("ply") is not None:
+        j = _index_of_ply(game, pk["ply"])
+        if j is not None:
+            return j
+    return None
+
+
+def validate_parenthetical_variations(
+    report_md: str, game: GameAnalysis, fact_packets: Optional[List[dict]] = None
+) -> List["UnverifiedVariation"]:
+    """Legality-replay validator for written parenthetical variations (the reframe).
+
+    Returns a record for each line that FLAGs (well-formed, illegal from every candidate
+    branch board, not a verbatim engine line) or ABSTAINs (malformed/ambiguous SAN, or an
+    unmet mate/check annotation). A VALID line — including a legal counterfactual the
+    engine never pre-analysed — produces NO record. Never mutates the report.
+
+    fact_packets (optional) feed the sentence->ply binding fallback; built minimally from
+    `game` when omitted (only move_no/side/played/ply are read, so no tiers are needed).
+    See docs/specs/VARIATION_VALIDATOR.md.
+    """
+    if not report_md or not getattr(game, "moves", None):
+        return []
+    # Lazy import: factcheck imports outputs lazily too, so module-level would cycle.
+    from factcheck import split_sentences, _HYPOTHETICAL_RE
+
+    if fact_packets is None:
+        fact_packets = [
+            {"ply": m.ply, "move_no": m.move_number, "side": m.side, "played": m.san}
+            for m in game.moves
+        ]
+
+    pv_lists = _engine_pv_token_lists(game)
+    all_plies: Optional[List["chess.Board"]] = None  # built lazily — the expensive path
+    results: List[UnverifiedVariation] = []
+    seen_parens: set = set()
+
+    for sentence in split_sentences(report_md):
+        for pm in re.finditer(r"\(([^)]*)\)", sentence):
+            paren = pm.group(1)
+            if paren in seen_parens:
+                continue
+            seq, had_unparseable = _san_sequence(paren)
+            if not seq:
+                continue
+            hypothetical = bool(_HYPOTHETICAL_RE.search(sentence))
+            has_move_notation = bool(_VARIATION_INTRO_RE.search(paren))
+            # Inspect a paren only if it is move-bearing notation, OR its enclosing
+            # sentence is hypothetical (the numberless-counterfactual case, where the
+            # grammatical setup "if X had not played ..." lives in the prose).
+            if not (has_move_notation or hypothetical):
+                continue
+            seen_parens.add(paren)
+
+            idx = _resolve_anchor_index(seq, sentence, game, fact_packets)
+            anchor_ply = game.moves[idx].ply if idx is not None else None
+            cands = _anchor_candidate_boards(game, idx, hypothetical)
+            legal, first_illegal, ambiguous, soft_fail = replay_variation_legal(seq, cands)
+
+            if not legal:
+                if all_plies is None:
+                    all_plies = _all_plies_candidate_boards(game)
+                s_legal, s_illegal, s_amb, s_soft = replay_variation_legal(seq, all_plies)
+                if s_legal:
+                    legal, first_illegal, ambiguous, soft_fail = True, None, s_amb, s_soft
+                else:
+                    ambiguous = ambiguous or s_amb
+                    if first_illegal is None:
+                        first_illegal = s_illegal
+
+            cand_fens = [b.fen() for b in cands]
+
+            if legal:
+                if soft_fail:  # legal but the claimed mate/check held on no candidate
+                    results.append(UnverifiedVariation(
+                        paren=paren, verdict="ABSTAIN", confidence="low",
+                        anchor_ply=anchor_ply, first_illegal_san=None,
+                        candidate_fens=cand_fens))
+                continue  # VALID — the counterfactual / sideline survives
+
+            if _line_is_engine_pv(seq, pv_lists):
+                continue  # VALID via provenance (verbatim engine line)
+            if had_unparseable or ambiguous:
+                results.append(UnverifiedVariation(
+                    paren=paren, verdict="ABSTAIN", confidence="low",
+                    anchor_ply=anchor_ply, first_illegal_san=first_illegal,
+                    candidate_fens=cand_fens))
+                continue
+            if not cands and not all_plies:
+                continue  # no usable branch board anywhere -> can't prove illegality
+            results.append(UnverifiedVariation(
+                paren=paren, verdict="FLAG", confidence="high",
+                anchor_ply=anchor_ply, first_illegal_san=first_illegal,
+                candidate_fens=cand_fens))
+    return results
+
+
+def find_unverified_variation_moves(report_md: str, game: GameAnalysis) -> List[str]:
+    """Back-compat shim over `validate_parenthetical_variations`: the first illegal SAN
+    of each FLAGGED line — a well-formed move illegal from every candidate branch board
+    AND absent from the engine's lines.
+
+    BREAKING CHANGE (v0.42 reframe): the meaning moved from 'engine-absent' to
+    'illegal-from-branch'. A legal counterfactual the engine never pre-analysed is no
+    longer returned — only genuine confabulation/illegality is. ABSTAIN lines (malformed
+    SAN) are NOT returned. See docs/specs/VARIATION_VALIDATOR.md.
+    """
+    return [
+        v.first_illegal_san
+        for v in validate_parenthetical_variations(report_md, game)
+        if v.verdict == "FLAG" and v.first_illegal_san
+    ]
 
 
 _VARIATION_INTRO_RE = re.compile(r"\d+\.(?:\.\.)?\s*[OKQRBNa-h]")
 
 
 def strip_unverified_variations(report_md: str, game: GameAnalysis) -> str:
-    """Remove parenthetical variation spans that contain engine-unverified moves.
+    """Remove parenthetical variation spans whose moves are not all in the engine lines.
 
-    Promotion from the *detect-and-warn* behaviour of
-    ``find_unverified_variation_moves`` to an *enforce* behaviour: any
-    parenthetical that looks like variation notation and whose moves are not
-    all present in the engine lines for this game is silently deleted from the
-    prose.  Parentheticals that are ordinary asides (no move-number+SAN
-    pattern) are never touched.
+    DISABLED BY DEFAULT (v0.42 reframe): this implements the OLD engine-membership
+    policy and is NO LONGER called by the pipeline. `assemble_report` now WARNS and never
+    strips, because deleting on a heuristic risks removing a legitimate instructive
+    counterfactual — the exact harm the reframe forbids (docs/specs/VARIATION_VALIDATOR.md
+    §6). Kept only so its behaviour stays test-covered. If stripping is ever re-enabled it
+    must be gated to category-2 lines only (well-formed, illegal from every branch, not an
+    engine line) — never to a line that was merely engine-absent. Do not re-wire as-is.
     """
     if not report_md:
         return report_md
@@ -509,21 +877,23 @@ def assemble_report(
     # move so there's no header/bold duplication for dramatic-but-undiagrammed moves.
     body = _strip_orphan_move_headers(body)
 
-    # Data-back trust boundary: strip any parenthetical whose variation moves
-    # were not supplied by the engine — the model invented them rather than
-    # quoting. Log the stripped moves so confabulation is visible in the
-    # server/CLI console without blocking the report.
+    # Data-back trust boundary (legality reframe): WARN about any parenthetical line with
+    # no legal anchoring in this game, but NEVER mutate `body`. The old engine-membership
+    # strip wrongly deleted legitimate instructive counterfactuals the engine had not
+    # pre-analysed; under the reframe a line is valid if it replays legally from a
+    # plausible branch board, and the failure action is warn-and-annotate, never strip
+    # (docs/specs/VARIATION_VALIDATOR.md §6).
     try:
-        unverified = find_unverified_variation_moves(body, game)
-        if unverified:
+        flagged = [v for v in validate_parenthetical_variations(body, game)
+                   if v.verdict == "FLAG"]
+        if flagged:
             import sys
-            print(
-                f"  [variation check] stripping {len(unverified)} unverified "
-                f"move(s) from parenthetical variations: "
-                f"{', '.join(unverified[:12])}",
-                file=sys.stderr,
-            )
-            body = strip_unverified_variations(body, game)
+            for v in flagged[:12]:
+                print(
+                    f"  [variation check] illegal-from-branch: {v.first_illegal_san!r} "
+                    f"(anchor ply {v.anchor_ply}) in ({v.paren[:70]})",
+                    file=sys.stderr,
+                )
     except Exception:
         pass
 
