@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.15] — 2026-06-18
+
+### Added
+- **`is_stalemate_move` factgate predicate** (`stalemate_move` tag) — move predicate certifying the move results in stalemate: the opponent has no legal moves and is not in check, immediately drawing the game. Uses `board_after.is_stalemate()`. Evidence carries a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with stalemate-vs-checkmate clarity and the stalemate-as-saving-resource framing. 5 new pure tests; full suite 301 passed.
+
 ## [0.41.14] — 2026-06-18
 
 ### Added

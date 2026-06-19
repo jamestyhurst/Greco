@@ -2296,6 +2296,26 @@ def is_rook_on_seventh(
     }
 
 
+def is_stalemate_move(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move results in stalemate — the opponent has no legal
+    moves and is not in check, so the game is drawn immediately.
+    evidence keys: evidence (ready-to-quote string).
+    """
+    if not board_after.is_stalemate():
+        return False, None
+    return True, {
+        "evidence": (
+            "Stalemate — the opponent has no legal moves and is not in check; "
+            "the game is drawn"
+        ),
+    }
+
+
 def is_double_check(
     board_before: chess.Board,
     move: chess.Move,
@@ -2401,6 +2421,7 @@ GATED_TAGS = (
     "rook_on_seventh",
     "captures_hanging",
     "double_check",
+    "stalemate_move",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2598,5 +2619,9 @@ def certified_claims(
     dc = _safe(lambda: is_double_check(board_before, move, board_after, mover_color))
     if dc and dc[0]:
         tags.add("double_check")
+
+    sm = _safe(lambda: is_stalemate_move(board_before, move, board_after, mover_color))
+    if sm and sm[0]:
+        tags.add("stalemate_move")
 
     return tags

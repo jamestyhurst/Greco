@@ -2734,3 +2734,50 @@ def test_double_check_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "double_check" in tags
+
+
+# --- is_stalemate_move --------------------------------------------------------
+# FEN before: k7/8/2K5/2Q5/8/8/8/8 w - - 0 1
+#   White: Qc5, Kc6  |  Black: Ka8
+#   Qc5→c7: queen lands on c7, covering a7/b7/b8 — Black king has no legal moves, not in check.
+def _sm(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_stalemate_move(board_before, move, board_after, color)
+
+
+def test_stalemate_move_true():
+    # Qc5→c7 stalemating the Black king on a8.
+    ok, ev = _sm("k7/8/2K5/2Q5/8/8/8/8 w - - 0 1", "c5c7", chess.WHITE)
+    assert ok
+    assert "stalemate" in ev["evidence"].lower()
+
+
+def test_stalemate_move_checkmate_false():
+    # Rg7→g8+ delivers checkmate, NOT stalemate.
+    ok, _ = _sm("7k/6R1/6K1/8/8/8/8/8 w - - 0 1", "g7g8", chess.WHITE)
+    assert not ok
+
+
+def test_stalemate_move_quiet_false():
+    # White king moves away — Black is not stalemated.
+    ok, _ = _sm("k7/8/2K5/2Q5/8/8/8/8 w - - 0 1", "c6d5", chess.WHITE)
+    assert not ok
+
+
+def test_stalemate_move_ongoing_false():
+    # Normal position — game not over after the move.
+    ok, _ = _sm("k7/8/8/8/8/8/8/K7 w - - 0 1", "a1b1", chess.WHITE)
+    assert not ok
+
+
+def test_stalemate_move_in_certified_claims():
+    # Qc5→c7 stalemate: stalemate_move tag should appear in certified_claims.
+    board_before = chess.Board("k7/8/2K5/2Q5/8/8/8/8 w - - 0 1")
+    move = chess.Move.from_uci("c5c7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "stalemate_move" in tags
