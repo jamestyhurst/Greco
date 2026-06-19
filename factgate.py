@@ -2783,6 +2783,7 @@ def has_connected_passers(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     """Certifies that this move creates a new connected-passer formation for the
     mover — two or more passed pawns on adjacent files that did not exist as a
     connected pair before the move. Only fires on the transition move.
@@ -2938,6 +2939,7 @@ def has_queen_centralization(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.QUEEN:
         return False, None
@@ -3007,6 +3009,7 @@ def has_diagonal_battery(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _queen_bishop_batteries(board: chess.Board, color: bool) -> Set[frozenset]:
         queens = list(board.pieces(chess.QUEEN, color))
         bishops = list(board.pieces(chess.BISHOP, color))
@@ -3144,6 +3147,7 @@ def has_bishop_vs_knight(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _bvk_sides(board: chess.Board):
         wb = bool(board.pieces(chess.BISHOP, chess.WHITE))
         wn = bool(board.pieces(chess.KNIGHT, chess.WHITE))
@@ -3219,6 +3223,7 @@ def has_pawn_majority(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     QS_FILES = frozenset(range(4))    # a-d
     KS_FILES = frozenset(range(4, 8)) # e-h
 
@@ -3266,6 +3271,7 @@ def has_passed_pawn_race(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _has_passer(board: chess.Board, color: bool) -> bool:
         enemy = not color
         for sq in board.pieces(chess.PAWN, color):
@@ -3310,6 +3316,7 @@ def has_castling_rights_forfeited(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     if board_before.is_castling(move):
         return False, None
 
@@ -3398,6 +3405,7 @@ def has_hanging_pawns(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _find_complexes(board: chess.Board, color: bool) -> Set[Tuple[int, int]]:
         pawns = list(board.pieces(chess.PAWN, color))
         all_pf = {chess.square_file(sq) for sq in pawns}
@@ -3450,6 +3458,7 @@ def has_mobile_pawn_center(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     if mover_color == chess.WHITE:
         d_sq, e_sq = chess.D4, chess.E4
         center_desc = "d4 and e4"
@@ -3487,6 +3496,7 @@ def has_rook_file_battery(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _file_batteries(board: chess.Board, color: bool) -> Set[int]:
         majors = (
             list(board.pieces(chess.ROOK, color))
@@ -3530,6 +3540,7 @@ def has_pawn_duo(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _find_duos(board: chess.Board, color: bool) -> Set[frozenset]:
         pawn_squares = list(board.pieces(chess.PAWN, color))
         duos: Set[frozenset] = set()
@@ -3567,6 +3578,7 @@ def has_pawn_duo(
 def has_knight_on_seventh(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.KNIGHT:
         return False, None
@@ -3590,6 +3602,7 @@ def has_knight_on_seventh(
 def has_knight_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.KNIGHT:
         return False, None
@@ -3613,6 +3626,7 @@ def has_knight_on_fifth(
 def has_two_rooks_vs_queen(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
@@ -3648,6 +3662,7 @@ def has_two_rooks_vs_queen(
 def has_queen_vs_rook_and_minor(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3688,6 +3703,7 @@ def has_queen_vs_rook_and_minor(
 def has_rook_vs_two_minors(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3728,6 +3744,7 @@ def has_rook_vs_two_minors(
 def has_queen_endgame(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _is_queen_endgame(board: chess.Board) -> bool:
         if not (board.pieces(chess.QUEEN, chess.WHITE) or board.pieces(chess.QUEEN, chess.BLACK)):
             return False
@@ -3760,6 +3777,7 @@ def has_queen_endgame(
 def has_rook_vs_bishop(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3799,6 +3817,7 @@ def has_rook_vs_bishop(
 def has_rook_vs_knight(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3838,6 +3857,7 @@ def has_rook_vs_knight(
 def has_two_bishops_vs_rook(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3877,6 +3897,7 @@ def has_two_bishops_vs_rook(
 def has_two_knights_vs_rook(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3916,6 +3937,7 @@ def has_two_knights_vs_rook(
 def has_queen_vs_rook(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3955,6 +3977,7 @@ def has_queen_vs_rook(
 def has_queen_vs_two_minors(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -3994,6 +4017,7 @@ def has_queen_vs_two_minors(
 def has_rook_and_minor_vs_two_rooks(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -4033,6 +4057,7 @@ def has_rook_and_minor_vs_two_rooks(
 def has_two_rooks_vs_minor_pair(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -4072,6 +4097,7 @@ def has_two_rooks_vs_minor_pair(
 def has_queen_vs_bishop(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -4111,6 +4137,7 @@ def has_queen_vs_bishop(
 def has_queen_vs_knight(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
@@ -4150,6 +4177,7 @@ def has_queen_vs_knight(
 def has_queen_and_minor_vs_two_rooks(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4180,6 +4208,7 @@ def has_queen_and_minor_vs_two_rooks(
 def has_queen_and_rook_vs_two_rooks(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4211,6 +4240,7 @@ def has_queen_and_rook_vs_two_rooks(
 def has_rook_and_two_minors_vs_two_rooks(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4242,6 +4272,7 @@ def has_rook_and_two_minors_vs_two_rooks(
 def has_queen_vs_three_minors(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4274,6 +4305,7 @@ def has_queen_vs_three_minors(
 def has_two_rooks_vs_three_minors(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4305,6 +4337,7 @@ def has_two_rooks_vs_three_minors(
 def has_queen_vs_two_rooks_and_minor(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4336,6 +4369,7 @@ def has_queen_vs_two_rooks_and_minor(
 def has_three_minors_vs_rook(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4367,6 +4401,7 @@ def has_three_minors_vs_rook(
 def has_queen_and_rook_vs_queen(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
         wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
@@ -4767,6 +4802,7 @@ def has_queen_and_two_minors_vs_queen(
 def has_rook_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.ROOK:
         return False, None
@@ -4790,6 +4826,7 @@ def has_rook_on_fifth(
 def has_bishop_on_seventh(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.BISHOP:
         return False, None
@@ -4813,6 +4850,7 @@ def has_bishop_on_seventh(
 def has_pawn_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.PAWN:
         return False, None
@@ -4837,6 +4875,7 @@ def has_pawn_on_fifth(
 def has_bishop_centralized(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.BISHOP:
         return False, None
@@ -4854,6 +4893,7 @@ def has_bishop_centralized(
 def has_two_bishops_vs_two_knights(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board: chess.Board) -> Optional[str]:
         wb = len(board.pieces(chess.BISHOP, chess.WHITE))
         wn = len(board.pieces(chess.KNIGHT, chess.WHITE))
@@ -4888,6 +4928,7 @@ def has_two_bishops_vs_two_knights(
 def has_pawn_on_sixth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.PAWN:
         return False, None
@@ -4911,6 +4952,7 @@ def has_pawn_on_sixth(
 def has_king_centralized(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.KING:
         return False, None
@@ -4930,6 +4972,7 @@ def has_king_centralized(
 def has_queen_on_back_rank(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.QUEEN:
         return False, None
@@ -4953,6 +4996,7 @@ def has_queen_on_back_rank(
 def has_outside_passed_pawn(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _is_passed(board: chess.Board, sq: int, color: bool) -> bool:
         f = chess.square_file(sq)
         r = chess.square_rank(sq)
@@ -4995,6 +5039,7 @@ def has_outside_passed_pawn(
 def has_queen_on_sixth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.QUEEN:
         return False, None
@@ -5021,6 +5066,7 @@ def has_rook_on_back_rank(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.ROOK:
         return False, None
@@ -5056,6 +5102,7 @@ def has_queen_on_seventh(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.QUEEN:
         return False, None
@@ -5091,6 +5138,7 @@ def has_minor_piece_endgame(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _is_mixed_minor_endgame(board: chess.Board) -> bool:
         for color in [chess.WHITE, chess.BLACK]:
             for pt in [chess.ROOK, chess.QUEEN]:
@@ -5129,6 +5177,7 @@ def has_knight_endgame(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _is_knight_endgame(board: chess.Board) -> bool:
         for color in [chess.WHITE, chess.BLACK]:
             for pt in [chess.ROOK, chess.QUEEN, chess.BISHOP]:
@@ -5163,6 +5212,7 @@ def has_bishop_endgame(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _is_bishop_endgame(board: chess.Board) -> bool:
         for color in [chess.WHITE, chess.BLACK]:
             for pt in [chess.ROOK, chess.QUEEN, chess.KNIGHT]:
@@ -5197,6 +5247,7 @@ def has_knight_on_sixth(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.KNIGHT:
         return False, None
@@ -5231,6 +5282,7 @@ def has_knight_on_rim(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.KNIGHT:
         return False, None
@@ -5264,6 +5316,7 @@ def has_open_center(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _center_open(board: chess.Board) -> bool:
         for color in [chess.WHITE, chess.BLACK]:
             for sq in board.pieces(chess.PAWN, color):
@@ -5294,6 +5347,7 @@ def has_rook_on_sixth(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     piece = board_before.piece_at(move.from_square)
     if piece is None or piece.piece_type != chess.ROOK:
         return False, None
@@ -5330,6 +5384,7 @@ def has_tripled_pawns(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _find_tripled(board: chess.Board, color: bool) -> Set[int]:
         file_counts: dict = {}
         for sq in board.pieces(chess.PAWN, color):
@@ -5365,6 +5420,7 @@ def has_isolated_queen_pawn(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _is_iqp(board: chess.Board, color: bool) -> bool:
         d_sq = chess.D4 if color == chess.WHITE else chess.D5
         pd = board.piece_at(d_sq)
@@ -5401,6 +5457,7 @@ def has_seventh_rank_battery(
     board_after: chess.Board,
     mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _seventh_rank_battery(board: chess.Board, color: bool) -> bool:
         rank = 6 if color == chess.WHITE else 1
         majors = (
