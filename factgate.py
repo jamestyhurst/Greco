@@ -3260,6 +3260,52 @@ def has_pawn_majority(
     }
 
 
+def is_bishop_on_long_diagonal(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.BISHOP:
+        return False, None
+
+    _A1H8 = frozenset({
+        chess.A1, chess.B2, chess.C3, chess.D4,
+        chess.E5, chess.F6, chess.G7, chess.H8,
+    })
+    _H1A8 = frozenset({
+        chess.H1, chess.G2, chess.F3, chess.E4,
+        chess.D5, chess.C6, chess.B7, chess.A8,
+    })
+
+    to_sq = move.to_square
+    from_sq = move.from_square
+
+    if to_sq in _A1H8:
+        diag_name = "a1-h8"
+    elif to_sq in _H1A8:
+        diag_name = "h1-a8"
+    else:
+        return False, None
+
+    if from_sq in _A1H8 or from_sq in _H1A8:
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {
+        "square": sq_name,
+        "diagonal": diag_name,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s bishop reaches {sq_name} on the {diag_name} long diagonal — "
+            f"from this diagonal the bishop commands the full length of the board, "
+            f"radiating pressure from corner to corner"
+        ),
+    }
+
+
 def has_hanging_pawns(
     board_before: chess.Board,
     move: chess.Move,
@@ -3510,6 +3556,7 @@ GATED_TAGS = (
     "rook_file_battery",
     "mobile_pawn_center",
     "hanging_pawns",
+    "bishop_long_diagonal",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3823,5 +3870,9 @@ def certified_claims(
     hpw = _safe(lambda: has_hanging_pawns(board_before, move, board_after, mover_color))
     if hpw and hpw[0]:
         tags.add("hanging_pawns")
+
+    bld = _safe(lambda: is_bishop_on_long_diagonal(board_before, move, board_after, mover_color))
+    if bld and bld[0]:
+        tags.add("bishop_long_diagonal")
 
     return tags

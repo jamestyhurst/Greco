@@ -4284,3 +4284,58 @@ def test_hanging_pawns_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "hanging_pawns" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_bishop_on_long_diagonal
+# ---------------------------------------------------------------------------
+
+def _bld(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_bishop_on_long_diagonal(board_before, move, board_after, color)
+
+
+def test_bishop_long_diagonal_a1h8_true():
+    # White bishop c1→b2: c1 is not on a long diagonal; b2 is on a1-h8 diagonal.
+    ok, ev = _bld("4k3/8/8/8/8/8/8/2B1K3 w - - 0 1", "c1b2", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "a1" in ev["diagonal"] or "h8" in ev["diagonal"]
+
+
+def test_bishop_long_diagonal_h1a8_true():
+    # White bishop f1→g2: f1 is not on a long diagonal; g2 is on h1-a8 diagonal.
+    ok, ev = _bld("4k3/8/8/8/8/8/8/4KB2 w - - 0 1", "f1g2", chess.WHITE)
+    assert ok
+    assert "h1" in ev["diagonal"] or "a8" in ev["diagonal"]
+
+
+def test_bishop_long_diagonal_already_on_long_diag_false():
+    # Bishop already on d4 (a1-h8), moves to e5 (still a1-h8): no new transition.
+    ok, _ = _bld("4k3/8/8/8/3B4/8/8/4K3 w - - 0 1", "d4e5", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_long_diagonal_non_bishop_false():
+    # Rook moves to d4 (on a1-h8 diagonal) — not a bishop move.
+    ok, _ = _bld("4k3/8/8/8/8/8/8/3RK3 w - - 0 1", "d1d4", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_long_diagonal_off_long_diagonal_false():
+    # Bishop c1→e3: e3 is not on any long diagonal.
+    ok, _ = _bld("4k3/8/8/8/8/8/8/2B1K3 w - - 0 1", "c1e3", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_long_diagonal_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/2B1K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("c1b2")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "bishop_long_diagonal" in tags

@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.44] — 2026-06-19
+
+### Added
+- **`is_bishop_on_long_diagonal` factgate predicate** (`bishop_long_diagonal` tag) — fires when a bishop moves FROM a non-long-diagonal square TO a square on the a1-h8 or h1-a8 long diagonal. Guards on piece type (bishop), checks the destination against two frozensets of 8 long-diagonal squares each, and suppresses the tag if the bishop was already on a long diagonal before the move. Evidence carries `square`, `diagonal`, `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with corner-to-corner scope framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 465 passed.
+
 ## [0.41.43] — 2026-06-19
 
 ### Added
