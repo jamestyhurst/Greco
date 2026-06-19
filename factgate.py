@@ -1946,6 +1946,33 @@ def is_connected_rooks(board: chess.Board, color: bool) -> Tuple[bool, Optional[
 
 
 # --------------------------------------------------------------------------- #
+# File opening — a move that creates a new fully-open file.
+# --------------------------------------------------------------------------- #
+def creates_open_file(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certify that the move opened a new fully-open file (no pawns of either colour
+    remain on it). Most commonly a pawn capture that exchanges both colours' pawns off
+    the same file, freeing it for rooks and queens. Engine-free — pure pawn counting.
+    """
+    open_before = set(file_structure(board_before)["open"])
+    open_after = set(file_structure(board_after)["open"])
+    new_open = sorted(open_after - open_before)
+    if not new_open:
+        return False, None
+
+    side = "White" if mover_color == chess.WHITE else "Black"
+    file_list = ", ".join(f"{f}-file" for f in new_open)
+    return True, {
+        "files": new_open,
+        "evidence": f"{side}'s move opens the {file_list}",
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Desperado — a piece captures material while itself under attack.
 # --------------------------------------------------------------------------- #
 def is_desperado(
@@ -2067,6 +2094,7 @@ GATED_TAGS = (
     "rook_on_open_file",
     "desperado",
     "connected_rooks",
+    "file_opened",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2220,5 +2248,9 @@ def certified_claims(
     cr = _safe(lambda: is_connected_rooks(board_after, mover_color))
     if cr and cr[0]:
         tags.add("connected_rooks")
+
+    fo = _safe(lambda: creates_open_file(board_before, move, board_after, mover_color))
+    if fo and fo[0]:
+        tags.add("file_opened")
 
     return tags

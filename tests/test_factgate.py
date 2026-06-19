@@ -2221,3 +2221,43 @@ def test_connected_rooks_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "connected_rooks" in tags
+
+
+# --- creates_open_file ------------------------------------------------------
+def _open_file(fen, uci, color=chess.WHITE):
+    """Helper: push UCI move and call creates_open_file."""
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.creates_open_file(b, mv, after, color)
+
+
+def test_creates_open_file_true_pawn_exchange():
+    # White pawn c4 captures Black pawn d5 → c-file becomes open (no pawns of either colour).
+    # Before: White pawn c4, Black pawn d5; no other c- or d-file pawns.
+    ok, ev = _open_file("3k4/8/8/3p4/2P1P3/8/8/4K3 w - - 0 1", "c4d5")
+    assert ok
+    assert "c" in ev["files"]
+
+
+def test_creates_open_file_false_quiet_push():
+    # Quiet pawn push d4-d5 moves a pawn but exchanges nothing → no new open file.
+    ok, _ = _open_file("3k4/8/8/8/3P4/8/8/4K3 w - - 0 1", "d4d5")
+    assert not ok
+
+
+def test_creates_open_file_false_already_open():
+    # d-file already open before White's king move → no *new* open file detected.
+    ok, _ = _open_file("3k4/8/8/8/8/8/8/4K3 w - - 0 1", "e1f1")
+    assert not ok
+
+
+def test_creates_open_file_in_certified_claims():
+    # White cxd5 opens the c-file → "file_opened" tag appears in certified_claims.
+    board_before = chess.Board("3k4/8/8/3p4/2P1P3/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("c4d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "file_opened" in tags

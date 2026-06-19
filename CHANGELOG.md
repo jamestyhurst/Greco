@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.4] — 2026-06-18
+
+### Added
+- **`creates_open_file` factgate predicate** (`file_opened` tag) — move predicate certifying that a move opened a new fully-open file (no pawns of either colour). Uses `file_structure()` diff on board_before vs board_after. Wired into `GATED_TAGS`, `certified_claims()`, and the narrator system prompt. 4 new pure tests; full suite 654 passed.
+
 ## [0.41.3] — 2026-06-18
 
 ### Added
