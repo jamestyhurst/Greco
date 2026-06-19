@@ -3899,3 +3899,57 @@ def test_rook_endgame_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_endgame" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_diagonal_battery
+# ---------------------------------------------------------------------------
+
+def _dbat(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_diagonal_battery(board_before, move, board_after, color)
+
+
+def test_diagonal_battery_pawn_unblocks_queen_bishop_true():
+    # White pawn b2→b3 clears b2, connecting White queen on a3 and bishop on c1 diagonally.
+    ok, ev = _dbat("4k3/8/8/8/8/Q7/1P6/2BK4 w - - 0 1", "b2b3", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_diagonal_battery_queen_moves_to_align_with_bishop_true():
+    # White queen h3→f1 aligns with bishop on c4 along the c4-f1 diagonal (e2,d3 empty).
+    ok, ev = _dbat("4k3/8/8/8/2B5/7Q/8/7K w - - 0 1", "h3f1", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_diagonal_battery_already_existed_before_false():
+    # Queen on f1 and bishop on c4 already form a battery — king move changes nothing.
+    ok, _ = _dbat("4k3/8/8/8/2B5/8/8/5Q1K w - - 0 1", "h1g1", chess.WHITE)
+    assert not ok
+
+
+def test_diagonal_battery_two_bishops_no_queen_false():
+    # Two White bishops on same diagonal — no queen involved, not a diagonal battery.
+    ok, _ = _dbat("4k3/8/8/3B4/8/1B6/8/7K w - - 0 1", "h1g1", chess.WHITE)
+    assert not ok
+
+
+def test_diagonal_battery_no_diagonal_sliders_aligned_false():
+    # King move with queen and bishop on different diagonals — no battery possible.
+    ok, _ = _dbat("4k3/8/8/8/8/Q7/1P6/2BK4 w - - 0 1", "d1e1", chess.WHITE)
+    assert not ok
+
+
+def test_diagonal_battery_in_certified_claims():
+    fen = "4k3/8/8/8/8/Q7/1P6/2BK4 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("b2b3")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "diagonal_battery" in tags

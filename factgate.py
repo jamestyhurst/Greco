@@ -2932,6 +2932,57 @@ def is_opposite_side_castling(
     }
 
 
+def has_diagonal_battery(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _queen_bishop_batteries(board: chess.Board, color: bool) -> Set[frozenset]:
+        queens = list(board.pieces(chess.QUEEN, color))
+        bishops = list(board.pieces(chess.BISHOP, color))
+        result: Set[frozenset] = set()
+        for q_sq in queens:
+            qf, qr = chess.square_file(q_sq), chess.square_rank(q_sq)
+            for b_sq in bishops:
+                bf, br = chess.square_file(b_sq), chess.square_rank(b_sq)
+                if abs(qf - bf) != abs(qr - br):
+                    continue
+                between = chess.SquareSet(chess.between(q_sq, b_sq))
+                if any(board.piece_at(s) for s in between):
+                    continue
+                result.add(frozenset({q_sq, b_sq}))
+        return result
+
+    after_batteries = _queen_bishop_batteries(board_after, mover_color)
+    if not after_batteries:
+        return False, None
+    before_batteries = _queen_bishop_batteries(board_before, mover_color)
+    new_batteries = after_batteries - before_batteries
+    if not new_batteries:
+        return False, None
+
+    pair = next(iter(new_batteries))
+    sq1, sq2 = sorted(pair)
+    p1 = board_after.piece_at(sq1)
+    p2 = board_after.piece_at(sq2)
+    if p1 is not None and p1.piece_type == chess.QUEEN:
+        q_sq, b_sq = sq1, sq2
+    else:
+        q_sq, b_sq = sq2, sq1
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "queen_sq": chess.square_name(q_sq),
+        "bishop_sq": chess.square_name(b_sq),
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} lines up a diagonal battery — "
+            f"the queen on {chess.square_name(q_sq)} and bishop on {chess.square_name(b_sq)} "
+            f"combine their firepower along the same diagonal"
+        ),
+    }
+
+
 def is_rook_endgame(
     board_before: chess.Board,
     move: chess.Move,
@@ -3211,6 +3262,7 @@ GATED_TAGS = (
     "bishop_vs_knight",
     "undermining",
     "rook_endgame",
+    "diagonal_battery",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3496,5 +3548,9 @@ def certified_claims(
     re_ = _safe(lambda: is_rook_endgame(board_before, move, board_after, mover_color))
     if re_ and re_[0]:
         tags.add("rook_endgame")
+
+    db = _safe(lambda: has_diagonal_battery(board_before, move, board_after, mover_color))
+    if db and db[0]:
+        tags.add("diagonal_battery")
 
     return tags

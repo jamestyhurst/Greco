@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.37] — 2026-06-19
+
+### Added
+- **`has_diagonal_battery` factgate predicate** (`diagonal_battery` tag) — fires when a move newly creates a queen+bishop battery on the same diagonal with no blocking pieces between them. Inner `_queen_bishop_batteries()` helper finds all clean queen-bishop diagonal pairs per board; predicate fires when `after_batteries - before_batteries` is non-empty. Evidence carries `queen_sq`, `bishop_sq`, `mover`, and a ready-to-quote `evidence` string; frozenset pairs enable clean set-difference for newness detection. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 423 passed.
+
 ## [0.41.36] — 2026-06-19
 
 ### Added
