@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.50] — 2026-06-19
+
+### Added
+- **`has_rook_on_sixth` factgate predicate** (`rook_on_sixth` tag) — fires when the mover's rook advances to the 6th rank (White) or 3rd rank (Black) for the first time. Checks the moving piece is a rook, the landing square is on the target rank, and the rook was not already on that rank. Fills the gap between `rook_on_seventh` (7th rank) and `infiltration` (deep invasion) — the 6th rank is a meaningful positional milestone: the rook attacks enemy pawns from the side, restricts the king, and can swing laterally. Evidence carries `square`, `rank` ('sixth'/'third'), and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 501 passed.
+
 ## [0.41.49] — 2026-06-19
 
 ### Added

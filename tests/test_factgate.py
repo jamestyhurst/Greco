@@ -4620,3 +4620,60 @@ def test_tripled_pawns_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "tripled_pawns" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_rook_on_sixth
+# ---------------------------------------------------------------------------
+
+
+def _ro6(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_rook_on_sixth(board_before, move, board_after, color)
+
+
+def test_rook_on_sixth_white_ra1_a6_true():
+    # White Ra1→a6 (rank index 5 = sixth rank).
+    ok, ev = _ro6("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a6", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "sixth"
+
+
+def test_rook_on_sixth_black_ra6_a3_true():
+    # Black Ra6→a3 (rank index 2 = third rank, the sixth from Black's perspective).
+    ok, ev = _ro6("4k3/8/r7/8/8/8/8/4K3 b - - 0 1", "a6a3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "third"
+
+
+def test_rook_on_sixth_already_on_sixth_false():
+    # White rook already on a6; lateral move to b6 — was already on the sixth rank.
+    ok, _ = _ro6("4k3/8/R7/8/8/8/8/4K3 w - - 0 1", "a6b6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_sixth_goes_to_seventh_not_sixth_false():
+    # White Ra1→a7 reaches the seventh rank, not the sixth.
+    ok, _ = _ro6("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a7", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_sixth_queen_not_rook_false():
+    # Queen (not rook) moves to the sixth rank — piece guard vetoes.
+    ok, _ = _ro6("4k3/8/8/8/8/8/8/Q3K3 w - - 0 1", "a1a6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_sixth_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/R3K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_on_sixth" in tags

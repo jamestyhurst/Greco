@@ -3564,6 +3564,42 @@ def has_pawn_duo(
     }
 
 
+def has_rook_on_sixth(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.ROOK:
+        return False, None
+
+    to_sq = move.to_square
+    target_rank = 5 if mover_color == chess.WHITE else 2  # 0-indexed: rank 6=idx5, rank 3=idx2
+
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+
+    rank_name = "sixth" if mover_color == chess.WHITE else "third"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+
+    return True, {
+        "square": sq_name,
+        "rank": rank_name,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s rook advances to the {rank_name} rank on {sq_name} — "
+            f"deep in enemy territory, the rook attacks enemy pawns from the side, "
+            f"restricts the opponent's king, and can swing along the rank "
+            f"to wherever the position demands"
+        ),
+    }
+
+
 def has_tripled_pawns(
     board_before: chess.Board,
     move: chess.Move,
@@ -3758,6 +3794,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "rook_on_sixth",
     "tripled_pawns",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
@@ -4092,6 +4129,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    ro6 = _safe(lambda: has_rook_on_sixth(board_before, move, board_after, mover_color))
+    if ro6 and ro6[0]:
+        tags.add("rook_on_sixth")
 
     tpw = _safe(lambda: has_tripled_pawns(board_before, move, board_after, mover_color))
     if tpw and tpw[0]:
