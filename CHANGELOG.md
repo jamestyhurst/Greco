@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.92] — 2026-06-19
+
+### Added
+- **`has_queen_and_rook_vs_queen` factgate predicate** (`queen_and_rook_vs_queen` tag) — fires when a move newly creates a queen-and-rook vs. lone-queen imbalance: one side has exactly one queen and one rook (no minors), the other has exactly one queen (no rooks, no minors). Set-difference via inner `_state()` returning 'white_qr'/'black_qr'/None. Evidence carries `queen_rook_side`, `lone_queen_side`, and `mover`; commentary notes the decisive extra-rook advantage and checks for perpetual/fortress saving resources. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 753 passed.
+
 ## [0.41.91] — 2026-06-19
 
 ### Added
