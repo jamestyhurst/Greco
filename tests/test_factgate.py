@@ -2540,3 +2540,50 @@ def test_wins_exchange_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "wins_exchange" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_opposite_bishops
+# ---------------------------------------------------------------------------
+# c1 = file 2, rank 0 → sum 2 (even) → DARK square
+# c8 = file 2, rank 7 → sum 9 (odd)  → LIGHT square → opposite to c1 ✓
+# d8 = file 3, rank 7 → sum 10 (even) → DARK → same as c1 ✗
+def _ocb(fen):
+    b = chess.Board(fen)
+    return F.is_opposite_bishops(b)
+
+
+def test_opposite_bishops_true():
+    # White bishop c1 (dark), Black bishop c8 (light) — opposite colored.
+    ok, ev = _ocb("2b1k3/8/8/8/8/8/8/2B1K3 w - - 0 1")
+    assert ok
+    assert ev["white_bishop"] == "c1"
+    assert ev["black_bishop"] == "c8"
+
+
+def test_opposite_bishops_false_same_color():
+    # White bishop c1 (dark), Black bishop d8 (dark) — same colored.
+    ok, _ = _ocb("3bk3/8/8/8/8/8/8/2B1K3 w - - 0 1")
+    assert not ok
+
+
+def test_opposite_bishops_false_two_white_bishops():
+    # White has two bishops — not the opposite-bishop endgame structure.
+    ok, _ = _ocb("4k3/8/8/8/8/8/8/2BBK3 w - - 0 1")
+    assert not ok
+
+
+def test_opposite_bishops_false_no_black_bishop():
+    # Black has no bishop.
+    ok, _ = _ocb("4k3/8/8/8/8/8/8/2B1K3 w - - 0 1")
+    assert not ok
+
+
+def test_opposite_bishops_in_certified_claims():
+    # White king moves quietly; opposite-colored bishops remain after move.
+    board_before = chess.Board("2b1k3/8/8/8/8/8/8/2B1K3 w - - 0 1")
+    move = chess.Move.from_uci("e1d1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "opposite_colored_bishops" in tags

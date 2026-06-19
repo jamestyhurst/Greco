@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.11] — 2026-06-18
+
+### Added
+- **`is_opposite_bishops` factgate predicate** (`opposite_colored_bishops` tag) — board-state predicate certifying each side has exactly one bishop and they stand on different-colored squares (the structural draw-tendency indicator). Evidence carries `white_bishop`, `black_bishop` square names and a ready-to-quote `evidence` string. Helper `_sq_is_light(sq)` uses `(rank + file) % 2 == 1`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with draw-tendency guidance. 5 new pure tests; full suite 281 passed.
+
 ## [0.41.10] — 2026-06-18
 
 ### Added

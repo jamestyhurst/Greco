@@ -2242,6 +2242,36 @@ def wins_exchange(
 
 
 # --------------------------------------------------------------------------- #
+# Opposite-colored bishops — each side has exactly one bishop on different
+# colored squares (the structural draw tendency).
+# --------------------------------------------------------------------------- #
+def _sq_is_light(sq: int) -> bool:
+    return (chess.square_rank(sq) + chess.square_file(sq)) % 2 == 1
+
+
+def is_opposite_bishops(board: chess.Board) -> Tuple[bool, Optional[dict]]:
+    """Certifies that each side has exactly one bishop and they are on different
+    colored squares. Engine-free state predicate.
+    evidence keys: white_bishop (square name), black_bishop (square name), evidence.
+    """
+    white_bishops = list(board.pieces(chess.BISHOP, chess.WHITE))
+    black_bishops = list(board.pieces(chess.BISHOP, chess.BLACK))
+    if len(white_bishops) != 1 or len(black_bishops) != 1:
+        return False, None
+    wb_sq, bb_sq = white_bishops[0], black_bishops[0]
+    if _sq_is_light(wb_sq) == _sq_is_light(bb_sq):
+        return False, None
+    return True, {
+        "white_bishop": chess.square_name(wb_sq),
+        "black_bishop": chess.square_name(bb_sq),
+        "evidence": (
+            f"Opposite-colored bishops: White on {chess.square_name(wb_sq)}, "
+            f"Black on {chess.square_name(bb_sq)}"
+        ),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -2286,6 +2316,7 @@ GATED_TAGS = (
     "castling",
     "passer_created",
     "wins_exchange",
+    "opposite_colored_bishops",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2467,5 +2498,9 @@ def certified_claims(
     we = _safe(lambda: wins_exchange(board_before, move, board_after))
     if we and we[0]:
         tags.add("wins_exchange")
+
+    ocb = _safe(lambda: is_opposite_bishops(board_after))
+    if ocb and ocb[0]:
+        tags.add("opposite_colored_bishops")
 
     return tags
