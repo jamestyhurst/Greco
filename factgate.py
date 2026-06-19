@@ -1908,6 +1908,90 @@ def is_rook_on_open_file(
 
 
 # --------------------------------------------------------------------------- #
+# Desperado — a piece captures material while itself under attack.
+# --------------------------------------------------------------------------- #
+def is_desperado(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+) -> Tuple[bool, Optional[dict]]:
+    """Certify a desperado: a piece makes a capture while itself under attack by an
+    opponent piece of equal or lesser value (the piece is en prise and grabs material
+    before being captured itself).
+
+    Veto ladder:
+      1. Move is not a capture.
+      2. Moving piece has no recognized material value.
+      3. No opponent piece attacks the from-square before the move.
+      4. The cheapest opponent attacker is MORE valuable than the moving piece
+         (piece is not en prise — the opponent would lose material by taking it).
+      5. The captured piece has no material value.
+
+    Returns (True, evidence_dict) or (False, None).
+    evidence keys: piece, captured, cheapest_attacker, attacker_value,
+                   piece_value, captured_value.
+    """
+    # VETO 1: must be a capture
+    if not board_before.is_capture(move):
+        return False, None
+
+    from_sq = move.from_square
+    to_sq = move.to_square
+
+    # VETO 2: moving piece must have a recognized material value
+    moving_piece = board_before.piece_at(from_sq)
+    if moving_piece is None:
+        return False, None
+    moving_value = _PIECE_VALUES.get(moving_piece.piece_type, 0)
+    if moving_value == 0:
+        return False, None
+
+    # VETO 3: moving piece must be attacked by at least one opponent piece
+    opponent = not board_before.turn
+    attacker_squares = list(board_before.attackers(opponent, from_sq))
+    if not attacker_squares:
+        return False, None
+
+    attacker_pieces = [board_before.piece_at(sq) for sq in attacker_squares]
+    attacker_values = [
+        _PIECE_VALUES.get(p.piece_type, 0) for p in attacker_pieces if p is not None
+    ]
+    if not attacker_values:
+        return False, None
+    min_attacker_value = min(attacker_values)
+
+    # VETO 4: cheapest attacker must be ≤ moving piece value (confirms en prise)
+    if min_attacker_value > moving_value:
+        return False, None
+
+    # VETO 5: captured piece must have material value
+    if board_before.is_en_passant(move):
+        captured_type = chess.PAWN
+        captured_value = 1
+    else:
+        captured_piece = board_before.piece_at(to_sq)
+        if captured_piece is None:
+            return False, None
+        captured_type = captured_piece.piece_type
+        captured_value = _PIECE_VALUES.get(captured_type, 0)
+    if captured_value == 0:
+        return False, None
+
+    cheapest_idx = attacker_values.index(min_attacker_value)
+    cheapest_attacker = attacker_pieces[cheapest_idx]
+
+    return True, {
+        "piece": chess.piece_name(moving_piece.piece_type),
+        "captured": chess.piece_name(captured_type),
+        "cheapest_attacker": chess.piece_name(cheapest_attacker.piece_type)
+        if cheapest_attacker else "unknown",
+        "attacker_value": min_attacker_value,
+        "piece_value": moving_value,
+        "captured_value": captured_value,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -1943,6 +2027,7 @@ GATED_TAGS = (
     "prophylaxis",
     "bishop_pair",
     "rook_on_open_file",
+    "desperado",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2088,5 +2173,9 @@ def certified_claims(
         if rof and rof[0]:
             tags.add("rook_on_open_file")
             break
+
+    desp = _safe(lambda: is_desperado(board_before, move, board_after))
+    if desp and desp[0]:
+        tags.add("desperado")
 
     return tags

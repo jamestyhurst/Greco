@@ -2091,3 +2091,69 @@ def test_rook_on_open_file_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_on_open_file" in tags
+
+
+# --- is_desperado -----------------------------------------------------------
+def _desp(fen, uci):
+    """Helper: push UCI move on FEN and return is_desperado result."""
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.is_desperado(b, mv, after)
+
+
+def test_desperado_true_knight_takes_bishop_under_pawn_attack():
+    # White Nd5, attacked by Black pawn c6; White plays Nxb6 capturing Black bishop.
+    # Black pawn c6 attacks d5 (backward-diagonal for Black).
+    ok, ev = _desp("4k3/8/1bp5/3N4/8/8/8/4K3 w - - 0 1", "d5b6")
+    assert ok
+    assert ev["piece"] == "knight"
+    assert ev["captured"] == "bishop"
+
+
+def test_desperado_true_queen_takes_pawn_under_rook_attack():
+    # White Qd4 attacked by Black Rd8 (rook, 5 ≤ queen 9 → en prise).
+    # White plays Qxg7 capturing the Black pawn on g7.
+    ok, ev = _desp("3rk3/6p1/8/8/3Q4/8/8/4K3 w - - 0 1", "d4g7")
+    assert ok
+    assert ev["piece"] == "queen"
+    assert ev["captured"] == "pawn"
+
+
+def test_desperado_true_rook_takes_knight_under_equal_rook_attack():
+    # White Rd4 attacked by Black Rd8 (rook, 5 ≤ rook 5 → equal exchange → en prise).
+    # White plays Rxh4 capturing the Black knight.
+    ok, ev = _desp("3rk3/8/8/8/3R3n/8/8/4K3 w - - 0 1", "d4h4")
+    assert ok
+    assert ev["piece"] == "rook"
+    assert ev["captured"] == "knight"
+
+
+def test_desperado_false_non_capture():
+    # White Nd5 is en prise (Black pawn c6 attacks it), but White plays a quiet Nd5-e3.
+    ok, _ = _desp("4k3/8/1bp5/3N4/8/8/8/4K3 w - - 0 1", "d5e3")
+    assert not ok
+
+
+def test_desperado_false_piece_not_under_attack():
+    # White Nd5 takes Black bishop b6 but is NOT under attack — just a regular capture.
+    ok, _ = _desp("4k3/8/1b6/3N4/8/8/8/4K3 w - - 0 1", "d5b6")
+    assert not ok
+
+
+def test_desperado_false_attacker_is_more_valuable():
+    # White Bd5 attacked only by Black queen h1 (queen 9 > bishop 3 → not en prise).
+    # White plays Bxb7 but the bishop is NOT a desperado.
+    ok, _ = _desp("4k3/1p6/8/3B4/8/8/8/4K2q w - - 0 1", "d5b7")
+    assert not ok
+
+
+def test_desperado_in_certified_claims():
+    # Desperado capture should add the "desperado" tag to certified_claims.
+    board_before = chess.Board("4k3/8/1bp5/3N4/8/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("d5b6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "desperado" in tags

@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.2] — 2026-06-18
+
+### Added
+- **`is_desperado` factgate predicate** — certifies a capture made by a piece that is itself en prise (under attack by an opponent piece of equal or lesser value). The evidence bundle carries `piece`, `captured`, `cheapest_attacker`, `attacker_value`, `piece_value`, and `captured_value`. Wired into `GATED_TAGS`, `certified_claims()`, and the narrator system prompt. 7 new pure tests; full suite 641 passed.
+
 ## [0.41.1] — 2026-06-18
 
 ### Added
