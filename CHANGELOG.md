@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.32] — 2026-06-19
+
+### Added
+- **`has_pawn_majority` factgate predicate** (`pawn_majority` tag) — fires when a move newly creates a wing pawn majority (more mover pawns than enemy on queenside a–d or kingside e–h), where that majority did not exist on that wing before the move. Pure pawn-count computation via `board.pieces(PAWN, color)`. Evidence carries `wing` ("queenside (a–d files)", "kingside (e–h files)", or "queenside and kingside"), `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with endgame-conversion and passer-creation framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 393 passed.
+
 ## [0.41.31] — 2026-06-19
 
 ### Added

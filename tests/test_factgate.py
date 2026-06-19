@@ -3624,3 +3624,59 @@ def test_opposite_castling_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "opposite_side_castling" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_pawn_majority
+# ---------------------------------------------------------------------------
+
+def _pmaj(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_pawn_majority(board_before, move, board_after, color)
+
+
+def test_pawn_majority_white_qs_capture_creates_majority_true():
+    # White cxd5 — before: White QS=2 (a4,c4) vs Black QS=2 (b5,d5), tied.
+    # After: White QS=2 (a4,d5) vs Black QS=1 (b5). New QS majority.
+    ok, ev = _pmaj("4k3/8/8/1p1p4/P1P5/8/8/4K3 w - - 0 1", "c4d5", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_pawn_majority_black_ks_capture_creates_majority_true():
+    # Black exf4 — before: Black KS=2 (e5,g5) vs White KS=2 (f4,h4), tied.
+    # After: Black KS=2 (f4,g5) vs White KS=1 (h4). New KS majority.
+    ok, ev = _pmaj("4k3/8/8/4p1p1/5P1P/8/8/4K3 b - - 0 1", "e5f4", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_pawn_majority_pawn_advance_no_capture_false():
+    # White a4→a5: pawn stays on QS, no capture, counts unchanged — no new majority.
+    ok, _ = _pmaj("4k3/8/8/1p1p4/P1P5/8/8/4K3 w - - 0 1", "a4a5", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_majority_non_pawn_move_false():
+    # Rook move — pawn counts unchanged, no new majority.
+    ok, _ = _pmaj("4k3/8/8/1p1p4/P1P5/8/8/R3K3 w - - 0 1", "a1a2", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_majority_already_existed_before_false():
+    # White already has QS majority (2 vs 1) before c4→c5 advance; not newly created.
+    ok, _ = _pmaj("4k3/8/8/p7/P1P5/8/8/4K3 w - - 0 1", "c4c5", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_majority_in_certified_claims():
+    fen = "4k3/8/8/1p1p4/P1P5/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("c4d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "pawn_majority" in tags

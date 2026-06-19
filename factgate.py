@@ -2932,6 +2932,53 @@ def is_opposite_side_castling(
     }
 
 
+def has_pawn_majority(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    QS_FILES = frozenset(range(4))    # a-d
+    KS_FILES = frozenset(range(4, 8)) # e-h
+
+    def _counts(board: chess.Board, color: bool):
+        qs = sum(1 for sq in board.pieces(chess.PAWN, color) if chess.square_file(sq) in QS_FILES)
+        ks = sum(1 for sq in board.pieces(chess.PAWN, color) if chess.square_file(sq) in KS_FILES)
+        return qs, ks
+
+    enemy_color = not mover_color
+    m_qs_b, m_ks_b = _counts(board_before, mover_color)
+    e_qs_b, e_ks_b = _counts(board_before, enemy_color)
+    m_qs_a, m_ks_a = _counts(board_after, mover_color)
+    e_qs_a, e_ks_a = _counts(board_after, enemy_color)
+
+    new_qs = (m_qs_a > e_qs_a) and not (m_qs_b > e_qs_b)
+    new_ks = (m_ks_a > e_ks_a) and not (m_ks_b > e_ks_b)
+
+    if not (new_qs or new_ks):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    if new_qs and new_ks:
+        wing = "both wings"
+        wing_detail = "queenside and kingside"
+    elif new_qs:
+        wing = "the queenside"
+        wing_detail = "queenside (a–d files)"
+    else:
+        wing = "the kingside"
+        wing_detail = "kingside (e–h files)"
+
+    return True, {
+        "mover": mover_name,
+        "wing": wing_detail,
+        "evidence": (
+            f"{mover_name} has established a pawn majority on {wing} — "
+            f"the extra pawn can be leveraged to create a passed pawn in the endgame"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2998,6 +3045,7 @@ GATED_TAGS = (
     "connected_passers",
     "rook_behind_passer",
     "opposite_side_castling",
+    "pawn_majority",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3263,5 +3311,9 @@ def certified_claims(
     osc = _safe(lambda: is_opposite_side_castling(board_before, move, board_after, mover_color))
     if osc and osc[0]:
         tags.add("opposite_side_castling")
+
+    pm = _safe(lambda: has_pawn_majority(board_before, move, board_after, mover_color))
+    if pm and pm[0]:
+        tags.add("pawn_majority")
 
     return tags
