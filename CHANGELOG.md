@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.28] — 2026-06-19
+
+### Added
+- **`is_pawn_lever` factgate predicate** (`pawn_lever` tag) — pawn-move predicate certifying a non-capturing pawn advance that sets up a lever: after the move the pawn diagonally attacks an enemy pawn on an adjacent file, making a pawn exchange available. Evidence carries `pawn` (landing square), `targets` (enemy pawn squares), `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with line-opening consequence guidance. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 369 passed.
+
 ## [0.41.27] — 2026-06-19
 
 ### Added

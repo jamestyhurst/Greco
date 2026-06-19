@@ -3408,3 +3408,56 @@ def test_king_opposition_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "king_opposition" in tags
+
+
+# ── is_pawn_lever ──────────────────────────────────────────────────────────
+
+def _plev(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_pawn_lever(board_before, move, board_after, color)
+
+
+def test_pawn_lever_white_e5_vs_d6_true():
+    # White pawn e4→e5 sets up lever against black pawn on d6.
+    ok, ev = _plev("4k3/8/3p4/8/4P3/8/8/4K3 w - - 0 1", "e4e5", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_pawn_lever_black_f5_vs_e4_true():
+    # Black pawn f6→f5 sets up lever against white pawn on e4.
+    ok, ev = _plev("4k3/8/5p2/8/4P3/8/8/4K3 b - - 0 1", "f6f5", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_pawn_lever_no_enemy_pawn_adjacent_false():
+    # White pawn e4→e5 but no enemy pawn on d6 or f6.
+    ok, _ = _plev("4k3/8/8/8/4P3/8/8/4K3 w - - 0 1", "e4e5", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_lever_capture_move_false():
+    # A capturing pawn move (not a quiet advance) does not certify a lever.
+    ok, _ = _plev("4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1", "e4d5", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_lever_not_a_pawn_false():
+    # Knight move — not a pawn, predicate abstains.
+    ok, _ = _plev("4k3/8/3p4/8/4P3/5N2/8/4K3 w - - 0 1", "f3g5", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_lever_in_certified_claims():
+    # White pawn e4→e5 vs Pd6 — tag must appear in certified_claims.
+    fen = "4k3/8/3p4/8/4P3/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e4e5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "pawn_lever" in tags

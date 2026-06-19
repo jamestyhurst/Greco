@@ -2730,6 +2730,53 @@ def is_king_opposition(
     }
 
 
+def is_pawn_lever(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move is a non-capturing pawn advance that sets up a
+    pawn lever — after the move the pawn diagonally attacks an enemy pawn on an
+    adjacent file. Levers drive pawn-structure changes and line-opening play.
+    evidence keys: pawn, targets, mover, evidence.
+    """
+    if board_before.is_capture(move):
+        return False, None
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.PAWN:
+        return False, None
+    dest_file = chess.square_file(move.to_square)
+    dest_rank = chess.square_rank(move.to_square)
+    enemy_color = not mover_color
+    attack_rank = dest_rank + 1 if mover_color == chess.WHITE else dest_rank - 1
+    if not 0 <= attack_rank <= 7:
+        return False, None
+    lever_sqs = []
+    for df in (-1, 1):
+        f = dest_file + df
+        if 0 <= f <= 7:
+            sq = chess.square(f, attack_rank)
+            p = board_after.piece_at(sq)
+            if p is not None and p.piece_type == chess.PAWN and p.color == enemy_color:
+                lever_sqs.append(sq)
+    if not lever_sqs:
+        return False, None
+    pawn_sq = chess.square_name(move.to_square)
+    target_names = [chess.square_name(s) for s in lever_sqs]
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "pawn": pawn_sq,
+        "targets": target_names,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s pawn on {pawn_sq} sets up a lever against "
+            f"{' and '.join(target_names)} — "
+            f"exchanging here would open lines for the major pieces"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2792,6 +2839,7 @@ GATED_TAGS = (
     "threefold_repetition",
     "queenless_position",
     "king_opposition",
+    "pawn_lever",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3041,5 +3089,9 @@ def certified_claims(
     ko = _safe(lambda: is_king_opposition(board_before, move, board_after, mover_color))
     if ko and ko[0]:
         tags.add("king_opposition")
+
+    pl = _safe(lambda: is_pawn_lever(board_before, move, board_after, mover_color))
+    if pl and pl[0]:
+        tags.add("pawn_lever")
 
     return tags
