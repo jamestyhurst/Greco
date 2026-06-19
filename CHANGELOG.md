@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.35] — 2026-06-19
+
+### Added
+- **`is_undermining` factgate predicate** (`undermining` tag) — fires when a capture removes an enemy piece that was the defender of another enemy piece, leaving the second piece attacked and with fewer defenders. Iterates the captured piece's pre-capture attack squares; for each enemy piece on those squares checks `cap_sq ∈ attackers(enemy, sq)` (confirming defender relationship), `is_attacked_by(mover, sq)` after capture, and `after_defenders < before_defenders`. Evidence carries `captured_sq`, `exposed_sq`, `mover`, and a ready-to-quote `evidence` string; selects highest-value exposed piece. En passant guard (`captured is None`). Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 411 passed.
+
 ## [0.41.34] — 2026-06-19
 
 ### Added

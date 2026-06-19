@@ -2932,6 +2932,58 @@ def is_opposite_side_castling(
     }
 
 
+def is_undermining(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    if not board_before.is_capture(move):
+        return False, None
+    cap_sq = move.to_square
+    captured = board_before.piece_at(cap_sq)
+    if captured is None:
+        return False, None  # en passant guard: captured pawn is not at to_square
+    enemy_color = not mover_color
+
+    PIECE_VALUE = {
+        chess.QUEEN: 9, chess.ROOK: 5, chess.BISHOP: 3,
+        chess.KNIGHT: 3, chess.PAWN: 1, chess.KING: 0,
+    }
+
+    undermined: List[Tuple[int, chess.Piece]] = []
+    for sq in board_before.attacks(cap_sq):
+        target = board_before.piece_at(sq)
+        if target is None or target.color != enemy_color or target.piece_type == chess.KING:
+            continue
+        if cap_sq not in board_before.attackers(enemy_color, sq):
+            continue
+        if not board_after.is_attacked_by(mover_color, sq):
+            continue
+        before_def = len(board_before.attackers(enemy_color, sq))
+        after_def = len(board_after.attackers(enemy_color, sq))
+        if after_def < before_def:
+            undermined.append((sq, target))
+
+    if not undermined:
+        return False, None
+
+    best_sq, best_piece = max(undermined, key=lambda x: PIECE_VALUE.get(x[1].piece_type, 0))
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    cap_piece_name = chess.piece_name(captured.piece_type)
+    target_name = chess.piece_name(best_piece.piece_type)
+    return True, {
+        "mover": mover_name,
+        "captured_sq": chess.square_name(cap_sq),
+        "exposed_sq": chess.square_name(best_sq),
+        "evidence": (
+            f"{mover_name} takes the {cap_piece_name} on {chess.square_name(cap_sq)} — "
+            f"removing the defender of the {target_name} on {chess.square_name(best_sq)} "
+            f"and leaving it vulnerable to capture"
+        ),
+    }
+
+
 def has_bishop_vs_knight(
     board_before: chess.Board,
     move: chess.Move,
@@ -3123,6 +3175,7 @@ GATED_TAGS = (
     "pawn_majority",
     "king_active_endgame",
     "bishop_vs_knight",
+    "undermining",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3400,5 +3453,9 @@ def certified_claims(
     bvk = _safe(lambda: has_bishop_vs_knight(board_before, move, board_after, mover_color))
     if bvk and bvk[0]:
         tags.add("bishop_vs_knight")
+
+    und = _safe(lambda: is_undermining(board_before, move, board_after, mover_color))
+    if und and und[0]:
+        tags.add("undermining")
 
     return tags

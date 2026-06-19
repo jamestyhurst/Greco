@@ -3788,3 +3788,60 @@ def test_bishop_vs_knight_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "bishop_vs_knight" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_undermining
+# ---------------------------------------------------------------------------
+
+def _und(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_undermining(board_before, move, board_after, color)
+
+
+def test_undermining_rook_removes_rook_defender_of_queen_true():
+    # White Rxe4 removes Black rook on e4 (sole defender of Black queen on e7).
+    # After: White rook on e4 attacks e7; Black queen is exposed.
+    ok, ev = _und("6k1/4q3/8/8/4r3/8/8/K3R3 w - - 0 1", "e1e4", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_undermining_bishop_removes_bishop_defender_of_rook_true():
+    # White Bxd5 removes Black bishop on d5 (sole defender of Black rook on b3).
+    # After: White bishop on d5 attacks b3; Black rook is exposed.
+    ok, ev = _und("6k1/8/8/3b4/8/1r3B2/8/4K3 w - - 0 1", "f3d5", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_undermining_non_capture_false():
+    # Rook advance (no capture) — cannot be undermining.
+    ok, _ = _und("6k1/4q3/8/8/4r3/8/8/K3R3 w - - 0 1", "e1e3", chess.WHITE)
+    assert not ok
+
+
+def test_undermining_capture_but_isolated_piece_false():
+    # White Rxe4 captures Black rook that defends nothing else — no undermining.
+    ok, _ = _und("6k1/8/8/8/4r3/8/8/K3R3 w - - 0 1", "e1e4", chess.WHITE)
+    assert not ok
+
+
+def test_undermining_captured_piece_not_on_same_line_as_queen_false():
+    # Black queen on d7; Black rook on e4 — rook is NOT on the e7 diagonal/file of the queen.
+    # Rxe4 does not expose d7 (rook can't defend along a diagonal).
+    ok, _ = _und("6k1/3q4/8/8/4r3/8/8/K3R3 w - - 0 1", "e1e4", chess.WHITE)
+    assert not ok
+
+
+def test_undermining_in_certified_claims():
+    fen = "6k1/4q3/8/8/4r3/8/8/K3R3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e1e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "undermining" in tags
