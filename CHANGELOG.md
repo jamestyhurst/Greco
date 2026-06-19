@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.33] — 2026-06-19
+
+### Added
+- **`is_king_active_endgame` factgate predicate** (`king_active_endgame` tag) — fires when the king advances forward (White: higher rank, Black: lower rank) in a queenless position (no queens on board_after). Guards on piece type (king), direction of movement, and queen-absence. Evidence carries `king` (landing square), `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with endgame-king-activity framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 399 passed.
+
 ## [0.41.32] — 2026-06-19
 
 ### Added

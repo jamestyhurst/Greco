@@ -2932,6 +2932,42 @@ def is_opposite_side_castling(
     }
 
 
+def is_king_active_endgame(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.KING:
+        return False, None
+    queens_after = (
+        board_after.pieces(chess.QUEEN, chess.WHITE)
+        | board_after.pieces(chess.QUEEN, chess.BLACK)
+    )
+    if queens_after:
+        return False, None
+    from_rank = chess.square_rank(move.from_square)
+    to_rank = chess.square_rank(move.to_square)
+    if mover_color == chess.WHITE:
+        if to_rank <= from_rank:
+            return False, None
+    else:
+        if to_rank >= from_rank:
+            return False, None
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    king_sq = chess.square_name(move.to_square)
+    return True, {
+        "mover": mover_name,
+        "king": king_sq,
+        "evidence": (
+            f"{mover_name}'s king marches forward to {king_sq} — "
+            f"in the endgame the king is a fighting piece; "
+            f"centralising it now creates threats and supports advancing pawns"
+        ),
+    }
+
+
 def has_pawn_majority(
     board_before: chess.Board,
     move: chess.Move,
@@ -3046,6 +3082,7 @@ GATED_TAGS = (
     "rook_behind_passer",
     "opposite_side_castling",
     "pawn_majority",
+    "king_active_endgame",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3315,5 +3352,9 @@ def certified_claims(
     pm = _safe(lambda: has_pawn_majority(board_before, move, board_after, mover_color))
     if pm and pm[0]:
         tags.add("pawn_majority")
+
+    kae = _safe(lambda: is_king_active_endgame(board_before, move, board_after, mover_color))
+    if kae and kae[0]:
+        tags.add("king_active_endgame")
 
     return tags

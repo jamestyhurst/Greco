@@ -3680,3 +3680,57 @@ def test_pawn_majority_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "pawn_majority" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_king_active_endgame
+# ---------------------------------------------------------------------------
+
+def _kae(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_king_active_endgame(board_before, move, board_after, color)
+
+
+def test_king_active_endgame_white_advances_true():
+    # White king e2→e3 in a rook endgame (no queens). Forward march.
+    ok, ev = _kae("4k3/8/8/8/8/8/4K3/3R4 w - - 0 1", "e2e3", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_king_active_endgame_black_advances_true():
+    # Black king e7→e6 in a rook endgame (no queens). Forward march.
+    ok, ev = _kae("3r4/4k3/8/8/8/8/4K3/8 b - - 0 1", "e7e6", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_king_active_endgame_king_retreats_false():
+    # White king e3→e2 — retreating, not advancing. No fire.
+    ok, _ = _kae("4k3/8/8/8/8/4K3/8/3R4 w - - 0 1", "e3e2", chess.WHITE)
+    assert not ok
+
+
+def test_king_active_endgame_queens_present_false():
+    # King advances but queens still on the board — not an endgame.
+    ok, _ = _kae("3qk3/8/8/8/8/8/4K3/3Q4 w - - 0 1", "e2e3", chess.WHITE)
+    assert not ok
+
+
+def test_king_active_endgame_not_king_move_false():
+    # Rook move — not a king move.
+    ok, _ = _kae("4k3/8/8/8/8/8/4K3/3R4 w - - 0 1", "d1d4", chess.WHITE)
+    assert not ok
+
+
+def test_king_active_endgame_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/4K3/3R4 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e2e3")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "king_active_endgame" in tags
