@@ -7375,3 +7375,64 @@ def test_two_rooks_vs_rook_and_minor_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "two_rooks_vs_rook_and_minor" in tags
 
+
+# ---------------------------------------------------------------------------
+# has_queen_and_two_minors_vs_queen
+# ---------------------------------------------------------------------------
+
+def _qt2mvq(fen, move_uci, mover_color=chess.WHITE):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(move_uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_and_two_minors_vs_queen(board_before, move, board_after, mover_color)
+
+
+def test_queen_and_two_minors_vs_queen_white_true():
+    # White Queen captures black knight on d5 → White Q+B+N vs Black lone Q
+    result = _qt2mvq("3q1k2/8/8/3n4/1B6/2N5/8/3QK3 w - - 0 1", "d1d5")
+    fired, info = result
+    assert fired
+    assert info["queen_two_minor_side"] == "White"
+    assert info["lone_queen_side"] == "Black"
+
+
+def test_queen_and_two_minors_vs_queen_black_true():
+    # Black Queen captures white knight on d5 → Black Q+B+N vs White lone Q
+    result = _qt2mvq("3q1k2/8/8/3N4/1b6/2n5/8/3QK3 b - - 0 1", "d8d5", chess.BLACK)
+    fired, info = result
+    assert fired
+    assert info["queen_two_minor_side"] == "Black"
+    assert info["lone_queen_side"] == "White"
+
+
+def test_queen_and_two_minors_vs_queen_queen_two_minor_side_has_rook_false():
+    # After capture: White has Q+R+B+N, not clean Q+2M — does not fire
+    result = _qt2mvq("3q1k2/8/8/3n4/1B6/2N5/8/3QK2R w - - 0 1", "d1d5")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_two_minors_vs_queen_imbalance_pre_existed_false():
+    # White already has Q+B+N vs Black lone Q before the move
+    result = _qt2mvq("3q1k2/8/8/8/1B6/2N5/4K3/3Q4 w - - 0 1", "d1d2")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_two_minors_vs_queen_lone_queen_side_has_minor_false():
+    # Black still has a minor piece alongside its queen — does not fire
+    result = _qt2mvq("3q1k2/8/8/3n4/1b1B4/2N5/4K3/3Q4 w - - 0 1", "d1d2")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_two_minors_vs_queen_in_certified_claims():
+    fen = "3q1k2/8/8/3n4/1B6/2N5/8/3QK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_and_two_minors_vs_queen" in tags
+

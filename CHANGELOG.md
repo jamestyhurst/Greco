@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.100] — 2026-06-19
+
+### Added
+- **`has_queen_and_two_minors_vs_queen` factgate predicate** (`queen_and_two_minors_vs_queen` tag) — fires when a move newly creates a queen-and-two-minors vs. lone-queen imbalance: one side has exactly one queen and two minor pieces (no rooks), the other has exactly one queen and no other pieces. Set-difference via inner `_state()` returning 'white_q2m'/'black_q2m'/None. Evidence carries `queen_two_minor_side`, `lone_queen_side`, and `mover`; commentary notes the decisive material advantage of the extra two minor pieces. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 801 passed.
+
 ## [0.41.99] — 2026-06-19
 
 ### Added
