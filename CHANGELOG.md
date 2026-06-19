@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.84] — 2026-06-19
+
+### Added
+- **`has_queen_vs_knight` factgate predicate** (`queen_vs_knight` tag) — fires when a move newly creates a queen-vs-lone-knight imbalance: one side has exactly one queen (no rooks, no minors), the other has exactly one knight (no queens, no rooks, no bishops). Set-difference via inner `_state()` returning 'white_queen'/'black_queen'/None. Evidence carries `queen_side`, `knight_side`, and `mover`; commentary notes the queen's ~6-pawn edge and the knight's particular difficulty defending against long-range queen threats. Companion to `queen_vs_bishop`; completes the queen-vs-single-piece family. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 705 passed.
+
 ## [0.41.83] — 2026-06-19
 
 ### Added
