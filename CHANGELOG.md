@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.69] — 2026-06-19
+
+### Added
+- **`has_bishop_on_seventh` factgate predicate** (`bishop_on_seventh` tag) — fires when the mover's bishop newly lands on the mover's 7th rank (rank idx 6 for White, idx 1 for Black), where the bishop was not already on that rank. Extends the seventh-rank invasion series alongside `rook_on_seventh`, `queen_on_seventh`, and `knight_on_seventh`. Evidence carries `square`, `rank` ('seventh'/'second'), and `mover`; commentary frames it as a deep diagonal invasion bearing on the enemy back rank. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 615 passed.
+
 ## [0.41.68] — 2026-06-19
 
 ### Added

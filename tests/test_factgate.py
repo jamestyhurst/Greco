@@ -5650,3 +5650,61 @@ def test_pawn_on_fifth_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "pawn_on_fifth" in tags
+
+
+# ── has_bishop_on_seventh ─────────────────────────────────────────────
+def _bo7(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_bishop_on_seventh(bb, mv, ba, col)
+
+
+def test_bishop_on_seventh_white_b2_to_g7_true():
+    # White bishop b2→g7 (rank idx 6 = 7th rank)
+    ok, ev = _bo7("4k3/8/8/8/8/8/1B6/4K3 w - - 0 1", "b2g7", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "seventh"
+    assert ev["square"] == "g7"
+
+
+def test_bishop_on_seventh_black_g6_to_b1_true():
+    # Black bishop g6→b1 (rank idx 0, not rank idx 1) — should be FALSE
+    # Actually let's test Black bishop f3→b7 (rank idx 6, NOT 7th for Black)
+    # Black's 7th rank from Black's side = algebraic rank 2 = rank idx 1
+    # So let's do Black bishop h4→f2 (rank idx 1)
+    ok, ev = _bo7("4k3/8/8/8/7b/8/8/4K3 b - - 0 1", "h4f2", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "second"
+    assert ev["square"] == "f2"
+
+
+def test_bishop_on_seventh_not_bishop_false():
+    # Rook moves to g7, not bishop
+    ok, _ = _bo7("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a7", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_on_seventh_already_on_seventh_false():
+    # White bishop already on seventh (c7), moves to g3
+    ok, _ = _bo7("4k3/2B5/8/8/8/8/8/4K3 w - - 0 1", "c7g3", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_on_seventh_goes_to_sixth_false():
+    # White bishop goes to rank idx 5 (6th rank), not 7th
+    ok, _ = _bo7("4k3/8/8/8/8/8/1B6/4K3 w - - 0 1", "b2f6", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_on_seventh_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/1B6/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("b2g7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "bishop_on_seventh" in tags
