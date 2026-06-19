@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.3] — 2026-06-18
+
+### Added
+- **`is_connected_rooks` factgate predicate** — state predicate certifying that the mover has two rooks on the same rank or file with no pieces between them (they see each other). Uses `chess.SquareSet(chess.between(...))` for gap detection; excludes diagonal alignments. Wired into `GATED_TAGS`, `certified_claims()`, and the narrator system prompt. 7 new pure tests; full suite 650 passed.
+
 ## [0.41.2] — 2026-06-18
 
 ### Added

@@ -1908,6 +1908,44 @@ def is_rook_on_open_file(
 
 
 # --------------------------------------------------------------------------- #
+# Connected rooks — two rooks see each other on the same rank or file.
+# --------------------------------------------------------------------------- #
+def is_connected_rooks(board: chess.Board, color: bool) -> Tuple[bool, Optional[dict]]:
+    """Certifies that `color` has at least two rooks connected — seeing each other on
+    the same rank or file with no intervening pieces. Engine-free state predicate.
+    """
+    rook_squares = list(board.pieces(chess.ROOK, color))
+    if len(rook_squares) < 2:
+        return False, None
+
+    for i in range(len(rook_squares)):
+        for j in range(i + 1, len(rook_squares)):
+            sq1, sq2 = rook_squares[i], rook_squares[j]
+            r1, f1 = chess.square_rank(sq1), chess.square_file(sq1)
+            r2, f2 = chess.square_rank(sq2), chess.square_file(sq2)
+
+            # Rooks must share a rank or file; diagonal alignments are excluded.
+            if r1 != r2 and f1 != f2:
+                continue
+
+            # Confirm no pieces occupy the squares between them.
+            if not any(board.piece_at(sq) for sq in chess.SquareSet(chess.between(sq1, sq2))):
+                side = "White" if color == chess.WHITE else "Black"
+                axis = "rank" if r1 == r2 else "file"
+                return True, {
+                    "square1": chess.square_name(sq1),
+                    "square2": chess.square_name(sq2),
+                    "rank_or_file": axis,
+                    "evidence": (
+                        f"{side}'s rooks are connected on the {axis} "
+                        f"({chess.square_name(sq1)} and {chess.square_name(sq2)})"
+                    ),
+                }
+
+    return False, None
+
+
+# --------------------------------------------------------------------------- #
 # Desperado — a piece captures material while itself under attack.
 # --------------------------------------------------------------------------- #
 def is_desperado(
@@ -2028,6 +2066,7 @@ GATED_TAGS = (
     "bishop_pair",
     "rook_on_open_file",
     "desperado",
+    "connected_rooks",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2177,5 +2216,9 @@ def certified_claims(
     desp = _safe(lambda: is_desperado(board_before, move, board_after))
     if desp and desp[0]:
         tags.add("desperado")
+
+    cr = _safe(lambda: is_connected_rooks(board_after, mover_color))
+    if cr and cr[0]:
+        tags.add("connected_rooks")
 
     return tags

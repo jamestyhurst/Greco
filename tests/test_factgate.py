@@ -2167,3 +2167,57 @@ def test_desperado_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "desperado" in tags
+
+
+# --- is_connected_rooks -----------------------------------------------------
+def _conn(fen, color=chess.WHITE):
+    """Helper: call is_connected_rooks on a FEN position."""
+    return F.is_connected_rooks(chess.Board(fen), color)
+
+
+def test_connected_rooks_same_rank_true():
+    # White rooks on a1 and e1, nothing between on rank 1 → connected.
+    ok, ev = _conn("3k4/8/8/8/8/8/8/R3RK2 w - - 0 1")
+    assert ok
+    assert ev["rank_or_file"] == "rank"
+
+
+def test_connected_rooks_same_rank_blocked():
+    # White rooks on a1 and e1, White queen on c1 between them → not connected.
+    ok, _ = _conn("3k4/8/8/8/8/8/8/R1Q1RK2 w - - 0 1")
+    assert not ok
+
+
+def test_connected_rooks_same_file_true():
+    # White rooks on a1 and a7, nothing between on a-file → connected.
+    ok, ev = _conn("4k3/R7/8/8/8/8/8/R4K2 w - - 0 1")
+    assert ok
+    assert ev["rank_or_file"] == "file"
+
+
+def test_connected_rooks_same_file_blocked():
+    # White rooks on a1 and a7, White pawn on a6 between them → not connected.
+    ok, _ = _conn("4k3/R7/P7/8/8/8/8/R4K2 w - - 0 1")
+    assert not ok
+
+
+def test_connected_rooks_different_rank_and_file():
+    # White rooks on a1 and e6, different rank and file → not connected.
+    ok, _ = _conn("3k4/8/4R3/8/8/8/8/R4K2 w - - 0 1")
+    assert not ok
+
+
+def test_connected_rooks_single_rook():
+    # White has only one rook → always False.
+    ok, _ = _conn("3k4/8/8/8/8/8/8/R4K2 w - - 0 1")
+    assert not ok
+
+
+def test_connected_rooks_in_certified_claims():
+    # White rooks on a1 and e1 are connected; king moves, rooks stay connected → tag fires.
+    board_before = chess.Board("3k4/8/8/8/8/8/8/R3RK2 w - - 0 1")
+    move = chess.Move.from_uci("f1g1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "connected_rooks" in tags
