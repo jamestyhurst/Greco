@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.20] — 2026-06-19
+
+### Added
+- **`pawn_on_seventh` factgate predicate** (`pawn_on_seventh` tag) — move predicate certifying a pawn just advanced to the mover's 7th rank (rank 6 for White = a7-h7; rank 1 for Black = a2-h2), one step from promotion. Evidence carries `square`, `rank` ('7th'/'2nd'), and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with composition guidance alongside `promotion_threat` and urgency-calibration rules. 5 new pure tests; full suite 326 passed.
+
 ## [0.41.19] — 2026-06-19
 
 ### Added

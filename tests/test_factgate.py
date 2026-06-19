@@ -2972,3 +2972,53 @@ def test_checkmate_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "checkmate" in tags
+
+
+# --- pawn_on_seventh ----------------------------------------------------------
+# Certifies a pawn just advanced to the 7th rank from the mover's perspective:
+# rank 6 (0-indexed) = 7th rank for White (e.g. e7); rank 1 = 2nd rank for Black (e.g. e2).
+# One step from promotion — the defining moment of a deep passer.
+def _p7(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.pawn_on_seventh(board_before, move, board_after, color)
+
+
+def test_pawn_on_seventh_white_true():
+    # White pawn e6 advances to e7 (rank 6 = 7th rank for White).
+    ok, ev = _p7("4k3/8/4P3/8/8/8/8/4K3 w - - 0 1", "e6e7", chess.WHITE)
+    assert ok
+    assert ev["square"] == "e7"
+    assert "7th" in ev["evidence"]
+
+
+def test_pawn_on_seventh_black_true():
+    # Black pawn e3 advances to e2 (rank 1 = Black's 7th rank).
+    ok, ev = _p7("4k3/8/8/8/8/4p3/8/4K3 b - - 0 1", "e3e2", chess.BLACK)
+    assert ok
+    assert ev["square"] == "e2"
+    assert "2nd" in ev["evidence"]
+
+
+def test_pawn_on_seventh_wrong_rank_false():
+    # White pawn e5 advances to e6 (6th rank, not 7th).
+    ok, _ = _p7("4k3/8/8/4P3/8/8/8/4K3 w - - 0 1", "e5e6", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_seventh_knight_false():
+    # Knight moves to e7 (7th rank) — not a pawn.
+    ok, _ = _p7("4k3/8/8/5N2/8/8/8/4K3 w - - 0 1", "f5e7", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_seventh_in_certified_claims():
+    # White pawn e6→e7: pawn_on_seventh tag must appear in certified_claims.
+    board_before = chess.Board("4k3/8/4P3/8/8/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("e6e7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "pawn_on_seventh" in tags
