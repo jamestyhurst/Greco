@@ -3518,3 +3518,56 @@ def test_connected_passers_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "connected_passers" in tags
+
+
+# ── rook_behind_own_passer ─────────────────────────────────────────────────
+
+def _rbp(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.rook_behind_own_passer(board_before, move, board_after, color)
+
+
+def test_rook_behind_passer_white_rook_behind_true():
+    # White rook swings to e3, behind own passed pawn on e5.
+    ok, ev = _rbp("4k3/8/8/4P3/8/R7/8/4K3 w - - 0 1", "a3e3", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_rook_behind_passer_black_rook_behind_true():
+    # Black rook swings to d7, behind own passed pawn on d4.
+    ok, ev = _rbp("4k3/7r/8/8/3p4/8/8/4K3 b - - 0 1", "h7d7", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_rook_behind_passer_rook_ahead_false():
+    # White rook moves to e6 — that is AHEAD of the pawn on e5, not behind.
+    ok, _ = _rbp("4k3/8/R7/4P3/8/8/8/4K3 w - - 0 1", "a6e6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_behind_passer_pawn_not_passed_false():
+    # Rook goes behind e5 but e5 is blocked by enemy pawn on e7 — not a passer.
+    ok, _ = _rbp("4k3/4p3/8/4P3/8/R7/8/4K3 w - - 0 1", "a3e3", chess.WHITE)
+    assert not ok
+
+
+def test_rook_behind_passer_not_rook_false():
+    # Pawn advance — not a rook move.
+    ok, _ = _rbp("4k3/8/8/4P3/8/8/8/4K3 w - - 0 1", "e5e6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_behind_passer_in_certified_claims():
+    # Rook swings behind white passer — tag in certified_claims.
+    fen = "4k3/8/8/4P3/8/R7/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a3e3")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_behind_passer" in tags

@@ -2825,6 +2825,50 @@ def has_connected_passers(
     }
 
 
+def rook_behind_own_passer(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the rook just moved to a square directly behind one of
+    the mover's own passed pawns on the same file — the Tarrasch rule, which
+    maximises the passer's support while cutting off the enemy king.
+    evidence keys: rook, pawn, file, mover, evidence.
+    """
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.ROOK:
+        return False, None
+    dest_file = chess.square_file(move.to_square)
+    dest_rank = chess.square_rank(move.to_square)
+    for pawn_sq in board_after.pieces(chess.PAWN, mover_color):
+        if chess.square_file(pawn_sq) != dest_file:
+            continue
+        pawn_rank = chess.square_rank(pawn_sq)
+        # Rook must be BEHIND the pawn (lower rank for white, higher rank for black)
+        if mover_color == chess.WHITE and dest_rank >= pawn_rank:
+            continue
+        if mover_color == chess.BLACK and dest_rank <= pawn_rank:
+            continue
+        if not is_passed_pawn(board_after, pawn_sq, mover_color):
+            continue
+        file_letter = "abcdefgh"[dest_file]
+        mover_name = "White" if mover_color == chess.WHITE else "Black"
+        return True, {
+            "rook": chess.square_name(move.to_square),
+            "pawn": chess.square_name(pawn_sq),
+            "file": file_letter,
+            "mover": mover_name,
+            "evidence": (
+                f"{mover_name}'s rook swings behind the passed pawn on "
+                f"{chess.square_name(pawn_sq)} on the {file_letter}-file — "
+                f"applying the Tarrasch rule: the rook drives the passer forward "
+                f"while cutting off the enemy king"
+            ),
+        }
+    return False, None
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2889,6 +2933,7 @@ GATED_TAGS = (
     "king_opposition",
     "pawn_lever",
     "connected_passers",
+    "rook_behind_passer",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3146,5 +3191,9 @@ def certified_claims(
     cp = _safe(lambda: has_connected_passers(board_before, move, board_after, mover_color))
     if cp and cp[0]:
         tags.add("connected_passers")
+
+    rbp = _safe(lambda: rook_behind_own_passer(board_before, move, board_after, mover_color))
+    if rbp and rbp[0]:
+        tags.add("rook_behind_passer")
 
     return tags

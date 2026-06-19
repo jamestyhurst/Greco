@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.30] — 2026-06-19
+
+### Added
+- **`rook_behind_own_passer` factgate predicate** (`rook_behind_passer` tag) — rook-move predicate certifying that the mover's rook just moved to a square directly behind one of its own passed pawns on the same file (Tarrasch rule). Guards on rook piece type, same-file check, directional behind-check, and `is_passed_pawn`. Evidence carries `rook`, `pawn`, `file`, `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with Tarrasch-principle and king-cutoff pedagogy. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 381 passed.
+
 ## [0.41.29] — 2026-06-19
 
 ### Added
