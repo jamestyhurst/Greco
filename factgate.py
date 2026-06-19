@@ -2115,6 +2115,38 @@ def is_promotion(
 
 
 # --------------------------------------------------------------------------- #
+# En passant — the capturing pawn lands behind the captured pawn.
+# --------------------------------------------------------------------------- #
+def is_en_passant(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move is an en passant capture.
+
+    The captured pawn sits on the same file as the destination square and the
+    same rank as the origin square — it vanishes from that square, not from the
+    destination.  Evidence keys: capture_square (where the capturing pawn lands),
+    captured_square (where the captured pawn was).
+    """
+    if not board_before.is_en_passant(move):
+        return False, None
+    captured_sq = chess.square(
+        chess.square_file(move.to_square),
+        chess.square_rank(move.from_square),
+    )
+    side = "White" if board_before.turn == chess.WHITE else "Black"
+    return True, {
+        "capture_square": chess.square_name(move.to_square),
+        "captured_square": chess.square_name(captured_sq),
+        "evidence": (
+            f"{side} captures en passant on {chess.square_name(move.to_square)}, "
+            f"removing the pawn from {chess.square_name(captured_sq)}"
+        ),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -2155,6 +2187,7 @@ GATED_TAGS = (
     "file_opened",
     "half_open_file",
     "promotion",
+    "en_passant",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2320,5 +2353,9 @@ def certified_claims(
     prm = _safe(lambda: is_promotion(board_before, move, board_after))
     if prm and prm[0]:
         tags.add("promotion")
+
+    ep = _safe(lambda: is_en_passant(board_before, move, board_after))
+    if ep and ep[0]:
+        tags.add("en_passant")
 
     return tags

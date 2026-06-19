@@ -2350,3 +2350,52 @@ def test_promotion_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "promotion" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_en_passant
+# ---------------------------------------------------------------------------
+def _ep(fen, uci):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.is_en_passant(b, mv, after)
+
+
+def test_en_passant_white_captures():
+    # White pawn on e5 captures Black pawn that just moved d7-d5.
+    # FEN: Black pawn on d5, en passant target d6.
+    ok, ev = _ep("4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1", "e5d6")
+    assert ok
+    assert ev["capture_square"] == "d6"
+    assert ev["captured_square"] == "d5"
+
+
+def test_en_passant_black_captures():
+    # Black pawn on e4 captures White pawn that just moved f2-f4.
+    # FEN: White pawn on f4, en passant target f3.
+    ok, ev = _ep("4k3/8/8/8/4pP2/8/8/4K3 b - f3 0 1", "e4f3")
+    assert ok
+    assert ev["capture_square"] == "f3"
+    assert ev["captured_square"] == "f4"
+
+
+def test_en_passant_false_regular_pawn_push():
+    ok, _ = _ep("4k3/8/8/4P3/8/8/8/4K3 w - - 0 1", "e5e6")
+    assert not ok
+
+
+def test_en_passant_false_regular_capture():
+    # Regular diagonal pawn capture, not en passant.
+    ok, _ = _ep("4k3/8/3p4/4P3/8/8/8/4K3 w - - 0 1", "e5d6")
+    assert not ok
+
+
+def test_en_passant_in_certified_claims():
+    board_before = chess.Board("4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1")
+    move = chess.Move.from_uci("e5d6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "en_passant" in tags

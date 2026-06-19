@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.7] — 2026-06-18
+
+### Added
+- **`is_en_passant` factgate predicate** (`en_passant` tag) — move predicate certifying an en passant capture. Evidence bundle carries `capture_square` (where the capturing pawn lands) and `captured_square` (where the captured pawn was removed from). Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with guidance on naming both squares and the disappearing pawn mechanic. 5 new pure tests; full suite 261 passed.
+
 ## [0.41.6] — 2026-06-18
 
 ### Added
