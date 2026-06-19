@@ -7314,3 +7314,64 @@ def test_queen_and_minor_vs_rook_and_minor_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_and_minor_vs_rook_and_minor" in tags
 
+
+# ---------------------------------------------------------------------------
+# has_two_rooks_vs_rook_and_minor
+# ---------------------------------------------------------------------------
+
+def _trvram(fen, move_uci, mover_color=chess.WHITE):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(move_uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_two_rooks_vs_rook_and_minor(board_before, move, board_after, mover_color)
+
+
+def test_two_rooks_vs_rook_and_minor_white_true():
+    # White Ra4 captures black knight on b4 → White 2R vs Black R+B
+    result = _trvram("1r3k2/8/8/1b6/Rn6/8/8/4K2R w - - 0 1", "a4b4")
+    fired, info = result
+    assert fired
+    assert info["two_rook_side"] == "White"
+    assert info["rook_minor_side"] == "Black"
+
+
+def test_two_rooks_vs_rook_and_minor_black_true():
+    # Black ra4 captures white knight on b4 → Black 2R vs White R+B
+    result = _trvram("7r/8/8/1B6/rN6/8/8/R3K3 b - - 0 1", "a4b4", chess.BLACK)
+    fired, info = result
+    assert fired
+    assert info["two_rook_side"] == "Black"
+    assert info["rook_minor_side"] == "White"
+
+
+def test_two_rooks_vs_rook_and_minor_two_rook_side_has_minor_false():
+    # After capture: White has 2R+B, not clean 2R — does not fire
+    result = _trvram("1r3k2/8/8/1b6/Rn6/8/8/2B1K2R w - - 0 1", "a4b4")
+    fired, _ = result
+    assert not fired
+
+
+def test_two_rooks_vs_rook_and_minor_imbalance_pre_existed_false():
+    # White already has 2R vs Black R+B before the move
+    result = _trvram("1r3k2/8/8/1b6/8/8/8/R3K2R w - - 0 1", "a1a2")
+    fired, _ = result
+    assert not fired
+
+
+def test_two_rooks_vs_rook_and_minor_rook_minor_side_has_extra_rook_false():
+    # Black also has two rooks (not one) alongside its minor — does not fire
+    result = _trvram("rr6/8/7k/1b6/8/8/8/R3K2R w - - 0 1", "a1a2")
+    fired, _ = result
+    assert not fired
+
+
+def test_two_rooks_vs_rook_and_minor_in_certified_claims():
+    fen = "1r3k2/8/8/1b6/Rn6/8/8/4K2R w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a4b4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "two_rooks_vs_rook_and_minor" in tags
+
