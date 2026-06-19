@@ -3564,6 +3564,42 @@ def has_pawn_duo(
     }
 
 
+def has_isolated_queen_pawn(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _is_iqp(board: chess.Board, color: bool) -> bool:
+        d_sq = chess.D4 if color == chess.WHITE else chess.D5
+        pd = board.piece_at(d_sq)
+        if pd is None or pd.piece_type != chess.PAWN or pd.color != color:
+            return False
+        for sq in board.pieces(chess.PAWN, color):
+            f = chess.square_file(sq)
+            if f == 2 or f == 4:  # c-file=2, e-file=4
+                return False
+        return True
+
+    if not _is_iqp(board_after, mover_color):
+        return False, None
+    if _is_iqp(board_before, mover_color):
+        return False, None
+
+    d_sq_name = "d4" if mover_color == chess.WHITE else "d5"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "square": d_sq_name,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} acquires an isolated queen's pawn on {d_sq_name} — "
+            f"a central pawn with no friendly pawns on the c or e files to support it; "
+            f"a dynamic middlegame asset that radiates piece activity but becomes "
+            f"a long-term endgame liability if it cannot advance"
+        ),
+    }
+
+
 def has_seventh_rank_battery(
     board_before: chess.Board,
     move: chess.Move,
@@ -3686,6 +3722,7 @@ GATED_TAGS = (
     "castling_rights_forfeited",
     "passed_pawn_race",
     "seventh_rank_battery",
+    "isolated_queen_pawn",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -4015,5 +4052,9 @@ def certified_claims(
     s7b = _safe(lambda: has_seventh_rank_battery(board_before, move, board_after, mover_color))
     if s7b and s7b[0]:
         tags.add("seventh_rank_battery")
+
+    iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
+    if iqp and iqp[0]:
+        tags.add("isolated_queen_pawn")
 
     return tags

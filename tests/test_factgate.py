@@ -4506,3 +4506,60 @@ def test_seventh_rank_battery_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "seventh_rank_battery" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_isolated_queen_pawn
+# ---------------------------------------------------------------------------
+
+
+def _iqp(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_isolated_queen_pawn(board_before, move, board_after, color)
+
+
+def test_isolated_queen_pawn_white_creates_d4_true():
+    # White d2→d4; no c or e pawns → IQP newly created on d4.
+    ok, ev = _iqp("4k3/8/8/8/8/8/3P4/4K3 w - - 0 1", "d2d4", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["square"] == "d4"
+
+
+def test_isolated_queen_pawn_black_creates_d5_true():
+    # Black d7→d5; no c or e pawns → IQP newly created on d5.
+    ok, ev = _iqp("4k3/3p4/8/8/8/8/8/4K3 b - - 0 1", "d7d5", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["square"] == "d5"
+
+
+def test_isolated_queen_pawn_already_existed_false():
+    # White IQP on d4 was already there; king move doesn't create a new one.
+    ok, _ = _iqp("4k3/8/8/8/3P4/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_isolated_queen_pawn_has_c_pawn_false():
+    # White d2→d4 but c4 pawn remains; d4 is not isolated.
+    ok, _ = _iqp("4k3/8/8/8/2P5/8/3P4/4K3 w - - 0 1", "d2d4", chess.WHITE)
+    assert not ok
+
+
+def test_isolated_queen_pawn_has_e_pawn_false():
+    # White d2→d4 but e4 pawn exists; d4 is not isolated.
+    ok, _ = _iqp("4k3/8/8/8/4P3/8/3P4/4K3 w - - 0 1", "d2d4", chess.WHITE)
+    assert not ok
+
+
+def test_isolated_queen_pawn_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/3P4/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d2d4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "isolated_queen_pawn" in tags

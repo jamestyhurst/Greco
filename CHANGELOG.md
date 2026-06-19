@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.48] — 2026-06-19
+
+### Added
+- **`has_isolated_queen_pawn` factgate predicate** (`isolated_queen_pawn` tag) — fires when the move newly creates an isolated queen's pawn: mover has a pawn on d4 (White) or d5 (Black) with no friendly pawns on the c or e files, where this structure did not exist before the move. Inner `_is_iqp` helper checks the d-square occupant and iterates friendly pawns for any c/e-file presence. Set-difference pattern (after TRUE, before FALSE) fires only on newly created IQP structures. Evidence carries `square` ("d4"/"d5"), `mover`, and a ready-to-quote evidence string conveying the IQP's dual character (middlegame asset, endgame liability). Distinct from the general `isolated_pawn` tag (any isolated pawn); this tag certifies the specific d-file IQP complex. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 489 passed.
+
 ## [0.41.47] — 2026-06-19
 
 ### Added
