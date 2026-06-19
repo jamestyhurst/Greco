@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.58] — 2026-06-19
+
+### Added
+- **`has_rook_on_back_rank` factgate predicate** (`rook_on_back_rank` tag) — fires when the mover's rook newly lands on the opponent's back rank (rank idx 7 for White, idx 0 for Black), where the rook was not already on that rank. Checks moving piece is a rook, landing rank matches target, and from-rank differs. The logical endpoint of the rook-penetration motif (sixth→seventh→back rank). Evidence carries `square`, `rank` ('eighth'/'first'), and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 549 passed.
+
 ## [0.41.57] — 2026-06-19
 
 ### Added

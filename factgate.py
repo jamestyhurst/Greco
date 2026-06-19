@@ -3564,6 +3564,41 @@ def has_pawn_duo(
     }
 
 
+def has_rook_on_back_rank(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.ROOK:
+        return False, None
+
+    to_sq = move.to_square
+    target_rank = 7 if mover_color == chess.WHITE else 0  # 8th rank idx=7; 1st rank idx=0
+
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+
+    rank_name = "eighth" if mover_color == chess.WHITE else "first"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {
+        "square": sq_name,
+        "rank": rank_name,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s rook penetrates all the way to the {rank_name} rank on {sq_name} — "
+            f"the ultimate invasion; from the back rank the rook can sweep the entire length "
+            f"of the file, threaten back-rank mates, and support promotion of a passed pawn "
+            f"from behind the enemy lines"
+        ),
+    }
+
+
 def has_queen_on_seventh(
     board_before: chess.Board,
     move: chess.Move,
@@ -4032,6 +4067,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "rook_on_back_rank",
     "queen_on_seventh",
     "minor_piece_endgame",
     "knight_endgame",
@@ -4374,6 +4410,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    rob = _safe(lambda: has_rook_on_back_rank(board_before, move, board_after, mover_color))
+    if rob and rob[0]:
+        tags.add("rook_on_back_rank")
 
     q7 = _safe(lambda: has_queen_on_seventh(board_before, move, board_after, mover_color))
     if q7 and q7[0]:

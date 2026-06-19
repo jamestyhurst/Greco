@@ -5068,3 +5068,60 @@ def test_queen_on_seventh_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_on_seventh" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_rook_on_back_rank
+# ---------------------------------------------------------------------------
+
+
+def _rob(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_rook_on_back_rank(board_before, move, board_after, color)
+
+
+def test_rook_on_back_rank_white_a1a8_true():
+    # White rook a1→a8 — lands on the eighth rank.
+    ok, ev = _rob("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a8", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "eighth"
+
+
+def test_rook_on_back_rank_black_a8a1_true():
+    # Black rook a8→a1 — lands on rank idx 0 (first rank = Black's back rank).
+    ok, ev = _rob("r3k3/8/8/8/8/8/8/4K3 b - - 0 1", "a8a1", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "first"
+
+
+def test_rook_on_back_rank_already_on_back_rank_false():
+    # White rook already on a8; moves to b8 — was already on the eighth rank.
+    ok, _ = _rob("R3k3/8/8/8/8/8/8/4K3 w - - 0 1", "a8b8", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_back_rank_goes_to_seventh_not_eighth_false():
+    # White rook a1→a7 — reaches the seventh rank, not the eighth.
+    ok, _ = _rob("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a7", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_back_rank_queen_not_rook_false():
+    # White queen a1→a8 — piece is a queen; piece guard vetoes.
+    ok, _ = _rob("4k3/8/8/8/8/8/8/Q3K3 w - - 0 1", "a1a8", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_back_rank_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/R3K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a8")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_on_back_rank" in tags
