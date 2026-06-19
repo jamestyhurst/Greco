@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.73] — 2026-06-19
+
+### Added
+- **`has_rook_vs_two_minors` factgate predicate** (`rook_vs_two_minors` tag) — fires when a move newly creates a rook-vs-two-minor-pieces imbalance: one side has exactly one rook (no queens, no minors), the other has exactly two minor pieces in any combination (no queens, no rooks). Set-difference guards prevent re-firing. Inner `_state()` returns 'white_rook'/'black_rook'/None; uses `wm = wb + wn` / `bm = bb + bn` for minor counts. Evidence carries `rook_side`, `minor_side`, and `mover`; commentary notes the two-piece theoretical edge (~0.5 pawn) while calibrating to the rook's practical open-file and penetration chances. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 639 passed.
+
 ## [0.41.72] — 2026-06-19
 
 ### Added
