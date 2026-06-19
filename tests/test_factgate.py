@@ -4901,3 +4901,58 @@ def test_bishop_endgame_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
     assert "bishop_endgame" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_knight_endgame
+# ---------------------------------------------------------------------------
+
+
+def _keg(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_knight_endgame(board_before, move, board_after, color)
+
+
+def test_knight_endgame_white_king_takes_bishop_true():
+    # White king e2 captures Black bishop f1 — only White knight + kings remain.
+    ok, ev = _keg("4k3/8/8/8/8/8/4K3/4Nb2 w - - 0 1", "e2f1", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+
+
+def test_knight_endgame_black_knight_takes_rook_true():
+    # Black knight f3 captures White rook g1 — only Black knight + kings remain.
+    ok, ev = _keg("4k3/8/8/8/8/5n2/8/4K1R1 b - - 0 1", "f3g1", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+
+
+def test_knight_endgame_already_knight_endgame_false():
+    # Already only knights + kings before the move — no new event.
+    ok, _ = _keg("4kn2/8/8/8/8/8/8/4KN2 w - - 0 1", "e1d3", chess.WHITE)
+    assert not ok
+
+
+def test_knight_endgame_bishop_remains_false():
+    # Black knight captures White rook but Black bishop still on board.
+    ok, _ = _keg("4k3/8/8/8/8/5n2/8/4K1Rb b - - 0 1", "f3g1", chess.BLACK)
+    assert not ok
+
+
+def test_knight_endgame_second_rook_remains_false():
+    # Black knight captures one White rook but the second White rook remains.
+    ok, _ = _keg("4k3/8/8/8/8/5n2/8/4K1RR b - - 0 1", "f3g1", chess.BLACK)
+    assert not ok
+
+
+def test_knight_endgame_in_certified_claims():
+    fen = "4k3/8/8/8/8/5n2/8/4K1R1 b - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("f3g1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
+    assert "knight_endgame" in tags

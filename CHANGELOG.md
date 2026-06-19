@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.55] — 2026-06-19
+
+### Added
+- **`has_knight_endgame` factgate predicate** (`knight_endgame` tag) — fires when this move causes a transition into a knight endgame (only kings, at least one knight, and pawns remain), where this was not the case before. Inner `_is_knight_endgame` checks for absence of rooks/queens/bishops for both sides, then requires at least one knight. Completes the endgame-type family: `rook_endgame`, `bishop_endgame`, `pawn_endgame`, `knight_endgame`. Evidence carries `mover` and a ready-to-quote evidence string discussing knight coordination, colour-independence, and tempo limitations in endgames. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 531 passed.
+
 ## [0.41.54] — 2026-06-19
 
 ### Added

@@ -3564,6 +3564,40 @@ def has_pawn_duo(
     }
 
 
+def has_knight_endgame(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _is_knight_endgame(board: chess.Board) -> bool:
+        for color in [chess.WHITE, chess.BLACK]:
+            for pt in [chess.ROOK, chess.QUEEN, chess.BISHOP]:
+                if board.pieces(pt, color):
+                    return False
+        for color in [chess.WHITE, chess.BLACK]:
+            if board.pieces(chess.KNIGHT, color):
+                return True
+        return False
+
+    if not _is_knight_endgame(board_after):
+        return False, None
+    if _is_knight_endgame(board_before):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"The position enters a knight endgame — only kings, knights, and pawns remain; "
+            f"knight endgames are notoriously tricky: the knight's leaping ability "
+            f"lets it attack squares of both colours simultaneously, "
+            f"king-knight coordination is essential for escorting passers to promotion, "
+            f"and the knight's slow tempo makes it poor at gaining the opposition"
+        ),
+    }
+
+
 def has_bishop_endgame(
     board_before: chess.Board,
     move: chess.Move,
@@ -3925,6 +3959,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "knight_endgame",
     "bishop_endgame",
     "knight_on_sixth",
     "knight_on_rim",
@@ -4264,6 +4299,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    keg = _safe(lambda: has_knight_endgame(board_before, move, board_after, mover_color))
+    if keg and keg[0]:
+        tags.add("knight_endgame")
 
     beg = _safe(lambda: has_bishop_endgame(board_before, move, board_after, mover_color))
     if beg and beg[0]:
