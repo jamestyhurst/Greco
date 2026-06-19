@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.25] — 2026-06-19
+
+### Added
+- **`is_threefold_repetition` factgate predicate** (`threefold_repetition` tag) — move predicate certifying that after this move the same position has occurred three times, ending the game as an immediate draw. Uses `board_after.is_repetition(count=3)` which checks the full move-stack history (position = board + side to move + castling rights + en passant). Evidence carries a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with "perpetual draw save" vs "missed win" calibration. 5 new tests (2 TRUE / 2 FALSE / 1 integration, including king-shuffle setup to build genuine game history); full suite 351 passed.
+
 ## [0.41.24] — 2026-06-19
 
 ### Added

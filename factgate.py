@@ -2527,6 +2527,27 @@ def captures_hanging(
     }
 
 
+def is_threefold_repetition(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that after this move the same position has occurred three times —
+    the game is immediately drawn by threefold repetition. Uses python-chess's
+    board.is_repetition(count=3) which checks the full move-stack history.
+    evidence keys: evidence.
+    """
+    if not board_after.is_repetition(count=3):
+        return False, None
+    return True, {
+        "evidence": (
+            "This position has occurred three times — the game is drawn "
+            "by threefold repetition"
+        ),
+    }
+
+
 def is_rook_doubled(
     board_before: chess.Board,
     move: chess.Move,
@@ -2691,6 +2712,7 @@ GATED_TAGS = (
     "royal_fork",
     "captures_with_check",
     "rook_doubled",
+    "threefold_repetition",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2928,5 +2950,9 @@ def certified_claims(
     rdbl = _safe(lambda: is_rook_doubled(board_before, move, board_after, mover_color))
     if rdbl and rdbl[0]:
         tags.add("rook_doubled")
+
+    tfr = _safe(lambda: is_threefold_repetition(board_before, move, board_after, mover_color))
+    if tfr and tfr[0]:
+        tags.add("threefold_repetition")
 
     return tags

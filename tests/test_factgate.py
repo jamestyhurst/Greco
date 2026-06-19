@@ -3221,3 +3221,76 @@ def test_is_rook_doubled_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_doubled" in tags
+
+
+# --- is_threefold_repetition --------------------------------------------------
+# Certifies that after the move the same position has appeared three times —
+# the game is immediately drawn by threefold repetition.
+#
+# Helper to build a board state that is one move away from the 3rd repetition:
+# knight shuffle g1↔f3 / g8↔f6 four times brings the starting position back
+# three times.  After 7 half-moves, board is position D (occurrence 2);
+# the 8th half-move f6g8 returns to the starting position for the 3rd time.
+def _build_3rep_board():
+    board = chess.Board()
+    for uci in ["g1f3", "g8f6", "f3g1", "f6g8", "g1f3", "g8f6", "f3g1"]:
+        board.push(chess.Move.from_uci(uci))
+    return board  # Black to move; f6g8 → 3rd occurrence of starting position
+
+
+def test_is_threefold_repetition_true():
+    # 8th half-move f6g8 triggers the 3rd occurrence of the starting position.
+    board_before = _build_3rep_board()
+    move = chess.Move.from_uci("f6g8")
+    board_after = board_before.copy()
+    board_after.push(move)
+    ok, ev = F.is_threefold_repetition(board_before, move, board_after, chess.BLACK)
+    assert ok
+    assert "three" in ev["evidence"].lower()
+
+
+def test_is_threefold_repetition_only_two_reps_false():
+    # After only 4 half-moves the starting position has occurred twice, not three.
+    board = chess.Board()
+    for uci in ["g1f3", "g8f6", "f3g1"]:
+        board.push(chess.Move.from_uci(uci))
+    move = chess.Move.from_uci("f6g8")  # 2nd occurrence, not 3rd
+    board_after = board.copy()
+    board_after.push(move)
+    ok, _ = F.is_threefold_repetition(board, move, board_after, chess.BLACK)
+    assert not ok
+
+
+def test_is_threefold_repetition_fresh_position_false():
+    # Opening pawn move — no repetition possible on move 1.
+    board_before = chess.Board()
+    move = chess.Move.from_uci("e2e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    ok, _ = F.is_threefold_repetition(board_before, move, board_after, chess.WHITE)
+    assert not ok
+
+
+def test_is_threefold_repetition_second_true_case():
+    # King-shuffle in a castling-free position — both sides alternate correctly.
+    # Position A = Ke1 Ke8 White-to-move (no castling rights in FEN).
+    board = chess.Board("4k3/8/8/8/8/8/8/4K3 w - - 0 1")
+    for uci in ["e1d1", "e8d8", "d1e1", "d8e8", "e1d1", "e8d8", "d1e1"]:
+        board.push(chess.Move.from_uci(uci))
+    # After 7 half-moves: Ke1 Kd8 Black-to-move (position D, occurrence 2).
+    # Move d8e8 → position A (Ke1 Ke8 White-to-move) for the 3rd time.
+    board_before = board
+    move = chess.Move.from_uci("d8e8")
+    board_after = board_before.copy()
+    board_after.push(move)
+    ok, _ = F.is_threefold_repetition(board_before, move, board_after, chess.BLACK)
+    assert ok
+
+
+def test_is_threefold_repetition_in_certified_claims():
+    board_before = _build_3rep_board()
+    move = chess.Move.from_uci("f6g8")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
+    assert "threefold_repetition" in tags
