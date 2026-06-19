@@ -3645,6 +3645,46 @@ def has_two_rooks_vs_queen(
     }
 
 
+def has_queen_vs_rook_and_minor(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _state(board: chess.Board) -> Optional[str]:
+        wr = len(board.pieces(chess.ROOK, chess.WHITE))
+        wb = len(board.pieces(chess.BISHOP, chess.WHITE))
+        wn = len(board.pieces(chess.KNIGHT, chess.WHITE))
+        wq = len(board.pieces(chess.QUEEN, chess.WHITE))
+        br = len(board.pieces(chess.ROOK, chess.BLACK))
+        bb = len(board.pieces(chess.BISHOP, chess.BLACK))
+        bn = len(board.pieces(chess.KNIGHT, chess.BLACK))
+        bq = len(board.pieces(chess.QUEEN, chess.BLACK))
+        wm = wb + wn
+        bm = bb + bn
+        if wq == 1 and wr == 0 and wm == 0 and br == 1 and bm == 1 and bq == 0:
+            return "white_queen"
+        if bq == 1 and br == 0 and bm == 0 and wr == 1 and wm == 1 and wq == 0:
+            return "black_queen"
+        return None
+    after = _state(board_after)
+    if not after:
+        return False, None
+    before = _state(board_before)
+    if before:
+        return False, None
+    queen_side = "White" if after == "white_queen" else "Black"
+    rook_side = "Black" if after == "white_queen" else "White"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "queen_side": queen_side, "rook_side": rook_side, "mover": mover_name,
+        "evidence": (
+            f"The material crystallises into a queen vs. rook-and-minor imbalance — "
+            f"{queen_side} wields the queen while {rook_side} answers with rook and minor piece; "
+            f"the queen typically outweighs this combination by a small margin, "
+            f"though the rook-and-minor side gains practical chances in complex, tactical positions "
+            f"or when the rook claims an open file and the minor piece finds a strong outpost"
+        ),
+    }
+
+
 def has_rook_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4406,6 +4446,7 @@ GATED_TAGS = (
     "bishop_on_seventh",
     "rook_on_fifth",
     "two_rooks_vs_queen",
+    "queen_vs_rook_and_minor",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -4783,6 +4824,10 @@ def certified_claims(
     trvq = _safe(lambda: has_two_rooks_vs_queen(board_before, move, board_after, mover_color))
     if trvq and trvq[0]:
         tags.add("two_rooks_vs_queen")
+
+    qvrm = _safe(lambda: has_queen_vs_rook_and_minor(board_before, move, board_after, mover_color))
+    if qvrm and qvrm[0]:
+        tags.add("queen_vs_rook_and_minor")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:

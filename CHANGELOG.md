@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.72] — 2026-06-19
+
+### Added
+- **`has_queen_vs_rook_and_minor` factgate predicate** (`queen_vs_rook_and_minor` tag) — fires when a move newly creates a pure queen vs. rook-and-minor imbalance: one side has exactly one queen (no rooks, no minor pieces), the other has exactly one rook and one minor piece (no queens). Set-difference guards against re-firing. Inner `_state()` returns 'white_queen'/'black_queen'/None; uses `wm = wb + wn` / `bm = bb + bn` to count minors. Evidence carries `queen_side`, `rook_side`, and `mover`; commentary acknowledges the queen's slight theoretical edge (~0.5 pawn) while calibrating to practical compensation in dynamic positions with an active rook and strong minor outpost. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 633 passed.
+
 ## [0.41.71] — 2026-06-19
 
 ### Added

@@ -5811,3 +5811,56 @@ def test_two_rooks_vs_queen_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "two_rooks_vs_queen" in tags
+
+
+# ── has_queen_vs_rook_and_minor ───────────────────────────────────────
+def _qvrm(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_queen_vs_rook_and_minor(bb, mv, ba, col)
+
+
+def test_queen_vs_rook_and_minor_black_captures_white_knight_true():
+    # Black Re2 captures White Ne4; after: White has Q only, Black has R+B
+    ok, ev = _qvrm("2bk4/8/8/8/4N3/8/4r3/3QK3 b - - 0 1", "e2e4", chess.BLACK)
+    assert ok
+    assert ev["queen_side"] == "White"
+    assert ev["rook_side"] == "Black"
+
+
+def test_queen_vs_rook_and_minor_white_captures_black_rook_true():
+    # White Ra8 captures Black Rb8; after: Black has Q only, White has R+B
+    ok, ev = _qvrm("Rr1qk3/8/8/8/2B5/8/8/4K3 w - - 0 1", "a8b8", chess.WHITE)
+    assert ok
+    assert ev["queen_side"] == "Black"
+    assert ev["rook_side"] == "White"
+
+
+def test_queen_vs_rook_and_minor_queen_still_has_extra_false():
+    # After move White still has Q+R — not a pure Q vs R+minor
+    ok, _ = _qvrm("3qk3/8/8/8/8/8/8/R2QK3 w - - 0 1", "a1a5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_rook_and_minor_imbalance_already_existed_false():
+    # White R+B vs Black Q already exists before move
+    ok, _ = _qvrm("3qk3/8/8/8/8/8/8/R1B1K3 w - - 0 1", "a1a5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_rook_and_minor_two_minors_on_rook_side_false():
+    # White R+B+N vs Black Q — rook side has two minors, not one
+    ok, _ = _qvrm("3qk3/8/8/8/8/8/8/RNB1K3 w - - 0 1", "b1c3", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_rook_and_minor_in_certified_claims():
+    fen = "2bk4/8/8/8/4N3/8/4r3/3QK3 b - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e2e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
+    assert "queen_vs_rook_and_minor" in tags
