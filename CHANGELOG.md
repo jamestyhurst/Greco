@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.81] — 2026-06-19
+
+### Added
+- **`has_rook_and_minor_vs_two_rooks` factgate predicate** (`rook_and_minor_vs_two_rooks` tag) — fires when a move newly creates a rook-and-minor vs. two rooks imbalance: one side has exactly one rook and exactly one minor piece (no queens), the other has exactly two rooks (no queens, no minors). Set-difference via inner `_state()` returning 'white_rook_minor'/'black_rook_minor'/None; uses `(wb+wn)==1`/`(bb+bn)==1` to cover R+B and R+N cases. Evidence carries `minor_rook_side`, `two_rook_side`, and `mover`. Narrator rule appended to line 202. Wired into `GATED_TAGS`, `certified_claims()`. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 687 passed.
+
 ## [0.41.80] — 2026-06-19
 
 ### Added

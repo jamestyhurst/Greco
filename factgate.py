@@ -3991,6 +3991,45 @@ def has_queen_vs_two_minors(
     }
 
 
+def has_rook_and_minor_vs_two_rooks(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _state(board: chess.Board) -> Optional[str]:
+        wr = len(board.pieces(chess.ROOK, chess.WHITE))
+        wb = len(board.pieces(chess.BISHOP, chess.WHITE))
+        wn = len(board.pieces(chess.KNIGHT, chess.WHITE))
+        wq = len(board.pieces(chess.QUEEN, chess.WHITE))
+        br = len(board.pieces(chess.ROOK, chess.BLACK))
+        bb = len(board.pieces(chess.BISHOP, chess.BLACK))
+        bn = len(board.pieces(chess.KNIGHT, chess.BLACK))
+        bq = len(board.pieces(chess.QUEEN, chess.BLACK))
+        if wr == 1 and (wb + wn) == 1 and wq == 0 and br == 2 and bb == 0 and bn == 0 and bq == 0:
+            return "white_rook_minor"
+        if br == 1 and (bb + bn) == 1 and bq == 0 and wr == 2 and wb == 0 and wn == 0 and wq == 0:
+            return "black_rook_minor"
+        return None
+    after = _state(board_after)
+    if not after:
+        return False, None
+    before = _state(board_before)
+    if before:
+        return False, None
+    minor_rook_side = "White" if after == "white_rook_minor" else "Black"
+    two_rook_side = "Black" if after == "white_rook_minor" else "White"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "minor_rook_side": minor_rook_side, "two_rook_side": two_rook_side, "mover": mover_name,
+        "evidence": (
+            f"The material resolves into a rook-and-minor vs. two rooks imbalance — "
+            f"{minor_rook_side} holds a rook and a minor piece while {two_rook_side} "
+            f"commands the rook pair; two rooks typically outweigh a rook-and-minor by about "
+            f"one to two pawns, especially in open positions where rook coordination along "
+            f"multiple files is decisive; the rook-and-minor side compensates through the "
+            f"minor piece's outpost potential and tactical flexibility"
+        ),
+    }
+
+
 def has_rook_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4761,6 +4800,7 @@ GATED_TAGS = (
     "two_knights_vs_rook",
     "queen_vs_rook",
     "queen_vs_two_minors",
+    "rook_and_minor_vs_two_rooks",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -5174,6 +5214,10 @@ def certified_claims(
     qvtm = _safe(lambda: has_queen_vs_two_minors(board_before, move, board_after, mover_color))
     if qvtm and qvtm[0]:
         tags.add("queen_vs_two_minors")
+
+    rmvtr = _safe(lambda: has_rook_and_minor_vs_two_rooks(board_before, move, board_after, mover_color))
+    if rmvtr and rmvtr[0]:
+        tags.add("rook_and_minor_vs_two_rooks")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:
