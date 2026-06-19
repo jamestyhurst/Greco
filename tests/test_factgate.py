@@ -7009,3 +7009,64 @@ def test_queen_and_minor_vs_queen_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_and_minor_vs_queen" in tags
 
+
+# ---------------------------------------------------------------------------
+# has_rook_and_minor_vs_rook
+# ---------------------------------------------------------------------------
+
+def _rmvr(fen, move_uci, mover_color=chess.WHITE):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(move_uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_rook_and_minor_vs_rook(board_before, move, board_after, mover_color)
+
+
+def test_rook_and_minor_vs_rook_white_true():
+    # White Rb1 captures black bishop on b4 → White R+B vs Black lone R
+    result = _rmvr("1r6/8/8/8/1b6/8/8/1RBK3k w - - 0 1", "b1b4")
+    fired, info = result
+    assert fired
+    assert info["rook_minor_side"] == "White"
+    assert info["lone_rook_side"] == "Black"
+
+
+def test_rook_and_minor_vs_rook_black_true():
+    # Black rb8 captures white Bishop on b4 → Black R+B vs White lone R
+    result = _rmvr("1r6/K7/8/8/1B6/8/1b6/R3k3 b - - 0 1", "b8b4", chess.BLACK)
+    fired, info = result
+    assert fired
+    assert info["rook_minor_side"] == "Black"
+    assert info["lone_rook_side"] == "White"
+
+
+def test_rook_and_minor_vs_rook_rook_minor_side_has_two_minors_false():
+    # After Rb1xb4: White has R+B+N, not clean R+minor → does not fire
+    result = _rmvr("1r6/8/8/8/1n6/3N4/8/1RBK3k w - - 0 1", "b1b4")
+    fired, _ = result
+    assert not fired
+
+
+def test_rook_and_minor_vs_rook_imbalance_pre_existed_false():
+    # White already has R+B vs Black lone R before the move
+    result = _rmvr("1r6/8/8/8/8/8/8/1RBK3k w - - 0 1", "b1b2")
+    fired, _ = result
+    assert not fired
+
+
+def test_rook_and_minor_vs_rook_lone_rook_side_has_minor_false():
+    # Black also has a knight alongside its rook → not a lone rook → does not fire
+    result = _rmvr("1r6/8/8/8/8/5n2/8/1RBK3k w - - 0 1", "b1b3")
+    fired, _ = result
+    assert not fired
+
+
+def test_rook_and_minor_vs_rook_in_certified_claims():
+    fen = "1r6/8/8/8/1b6/8/8/1RBK3k w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("b1b4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_and_minor_vs_rook" in tags
+
