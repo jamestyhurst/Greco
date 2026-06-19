@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.62] — 2026-06-19
+
+### Added
+- **`has_king_centralized` factgate predicate** (`king_centralized` tag) — fires when the king moves to one of the four core central squares (d4, d5, e4, or e5), analogous to `knight_centralized`. Engine-free: checks piece is king, destination file ∈ {3,4} AND rank ∈ {3,4}. Commentary calibrated to game phase in narrator rule (endgame = positive, middlegame = bold/reckless). Fixed a test-helper naming collision: existing `_kc()` helper was for knight_centralized; new helper renamed `_kingc()` and certified_claims var renamed `kingc` to avoid shadowing. Evidence carries `square` and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 573 passed.
+
 ## [0.41.61] — 2026-06-19
 
 ### Added

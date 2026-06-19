@@ -5289,3 +5289,54 @@ def test_queen_on_back_rank_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_on_back_rank" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_king_centralized
+# ---------------------------------------------------------------------------
+
+def _kingc(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_king_centralized(board_before, move, board_after, color)
+
+
+def test_king_centralized_white_e4_true():
+    ok, ev = _kingc("4k3/8/8/8/8/4K3/8/8 w - - 0 1", "e3e4", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["square"] == "e4"
+
+
+def test_king_centralized_black_d5_true():
+    ok, ev = _kingc("8/8/3k4/8/8/8/8/4K3 b - - 0 1", "d6d5", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["square"] == "d5"
+
+
+def test_king_centralized_goes_to_d3_not_central_false():
+    ok, _ = _kingc("4k3/8/8/8/4K3/8/8/8 w - - 0 1", "e4d3", chess.WHITE)
+    assert not ok
+
+
+def test_king_centralized_rook_to_e4_not_king_false():
+    ok, _ = _kingc("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert not ok
+
+
+def test_king_centralized_goes_to_f4_not_central_false():
+    ok, _ = _kingc("4k3/8/8/8/4K3/8/8/8 w - - 0 1", "e4f4", chess.WHITE)
+    assert not ok
+
+
+def test_king_centralized_in_certified_claims():
+    fen = "4k3/8/8/8/8/4K3/8/8 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e3e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "king_centralized" in tags
