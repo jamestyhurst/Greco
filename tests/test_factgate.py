@@ -3845,3 +3845,57 @@ def test_undermining_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "undermining" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_rook_endgame
+# ---------------------------------------------------------------------------
+
+def _re(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_rook_endgame(board_before, move, board_after, color)
+
+
+def test_rook_endgame_white_captures_last_minor_true():
+    # White Rxd6 takes Black's last bishop; only kings, rooks, pawns remain.
+    ok, ev = _re("4k3/pppp4/3b4/8/8/PPP5/8/3RK3 w - - 0 1", "d1d6", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_rook_endgame_black_captures_last_bishop_true():
+    # Black Rxd1 takes White's last bishop; only kings, rooks, pawns remain.
+    ok, ev = _re("4k3/3r4/8/8/8/8/8/3BK3 b - - 0 1", "d7d1", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_rook_endgame_already_rook_endgame_before_false():
+    # Position is already kings+rooks+pawns — no transition, predicate should not fire.
+    ok, _ = _re("4k3/pppp4/8/8/8/PPP5/8/3RK3 w - - 0 1", "d1d4", chess.WHITE)
+    assert not ok
+
+
+def test_rook_endgame_minor_still_present_after_false():
+    # White captures Black bishop but White still has a knight — not a pure rook endgame.
+    ok, _ = _re("4k3/pppp4/3b4/8/8/PPP5/8/3RNK2 w - - 0 1", "d1d6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_endgame_non_capture_pawn_advance_false():
+    # Pawn advance — no piece captured, piece inventory unchanged.
+    ok, _ = _re("4k3/pppp4/3b4/8/8/PPP5/8/3RK3 w - - 0 1", "a3a4", chess.WHITE)
+    assert not ok
+
+
+def test_rook_endgame_in_certified_claims():
+    fen = "4k3/pppp4/3b4/8/8/PPP5/8/3RK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_endgame" in tags

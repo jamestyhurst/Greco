@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.36] — 2026-06-19
+
+### Added
+- **`is_rook_endgame` factgate predicate** (`rook_endgame` tag) — fires when a move newly transitions the game to a rook endgame (only kings, rooks, and pawns remain; no queens, bishops, or knights). Guards on `_has_non_rook(board_after)` being False, `_has_non_rook(board_before)` being True (new transition), and at least one rook present (to distinguish from `pawn_endgame`). Evidence carries `mover` and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with rook-activity and Lucena/Philidor framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 417 passed.
+
 ## [0.41.35] — 2026-06-19
 
 ### Added

@@ -2932,6 +2932,40 @@ def is_opposite_side_castling(
     }
 
 
+def is_rook_endgame(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    _MINOR_TYPES = (chess.QUEEN, chess.BISHOP, chess.KNIGHT)
+
+    def _has_non_rook(board: chess.Board) -> bool:
+        for color in (chess.WHITE, chess.BLACK):
+            for pt in _MINOR_TYPES:
+                if board.pieces(pt, color):
+                    return True
+        return False
+
+    if _has_non_rook(board_after):
+        return False, None
+    if not _has_non_rook(board_before):
+        return False, None  # Already in rook endgame; not a new transition
+    # Must have at least one rook (else it's a pawn_endgame)
+    if not (board_after.pieces(chess.ROOK, chess.WHITE) or board_after.pieces(chess.ROOK, chess.BLACK)):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"The position transitions to a rook endgame — "
+            f"only kings, rooks, and pawns remain; "
+            f"rook activity, king centralisation, and pawn structure now decide the outcome"
+        ),
+    }
+
+
 def is_undermining(
     board_before: chess.Board,
     move: chess.Move,
@@ -3176,6 +3210,7 @@ GATED_TAGS = (
     "king_active_endgame",
     "bishop_vs_knight",
     "undermining",
+    "rook_endgame",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3457,5 +3492,9 @@ def certified_claims(
     und = _safe(lambda: is_undermining(board_before, move, board_after, mover_color))
     if und and und[0]:
         tags.add("undermining")
+
+    re_ = _safe(lambda: is_rook_endgame(board_before, move, board_after, mover_color))
+    if re_ and re_[0]:
+        tags.add("rook_endgame")
 
     return tags
