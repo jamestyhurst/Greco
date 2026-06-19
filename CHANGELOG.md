@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.54] — 2026-06-19
+
+### Added
+- **`has_bishop_endgame` factgate predicate** (`bishop_endgame` tag) — fires when this move causes a transition into a bishop endgame (only kings, at least one bishop, and pawns remain), where this was not the case before. Inner `_is_bishop_endgame` checks for absence of rooks/queens/knights for both sides, then requires at least one bishop to be present. Set-difference fires only on the decisive move. Completes the endgame-type triad alongside `rook_endgame` and `pawn_endgame`. Evidence carries `mover` and a ready-to-quote evidence string discussing pawn colour sensitivity, opposite-bishop draw tendencies, and same-bishop king-activity themes. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 525 passed.
+
 ## [0.41.53] — 2026-06-19
 
 ### Added

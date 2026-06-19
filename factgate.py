@@ -3564,6 +3564,40 @@ def has_pawn_duo(
     }
 
 
+def has_bishop_endgame(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _is_bishop_endgame(board: chess.Board) -> bool:
+        for color in [chess.WHITE, chess.BLACK]:
+            for pt in [chess.ROOK, chess.QUEEN, chess.KNIGHT]:
+                if board.pieces(pt, color):
+                    return False
+        for color in [chess.WHITE, chess.BLACK]:
+            if board.pieces(chess.BISHOP, color):
+                return True
+        return False
+
+    if not _is_bishop_endgame(board_after):
+        return False, None
+    if _is_bishop_endgame(board_before):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"The position enters a bishop endgame — only kings, bishops, and pawns remain; "
+            f"bishop endgames are sensitive to pawn colour (pawns on the same colour "
+            f"as the bishop cramp its mobility), opposite-coloured bishops carry a "
+            f"strong drawing tendency, and same-colour bishop endings hinge on "
+            f"king activity and pawn breaks"
+        ),
+    }
+
+
 def has_knight_on_sixth(
     board_before: chess.Board,
     move: chess.Move,
@@ -3891,6 +3925,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "bishop_endgame",
     "knight_on_sixth",
     "knight_on_rim",
     "open_center",
@@ -4229,6 +4264,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    beg = _safe(lambda: has_bishop_endgame(board_before, move, board_after, mover_color))
+    if beg and beg[0]:
+        tags.add("bishop_endgame")
 
     kn6 = _safe(lambda: has_knight_on_sixth(board_before, move, board_after, mover_color))
     if kn6 and kn6[0]:

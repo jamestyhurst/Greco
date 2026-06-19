@@ -4846,3 +4846,58 @@ def test_knight_on_sixth_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "knight_on_sixth" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_bishop_endgame
+# ---------------------------------------------------------------------------
+
+
+def _beg(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_bishop_endgame(board_before, move, board_after, color)
+
+
+def test_bishop_endgame_white_bishop_takes_rook_true():
+    # White bishop c1 captures Black rook e3 (diagonal c1-e3) — only bishops + kings remain.
+    ok, ev = _beg("4k3/8/8/8/8/4r3/8/2B1K3 w - - 0 1", "c1e3", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+
+
+def test_bishop_endgame_black_bishop_takes_rook_true():
+    # Black bishop a1 captures White rook c3 — bishop endgame begins.
+    ok, ev = _beg("4k3/8/8/8/8/2R5/8/b3K3 b - - 0 1", "a1c3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+
+
+def test_bishop_endgame_already_bishop_endgame_false():
+    # Already only bishops + kings before the move — no new event.
+    ok, _ = _beg("4k1b1/8/8/8/8/8/8/4KB2 w - - 0 1", "f1g2", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_endgame_knight_remains_false():
+    # Black bishop takes rook but Black still has a knight — not a pure bishop endgame.
+    ok, _ = _beg("4k3/8/8/8/8/2R5/8/b3K1n1 b - - 0 1", "a1c3", chess.BLACK)
+    assert not ok
+
+
+def test_bishop_endgame_no_bishops_remain_false():
+    # King captures rook leaving only kings + pawn — pawn endgame, no bishops.
+    ok, _ = _beg("4k3/8/8/8/8/8/P7/4Kr2 w - - 0 1", "e1f1", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_endgame_in_certified_claims():
+    fen = "4k3/8/8/8/8/2R5/8/b3K3 b - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1c3")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
+    assert "bishop_endgame" in tags
