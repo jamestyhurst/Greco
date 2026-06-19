@@ -2090,6 +2090,31 @@ def is_desperado(
 
 
 # --------------------------------------------------------------------------- #
+# Promotion — a pawn reaches the back rank and becomes a new piece.
+# --------------------------------------------------------------------------- #
+def is_promotion(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move is a pawn promotion.
+
+    Returns (True, evidence_dict) when move.promotion is set and the piece
+    moving was indeed a pawn. Returns (False, None) otherwise.
+    evidence keys: promoted_to (piece name string), square (algebraic name).
+    """
+    if move.promotion is None:
+        return False, None
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.PAWN:
+        return False, None
+    return True, {
+        "promoted_to": chess.piece_name(move.promotion),
+        "square": chess.square_name(move.to_square),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -2129,6 +2154,7 @@ GATED_TAGS = (
     "connected_rooks",
     "file_opened",
     "half_open_file",
+    "promotion",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2290,5 +2316,9 @@ def certified_claims(
     hof = _safe(lambda: creates_half_open_file(board_before, move, board_after, mover_color))
     if hof and hof[0]:
         tags.add("half_open_file")
+
+    prm = _safe(lambda: is_promotion(board_before, move, board_after))
+    if prm and prm[0]:
+        tags.add("promotion")
 
     return tags

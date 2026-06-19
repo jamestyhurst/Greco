@@ -2303,3 +2303,50 @@ def test_creates_half_open_file_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "half_open_file" in tags
+
+
+# --- is_promotion -----------------------------------------------------------
+def _prom(fen, uci, color=chess.WHITE):
+    """Helper: push UCI move and call is_promotion."""
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.is_promotion(b, mv, after)
+
+
+def test_promotion_true_queen():
+    # White pawn on e7 promotes to queen on e8.
+    ok, ev = _prom("3k4/4P3/8/8/8/8/8/4K3 w - - 0 1", "e7e8q")
+    assert ok
+    assert ev["promoted_to"] == "queen"
+    assert ev["square"] == "e8"
+
+
+def test_promotion_true_knight_underpromote():
+    # Underpromoting to a knight is still a promotion.
+    ok, ev = _prom("3k4/4P3/8/8/8/8/8/4K3 w - - 0 1", "e7e8n")
+    assert ok
+    assert ev["promoted_to"] == "knight"
+
+
+def test_promotion_false_quiet_push():
+    # A pawn push that does not reach the back rank is not a promotion.
+    ok, _ = _prom("3k4/8/4P3/8/8/8/8/4K3 w - - 0 1", "e6e7")
+    assert not ok
+
+
+def test_promotion_false_non_pawn_move():
+    # A king move is never a promotion.
+    ok, _ = _prom("3k4/4P3/8/8/8/8/8/4K3 w - - 0 1", "e1f1")
+    assert not ok
+
+
+def test_promotion_in_certified_claims():
+    # White pawn promotes to queen → "promotion" tag in certified_claims.
+    board_before = chess.Board("3k4/4P3/8/8/8/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("e7e8q")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "promotion" in tags

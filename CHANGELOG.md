@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.6] — 2026-06-18
+
+### Added
+- **`is_promotion` factgate predicate** (`promotion` tag) — move predicate certifying that a pawn reached the back rank and was promoted. Evidence bundle carries `promoted_to` (piece name) and `square` (promotion square). Handles underpromotion (knight/rook/bishop) and distinguishes `promotion` (the move itself) from `promotion_threat` (a future threat). Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with underpromotion-specific guidance. 5 new pure tests; full suite 256 passed.
+
 ## [0.41.5] — 2026-06-18
 
 ### Added
