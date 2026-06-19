@@ -3564,6 +3564,29 @@ def has_pawn_duo(
     }
 
 
+def has_queen_on_back_rank(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.QUEEN:
+        return False, None
+    to_sq = move.to_square
+    target_rank = 7 if mover_color == chess.WHITE else 0
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+    rank_name = "eighth" if mover_color == chess.WHITE else "first"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {"square": sq_name, "rank": rank_name, "mover": mover_name, "evidence": (
+        f"{mover_name}'s queen storms all the way to the {rank_name} rank on {sq_name} — "
+        f"the deepest possible invasion; from the back rank the queen controls both the "
+        f"rank and its diagonals simultaneously, threatening back-rank mates, cutting off "
+        f"the enemy king, and supporting promotion from behind"
+    )}
+
+
 def has_outside_passed_pawn(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4132,6 +4155,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "queen_on_back_rank",
     "outside_passed_pawn",
     "queen_on_sixth",
     "rook_on_back_rank",
@@ -4477,6 +4501,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    qbr = _safe(lambda: has_queen_on_back_rank(board_before, move, board_after, mover_color))
+    if qbr and qbr[0]:
+        tags.add("queen_on_back_rank")
 
     opp = _safe(lambda: has_outside_passed_pawn(board_before, move, board_after, mover_color))
     if opp and opp[0]:

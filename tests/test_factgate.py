@@ -5236,3 +5236,56 @@ def test_outside_passed_pawn_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "outside_passed_pawn" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_queen_on_back_rank
+# ---------------------------------------------------------------------------
+
+def _qbr(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_on_back_rank(board_before, move, board_after, color)
+
+
+def test_queen_on_back_rank_white_d1d8_true():
+    ok, ev = _qbr("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d8", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "eighth"
+    assert ev["square"] == "d8"
+
+
+def test_queen_on_back_rank_black_d8d1_true():
+    ok, ev = _qbr("3qk3/8/8/8/8/8/8/4K3 b - - 0 1", "d8d1", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "first"
+    assert ev["square"] == "d1"
+
+
+def test_queen_on_back_rank_already_on_back_rank_false():
+    ok, _ = _qbr("Q3k3/8/8/8/8/8/8/4K3 w - - 0 1", "a8c8", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_back_rank_goes_to_seventh_not_eighth_false():
+    ok, _ = _qbr("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d7", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_back_rank_rook_not_queen_false():
+    ok, _ = _qbr("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a8", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_back_rank_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/3QK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d8")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_on_back_rank" in tags
