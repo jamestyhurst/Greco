@@ -3874,6 +3874,45 @@ def has_two_bishops_vs_rook(
     }
 
 
+def has_two_knights_vs_rook(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _state(board: chess.Board) -> Optional[str]:
+        wr = len(board.pieces(chess.ROOK, chess.WHITE))
+        wb = len(board.pieces(chess.BISHOP, chess.WHITE))
+        wn = len(board.pieces(chess.KNIGHT, chess.WHITE))
+        wq = len(board.pieces(chess.QUEEN, chess.WHITE))
+        br = len(board.pieces(chess.ROOK, chess.BLACK))
+        bb = len(board.pieces(chess.BISHOP, chess.BLACK))
+        bn = len(board.pieces(chess.KNIGHT, chess.BLACK))
+        bq = len(board.pieces(chess.QUEEN, chess.BLACK))
+        if wn == 2 and wb == 0 and wq == 0 and wr == 0 and br == 1 and bb == 0 and bq == 0 and bn == 0:
+            return "white_knights"
+        if bn == 2 and bb == 0 and bq == 0 and br == 0 and wr == 1 and wb == 0 and wq == 0 and wn == 0:
+            return "black_knights"
+        return None
+    after = _state(board_after)
+    if not after:
+        return False, None
+    before = _state(board_before)
+    if before:
+        return False, None
+    knight_side = "White" if after == "white_knights" else "Black"
+    rook_side = "Black" if after == "white_knights" else "White"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "knight_side": knight_side, "rook_side": rook_side, "mover": mover_name,
+        "evidence": (
+            f"The material resolves into a two knights vs. rook imbalance — "
+            f"{knight_side} wields the knight pair while {rook_side} relies on the lone rook; "
+            f"two knights are typically worth slightly more than a rook but lack the rook's "
+            f"long-range power and open-file dominance; the knight side excels in closed and "
+            f"tactical positions where the knights can establish strong outposts, while the "
+            f"rook side compensates with active play along open files and rank penetration"
+        ),
+    }
+
+
 def has_rook_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4641,6 +4680,7 @@ GATED_TAGS = (
     "rook_vs_bishop",
     "rook_vs_knight",
     "two_bishops_vs_rook",
+    "two_knights_vs_rook",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -5042,6 +5082,10 @@ def certified_claims(
     tbvr = _safe(lambda: has_two_bishops_vs_rook(board_before, move, board_after, mover_color))
     if tbvr and tbvr[0]:
         tags.add("two_bishops_vs_rook")
+
+    tkvr = _safe(lambda: has_two_knights_vs_rook(board_before, move, board_after, mover_color))
+    if tkvr and tkvr[0]:
+        tags.add("two_knights_vs_rook")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:

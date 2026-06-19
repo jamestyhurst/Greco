@@ -6142,3 +6142,56 @@ def test_two_bishops_vs_rook_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "two_bishops_vs_rook" in tags
+
+
+# ── has_two_knights_vs_rook ──────────────────────────────────────────────────
+
+def _tkvr(fen, uci, color):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = b.copy(); ba.push(mv)
+    return F.has_two_knights_vs_rook(b, mv, ba, color)
+
+
+def test_two_knights_vs_rook_white_knights_true():
+    # Nc3xe4 captures Black bishop → White 2N, Black R
+    ok, d = _tkvr("4k3/8/8/8/4b3/2N2N2/3r4/4K3 w - - 0 1", "c3e4", chess.WHITE)
+    assert ok
+    assert d["knight_side"] == "White"
+    assert d["rook_side"] == "Black"
+
+
+def test_two_knights_vs_rook_black_knights_true():
+    # Rd1xd6 captures Black bishop → Black 2N, White R
+    ok, d = _tkvr("4k3/8/3b4/8/8/2n2n2/8/3RK3 w - - 0 1", "d1d6", chess.WHITE)
+    assert ok
+    assert d["knight_side"] == "Black"
+    assert d["rook_side"] == "White"
+
+
+def test_two_knights_vs_rook_only_one_knight_false():
+    # White has only 1N after move — not a 2N:1R imbalance
+    ok, _ = _tkvr("4k3/8/8/8/4b3/4N3/8/4K2R w - - 0 1", "e3d5", chess.WHITE)
+    assert not ok
+
+
+def test_two_knights_vs_rook_imbalance_pre_existed_false():
+    # White already has 2N vs Black R before the move
+    ok, _ = _tkvr("1r2k3/8/8/8/8/2N2N2/8/4K3 w - - 0 1", "c3d5", chess.WHITE)
+    assert not ok
+
+
+def test_two_knights_vs_rook_knight_side_has_bishop_too_false():
+    # White has 2N+B; not a clean 2N:1R imbalance
+    ok, _ = _tkvr("1r2k3/8/8/8/4b3/2N2N2/8/2B1K3 w - - 0 1", "c3e4", chess.WHITE)
+    assert not ok
+
+
+def test_two_knights_vs_rook_in_certified_claims():
+    fen = "4k3/8/8/8/4b3/2N2N2/3r4/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("c3e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "two_knights_vs_rook" in tags

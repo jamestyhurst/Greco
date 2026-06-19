@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.78] — 2026-06-19
+
+### Added
+- **`has_two_knights_vs_rook` factgate predicate** (`two_knights_vs_rook` tag) — fires when a move newly creates a two-knights-vs-rook imbalance: one side has exactly two knights (no rooks, no bishops, no queens), the other has exactly one rook (no queens, no bishops, no knights). Set-difference via inner `_state()` returning 'white_knights'/'black_knights'/None. Evidence carries `knight_side`, `rook_side`, and `mover`; commentary notes the knight pair's theoretical slight edge in closed/tactical positions where outposts abound, while calibrating to the rook's long-range file dominance and practical compensation. Companion to `two_bishops_vs_rook`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 669 passed.
+
 ## [0.41.77] — 2026-06-19
 
 ### Added
