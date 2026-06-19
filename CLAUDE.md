@@ -108,3 +108,30 @@ a Greco Dev Log entry: Device Laptop, Branch, Version, Status, Type, Notes. Prot
 **Never:** commit/print the API key; push without the secret scan; use a freeform commit subject
 or hand-edit `version.py`; or set up a scheduled/background auto-push (session-driven and manual
 only — background installers/tasks trip this machine's antivirus).
+
+## Autonomous sessions — approval tagging
+
+When any predicate or narrator rule is written during an autonomous session **without James
+directly approving the wording**, the code must be tagged immediately:
+
+1. **In `factgate.py`:** add `# ⚠️ PENDING_APPROVAL: predicate definition and narrator wording
+   not reviewed by James` as the first line of the function body (right after the `) -> ...:`
+   signature line, before `def _state`).
+2. **In narrator.py:** once the narrator rules are restructured into a dict (see below), add
+   `# ⚠️ PENDING_APPROVAL` to the entry for each unapproved tag.
+3. **Findable with grep:** `git grep -n "PENDING_APPROVAL" -- .` must list every unapproved
+   predicate and narrator rule. Scan this at the start of any review session.
+
+The tag is removed only when James explicitly approves the wording. Never ship a predicate to
+production narration without approval.
+
+**Safe for autonomous sessions (no approval tag needed):**
+- Implementing predicates whose spec already appears in `docs/specs/PREDICATE_SPECS.md`
+  and whose glossary entry is marked `✅ approved` in
+  `knowledge/terminology/chess-terminology-glossary.md`.
+- Refactoring, test improvements, documentation, bug fixes with no behavior change.
+
+**Requires approval before autonomous implementation:**
+- Any new predicate not yet in the glossary or predicate specs.
+- Any narrator rule wording.
+- Any new terminology or claim type.

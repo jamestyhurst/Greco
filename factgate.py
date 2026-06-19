@@ -4398,6 +4398,7 @@ def has_queen_and_rook_vs_queen(
 def has_queen_and_minor_vs_queen(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -4443,6 +4444,7 @@ def has_queen_and_minor_vs_queen(
 def has_rook_and_minor_vs_rook(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -4488,6 +4490,7 @@ def has_rook_and_minor_vs_rook(
 def has_queen_vs_rook_and_two_minors(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -4534,6 +4537,7 @@ def has_queen_vs_rook_and_two_minors(
 def has_rook_and_minor_vs_minor_pair(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -4579,6 +4583,7 @@ def has_rook_and_minor_vs_minor_pair(
 def has_queen_and_rook_vs_rook_and_minor(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -4624,6 +4629,7 @@ def has_queen_and_rook_vs_rook_and_minor(
 def has_queen_and_minor_vs_rook_and_minor(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -4669,6 +4675,7 @@ def has_queen_and_minor_vs_rook_and_minor(
 def has_two_rooks_vs_rook_and_minor(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -4714,6 +4721,7 @@ def has_two_rooks_vs_rook_and_minor(
 def has_queen_and_two_minors_vs_queen(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
+    # ⚠️ PENDING_APPROVAL: predicate definition and narrator wording not reviewed by James
     def _state(board):
         wq = len(board.pieces(chess.QUEEN, chess.WHITE))
         wr = len(board.pieces(chess.ROOK, chess.WHITE))
