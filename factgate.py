@@ -4208,6 +4208,37 @@ def has_queen_and_rook_vs_two_rooks(
     }
 
 
+def has_rook_and_two_minors_vs_two_rooks(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _state(board):
+        wq=len(board.pieces(chess.QUEEN,chess.WHITE)); wr=len(board.pieces(chess.ROOK,chess.WHITE))
+        wb=len(board.pieces(chess.BISHOP,chess.WHITE)); wn=len(board.pieces(chess.KNIGHT,chess.WHITE))
+        bq=len(board.pieces(chess.QUEEN,chess.BLACK)); br=len(board.pieces(chess.ROOK,chess.BLACK))
+        bb=len(board.pieces(chess.BISHOP,chess.BLACK)); bn=len(board.pieces(chess.KNIGHT,chess.BLACK))
+        if wr==1 and (wb+wn)==2 and wq==0 and br==2 and (bb+bn)==0 and bq==0: return "white_r2m"
+        if br==1 and (bb+bn)==2 and bq==0 and wr==2 and (wb+wn)==0 and wq==0: return "black_r2m"
+        return None
+    after=_state(board_after)
+    if not after: return False, None
+    before=_state(board_before)
+    if before: return False, None
+    rook_minor_side="White" if after=="white_r2m" else "Black"
+    two_rook_side="Black" if after=="white_r2m" else "White"
+    mover_name="White" if mover_color==chess.WHITE else "Black"
+    return True, {
+        "rook_minor_side": rook_minor_side,
+        "two_rook_side": two_rook_side,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s move creates a rook-and-two-minors vs. two-rooks ending, "
+            f"with {rook_minor_side} holding a rook and minor-piece pair against "
+            f"{two_rook_side}'s rook pair — a dynamic imbalance where the minor pieces "
+            f"often compensate through outpost control and coordination."
+        ),
+    }
+
+
 def has_rook_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4984,6 +5015,7 @@ GATED_TAGS = (
     "queen_vs_knight",
     "queen_and_minor_vs_two_rooks",
     "queen_and_rook_vs_two_rooks",
+    "rook_and_two_minors_vs_two_rooks",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -5421,6 +5453,10 @@ def certified_claims(
     qrv2r = _safe(lambda: has_queen_and_rook_vs_two_rooks(board_before, move, board_after, mover_color))
     if qrv2r and qrv2r[0]:
         tags.add("queen_and_rook_vs_two_rooks")
+
+    r2mv2r = _safe(lambda: has_rook_and_two_minors_vs_two_rooks(board_before, move, board_after, mover_color))
+    if r2mv2r and r2mv2r[0]:
+        tags.add("rook_and_two_minors_vs_two_rooks")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:

@@ -6624,3 +6624,58 @@ def test_queen_and_rook_vs_two_rooks_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_and_rook_vs_two_rooks" in tags
 
+
+# ── has_rook_and_two_minors_vs_two_rooks ─────────────────────────────────
+
+
+def _r2mv2r(fen, uci, mover_color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_rook_and_two_minors_vs_two_rooks(board_before, move, board_after, mover_color)
+
+
+def test_rook_and_two_minors_vs_two_rooks_white_true():
+    # White Ra1 captures Black Na4 → White R+B+N vs Black 2R (newly created)
+    ok, info = _r2mv2r("1r2k3/1r6/8/8/n7/2N5/1B6/R3K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert ok
+    assert info["rook_minor_side"] == "White"
+    assert info["two_rook_side"] == "Black"
+
+
+def test_rook_and_two_minors_vs_two_rooks_black_true():
+    # Black Rb8 captures White Nb5 → Black R+B+N vs White 2R (newly created)
+    ok, info = _r2mv2r("1r2k3/8/2b5/1N6/3n4/8/RR6/4K3 b - - 0 1", "b8b5", chess.BLACK)
+    assert ok
+    assert info["rook_minor_side"] == "Black"
+    assert info["two_rook_side"] == "White"
+
+
+def test_rook_and_two_minors_vs_two_rooks_rook_minor_side_has_queen_false():
+    # R+minor side also has a queen — not clean R+2minors
+    ok, _ = _r2mv2r("1r2k3/8/2b5/1N6/3n4/8/RR6/q3K3 b - - 0 1", "b8b5", chess.BLACK)
+    assert not ok
+
+
+def test_rook_and_two_minors_vs_two_rooks_imbalance_pre_existed_false():
+    # Already R+2minors vs 2R before the move — set-difference must not fire
+    ok, _ = _r2mv2r("1r2k3/8/2b5/8/3n4/8/RR6/4K3 b - - 0 1", "b8b7", chess.BLACK)
+    assert not ok
+
+
+def test_rook_and_two_minors_vs_two_rooks_two_rook_side_has_extra_false():
+    # Two-rook side retains an extra bishop — not clean 2R
+    ok, _ = _r2mv2r("1r2k3/8/2b5/1N6/3n4/8/RR4B1/4K3 b - - 0 1", "b8b5", chess.BLACK)
+    assert not ok
+
+
+def test_rook_and_two_minors_vs_two_rooks_in_certified_claims():
+    fen = "1r2k3/1r6/8/8/n7/2N5/1B6/R3K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_and_two_minors_vs_two_rooks" in tags
+
