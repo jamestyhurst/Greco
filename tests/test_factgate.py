@@ -4395,3 +4395,58 @@ def test_castling_rights_forfeited_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "castling_rights_forfeited" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_passed_pawn_race
+# ---------------------------------------------------------------------------
+
+def _ppr(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_passed_pawn_race(board_before, move, board_after, color)
+
+
+def test_passed_pawn_race_white_creates_passer_true():
+    # White d4 captures Black c5 → White gets passer on c5; Black's a3 was already a passer.
+    ok, ev = _ppr("4k3/8/8/2p5/3P4/p7/8/4K3 w - - 0 1", "d4c5", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "race" in ev["evidence"]
+
+
+def test_passed_pawn_race_black_creates_passer_true():
+    # Black e4 captures White d3 → Black gets passer on d3; White's e5 was already a passer.
+    ok, ev = _ppr("4k3/8/8/4P3/4p3/3P4/8/4K3 b - - 0 1", "e4d3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+
+
+def test_passed_pawn_race_both_already_had_passers_false():
+    # White g2 and Black a3 are both already passers; king move changes nothing.
+    ok, _ = _ppr("4k3/8/8/8/8/p7/8/4K1P1 w - - 0 1", "e1d2", chess.WHITE)
+    assert not ok
+
+
+def test_passed_pawn_race_neither_has_passer_false():
+    # White d4 and Black d5 block each other; king move creates no passer.
+    ok, _ = _ppr("4k3/8/8/3p4/3P4/8/8/4K3 w - - 0 1", "e1d2", chess.WHITE)
+    assert not ok
+
+
+def test_passed_pawn_race_only_one_passer_false():
+    # White already has a passer (d4 in empty board); king move doesn't give Black one.
+    ok, _ = _ppr("4k3/8/8/8/3P4/8/8/4K3 w - - 0 1", "e1d2", chess.WHITE)
+    assert not ok
+
+
+def test_passed_pawn_race_in_certified_claims():
+    fen = "4k3/8/8/2p5/3P4/p7/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d4c5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "passed_pawn_race" in tags

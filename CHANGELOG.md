@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.46] — 2026-06-19
+
+### Added
+- **`has_passed_pawn_race` factgate predicate** (`passed_pawn_race` tag) — fires when the move causes both sides to have at least one passed pawn for the first time. Inner `_has_passer` helper checks each friendly pawn against all enemy pawns on same/adjacent files ahead (White: higher ranks; Black: lower ranks) to determine passed-pawn status. Guards: both sides must have a passer AFTER the move AND at most one had one BEFORE. Evidence carries `mover` and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with race-urgency and rule-of-square framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 477 passed.
+
 ## [0.41.45] — 2026-06-19
 
 ### Added

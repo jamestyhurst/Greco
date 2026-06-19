@@ -3260,6 +3260,50 @@ def has_pawn_majority(
     }
 
 
+def has_passed_pawn_race(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _has_passer(board: chess.Board, color: bool) -> bool:
+        enemy = not color
+        for sq in board.pieces(chess.PAWN, color):
+            f = chess.square_file(sq)
+            r = chess.square_rank(sq)
+            blocked = False
+            for ep in board.pieces(chess.PAWN, enemy):
+                ef = chess.square_file(ep)
+                er = chess.square_rank(ep)
+                if abs(ef - f) > 1:
+                    continue
+                if (color == chess.WHITE and er > r) or (color == chess.BLACK and er < r):
+                    blocked = True
+                    break
+            if not blocked:
+                return True
+        return False
+
+    after_w = _has_passer(board_after, chess.WHITE)
+    after_b = _has_passer(board_after, chess.BLACK)
+    if not (after_w and after_b):
+        return False, None
+
+    before_w = _has_passer(board_before, chess.WHITE)
+    before_b = _has_passer(board_before, chess.BLACK)
+    if before_w and before_b:
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"Both sides now have a passed pawn — a mutual pawn race; "
+            f"whoever queens first will seize a decisive material advantage"
+        ),
+    }
+
+
 def has_castling_rights_forfeited(
     board_before: chess.Board,
     move: chess.Move,
@@ -3600,6 +3644,7 @@ GATED_TAGS = (
     "hanging_pawns",
     "bishop_long_diagonal",
     "castling_rights_forfeited",
+    "passed_pawn_race",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3921,5 +3966,9 @@ def certified_claims(
     crf = _safe(lambda: has_castling_rights_forfeited(board_before, move, board_after, mover_color))
     if crf and crf[0]:
         tags.add("castling_rights_forfeited")
+
+    ppr = _safe(lambda: has_passed_pawn_race(board_before, move, board_after, mover_color))
+    if ppr and ppr[0]:
+        tags.add("passed_pawn_race")
 
     return tags
