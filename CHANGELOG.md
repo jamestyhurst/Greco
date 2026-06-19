@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.21] — 2026-06-19
+
+### Added
+- **`captures_queen` factgate predicate** (`captures_queen` tag) — move predicate certifying the move captures the enemy queen. Evidence carries `captured_at` (square name), `mover_piece` (the capturing piece name), and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with phrasing guidance distinguishing uncompensated queen wins from deliberate queen trades and calibration to material consequence. 5 new pure tests; full suite 331 passed.
+
 ## [0.41.20] — 2026-06-19
 
 ### Added

@@ -2296,6 +2296,29 @@ def is_rook_on_seventh(
     }
 
 
+def captures_queen(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move captures the enemy queen. This tags the CAPTURE EVENT;
+    whether it nets material depends on subsequent moves (use engine eval / material field).
+    evidence keys: captured_at (square name), mover_piece (piece name), evidence.
+    """
+    captured = board_before.piece_at(move.to_square)
+    if captured is None or captured.piece_type != chess.QUEEN or captured.color == mover_color:
+        return False, None
+    moving = board_before.piece_at(move.from_square)
+    mover_name = PIECE_NAMES[moving.piece_type] if moving else "piece"
+    sq_name = chess.square_name(move.to_square)
+    return True, {
+        "captured_at": sq_name,
+        "mover_piece": mover_name,
+        "evidence": f"{mover_name.capitalize()} captures the queen on {sq_name}",
+    }
+
+
 def pawn_on_seventh(
     board_before: chess.Board,
     move: chess.Move,
@@ -2559,6 +2582,7 @@ GATED_TAGS = (
     "knight_centralized",
     "checkmate",
     "pawn_on_seventh",
+    "captures_queen",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2780,5 +2804,9 @@ def certified_claims(
     p7 = _safe(lambda: pawn_on_seventh(board_before, move, board_after, mover_color))
     if p7 and p7[0]:
         tags.add("pawn_on_seventh")
+
+    cq = _safe(lambda: captures_queen(board_before, move, board_after, mover_color))
+    if cq and cq[0]:
+        tags.add("captures_queen")
 
     return tags

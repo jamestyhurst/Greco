@@ -3022,3 +3022,51 @@ def test_pawn_on_seventh_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "pawn_on_seventh" in tags
+
+
+# --- captures_queen -----------------------------------------------------------
+# Certifies the move captures the enemy queen. The tag certifies the CAPTURE EVENT;
+# whether it nets material depends on what happens next (engine eval / material field).
+def _cq(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.captures_queen(board_before, move, board_after, color)
+
+
+def test_captures_queen_knight_takes_queen_true():
+    # White knight e5 captures Black queen d7.
+    ok, ev = _cq("4k3/3q4/8/4N3/8/8/8/4K3 w - - 0 1", "e5d7", chess.WHITE)
+    assert ok
+    assert ev["captured_at"] == "d7"
+    assert ev["mover_piece"] == "knight"
+
+
+def test_captures_queen_rook_takes_queen_true():
+    # White rook d1 captures Black queen d5.
+    ok, ev = _cq("4k3/8/8/3q4/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert ok
+    assert ev["captured_at"] == "d5"
+
+
+def test_captures_queen_takes_rook_false():
+    # Move captures a rook, not a queen.
+    ok, _ = _cq("4k3/8/8/3r4/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_captures_queen_quiet_move_false():
+    # Quiet move — no capture at all.
+    ok, _ = _cq("4k3/3q4/8/4N3/8/8/8/4K3 w - - 0 1", "e5f3", chess.WHITE)
+    assert not ok
+
+
+def test_captures_queen_in_certified_claims():
+    # White knight takes Black queen: captures_queen tag must appear.
+    board_before = chess.Board("4k3/3q4/8/4N3/8/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("e5d7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "captures_queen" in tags
