@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.13] — 2026-06-18
+
+### Added
+- **`captures_hanging` factgate predicate** (`captures_hanging` tag) — move predicate certifying a capture takes an enemy piece with zero defenders at the moment of capture. The capturing piece is removed from a probe board before counting defenders, correctly revealing X-ray defenders; en passant is excluded (covered by its own tag). Evidence carries `captured` (piece name), `square`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with "hanging piece / free capture" guidance. 5 new pure tests; full suite 291 passed.
+
 ## [0.41.12] — 2026-06-18
 
 ### Added

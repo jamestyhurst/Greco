@@ -2635,3 +2635,53 @@ def test_rook_on_seventh_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_on_seventh" in tags
+
+
+# --- captures_hanging ---------------------------------------------------------
+# A hanging piece is one with zero defenders for its own side at the moment of capture.
+# The capturing piece is lifted from the board before counting defenders so that
+# X-ray defenders behind it are correctly revealed.
+def _ch(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.captures_hanging(board_before, move, board_after, color)
+
+
+def test_captures_hanging_pawn_true():
+    # White pawn d4 captures undefended Black pawn e5 (Black king on e7 doesn't reach e5).
+    ok, ev = _ch("8/4k3/8/4p3/3P4/8/8/4K3 w - - 0 1", "d4e5", chess.WHITE)
+    assert ok
+    assert ev["square"] == "e5"
+    assert ev["captured"] == "pawn"
+
+
+def test_captures_hanging_bishop_true():
+    # White knight c4 captures undefended Black bishop d5 (Black king on e8 too far).
+    ok, ev = _ch("4k3/8/8/3b4/2N5/8/8/4K3 w - - 0 1", "c4d5", chess.WHITE)
+    assert ok
+    assert ev["square"] == "d5"
+    assert ev["captured"] == "bishop"
+
+
+def test_captures_hanging_defended_false():
+    # White pawn takes e5 but Black rook on e6 defends it.
+    ok, _ = _ch("8/4k3/4r3/4p3/3P4/8/8/4K3 w - - 0 1", "d4e5", chess.WHITE)
+    assert not ok
+
+
+def test_captures_hanging_non_capture_false():
+    # Knight moves to empty square — not a capture.
+    ok, _ = _ch("4k3/8/8/8/2N5/8/8/4K3 w - - 0 1", "c4e5", chess.WHITE)
+    assert not ok
+
+
+def test_captures_hanging_in_certified_claims():
+    # White knight takes undefended Black bishop: tag must appear in certified_claims.
+    board_before = chess.Board("4k3/8/8/3b4/2N5/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("c4d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "captures_hanging" in tags

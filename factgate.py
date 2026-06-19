@@ -2296,6 +2296,37 @@ def is_rook_on_seventh(
     }
 
 
+def captures_hanging(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move captures an enemy piece that had zero defenders
+    at the moment of capture. The capturing piece is removed from the board
+    before counting defenders so that X-ray defenders are correctly revealed.
+    Skips en passant (its own predicate handles that).
+    evidence keys: captured (piece name), square, evidence.
+    """
+    if board_before.is_en_passant(move):
+        return False, None
+    captured = board_before.piece_at(move.to_square)
+    if captured is None or captured.color == mover_color:
+        return False, None
+    defender_color = not mover_color
+    probe = board_before.copy()
+    probe.remove_piece_at(move.from_square)
+    if probe.attackers(defender_color, move.to_square):
+        return False, None
+    piece_name = PIECE_NAMES[captured.piece_type]
+    sq_name = chess.square_name(move.to_square)
+    return True, {
+        "captured": piece_name,
+        "square": sq_name,
+        "evidence": f"{piece_name.capitalize()} on {sq_name} was undefended — a free capture",
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2343,6 +2374,7 @@ GATED_TAGS = (
     "wins_exchange",
     "opposite_colored_bishops",
     "rook_on_seventh",
+    "captures_hanging",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2532,5 +2564,9 @@ def certified_claims(
     r7 = _safe(lambda: is_rook_on_seventh(board_before, move, board_after, mover_color))
     if r7 and r7[0]:
         tags.add("rook_on_seventh")
+
+    ch = _safe(lambda: captures_hanging(board_before, move, board_after, mover_color))
+    if ch and ch[0]:
+        tags.add("captures_hanging")
 
     return tags
