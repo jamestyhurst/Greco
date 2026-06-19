@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.53] — 2026-06-19
+
+### Added
+- **`has_knight_on_sixth` factgate predicate** (`knight_on_sixth` tag) — fires when the mover's knight newly lands on the mover's 6th rank (rank idx 5 for White, rank idx 2 for Black), where the knight was not already on that rank. Checks moving piece is a knight, landing rank is target, from-rank is different. Complements `rook_on_sixth` and `knight_centralized` (which only covers d4/d5/e4/e5) — covers all 6th-rank squares (a6–h6 for White). Evidence carries `square`, `rank` ('sixth'/'third'), and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 519 passed.
+
 ## [0.41.52] — 2026-06-19
 
 ### Added

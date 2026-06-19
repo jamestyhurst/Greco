@@ -4789,3 +4789,60 @@ def test_knight_on_rim_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "knight_on_rim" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_knight_on_sixth
+# ---------------------------------------------------------------------------
+
+
+def _kn6(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_knight_on_sixth(board_before, move, board_after, color)
+
+
+def test_knight_on_sixth_white_e4_f6_true():
+    # White knight e4→f6 — lands on the sixth rank (rank idx 5).
+    ok, ev = _kn6("4k3/8/8/8/4N3/8/8/4K3 w - - 0 1", "e4f6", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "sixth"
+
+
+def test_knight_on_sixth_black_d4_f3_true():
+    # Black knight d4→f3 — lands on rank idx 2 (third rank = Black's sixth).
+    ok, ev = _kn6("4k3/8/8/8/3n4/8/8/4K3 b - - 0 1", "d4f3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "third"
+
+
+def test_knight_on_sixth_already_on_sixth_false():
+    # White knight already on f6; moves to d5 — was already on the sixth rank.
+    ok, _ = _kn6("4k3/8/5N2/8/8/8/8/4K3 w - - 0 1", "f6d5", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_sixth_goes_to_fifth_not_sixth_false():
+    # White knight e4→g5 — reaches the fifth rank, not the sixth.
+    ok, _ = _kn6("4k3/8/8/8/4N3/8/8/4K3 w - - 0 1", "e4g5", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_sixth_bishop_not_knight_false():
+    # White bishop g4→e6 — piece is a bishop; piece guard vetoes.
+    ok, _ = _kn6("4k3/8/8/8/6B1/8/8/4K3 w - - 0 1", "g4e6", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_sixth_in_certified_claims():
+    fen = "4k3/8/8/8/4N3/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e4f6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "knight_on_sixth" in tags
