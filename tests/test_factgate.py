@@ -7070,3 +7070,64 @@ def test_rook_and_minor_vs_rook_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_and_minor_vs_rook" in tags
 
+
+# ---------------------------------------------------------------------------
+# has_queen_vs_rook_and_two_minors
+# ---------------------------------------------------------------------------
+
+def _qvr2m(fen, move_uci, mover_color=chess.WHITE):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(move_uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_vs_rook_and_two_minors(board_before, move, board_after, mover_color)
+
+
+def test_queen_vs_rook_and_two_minors_white_true():
+    # White Queen captures black knight → White lone Q vs Black R+2B
+    result = _qvr2m("r4k2/8/8/8/8/1b6/2b5/Qn5K w - - 0 1", "a1b1")
+    fired, info = result
+    assert fired
+    assert info["queen_side"] == "White"
+    assert info["rook_two_minor_side"] == "Black"
+
+
+def test_queen_vs_rook_and_two_minors_black_true():
+    # Black Queen captures white knight → Black lone Q vs White R+2B
+    result = _qvr2m("R6K/8/8/8/8/1B6/2B5/qN3k2 b - - 0 1", "a1b1", chess.BLACK)
+    fired, info = result
+    assert fired
+    assert info["queen_side"] == "Black"
+    assert info["rook_two_minor_side"] == "White"
+
+
+def test_queen_vs_rook_and_two_minors_queen_side_has_rook_false():
+    # After capture: White has Q+R, not a lone queen — does not fire
+    result = _qvr2m("r4k2/8/8/8/8/1b6/2b5/Qn4RK w - - 0 1", "a1b1")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_vs_rook_and_two_minors_imbalance_pre_existed_false():
+    # White already has lone Q vs Black R+2B before the move
+    result = _qvr2m("r4k2/8/8/8/8/1b6/2b5/Q6K w - - 0 1", "a1a2")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_vs_rook_and_two_minors_rook_minor_side_has_queen_false():
+    # Black's rook+2M side also has a queen — does not fire
+    result = _qvr2m("qr3k2/8/8/8/8/1b6/2b5/Q6K w - - 0 1", "a1a2")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_vs_rook_and_two_minors_in_certified_claims():
+    fen = "r4k2/8/8/8/8/1b6/2b5/Qn5K w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1b1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_vs_rook_and_two_minors" in tags
+
