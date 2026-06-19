@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.39] — 2026-06-19
+
+### Added
+- **`has_queen_centralization` factgate predicate** (`queen_centralization` tag) — fires when the queen moves to one of the four core central squares (d4, d5, e4, e5). Guards on piece type (queen) and destination square membership in a frozenset of the four central squares. Evidence carries `queen_sq`, `mover`, and a ready-to-quote `evidence` string. No newness guard — every queen landing on the centre is noteworthy. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with mobility-maximisation and flanks-coverage framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 435 passed.
+
 ## [0.41.38] — 2026-06-19
 
 ### Added

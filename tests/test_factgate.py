@@ -4007,3 +4007,57 @@ def test_shelter_pawn_capture_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "shelter_pawn_capture" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_queen_centralization
+# ---------------------------------------------------------------------------
+
+def _qcen(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_centralization(board_before, move, board_after, color)
+
+
+def test_queen_centralization_white_qd5_true():
+    # White queen d1→d5: lands on a core central square.
+    ok, ev = _qcen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_queen_centralization_black_qe5_true():
+    # Black queen h8→e5: diagonal move to a core central square.
+    ok, ev = _qcen("4k2q/8/8/8/8/8/8/4K3 b - - 0 1", "h8e5", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_queen_centralization_queen_to_non_central_false():
+    # White queen d1→d3: d3 is not d4/d5/e4/e5. No centralization.
+    ok, _ = _qcen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d3", chess.WHITE)
+    assert not ok
+
+
+def test_queen_centralization_non_queen_to_central_false():
+    # White rook e1→e4: rook to e4 — not a queen. No centralization.
+    ok, _ = _qcen("4k3/8/8/8/8/8/8/4RK2 w - - 0 1", "e1e4", chess.WHITE)
+    assert not ok
+
+
+def test_queen_centralization_king_move_false():
+    # King move — never a queen centralization.
+    ok, _ = _qcen("4k3/8/8/8/8/8/8/4KQ2 w - - 0 1", "e1e2", chess.WHITE)
+    assert not ok
+
+
+def test_queen_centralization_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/3QK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_centralization" in tags

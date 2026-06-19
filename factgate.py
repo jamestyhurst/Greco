@@ -2932,6 +2932,31 @@ def is_opposite_side_castling(
     }
 
 
+def has_queen_centralization(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.QUEEN:
+        return False, None
+    _CENTRAL = frozenset({chess.D4, chess.D5, chess.E4, chess.E5})
+    if move.to_square not in _CENTRAL:
+        return False, None
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    queen_sq = chess.square_name(move.to_square)
+    return True, {
+        "queen_sq": queen_sq,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s queen centralises to {queen_sq} — "
+            f"from the heart of the board the queen maximises its mobility "
+            f"and bears simultaneously on all four flanks"
+        ),
+    }
+
+
 def is_shelter_pawn_capture(
     board_before: chess.Board,
     move: chess.Move,
@@ -3308,6 +3333,7 @@ GATED_TAGS = (
     "rook_endgame",
     "diagonal_battery",
     "shelter_pawn_capture",
+    "queen_centralization",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3601,5 +3627,9 @@ def certified_claims(
     spc = _safe(lambda: is_shelter_pawn_capture(board_before, move, board_after, mover_color))
     if spc and spc[0]:
         tags.add("shelter_pawn_capture")
+
+    qc = _safe(lambda: has_queen_centralization(board_before, move, board_after, mover_color))
+    if qc and qc[0]:
+        tags.add("queen_centralization")
 
     return tags
