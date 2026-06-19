@@ -4677,3 +4677,58 @@ def test_rook_on_sixth_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_on_sixth" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_open_center
+# ---------------------------------------------------------------------------
+
+
+def _oc(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_open_center(board_before, move, board_after, color)
+
+
+def test_open_center_rook_captures_d_pawn_true():
+    # White rook takes the only remaining d-file pawn; e file already clear.
+    ok, ev = _oc("4k3/8/8/3p4/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+
+
+def test_open_center_rook_captures_e_pawn_true():
+    # White rook takes the only remaining e-file pawn; d file already clear.
+    ok, ev = _oc("4k3/8/8/R3p3/8/8/8/4K3 w - - 0 1", "a5e5", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+
+
+def test_open_center_already_open_false():
+    # Both d and e files are clear before the move — no new event.
+    ok, _ = _oc("4k3/8/8/8/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_open_center_only_d_cleared_false():
+    # White rook captures on d5 but White still has an e4 pawn — e file not clear.
+    ok, _ = _oc("4k3/8/8/3p4/4P3/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_open_center_pawn_on_e_file_remains_false():
+    # Black has a pawn on e5; White captures d5 — e file still has Black's e5.
+    ok, _ = _oc("4k3/8/8/3pp3/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_open_center_in_certified_claims():
+    fen = "4k3/8/8/3p4/8/8/8/3RK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "open_center" in tags

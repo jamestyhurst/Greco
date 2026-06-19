@@ -3564,6 +3564,36 @@ def has_pawn_duo(
     }
 
 
+def has_open_center(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _center_open(board: chess.Board) -> bool:
+        for color in [chess.WHITE, chess.BLACK]:
+            for sq in board.pieces(chess.PAWN, color):
+                if chess.square_file(sq) in (3, 4):  # d=3, e=4
+                    return False
+        return True
+
+    if not _center_open(board_after):
+        return False, None
+    if _center_open(board_before):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} opens the centre — both the d and e files are now clear of all pawns; "
+            f"with no central pawns to restrict them, pieces gain maximum mobility, "
+            f"rooks can penetrate along open files, and king safety becomes urgent "
+            f"in a position where the board has suddenly opened up"
+        ),
+    }
+
+
 def has_rook_on_sixth(
     board_before: chess.Board,
     move: chess.Move,
@@ -3794,6 +3824,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "open_center",
     "rook_on_sixth",
     "tripled_pawns",
 )
@@ -4129,6 +4160,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    oc = _safe(lambda: has_open_center(board_before, move, board_after, mover_color))
+    if oc and oc[0]:
+        tags.add("open_center")
 
     ro6 = _safe(lambda: has_rook_on_sixth(board_before, move, board_after, mover_color))
     if ro6 and ro6[0]:

@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.51] — 2026-06-19
+
+### Added
+- **`has_open_center` factgate predicate** (`open_center` tag) — fires the moment both the d and e files are completely cleared of all pawns (from either side), where this was not the case before the move. Inner `_center_open` helper iterates all pawns of both colours and returns False if any land on d (file 3) or e (file 4); set-difference fires only when the last central pawn leaves the board. Evidence carries `mover` and a ready-to-quote evidence string describing the strategic shift. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 507 passed.
+
 ## [0.41.50] — 2026-06-19
 
 ### Added
