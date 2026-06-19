@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.17] — 2026-06-18
+
+### Added
+- **`is_pawn_endgame` factgate predicate** (`pawn_endgame` tag) — move predicate certifying that after the move, only kings and pawns remain on the board (the position has transitioned to a pure pawn endgame). Requires at least one pawn (K vs K with no pawns is not certified). Evidence carries a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with king-activity, opposition, and passer-as-winning-plan guidance. 5 new pure tests; full suite 311 passed.
+
 ## [0.41.16] — 2026-06-18
 
 ### Added

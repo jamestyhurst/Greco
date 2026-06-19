@@ -2828,3 +2828,52 @@ def test_loses_exchange_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "loses_exchange" in tags
+
+
+# --- is_pawn_endgame ----------------------------------------------------------
+# Certifies that after the move, only kings and pawns remain on the board
+# (the position has entered a pure pawn endgame). Requires at least one pawn.
+# FEN: k7/8/4b3/5P2/8/8/8/4K3 w - - 0 1
+#   White: Ke1, Pf5  |  Black: Ka8, Be6
+#   f5xe6: pawn captures bishop → only Ke1, Pe6, Ka8 remain → pawn endgame.
+def _pe(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_pawn_endgame(board_before, move, board_after, color)
+
+
+def test_pawn_endgame_pawn_captures_last_piece_true():
+    # White pawn f5 captures Black bishop e6 — only kings + pawn remain.
+    ok, ev = _pe("k7/8/4b3/5P2/8/8/8/4K3 w - - 0 1", "f5e6", chess.WHITE)
+    assert ok
+    assert "pawn endgame" in ev["evidence"].lower()
+
+
+def test_pawn_endgame_rook_still_present_false():
+    # After pawn captures bishop, White rook still on board — not a pawn endgame.
+    ok, _ = _pe("k7/8/4b3/5P2/8/8/3R4/4K3 w - - 0 1", "f5e6", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_endgame_no_pawns_false():
+    # K vs K only — no pawns, not a pawn endgame.
+    ok, _ = _pe("k7/8/8/8/8/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_endgame_middlegame_false():
+    # Ordinary middlegame quiet move — many pieces remain.
+    ok, _ = _pe("r1bqk2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "e2e4", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_endgame_in_certified_claims():
+    # f5xe6 transitions to pawn endgame: tag must appear in certified_claims.
+    board_before = chess.Board("k7/8/4b3/5P2/8/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("f5e6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "pawn_endgame" in tags

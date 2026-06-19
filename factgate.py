@@ -2296,6 +2296,32 @@ def is_rook_on_seventh(
     }
 
 
+def is_pawn_endgame(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that after the move, only kings and pawns remain on the board
+    (the position has entered a pure pawn endgame). Requires at least one pawn.
+    evidence keys: evidence (ready-to-quote string).
+    """
+    _MINOR_MAJOR = (chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN)
+    for color in (chess.WHITE, chess.BLACK):
+        for piece_type in _MINOR_MAJOR:
+            if board_after.pieces(piece_type, color):
+                return False, None
+    has_pawn = bool(
+        board_after.pieces(chess.PAWN, chess.WHITE)
+        or board_after.pieces(chess.PAWN, chess.BLACK)
+    )
+    if not has_pawn:
+        return False, None
+    return True, {
+        "evidence": "Only kings and pawns remain — the position has entered a pawn endgame",
+    }
+
+
 def loses_exchange(
     board_before: chess.Board,
     move: chess.Move,
@@ -2458,6 +2484,7 @@ GATED_TAGS = (
     "double_check",
     "stalemate_move",
     "loses_exchange",
+    "pawn_endgame",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2663,5 +2690,9 @@ def certified_claims(
     le = _safe(lambda: loses_exchange(board_before, move, board_after, mover_color))
     if le and le[0]:
         tags.add("loses_exchange")
+
+    peg = _safe(lambda: is_pawn_endgame(board_before, move, board_after, mover_color))
+    if peg and peg[0]:
+        tags.add("pawn_endgame")
 
     return tags
