@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.57] — 2026-06-19
+
+### Added
+- **`has_queen_on_seventh` factgate predicate** (`queen_on_seventh` tag) — fires when the mover's queen newly lands on the 7th rank (rank idx 6 for White, idx 1 for Black), where the queen was not already on that rank. Checks moving piece is a queen, landing rank is target, from-rank is different. Distinct from `rook_on_seventh` (rooks only) and `infiltration` (standing positional fact). A queen on the seventh commands both rank and diagonal pressure, and is more resilient than a rook there since it cannot easily be traded away. Evidence carries `square`, `rank` ('seventh'/'second'), and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 543 passed.
+
 ## [0.41.56] — 2026-06-19
 
 ### Added

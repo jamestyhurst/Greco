@@ -5011,3 +5011,60 @@ def test_minor_piece_endgame_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
     assert "minor_piece_endgame" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_queen_on_seventh
+# ---------------------------------------------------------------------------
+
+
+def _q7(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_on_seventh(board_before, move, board_after, color)
+
+
+def test_queen_on_seventh_white_d1d7_true():
+    # White queen d1→d7 — lands on the seventh rank.
+    ok, ev = _q7("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d7", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "seventh"
+
+
+def test_queen_on_seventh_black_d8d2_true():
+    # Black queen d8→d2 — lands on rank idx 1 (second rank = Black's seventh).
+    ok, ev = _q7("3qk3/8/8/8/8/8/8/4K3 b - - 0 1", "d8d2", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "second"
+
+
+def test_queen_on_seventh_already_on_seventh_false():
+    # White queen already on d7; moves laterally to e7 — no new event.
+    ok, _ = _q7("4k3/3Q4/8/8/8/8/8/4K3 w - - 0 1", "d7e7", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_seventh_goes_to_sixth_not_seventh_false():
+    # White queen d1→d6 — reaches the sixth rank, not the seventh.
+    ok, _ = _q7("4k3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d6", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_seventh_rook_not_queen_false():
+    # White rook d1→d7 — piece is a rook; piece guard vetoes.
+    ok, _ = _q7("4k3/8/8/8/8/8/8/3RK3 w - - 0 1", "d1d7", chess.WHITE)
+    assert not ok
+
+
+def test_queen_on_seventh_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/3QK3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_on_seventh" in tags

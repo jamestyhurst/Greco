@@ -3564,6 +3564,41 @@ def has_pawn_duo(
     }
 
 
+def has_queen_on_seventh(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.QUEEN:
+        return False, None
+
+    to_sq = move.to_square
+    target_rank = 6 if mover_color == chess.WHITE else 1  # 7th rank idx=6; 2nd rank idx=1
+
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+
+    rank_name = "seventh" if mover_color == chess.WHITE else "second"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {
+        "square": sq_name,
+        "rank": rank_name,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name}'s queen penetrates to the {rank_name} rank on {sq_name} — "
+            f"commanding rank and diagonal simultaneously, the queen on the seventh "
+            f"threatens enemy pawns, supports a back-rank invasion, "
+            f"and is more resilient than a rook there since it cannot easily be traded away"
+        ),
+    }
+
+
 def has_minor_piece_endgame(
     board_before: chess.Board,
     move: chess.Move,
@@ -3997,6 +4032,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "queen_on_seventh",
     "minor_piece_endgame",
     "knight_endgame",
     "bishop_endgame",
@@ -4338,6 +4374,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    q7 = _safe(lambda: has_queen_on_seventh(board_before, move, board_after, mover_color))
+    if q7 and q7[0]:
+        tags.add("queen_on_seventh")
 
     mpe = _safe(lambda: has_minor_piece_endgame(board_before, move, board_after, mover_color))
     if mpe and mpe[0]:
