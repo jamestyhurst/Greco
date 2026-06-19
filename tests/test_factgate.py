@@ -7253,3 +7253,64 @@ def test_queen_and_rook_vs_rook_and_minor_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_and_rook_vs_rook_and_minor" in tags
 
+
+# ---------------------------------------------------------------------------
+# has_queen_and_minor_vs_rook_and_minor
+# ---------------------------------------------------------------------------
+
+def _qmvram(fen, move_uci, mover_color=chess.WHITE):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(move_uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_and_minor_vs_rook_and_minor(board_before, move, board_after, mover_color)
+
+
+def test_queen_and_minor_vs_rook_and_minor_white_true():
+    # White Queen captures black bishop on d1 → White Q+B vs Black R+N
+    result = _qmvram("r4k2/8/8/8/1n6/8/4K3/2BbQ3 w - - 0 1", "e1d1")
+    fired, info = result
+    assert fired
+    assert info["queen_minor_side"] == "White"
+    assert info["rook_minor_side"] == "Black"
+
+
+def test_queen_and_minor_vs_rook_and_minor_black_true():
+    # Black Queen captures white bishop on b1 → Black Q+N vs White R+B
+    result = _qmvram("Rq3k2/8/8/2B5/2n5/8/8/1B2K3 b - - 0 1", "b8b1", chess.BLACK)
+    fired, info = result
+    assert fired
+    assert info["queen_minor_side"] == "Black"
+    assert info["rook_minor_side"] == "White"
+
+
+def test_queen_and_minor_vs_rook_and_minor_queen_minor_side_has_rook_false():
+    # After capture: White has Q+R+B, not clean Q+minor — does not fire
+    result = _qmvram("r4k2/8/8/8/1n6/8/4K3/1RBbQ3 w - - 0 1", "e1d1")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_minor_vs_rook_and_minor_imbalance_pre_existed_false():
+    # White already has Q+B vs Black R+N before the move
+    result = _qmvram("r4k2/8/8/8/1n6/8/4K3/2BQ4 w - - 0 1", "d1e1")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_minor_vs_rook_and_minor_rook_minor_side_has_queen_false():
+    # Black's rook+minor side also has a queen — does not fire
+    result = _qmvram("r3qk2/8/8/8/1n6/8/4K3/2BbQ3 w - - 0 1", "e1d1")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_minor_vs_rook_and_minor_in_certified_claims():
+    fen = "r4k2/8/8/8/1n6/8/4K3/2BbQ3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e1d1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_and_minor_vs_rook_and_minor" in tags
+
