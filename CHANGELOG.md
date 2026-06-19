@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.18] — 2026-06-19
+
+### Added
+- **`knight_centralized` factgate predicate** (`knight_centralized` tag) — move predicate certifying a knight just moved to one of the four core central squares (d4, d5, e4, e5), where it controls the maximum eight squares. Module-level `_CORE_CENTER` frozenset avoids per-call set construction. Evidence carries `square` and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with "radiates across the board" and outpost-tag composition guidance. 5 new pure tests; full suite 316 passed.
+
 ## [0.41.17] — 2026-06-18
 
 ### Added

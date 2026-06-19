@@ -2296,6 +2296,32 @@ def is_rook_on_seventh(
     }
 
 
+_CORE_CENTER = frozenset({chess.D4, chess.D5, chess.E4, chess.E5})
+
+
+def knight_centralized(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move places a knight on one of the four core central squares
+    (d4, d5, e4, e5), the squares where a knight controls the maximum number of squares.
+    Engine-free geometric fact; distinct from outpost (which requires pawn support).
+    evidence keys: square (landing square name), evidence.
+    """
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.KNIGHT:
+        return False, None
+    if move.to_square not in _CORE_CENTER:
+        return False, None
+    sq_name = chess.square_name(move.to_square)
+    return True, {
+        "square": sq_name,
+        "evidence": f"Knight centralizes to {sq_name} — a core central square where it controls up to eight squares",
+    }
+
+
 def is_pawn_endgame(
     board_before: chess.Board,
     move: chess.Move,
@@ -2485,6 +2511,7 @@ GATED_TAGS = (
     "stalemate_move",
     "loses_exchange",
     "pawn_endgame",
+    "knight_centralized",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2694,5 +2721,9 @@ def certified_claims(
     peg = _safe(lambda: is_pawn_endgame(board_before, move, board_after, mover_color))
     if peg and peg[0]:
         tags.add("pawn_endgame")
+
+    kc = _safe(lambda: knight_centralized(board_before, move, board_after, mover_color))
+    if kc and kc[0]:
+        tags.add("knight_centralized")
 
     return tags

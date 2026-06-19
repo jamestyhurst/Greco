@@ -2877,3 +2877,51 @@ def test_pawn_endgame_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "pawn_endgame" in tags
+
+
+# --- knight_centralized -------------------------------------------------------
+# Certifies a knight just moved to one of the four core central squares:
+# d4 (27), d5 (35), e4 (28), e5 (36).  "A knight in the center controls the maximum
+# number of squares" — a foundational geometric fact, distinct from outpost (pawn support).
+def _kc(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.knight_centralized(board_before, move, board_after, color)
+
+
+def test_knight_centralized_to_e4_true():
+    # White knight f2 → e4 (core center). Should certify.
+    ok, ev = _kc("4k3/8/8/8/8/8/5N2/4K3 w - - 0 1", "f2e4", chess.WHITE)
+    assert ok
+    assert ev["square"] == "e4"
+
+
+def test_knight_centralized_to_d5_true():
+    # Black knight f6 → d5 (core center for Black). Should certify.
+    ok, ev = _kc("4k3/8/5n2/8/8/8/8/4K3 b - - 0 1", "f6d5", chess.BLACK)
+    assert ok
+    assert ev["square"] == "d5"
+
+
+def test_knight_centralized_to_f3_false():
+    # Knight moves to f3 — not a core central square.
+    ok, _ = _kc("4k3/8/8/8/8/8/7N/4K3 w - - 0 1", "h2f3", chess.WHITE)
+    assert not ok
+
+
+def test_knight_centralized_bishop_to_e4_false():
+    # Bishop moves to e4 — not a knight.
+    ok, _ = _kc("4k3/8/8/8/8/8/5B2/4K3 w - - 0 1", "f2e3", chess.WHITE)
+    assert not ok
+
+
+def test_knight_centralized_in_certified_claims():
+    # White knight f2 → e4: knight_centralized tag should appear.
+    board_before = chess.Board("4k3/8/8/8/8/8/5N2/4K3 w - - 0 1")
+    move = chess.Move.from_uci("f2e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "knight_centralized" in tags
