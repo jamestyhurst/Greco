@@ -3461,3 +3461,60 @@ def test_pawn_lever_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "pawn_lever" in tags
+
+
+# ── has_connected_passers ──────────────────────────────────────────────────
+
+def _cpass(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_connected_passers(board_before, move, board_after, color)
+
+
+def test_connected_passers_capture_creates_pair_true():
+    # White cxd5 removes the only enemy pawn; white now has connected passers d5+e5.
+    ok, ev = _cpass("4k3/8/8/3pP3/2P5/8/8/4K3 w - - 0 1", "c4d5", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_connected_passers_axb6_creates_bc_pair_true():
+    # White axb6 clears the blocker; white passers b6+c4 are now adjacent.
+    ok, ev = _cpass("4k3/8/1p6/P7/2P5/8/8/4K3 w - - 0 1", "a5b6", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_connected_passers_already_had_them_false():
+    # Connected passers d5+e5 existed before the move — transition guard abstains.
+    ok, _ = _cpass("4k3/8/8/3PP3/8/8/8/4K3 w - - 0 1", "d5d6", chess.WHITE)
+    assert not ok
+
+
+def test_connected_passers_non_adjacent_false():
+    # Passers on a5 and e5 are not on adjacent files — not connected.
+    ok, _ = _cpass("4k3/8/8/P3P3/8/8/8/4K3 w - - 0 1", "a5a6", chess.WHITE)
+    assert not ok
+
+
+def test_connected_passers_fewer_than_two_false():
+    # Starting position pawn move — no passers possible.
+    ok, _ = _cpass(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "e2e4",
+        chess.WHITE,
+    )
+    assert not ok
+
+
+def test_connected_passers_in_certified_claims():
+    # cxd5 creates connected passers — tag must appear.
+    fen = "4k3/8/8/3pP3/2P5/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("c4d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "connected_passers" in tags

@@ -2777,6 +2777,54 @@ def is_pawn_lever(
     }
 
 
+def has_connected_passers(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that this move creates a new connected-passer formation for the
+    mover — two or more passed pawns on adjacent files that did not exist as a
+    connected pair before the move. Only fires on the transition move.
+    evidence keys: squares, mover, evidence.
+    """
+    def _passers(board: chess.Board, color: bool) -> List[int]:
+        return [sq for sq in board.pieces(chess.PAWN, color) if is_passed_pawn(board, sq, color)]
+
+    def _are_connected(sqs: List[int]) -> bool:
+        if len(sqs) < 2:
+            return False
+        files = sorted({chess.square_file(sq) for sq in sqs})
+        return any(files[i + 1] - files[i] == 1 for i in range(len(files) - 1))
+
+    after_sqs = _passers(board_after, mover_color)
+    if not _are_connected(after_sqs):
+        return False, None
+
+    before_sqs = _passers(board_before, mover_color)
+    if _are_connected(before_sqs):
+        return False, None  # already had connected passers; this move didn't create them
+
+    files = sorted({chess.square_file(sq) for sq in after_sqs})
+    conn_files: Set[int] = set()
+    for i in range(len(files) - 1):
+        if files[i + 1] - files[i] == 1:
+            conn_files.update({files[i], files[i + 1]})
+            break
+    pair = [sq for sq in after_sqs if chess.square_file(sq) in conn_files][:2]
+    pair_names = [chess.square_name(sq) for sq in pair]
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "squares": pair_names,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} has connected passed pawns on "
+            f"{pair_names[0]} and {pair_names[1]} — "
+            f"two adjacent passers that advance together and are nearly unstoppable"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2840,6 +2888,7 @@ GATED_TAGS = (
     "queenless_position",
     "king_opposition",
     "pawn_lever",
+    "connected_passers",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3093,5 +3142,9 @@ def certified_claims(
     pl = _safe(lambda: is_pawn_lever(board_before, move, board_after, mover_color))
     if pl and pl[0]:
         tags.add("pawn_lever")
+
+    cp = _safe(lambda: has_connected_passers(board_before, move, board_after, mover_color))
+    if cp and cp[0]:
+        tags.add("connected_passers")
 
     return tags

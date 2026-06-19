@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.29] — 2026-06-19
+
+### Added
+- **`has_connected_passers` factgate predicate** (`connected_passers` tag) — transition predicate certifying that this move created a new connected-passer formation: two or more passed pawns on adjacent files that did not exist as a connected pair before the move. Reuses `is_passed_pawn` for pure passer detection; transition-guards on board_before. Evidence carries `squares` (the passer pair), `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with endgame-urgency calibration. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 375 passed.
+
 ## [0.41.28] — 2026-06-19
 
 ### Added
