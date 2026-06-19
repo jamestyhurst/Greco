@@ -6355,3 +6355,56 @@ def test_rook_and_minor_vs_two_rooks_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_and_minor_vs_two_rooks" in tags
 
+
+# ── has_two_rooks_vs_minor_pair ──────────────────────────────────────────────
+
+def _trvmp(fen, uci, color):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = b.copy(); ba.push(mv)
+    return F.has_two_rooks_vs_minor_pair(b, mv, ba, color)
+
+
+def test_two_rooks_vs_minor_pair_white_rooks_true():
+    # Ra1xa4 captures Black rook → White 2R vs Black B+N
+    ok, d = _trvmp("4k3/8/2n5/1b6/r7/8/8/R3KR2 w - - 0 1", "a1a4", chess.WHITE)
+    assert ok
+    assert d["two_rook_side"] == "White"
+    assert d["minor_pair_side"] == "Black"
+
+
+def test_two_rooks_vs_minor_pair_black_rooks_true():
+    # Rh4xa4 captures White rook → Black 2R vs White B+N
+    ok, d = _trvmp("r3k3/8/8/8/R6r/3B4/2N5/4K3 b - - 0 1", "h4a4", chess.BLACK)
+    assert ok
+    assert d["two_rook_side"] == "Black"
+    assert d["minor_pair_side"] == "White"
+
+
+def test_two_rooks_vs_minor_pair_rook_side_has_extra_minor_false():
+    # White has 2R+N after capture — not clean 2R
+    ok, _ = _trvmp("4k3/8/2n5/1b6/r7/8/8/R3KRN1 w - - 0 1", "a1a4", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_minor_pair_imbalance_pre_existed_false():
+    # Already 2R vs B+N before the move
+    ok, _ = _trvmp("4k3/8/2n5/1b6/8/8/8/R3KR2 w - - 0 1", "a1a3", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_minor_pair_minor_side_still_has_rook_false():
+    # Black still has a rook — not clean 2-minor
+    ok, _ = _trvmp("4k3/8/2n5/1b6/r7/8/8/R3KR2 w - - 0 1", "f1f3", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_minor_pair_in_certified_claims():
+    fen = "4k3/8/2n5/1b6/r7/8/8/R3KR2 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "two_rooks_vs_minor_pair" in tags
+
