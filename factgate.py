@@ -3564,6 +3564,29 @@ def has_pawn_duo(
     }
 
 
+def has_pawn_on_sixth(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.PAWN:
+        return False, None
+    to_sq = move.to_square
+    target_rank = 5 if mover_color == chess.WHITE else 2
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+    rank_name = "sixth" if mover_color == chess.WHITE else "third"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {"square": sq_name, "rank": rank_name, "mover": mover_name, "evidence": (
+        f"{mover_name}'s pawn storms to the {rank_name} rank on {sq_name} — "
+        f"deep in enemy territory and only one step from the seventh, "
+        f"the pawn creates concrete promotion threats and forces the opponent "
+        f"to commit pieces to stopping it"
+    )}
+
+
 def has_king_centralized(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4174,6 +4197,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "pawn_on_sixth",
     "king_centralized",
     "queen_on_back_rank",
     "outside_passed_pawn",
@@ -4521,6 +4545,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    po6 = _safe(lambda: has_pawn_on_sixth(board_before, move, board_after, mover_color))
+    if po6 and po6[0]:
+        tags.add("pawn_on_sixth")
 
     kingc = _safe(lambda: has_king_centralized(board_before, move, board_after, mover_color))
     if kingc and kingc[0]:

@@ -5340,3 +5340,56 @@ def test_king_centralized_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "king_centralized" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_pawn_on_sixth
+# ---------------------------------------------------------------------------
+
+def _p6(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_pawn_on_sixth(board_before, move, board_after, color)
+
+
+def test_pawn_on_sixth_white_a6_true():
+    ok, ev = _p6("4k3/8/8/P7/8/8/8/4K3 w - - 0 1", "a5a6", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "sixth"
+    assert ev["square"] == "a6"
+
+
+def test_pawn_on_sixth_black_h3_true():
+    ok, ev = _p6("4k3/8/8/8/7p/8/8/4K3 b - - 0 1", "h4h3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "third"
+    assert ev["square"] == "h3"
+
+
+def test_pawn_on_sixth_already_on_sixth_false():
+    ok, _ = _p6("4k3/8/P7/8/8/8/8/4K3 w - - 0 1", "a6a7", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_sixth_goes_to_fifth_not_sixth_false():
+    ok, _ = _p6("4k3/8/8/8/8/P7/8/4K3 w - - 0 1", "a3a4", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_sixth_rook_not_pawn_false():
+    ok, _ = _p6("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a6", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_sixth_in_certified_claims():
+    fen = "4k3/8/8/P7/8/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a5a6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "pawn_on_sixth" in tags

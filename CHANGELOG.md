@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.63] — 2026-06-19
+
+### Added
+- **`has_pawn_on_sixth` factgate predicate** (`pawn_on_sixth` tag) — fires when a pawn newly lands on the mover's 6th rank (rank idx 5 for White, idx 2 for Black), by advance or capture, where the pawn was not already on that rank. One rank earlier than `pawn_on_seventh`; the narrator calibrates urgency by whether the pawn is passed/blocked. Evidence carries `square`, `rank` ('sixth'/'third'), and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 579 passed.
+
 ## [0.41.62] — 2026-06-19
 
 ### Added
