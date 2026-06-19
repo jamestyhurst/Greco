@@ -3260,6 +3260,43 @@ def has_pawn_majority(
     }
 
 
+def has_mobile_pawn_center(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    if mover_color == chess.WHITE:
+        d_sq, e_sq = chess.D4, chess.E4
+        center_desc = "d4 and e4"
+    else:
+        d_sq, e_sq = chess.D5, chess.E5
+        center_desc = "d5 and e5"
+
+    def _has_center(board: chess.Board) -> bool:
+        pd = board.piece_at(d_sq)
+        pe = board.piece_at(e_sq)
+        return (
+            pd is not None and pd.piece_type == chess.PAWN and pd.color == mover_color
+            and pe is not None and pe.piece_type == chess.PAWN and pe.color == mover_color
+        )
+
+    if not _has_center(board_after):
+        return False, None
+    if _has_center(board_before):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} establishes a mobile pawn centre on {center_desc} — "
+            f"two central pawns that claim the heart of the board, restrict the opponent's pieces, "
+            f"and can advance to create space or open lines at the right moment"
+        ),
+    }
+
+
 def has_rook_file_battery(
     board_before: chess.Board,
     move: chess.Move,
@@ -3419,6 +3456,7 @@ GATED_TAGS = (
     "queen_centralization",
     "pawn_duo",
     "rook_file_battery",
+    "mobile_pawn_center",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3724,5 +3762,9 @@ def certified_claims(
     rfb = _safe(lambda: has_rook_file_battery(board_before, move, board_after, mover_color))
     if rfb and rfb[0]:
         tags.add("rook_file_battery")
+
+    mpc = _safe(lambda: has_mobile_pawn_center(board_before, move, board_after, mover_color))
+    if mpc and mpc[0]:
+        tags.add("mobile_pawn_center")
 
     return tags

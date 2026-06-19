@@ -4173,3 +4173,58 @@ def test_rook_file_battery_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_file_battery" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_mobile_pawn_center
+# ---------------------------------------------------------------------------
+
+def _mpc(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_mobile_pawn_center(board_before, move, board_after, color)
+
+
+def test_mobile_pawn_center_white_d_pawn_completes_center_true():
+    # White plays d2→d4 while e4 already exists: creates d4+e4 center.
+    ok, ev = _mpc("4k3/8/8/8/4P3/8/3P4/4K3 w - - 0 1", "d2d4", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "d4" in ev["evidence"] and "e4" in ev["evidence"]
+
+
+def test_mobile_pawn_center_black_e_pawn_completes_center_true():
+    # Black plays e7→e5 while d5 already exists: creates d5+e5 center.
+    ok, ev = _mpc("4k3/4p3/8/3p4/8/8/8/4K3 b - - 0 1", "e7e5", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+
+
+def test_mobile_pawn_center_only_one_central_pawn_false():
+    # White plays d2→d4 but there is no e4 — center not complete.
+    ok, _ = _mpc("4k3/8/8/8/8/8/3P4/4K3 w - - 0 1", "d2d4", chess.WHITE)
+    assert not ok
+
+
+def test_mobile_pawn_center_already_existed_false():
+    # White already has d4+e4; king move doesn't create a new center.
+    ok, _ = _mpc("4k3/8/8/8/3PP3/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_mobile_pawn_center_wrong_rank_false():
+    # White plays e2→e3: pawn lands on e3, not e4 — no center with d4.
+    ok, _ = _mpc("4k3/8/8/8/3P4/8/4P3/4K3 w - - 0 1", "e2e3", chess.WHITE)
+    assert not ok
+
+
+def test_mobile_pawn_center_in_certified_claims():
+    fen = "4k3/8/8/8/4P3/8/3P4/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d2d4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "mobile_pawn_center" in tags

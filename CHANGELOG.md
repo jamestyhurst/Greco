@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.42] — 2026-06-19
+
+### Added
+- **`has_mobile_pawn_center` factgate predicate** (`mobile_pawn_center` tag) — fires when the mover newly establishes both d and e pawns on their 4th rank (White: d4+e4; Black: d5+e5), where this pair did not exist before the move. Implementation checks `board.piece_at(d_sq)` and `board.piece_at(e_sq)` for mover-colored pawns in `board_after`, then guards against pre-existing center in `board_before`. Evidence carries `mover` and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with space-claiming and line-opening framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 453 passed.
+
 ## [0.41.41] — 2026-06-19
 
 ### Added
