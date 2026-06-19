@@ -2399,3 +2399,49 @@ def test_en_passant_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "en_passant" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_castling
+# ---------------------------------------------------------------------------
+def _castle(fen, uci):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.is_castling(b, mv, after)
+
+
+def test_castling_white_kingside():
+    ok, ev = _castle("4k3/8/8/8/8/8/8/4K2R w K - 0 1", "e1g1")
+    assert ok
+    assert ev["side"] == "kingside"
+    assert ev["color"] == "White"
+
+
+def test_castling_white_queenside():
+    ok, ev = _castle("4k3/8/8/8/8/8/8/R3K3 w Q - 0 1", "e1c1")
+    assert ok
+    assert ev["side"] == "queenside"
+    assert ev["color"] == "White"
+
+
+def test_castling_black_kingside():
+    ok, ev = _castle("4k2r/8/8/8/8/8/8/4K3 b k - 0 1", "e8g8")
+    assert ok
+    assert ev["side"] == "kingside"
+    assert ev["color"] == "Black"
+
+
+def test_castling_false_regular_king_move():
+    ok, _ = _castle("4k3/8/8/8/8/8/8/4K2R w K - 0 1", "e1f1")
+    assert not ok
+
+
+def test_castling_in_certified_claims():
+    board_before = chess.Board("4k3/8/8/8/8/8/8/4K2R w K - 0 1")
+    move = chess.Move.from_uci("e1g1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "castling" in tags

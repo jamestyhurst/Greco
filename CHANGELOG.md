@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.8] — 2026-06-18
+
+### Added
+- **`is_castling` factgate predicate** (`castling` tag) — move predicate certifying a castling move, with evidence `{side, color}` ('kingside'/'queenside', 'White'/'Black'). Uses `board.is_castling()` and `board.is_kingside_castling()`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with rook-jump mechanics and king-safety framing. 5 new pure tests; full suite 266 passed.
+
 ## [0.41.7] — 2026-06-18
 
 ### Added

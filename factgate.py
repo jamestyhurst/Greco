@@ -2147,6 +2147,32 @@ def is_en_passant(
 
 
 # --------------------------------------------------------------------------- #
+# Castling — the king moves two squares toward a rook.
+# --------------------------------------------------------------------------- #
+def is_castling(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move is a castling move (kingside or queenside).
+
+    Uses python-chess's is_castling() which checks the move is a legal
+    king-two-squares move with castling rights intact.
+    Evidence keys: side ('kingside' or 'queenside'), color ('White' or 'Black').
+    """
+    if not board_before.is_castling(move):
+        return False, None
+    color = board_before.turn
+    side = "kingside" if board_before.is_kingside_castling(move) else "queenside"
+    color_name = "White" if color == chess.WHITE else "Black"
+    return True, {
+        "side": side,
+        "color": color_name,
+        "evidence": f"{color_name} castles {side}",
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -2188,6 +2214,7 @@ GATED_TAGS = (
     "half_open_file",
     "promotion",
     "en_passant",
+    "castling",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2357,5 +2384,9 @@ def certified_claims(
     ep = _safe(lambda: is_en_passant(board_before, move, board_after))
     if ep and ep[0]:
         tags.add("en_passant")
+
+    cst = _safe(lambda: is_castling(board_before, move, board_after))
+    if cst and cst[0]:
+        tags.add("castling")
 
     return tags
