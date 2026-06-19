@@ -4339,3 +4339,59 @@ def test_bishop_long_diagonal_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "bishop_long_diagonal" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_castling_rights_forfeited
+# ---------------------------------------------------------------------------
+
+def _crf(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_castling_rights_forfeited(board_before, move, board_after, color)
+
+
+def test_castling_rights_king_move_loses_both_true():
+    # White Ke1→f1 (not castling): forfeits both castling rights.
+    ok, ev = _crf("4k3/8/8/8/8/8/8/4K2R w K - 0 1", "e1f1", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "kingside" in ev["evidence"]
+
+
+def test_castling_rights_rook_move_loses_qs_true():
+    # White Ra1→b1: forfeits queenside castling right.
+    ok, ev = _crf("4k3/8/8/8/8/8/8/R3K3 w Q - 0 1", "a1b1", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "queenside" in ev["evidence"]
+
+
+def test_castling_rights_none_to_lose_false():
+    # White already has no castling rights — king move loses nothing.
+    ok, _ = _crf("4k3/8/8/8/8/8/8/4K3 w - - 0 1", "e1f1", chess.WHITE)
+    assert not ok
+
+
+def test_castling_rights_actual_castling_false():
+    # White castles kingside: handled by the `castling` tag; this predicate suppresses.
+    ok, _ = _crf("4k3/8/8/8/8/8/8/4K2R w K - 0 1", "e1g1", chess.WHITE)
+    assert not ok
+
+
+def test_castling_rights_pawn_move_false():
+    # Pawn move — cannot affect castling rights.
+    ok, _ = _crf("4k3/8/8/8/8/4P3/8/4K2R w K - 0 1", "e3e4", chess.WHITE)
+    assert not ok
+
+
+def test_castling_rights_forfeited_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/4K2R w K - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e1f1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "castling_rights_forfeited" in tags

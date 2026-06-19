@@ -3260,6 +3260,48 @@ def has_pawn_majority(
     }
 
 
+def has_castling_rights_forfeited(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    if board_before.is_castling(move):
+        return False, None
+
+    had_ks = board_before.has_kingside_castling_rights(mover_color)
+    had_qs = board_before.has_queenside_castling_rights(mover_color)
+    has_ks = board_after.has_kingside_castling_rights(mover_color)
+    has_qs = board_after.has_queenside_castling_rights(mover_color)
+
+    lost_ks = had_ks and not has_ks
+    lost_qs = had_qs and not has_qs
+
+    if not (lost_ks or lost_qs):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    if lost_ks and lost_qs:
+        lost_str = "kingside and queenside"
+        side_str = "both sides"
+    elif lost_ks:
+        lost_str = "kingside"
+        side_str = "the kingside"
+    else:
+        lost_str = "queenside"
+        side_str = "the queenside"
+
+    return True, {
+        "mover": mover_name,
+        "lost": lost_str,
+        "evidence": (
+            f"{mover_name} forfeits {side_str} castling rights — "
+            f"the king can no longer find shelter via castling on the {lost_str}; "
+            f"king safety now depends on the existing piece configuration"
+        ),
+    }
+
+
 def is_bishop_on_long_diagonal(
     board_before: chess.Board,
     move: chess.Move,
@@ -3557,6 +3599,7 @@ GATED_TAGS = (
     "mobile_pawn_center",
     "hanging_pawns",
     "bishop_long_diagonal",
+    "castling_rights_forfeited",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3874,5 +3917,9 @@ def certified_claims(
     bld = _safe(lambda: is_bishop_on_long_diagonal(board_before, move, board_after, mover_color))
     if bld and bld[0]:
         tags.add("bishop_long_diagonal")
+
+    crf = _safe(lambda: has_castling_rights_forfeited(board_before, move, board_after, mover_color))
+    if crf and crf[0]:
+        tags.add("castling_rights_forfeited")
 
     return tags

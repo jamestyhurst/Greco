@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.45] — 2026-06-19
+
+### Added
+- **`has_castling_rights_forfeited` factgate predicate** (`castling_rights_forfeited` tag) — fires when a non-castling move (king or rook move) causes the mover to lose at least one castling right they previously held. Guards `board_before.is_castling(move)` to suppress actual castling moves (handled by the `castling` tag). Compares `has_kingside_castling_rights` / `has_queenside_castling_rights` before and after to compute which right(s) were lost. Evidence carries `lost` ("kingside", "queenside", or "kingside and queenside"), `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with king-shelter framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 471 passed.
+
 ## [0.41.44] — 2026-06-19
 
 ### Added
