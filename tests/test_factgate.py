@@ -5708,3 +5708,53 @@ def test_bishop_on_seventh_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "bishop_on_seventh" in tags
+
+
+# ── has_rook_on_fifth ─────────────────────────────────────────────────
+def _ro5(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_rook_on_fifth(bb, mv, ba, col)
+
+
+def test_rook_on_fifth_white_a1_to_a5_true():
+    ok, ev = _ro5("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a5", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "fifth"
+    assert ev["square"] == "a5"
+
+
+def test_rook_on_fifth_black_h8_to_h4_true():
+    ok, ev = _ro5("4k2r/8/8/8/8/8/8/4K3 b - - 0 1", "h8h4", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "fourth"
+    assert ev["square"] == "h4"
+
+
+def test_rook_on_fifth_not_rook_false():
+    ok, _ = _ro5("4k3/8/8/8/8/8/8/Q3K3 w - - 0 1", "a1a5", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_fifth_already_on_fifth_false():
+    ok, _ = _ro5("4k3/8/8/R7/8/8/8/4K3 w - - 0 1", "a5a6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_fifth_goes_to_sixth_not_fifth_false():
+    ok, _ = _ro5("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a6", chess.WHITE)
+    assert not ok
+
+
+def test_rook_on_fifth_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/8/R3K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_on_fifth" in tags

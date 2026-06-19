@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.70] — 2026-06-19
+
+### Added
+- **`has_rook_on_fifth` factgate predicate** (`rook_on_fifth` tag) — fires when the mover's rook newly lands on the mover's 5th rank (rank idx 4 for White, idx 3 for Black), where the rook was not already on that rank. Completes the rook-rank series (rook_on_fifth → rook_on_sixth → rook_on_seventh → rook_on_back_rank). Evidence carries `square`, `rank` ('fifth'/'fourth'), and `mover`; commentary frames it as a forward posting in the opponent's half, ready for further advances. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 621 passed.
+
 ## [0.41.69] — 2026-06-19
 
 ### Added
