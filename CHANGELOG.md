@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.43] — 2026-06-19
+
+### Added
+- **`has_hanging_pawns` factgate predicate** (`hanging_pawns` tag) — fires when the move newly creates a hanging pawn complex: two same-rank adjacent-file friendly pawns with no friendly pawns on either outer flank file. Inner `_find_complexes` helper iterates all pawn pairs matching the rank/adjacency criterion and checks outer file emptiness in the full pawn-file set; set-difference detects only newly formed complexes. Evidence carries `squares` (the two square names), `mover`, and a ready-to-quote `evidence` string. Distinct from `pawn_duo` (adds isolation condition) and `isolated_pawn` (covers single isolated pawns). Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with mobility-vs-vulnerability framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 459 passed.
+
 ## [0.41.42] — 2026-06-19
 
 ### Added

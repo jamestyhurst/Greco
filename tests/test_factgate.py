@@ -4228,3 +4228,59 @@ def test_mobile_pawn_center_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "mobile_pawn_center" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_hanging_pawns
+# ---------------------------------------------------------------------------
+
+def _hpw(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_hanging_pawns(board_before, move, board_after, color)
+
+
+def test_hanging_pawns_white_creates_complex_true():
+    # White plays c2→c4 while d4 already exists; b and e files empty of White pawns.
+    # Hanging pawn complex on c4+d4.
+    ok, ev = _hpw("4k3/8/8/8/3P4/8/2P5/4K3 w - - 0 1", "c2c4", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "c4" in ev["evidence"] and "d4" in ev["evidence"]
+
+
+def test_hanging_pawns_black_creates_complex_true():
+    # Black plays d7→d5 while c5 already exists; b and e files empty of Black pawns.
+    ok, ev = _hpw("4k3/3p4/8/2p5/8/8/8/4K3 b - - 0 1", "d7d5", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+
+
+def test_hanging_pawns_outer_file_occupied_false():
+    # White c4+d4 but b4 pawn present — not isolated on left.
+    ok, _ = _hpw("4k3/8/8/8/1PPP4/8/8/4K3 w - - 0 1", "e1e2", chess.WHITE)
+    assert not ok
+
+
+def test_hanging_pawns_no_pair_false():
+    # White c4 but no d4 — no adjacent pair.
+    ok, _ = _hpw("4k3/8/8/8/2P5/8/8/4K3 w - - 0 1", "e1e2", chess.WHITE)
+    assert not ok
+
+
+def test_hanging_pawns_already_existed_false():
+    # White c4+d4 already formed before move; king move doesn't create new complex.
+    ok, _ = _hpw("4k3/8/8/8/2PP4/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_hanging_pawns_in_certified_claims():
+    fen = "4k3/8/8/8/3P4/8/2P5/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("c2c4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "hanging_pawns" in tags

@@ -3260,6 +3260,58 @@ def has_pawn_majority(
     }
 
 
+def has_hanging_pawns(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _find_complexes(board: chess.Board, color: bool) -> Set[Tuple[int, int]]:
+        pawns = list(board.pieces(chess.PAWN, color))
+        all_pf = {chess.square_file(sq) for sq in pawns}
+        result: Set[Tuple[int, int]] = set()
+        for sq1 in pawns:
+            f1, r1 = chess.square_file(sq1), chess.square_rank(sq1)
+            for sq2 in pawns:
+                f2, r2 = chess.square_file(sq2), chess.square_rank(sq2)
+                if f2 != f1 + 1 or r1 != r2:
+                    continue
+                if (f1 - 1 >= 0 and (f1 - 1) in all_pf) or (f2 + 1 <= 7 and (f2 + 1) in all_pf):
+                    continue
+                result.add((f1, f2))
+        return result
+
+    after_cx = _find_complexes(board_after, mover_color)
+    if not after_cx:
+        return False, None
+    before_cx = _find_complexes(board_before, mover_color)
+    new_cx = after_cx - before_cx
+    if not new_cx:
+        return False, None
+
+    f1, f2 = next(iter(new_cx))
+    sq1 = next(
+        sq for sq in board_after.pieces(chess.PAWN, mover_color)
+        if chess.square_file(sq) == f1
+    )
+    sq2 = next(
+        sq for sq in board_after.pieces(chess.PAWN, mover_color)
+        if chess.square_file(sq) == f2
+        and chess.square_rank(sq) == chess.square_rank(sq1)
+    )
+    n1, n2 = chess.square_name(sq1), chess.square_name(sq2)
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "squares": [n1, n2],
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} creates a hanging pawn complex on {n1} and {n2} — "
+            f"the pair is isolated from all other friendly pawns, making them mobile and dynamic "
+            f"but also a potential target if the position opens"
+        ),
+    }
+
+
 def has_mobile_pawn_center(
     board_before: chess.Board,
     move: chess.Move,
@@ -3457,6 +3509,7 @@ GATED_TAGS = (
     "pawn_duo",
     "rook_file_battery",
     "mobile_pawn_center",
+    "hanging_pawns",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3766,5 +3819,9 @@ def certified_claims(
     mpc = _safe(lambda: has_mobile_pawn_center(board_before, move, board_after, mover_color))
     if mpc and mpc[0]:
         tags.add("mobile_pawn_center")
+
+    hpw = _safe(lambda: has_hanging_pawns(board_before, move, board_after, mover_color))
+    if hpw and hpw[0]:
+        tags.add("hanging_pawns")
 
     return tags
