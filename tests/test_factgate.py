@@ -2149,6 +2149,16 @@ def test_desperado_false_attacker_is_more_valuable():
     assert not ok
 
 
+def test_desperado_true_en_passant_pawn_takes_pawn():
+    # White pawn d5 attacked by Black pawn c6 (en prise); plays d5xe6 en passant.
+    # The en passant branch certifies captured piece as pawn even though to_sq is empty.
+    ok, ev = _desp("7k/8/2p5/3Pp3/8/8/8/4K3 w - e6 0 1", "d5e6")
+    assert ok
+    assert ev["piece"] == "pawn"
+    assert ev["captured"] == "pawn"
+    assert ev["cheapest_attacker"] == "pawn"
+
+
 def test_desperado_in_certified_claims():
     # Desperado capture should add the "desperado" tag to certified_claims.
     board_before = chess.Board("4k3/8/1bp5/3N4/8/8/8/4K3 w - - 0 1")
