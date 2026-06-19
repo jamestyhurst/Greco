@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.34] — 2026-06-19
+
+### Added
+- **`has_bishop_vs_knight` factgate predicate** (`bishop_vs_knight` tag) — fires when a move newly creates a clean minor-piece imbalance: one side has only bishop(s) (no knights), the other has only knight(s) (no bishops). Inner helper `_bvk_sides()` checks both sides' minor inventories; predicate guards on both "after" being clean and "before" not already being clean. Evidence carries `bishop_side`, `knight_side`, `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with open-vs-closed pawn structure framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 405 passed.
+
 ## [0.41.33] — 2026-06-19
 
 ### Added

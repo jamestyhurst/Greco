@@ -3734,3 +3734,57 @@ def test_king_active_endgame_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "king_active_endgame" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_bishop_vs_knight
+# ---------------------------------------------------------------------------
+
+def _bvk(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_bishop_vs_knight(board_before, move, board_after, color)
+
+
+def test_bishop_vs_knight_white_bishop_black_knight_true():
+    # White Bxb2 takes Black's last bishop; leaves White: B, Black: N — new imbalance.
+    ok, ev = _bvk("4k3/8/8/3n4/8/8/1b6/2BK4 w - - 0 1", "c1b2", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_bishop_vs_knight_black_bishop_white_knight_true():
+    # Black Bxd2 takes White's last bishop; leaves Black: B, White: N — new imbalance.
+    ok, ev = _bvk("4k3/8/8/8/1b6/5N2/3B4/4K3 b - - 0 1", "b4d2", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_bishop_vs_knight_imbalance_already_existed_false():
+    # White B vs Black N already existed before the bishop move — not newly created.
+    ok, _ = _bvk("4k3/8/8/3n4/8/8/8/3BK3 w - - 0 1", "d1e2", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_vs_knight_white_has_both_minors_false():
+    # White has B+N; Black has N — not a clean B-only vs N-only imbalance.
+    ok, _ = _bvk("4k3/8/8/3n4/8/8/8/2BNK3 w - - 0 1", "c1d2", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_vs_knight_both_have_bishops_false():
+    # Both sides have B; neither has N — no B vs N imbalance.
+    ok, _ = _bvk("4k3/8/3b4/8/8/8/8/3BK3 w - - 0 1", "d1e2", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_vs_knight_in_certified_claims():
+    fen = "4k3/8/8/3n4/8/8/1b6/2BK4 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("c1b2")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "bishop_vs_knight" in tags

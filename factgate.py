@@ -2932,6 +2932,45 @@ def is_opposite_side_castling(
     }
 
 
+def has_bishop_vs_knight(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _bvk_sides(board: chess.Board):
+        wb = bool(board.pieces(chess.BISHOP, chess.WHITE))
+        wn = bool(board.pieces(chess.KNIGHT, chess.WHITE))
+        bb = bool(board.pieces(chess.BISHOP, chess.BLACK))
+        bn = bool(board.pieces(chess.KNIGHT, chess.BLACK))
+        if wb and not wn and bn and not bb:
+            return (chess.WHITE, chess.BLACK)
+        if bb and not bn and wn and not wb:
+            return (chess.BLACK, chess.WHITE)
+        return None
+
+    after = _bvk_sides(board_after)
+    if after is None:
+        return False, None
+    if _bvk_sides(board_before) is not None:
+        return False, None
+
+    bishop_side, knight_side = after
+    b_name = "White" if bishop_side == chess.WHITE else "Black"
+    n_name = "White" if knight_side == chess.WHITE else "Black"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "bishop_side": b_name,
+        "knight_side": n_name,
+        "mover": mover_name,
+        "evidence": (
+            f"{b_name} retains the bishop while {n_name} is left with the knight — "
+            f"in open positions the bishop's long-range scope prevails; "
+            f"in locked pawn structures the knight's agility shines"
+        ),
+    }
+
+
 def is_king_active_endgame(
     board_before: chess.Board,
     move: chess.Move,
@@ -3083,6 +3122,7 @@ GATED_TAGS = (
     "opposite_side_castling",
     "pawn_majority",
     "king_active_endgame",
+    "bishop_vs_knight",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3356,5 +3396,9 @@ def certified_claims(
     kae = _safe(lambda: is_king_active_endgame(board_before, move, board_after, mover_color))
     if kae and kae[0]:
         tags.add("king_active_endgame")
+
+    bvk = _safe(lambda: has_bishop_vs_knight(board_before, move, board_after, mover_color))
+    if bvk and bvk[0]:
+        tags.add("bishop_vs_knight")
 
     return tags
