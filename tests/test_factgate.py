@@ -5178,3 +5178,61 @@ def test_queen_on_sixth_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_on_sixth" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_outside_passed_pawn
+# ---------------------------------------------------------------------------
+
+def _opp(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_outside_passed_pawn(board_before, move, board_after, color)
+
+
+def test_outside_passed_pawn_white_a_file_true():
+    # White b5 captures Black a6 → White gets an outside passer on a6
+    ok, ev = _opp("4k3/8/p7/1P6/8/8/8/4K3 w - - 0 1", "b5a6", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["file"] == "a"
+    assert ev["square"] == "a6"
+
+
+def test_outside_passed_pawn_black_h_file_true():
+    # Black g3 captures White h2 → Black gets an outside passer on h2
+    ok, ev = _opp("4k3/8/8/8/8/6p1/7P/4K3 b - - 0 1", "g3h2", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["file"] == "h"
+    assert ev["square"] == "h2"
+
+
+def test_outside_passed_pawn_already_had_one_false():
+    # White already has an outside passer on a6 before the move
+    ok, _ = _opp("4k3/8/P7/8/8/8/8/4K3 w - - 0 1", "a6a7", chess.WHITE)
+    assert not ok
+
+
+def test_outside_passed_pawn_inner_file_passer_false():
+    # White creates a passer on b6 (b-file, not a or h)
+    ok, _ = _opp("4k3/8/1p6/2P5/8/8/8/4K3 w - - 0 1", "c5b6", chess.WHITE)
+    assert not ok
+
+
+def test_outside_passed_pawn_non_pawn_move_false():
+    # King move in a pawnless position — no outside passer can appear
+    ok, _ = _opp("4k3/8/8/8/8/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_outside_passed_pawn_in_certified_claims():
+    fen = "4k3/8/p7/1P6/8/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("b5a6")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "outside_passed_pawn" in tags

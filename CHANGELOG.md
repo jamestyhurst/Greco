@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.60] — 2026-06-19
+
+### Added
+- **`has_outside_passed_pawn` factgate predicate** (`outside_passed_pawn` tag) — fires when the move newly creates an outside passed pawn (on the a or h file) for the mover, where none existed before. Inner `_is_passed` checks no enemy pawn on adjacent files ahead; `_outside_passers` filters to a/h files only; set-difference on before/after guards against re-firing for an already-existing wing passer. Evidence carries `square`, `file` ('a'/'h'), and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 561 passed.
+
 ## [0.41.59] — 2026-06-19
 
 ### Added

@@ -3564,6 +3564,48 @@ def has_pawn_duo(
     }
 
 
+def has_outside_passed_pawn(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _is_passed(board: chess.Board, sq: int, color: bool) -> bool:
+        f = chess.square_file(sq)
+        r = chess.square_rank(sq)
+        opp = not color
+        for osq in board.pieces(chess.PAWN, opp):
+            of = chess.square_file(osq)
+            if abs(of - f) <= 1:
+                orr = chess.square_rank(osq)
+                if color == chess.WHITE and orr > r:
+                    return False
+                if color == chess.BLACK and orr < r:
+                    return False
+        return True
+
+    def _outside_passers(board: chess.Board, color: bool) -> List[int]:
+        return [
+            sq for sq in board.pieces(chess.PAWN, color)
+            if chess.square_file(sq) in (0, 7) and _is_passed(board, sq, color)
+        ]
+
+    after = _outside_passers(board_after, mover_color)
+    if not after:
+        return False, None
+    before = _outside_passers(board_before, mover_color)
+    if before:
+        return False, None
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(after[0])
+    file_name = "a" if chess.square_file(after[0]) == 0 else "h"
+    return True, {
+        "square": sq_name, "file": file_name, "mover": mover_name,
+        "evidence": (
+            f"{mover_name} creates an outside passed pawn on the {file_name}-file at {sq_name} — "
+            f"a wing passer that forces the opponent's king to the edge of the board, "
+            f"freeing the mover's king and pieces to operate in the centre or on the other wing"
+        ),
+    }
+
+
 def has_queen_on_sixth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4090,6 +4132,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "outside_passed_pawn",
     "queen_on_sixth",
     "rook_on_back_rank",
     "queen_on_seventh",
@@ -4434,6 +4477,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    opp = _safe(lambda: has_outside_passed_pawn(board_before, move, board_after, mover_color))
+    if opp and opp[0]:
+        tags.add("outside_passed_pawn")
 
     qo6 = _safe(lambda: has_queen_on_sixth(board_before, move, board_after, mover_color))
     if qo6 and qo6[0]:
