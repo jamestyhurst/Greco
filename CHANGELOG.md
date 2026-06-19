@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.71] — 2026-06-19
+
+### Added
+- **`has_two_rooks_vs_queen` factgate predicate** (`two_rooks_vs_queen` tag) — fires when a move newly creates a pure 2R vs 1Q imbalance: one side has exactly two rooks and zero queens, the other exactly one queen and zero rooks. Set-difference guards against re-firing. Inner `_state()` returns 'white_rooks'/'black_rooks'/None. Evidence carries `rook_side`, `queen_side`, and `mover`; commentary calibrates to open vs. closed positions (rooks thrive in open files, queen dominates in closed). Mirrors pattern of `has_two_bishops_vs_two_knights`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 627 passed.
+
 ## [0.41.70] — 2026-06-19
 
 ### Added

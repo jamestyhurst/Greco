@@ -5758,3 +5758,56 @@ def test_rook_on_fifth_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_on_fifth" in tags
+
+
+# ── has_two_rooks_vs_queen ────────────────────────────────────────────
+def _2rvq(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_two_rooks_vs_queen(bb, mv, ba, col)
+
+
+def test_two_rooks_vs_queen_white_captures_black_rook_true():
+    # White Ra1 captures Black Ra8; after: White 2R no Q, Black 1Q no R
+    ok, ev = _2rvq("r5k1/3q4/8/8/8/8/8/R3K2R w - - 0 1", "a1a8", chess.WHITE)
+    assert ok
+    assert ev["rook_side"] == "White"
+    assert ev["queen_side"] == "Black"
+
+
+def test_two_rooks_vs_queen_black_captures_white_rook_true():
+    # Black Rb8 captures White Rb5; after: Black 2R no Q, White 1Q no R
+    ok, ev = _2rvq("1r4kr/8/8/1R6/Q7/8/8/4K3 b - - 0 1", "b8b5", chess.BLACK)
+    assert ok
+    assert ev["rook_side"] == "Black"
+    assert ev["queen_side"] == "White"
+
+
+def test_two_rooks_vs_queen_extra_piece_remains_false():
+    # White still has both rooks AND a queen after move → not 2R vs Q
+    ok, _ = _2rvq("4qk2/8/8/8/8/8/8/R2QK2R w - - 0 1", "h1h5", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_queen_imbalance_already_existed_false():
+    # Already 2R (White) vs Q (Black) before the move
+    ok, _ = _2rvq("4qk2/8/8/8/8/8/8/R3K2R w - - 0 1", "h1h5", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_queen_one_rook_vs_queen_false():
+    # Only 1 rook (White) vs 1 queen (Black) — not a 2R vs Q imbalance
+    ok, _ = _2rvq("4qk2/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a5", chess.WHITE)
+    assert not ok
+
+
+def test_two_rooks_vs_queen_in_certified_claims():
+    fen = "r5k1/3q4/8/8/8/8/8/R3K2R w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a8")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "two_rooks_vs_queen" in tags

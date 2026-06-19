@@ -3610,6 +3610,41 @@ def has_knight_on_fifth(
     )}
 
 
+def has_two_rooks_vs_queen(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _state(board: chess.Board) -> Optional[str]:
+        wr = len(board.pieces(chess.ROOK, chess.WHITE))
+        wq = len(board.pieces(chess.QUEEN, chess.WHITE))
+        br = len(board.pieces(chess.ROOK, chess.BLACK))
+        bq = len(board.pieces(chess.QUEEN, chess.BLACK))
+        if wr == 2 and wq == 0 and br == 0 and bq == 1:
+            return "white_rooks"
+        if br == 2 and bq == 0 and wr == 0 and wq == 1:
+            return "black_rooks"
+        return None
+
+    after = _state(board_after)
+    if not after:
+        return False, None
+    before = _state(board_before)
+    if before:
+        return False, None
+    rook_side = "White" if after == "white_rooks" else "Black"
+    queen_side = "Black" if after == "white_rooks" else "White"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "rook_side": rook_side, "queen_side": queen_side, "mover": mover_name,
+        "evidence": (
+            f"The material crystallises into a classic two rooks vs. queen imbalance — "
+            f"{rook_side} holds both rooks while {queen_side} relies on the lone queen; "
+            f"in open positions with active rooks and open files this is roughly balanced, "
+            f"but the coordinated rooks can dominate when they work together "
+            f"or when the queen has no strong targets"
+        ),
+    }
+
+
 def has_rook_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4370,6 +4405,7 @@ GATED_TAGS = (
     "pawn_on_fifth",
     "bishop_on_seventh",
     "rook_on_fifth",
+    "two_rooks_vs_queen",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -4743,6 +4779,10 @@ def certified_claims(
     ro5 = _safe(lambda: has_rook_on_fifth(board_before, move, board_after, mover_color))
     if ro5 and ro5[0]:
         tags.add("rook_on_fifth")
+
+    trvq = _safe(lambda: has_two_rooks_vs_queen(board_before, move, board_after, mover_color))
+    if trvq and trvq[0]:
+        tags.add("two_rooks_vs_queen")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:
