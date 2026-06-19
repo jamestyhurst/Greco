@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.16] — 2026-06-18
+
+### Added
+- **`loses_exchange` factgate predicate** (`loses_exchange` tag) — move predicate certifying a rook captures an enemy minor piece (bishop or knight), giving up the exchange (~2-pawn material loss). Complement of `wins_exchange`; allows narrator to distinguish exchange sacrifice from blunder. Evidence carries `piece`, `minor`, `minor_square`, `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 5 new pure tests; full suite 306 passed.
+
 ## [0.41.15] — 2026-06-18
 
 ### Added

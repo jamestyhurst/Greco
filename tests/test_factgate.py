@@ -2781,3 +2781,50 @@ def test_stalemate_move_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "stalemate_move" in tags
+
+
+# --- loses_exchange -----------------------------------------------------------
+# loses_exchange: mover's ROOK captures an enemy MINOR (bishop or knight).
+# Opposite of wins_exchange; certifies the mover is giving up the exchange (~2 pawn loss).
+def _le(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.loses_exchange(board_before, move, board_after, color)
+
+
+def test_loses_exchange_rook_takes_bishop_true():
+    # White rook d1 captures Black bishop on d5 — loses the exchange.
+    ok, ev = _le("4k3/8/8/3b4/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert ok
+    assert ev["minor"] == "bishop"
+
+
+def test_loses_exchange_rook_takes_knight_true():
+    # White rook takes Black knight.
+    ok, ev = _le("4k3/8/8/3n4/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert ok
+    assert ev["minor"] == "knight"
+
+
+def test_loses_exchange_bishop_takes_rook_false():
+    # Bishop captures rook — that's wins_exchange, not loses_exchange.
+    ok, _ = _le("4k3/8/8/3r4/8/8/8/3BK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_loses_exchange_rook_takes_rook_false():
+    # Rook takes rook — equal trade, not an exchange sacrifice.
+    ok, _ = _le("4k3/8/8/3r4/8/8/8/3RK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_loses_exchange_in_certified_claims():
+    # White rook takes Black bishop: loses_exchange tag must appear.
+    board_before = chess.Board("4k3/8/8/3b4/8/8/8/3RK3 w - - 0 1")
+    move = chess.Move.from_uci("d1d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "loses_exchange" in tags

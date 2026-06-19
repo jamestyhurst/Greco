@@ -2296,6 +2296,41 @@ def is_rook_on_seventh(
     }
 
 
+def loses_exchange(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the mover's rook captures an enemy minor piece (bishop or knight)
+    — the mover is giving up the exchange (~2-pawn material loss). Complement of wins_exchange.
+    evidence keys: piece ('rook'), minor (piece name), minor_square, mover, evidence.
+    """
+    if board_before.is_en_passant(move):
+        return False, None
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.ROOK or piece.color != mover_color:
+        return False, None
+    captured = board_before.piece_at(move.to_square)
+    if captured is None or captured.piece_type not in (chess.BISHOP, chess.KNIGHT):
+        return False, None
+    if captured.color == mover_color:
+        return False, None
+    minor_name = PIECE_NAMES[captured.piece_type]
+    sq_name = chess.square_name(move.to_square)
+    mover_label = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "piece": "rook",
+        "minor": minor_name,
+        "minor_square": sq_name,
+        "mover": mover_label,
+        "evidence": (
+            f"{mover_label} rook captures the {minor_name} on {sq_name} — "
+            "giving up the exchange"
+        ),
+    }
+
+
 def is_stalemate_move(
     board_before: chess.Board,
     move: chess.Move,
@@ -2422,6 +2457,7 @@ GATED_TAGS = (
     "captures_hanging",
     "double_check",
     "stalemate_move",
+    "loses_exchange",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2623,5 +2659,9 @@ def certified_claims(
     sm = _safe(lambda: is_stalemate_move(board_before, move, board_after, mover_color))
     if sm and sm[0]:
         tags.add("stalemate_move")
+
+    le = _safe(lambda: loses_exchange(board_before, move, board_after, mover_color))
+    if le and le[0]:
+        tags.add("loses_exchange")
 
     return tags
