@@ -5449,3 +5449,56 @@ def test_two_bishops_vs_two_knights_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "two_bishops_vs_two_knights" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_knight_on_seventh
+# ---------------------------------------------------------------------------
+
+def _kn7(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_knight_on_seventh(board_before, move, board_after, color)
+
+
+def test_knight_on_seventh_white_f7_true():
+    ok, ev = _kn7("4k3/8/8/4N3/8/8/8/4K3 w - - 0 1", "e5f7", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "seventh"
+    assert ev["square"] == "f7"
+
+
+def test_knight_on_seventh_black_f2_true():
+    ok, ev = _kn7("4k3/8/8/8/4n3/8/8/4K3 b - - 0 1", "e4f2", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "second"
+    assert ev["square"] == "f2"
+
+
+def test_knight_on_seventh_already_on_seventh_false():
+    ok, _ = _kn7("4k3/5N2/8/8/8/8/8/4K3 w - - 0 1", "f7e5", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_seventh_goes_to_sixth_not_seventh_false():
+    ok, _ = _kn7("4k3/8/8/4N3/8/8/8/4K3 w - - 0 1", "e5c6", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_seventh_bishop_not_knight_false():
+    ok, _ = _kn7("4k3/8/8/8/8/8/8/B3K3 w - - 0 1", "a1g7", chess.WHITE)
+    assert not ok
+
+
+def test_knight_on_seventh_in_certified_claims():
+    fen = "4k3/8/8/4N3/8/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e5f7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "knight_on_seventh" in tags

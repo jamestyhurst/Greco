@@ -3564,6 +3564,29 @@ def has_pawn_duo(
     }
 
 
+def has_knight_on_seventh(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.KNIGHT:
+        return False, None
+    to_sq = move.to_square
+    target_rank = 6 if mover_color == chess.WHITE else 1
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+    rank_name = "seventh" if mover_color == chess.WHITE else "second"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {"square": sq_name, "rank": rank_name, "mover": mover_name, "evidence": (
+        f"{mover_name}'s knight leaps to the {rank_name} rank on {sq_name} — "
+        f"deep in enemy territory, the knight threatens forks of rooks and king, "
+        f"attacks pawns on the back rank, and is extremely difficult to dislodge "
+        f"because the enemy king cannot safely approach without being forked"
+    )}
+
+
 def has_two_bishops_vs_two_knights(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4231,6 +4254,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "knight_on_seventh",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -4580,6 +4604,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    kn7 = _safe(lambda: has_knight_on_seventh(board_before, move, board_after, mover_color))
+    if kn7 and kn7[0]:
+        tags.add("knight_on_seventh")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:

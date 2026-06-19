@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.65] — 2026-06-19
+
+### Added
+- **`has_knight_on_seventh` factgate predicate** (`knight_on_seventh` tag) — fires when the mover's knight newly lands on the mover's 7th rank (rank idx 6 for White, idx 1 for Black), by advance or capture, where the knight was not already on that rank. Evidence carries `square`, `rank` ('seventh'/'second'), and `mover`; commentary emphasises forks of rooks/king, back-rank pawn attacks, and difficulty of dislodging. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 591 passed.
+
 ## [0.41.64] — 2026-06-19
 
 ### Added
