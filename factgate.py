@@ -3564,6 +3564,40 @@ def has_pawn_duo(
     }
 
 
+def has_two_bishops_vs_two_knights(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _state(board: chess.Board) -> Optional[str]:
+        wb = len(board.pieces(chess.BISHOP, chess.WHITE))
+        wn = len(board.pieces(chess.KNIGHT, chess.WHITE))
+        bb = len(board.pieces(chess.BISHOP, chess.BLACK))
+        bn = len(board.pieces(chess.KNIGHT, chess.BLACK))
+        if wb == 2 and wn == 0 and bb == 0 and bn == 2:
+            return "white_bishops"
+        if bb == 2 and bn == 0 and wb == 0 and wn == 2:
+            return "black_bishops"
+        return None
+
+    after = _state(board_after)
+    if not after:
+        return False, None
+    before = _state(board_before)
+    if before:
+        return False, None
+    bishop_side = "White" if after == "white_bishops" else "Black"
+    knight_side = "Black" if after == "white_bishops" else "White"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "bishop_side": bishop_side, "knight_side": knight_side, "mover": mover_name,
+        "evidence": (
+            f"The position crystallises into a classic bishop-pair vs knight-pair imbalance — "
+            f"{bishop_side} holds both bishops while {knight_side} has both knights; "
+            f"in open positions the bishops' long diagonals dominate, "
+            f"in closed positions the knights' leaping ability gives the edge"
+        ),
+    }
+
+
 def has_pawn_on_sixth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4197,6 +4231,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
     "queen_on_back_rank",
@@ -4545,6 +4580,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
+    if tbvtk and tbvtk[0]:
+        tags.add("two_bishops_vs_two_knights")
 
     po6 = _safe(lambda: has_pawn_on_sixth(board_before, move, board_after, mover_color))
     if po6 and po6[0]:

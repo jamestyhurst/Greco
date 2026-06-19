@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.64] — 2026-06-19
+
+### Added
+- **`has_two_bishops_vs_two_knights` factgate predicate** (`two_bishops_vs_two_knights` tag) — fires when the move newly creates a pure 2B vs 2N imbalance: one side has exactly 2 bishops and 0 knights, the other exactly 2 knights and 0 bishops. Set-difference guards against re-firing if the imbalance pre-existed. Inner `_state()` returns 'white_bishops'/'black_bishops'/None. Evidence carries `bishop_side`, `knight_side`, and `mover`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 585 passed.
+
 ## [0.41.63] — 2026-06-19
 
 ### Added

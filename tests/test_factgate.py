@@ -5393,3 +5393,59 @@ def test_pawn_on_sixth_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "pawn_on_sixth" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_two_bishops_vs_two_knights
+# ---------------------------------------------------------------------------
+
+def _tbvtk(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_two_bishops_vs_two_knights(board_before, move, board_after, color)
+
+
+def test_two_bishops_vs_two_knights_white_bishops_true():
+    # White captures Black's last bishop → White 2B 0N, Black 0B 2N
+    ok, ev = _tbvtk("4k1n1/7n/8/4b3/8/8/1B4B1/4K3 w - - 0 1", "b2e5", chess.WHITE)
+    assert ok
+    assert ev["bishop_side"] == "White"
+    assert ev["knight_side"] == "Black"
+
+
+def test_two_bishops_vs_two_knights_black_bishops_true():
+    # Black captures White's last bishop → Black 2B 0N, White 0B 2N
+    ok, ev = _tbvtk("4k3/1b4b1/2B5/8/8/8/8/1N2K2N b - - 0 1", "b7c6", chess.BLACK)
+    assert ok
+    assert ev["bishop_side"] == "Black"
+    assert ev["knight_side"] == "White"
+
+
+def test_two_bishops_vs_two_knights_already_in_state_false():
+    # Already in 2B vs 2N state — king move, no change
+    ok, _ = _tbvtk("4k1n1/7n/8/4B3/8/8/6B1/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_two_bishops_vs_two_knights_asymmetric_minor_pieces_false():
+    # After move: White 2B, Black 1B 1N — not the full imbalance
+    ok, _ = _tbvtk("4k1n1/8/5b2/8/8/8/1B6/4KB2 w - - 0 1", "b2c3", chess.WHITE)
+    assert not ok
+
+
+def test_two_bishops_vs_two_knights_no_minors_false():
+    # King-only position — no minor pieces
+    ok, _ = _tbvtk("4k3/8/8/8/8/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_two_bishops_vs_two_knights_in_certified_claims():
+    fen = "4k1n1/7n/8/4b3/8/8/1B4B1/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("b2e5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "two_bishops_vs_two_knights" in tags
