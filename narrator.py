@@ -711,6 +711,18 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
         except Exception:
             pass
 
+        try:
+            from factgate import is_desperado as _is_desp
+
+            _mv_desp = chess.Move.from_uci(move.uci) if move.uci else chess.Move.null()
+            _board_bef_desp = chess.Board(move.fen_before)
+            _board_aft_desp = chess.Board(move.fen_after)
+            _desp_ok, _desp_ev = _is_desp(_board_bef_desp, _mv_desp, _board_aft_desp)
+            if _desp_ok and _desp_ev:
+                d["desperado_evidence"] = _desp_ev
+        except Exception:
+            pass
+
     # Tier 2 and Tier 3 get extra context for the model to chew on.
     if tier >= 2:
         d["best_pv"] = move.best_pv_san

@@ -112,3 +112,23 @@ def test_build_user_prompt_uses_real_names(make_move, make_game):
     g = make_game([make_move()], White="Magnus", Black="Hikaru")
     prompt = build_user_prompt(g, [1], {}, with_knowledge=False)
     assert "Magnus" in prompt and "Hikaru" in prompt
+
+
+def test_move_to_dict_desperado_evidence(make_move):
+    # Nd5xb6: White knight captures Black bishop while itself attacked by Black pawn c6.
+    # fen_before: Ke1 Nd5 | Ke8 Bb6 pc6
+    import chess as _chess
+    _b = _chess.Board("4k3/8/1bp5/3N4/8/8/8/4K3 w - - 0 1")
+    _b.push(_chess.Move.from_uci("d5b6"))
+    m = make_move(
+        uci="d5b6",
+        san="Nxb6",
+        fen_before="4k3/8/1bp5/3N4/8/8/8/4K3 w - - 0 1",
+        fen_after=_b.fen(),
+    )
+    d = _move_to_dict(m, tier=1)
+    assert "desperado_evidence" in d
+    ev = d["desperado_evidence"]
+    assert ev["piece"] == "knight"
+    assert ev["captured"] == "bishop"
+    assert ev["cheapest_attacker"] == "pawn"
