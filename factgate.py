@@ -3610,6 +3610,23 @@ def has_knight_on_fifth(
     )}
 
 
+def has_bishop_centralized(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.BISHOP:
+        return False, None
+    if move.to_square not in _CORE_CENTER:
+        return False, None
+    sq_name = chess.square_name(move.to_square)
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {"square": sq_name, "mover": mover_name, "evidence": (
+        f"{mover_name}'s bishop centralises to {sq_name} — "
+        f"from a core central square the bishop bears simultaneously on both long diagonals "
+        f"spanning the board, maximising its reach and coordinating with pieces on either wing"
+    )}
+
+
 def has_two_bishops_vs_two_knights(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4279,6 +4296,7 @@ GATED_TAGS = (
     "isolated_queen_pawn",
     "knight_on_seventh",
     "knight_on_fifth",
+    "bishop_centralized",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -4636,6 +4654,10 @@ def certified_claims(
     kn5 = _safe(lambda: has_knight_on_fifth(board_before, move, board_after, mover_color))
     if kn5 and kn5[0]:
         tags.add("knight_on_fifth")
+
+    bisc = _safe(lambda: has_bishop_centralized(board_before, move, board_after, mover_color))
+    if bisc and bisc[0]:
+        tags.add("bishop_centralized")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:

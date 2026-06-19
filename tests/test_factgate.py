@@ -5552,3 +5552,51 @@ def test_knight_on_fifth_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "knight_on_fifth" in tags
+
+
+# ── has_bishop_centralized ────────────────────────────────────────────
+def _bc(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_bishop_centralized(bb, mv, ba, col)
+
+
+def test_bishop_centralized_white_to_d5_true():
+    ok, ev = _bc("4k3/8/8/8/8/8/6B1/4K3 w - - 0 1", "g2d5", chess.WHITE)
+    assert ok
+    assert ev["square"] == "d5"
+    assert ev["mover"] == "White"
+
+
+def test_bishop_centralized_black_to_e4_true():
+    ok, ev = _bc("4k3/8/8/5b2/8/8/8/4K3 b - - 0 1", "f5e4", chess.BLACK)
+    assert ok
+    assert ev["square"] == "e4"
+    assert ev["mover"] == "Black"
+
+
+def test_bishop_centralized_not_bishop_false():
+    ok, _ = _bc("4k3/8/8/8/8/8/6Q1/4K3 w - - 0 1", "g2d5", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_centralized_goes_to_non_center_false():
+    ok, _ = _bc("4k3/8/8/8/8/8/6B1/4K3 w - - 0 1", "g2f3", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_centralized_goes_to_c4_not_core_false():
+    ok, _ = _bc("4k3/8/8/8/8/8/6B1/4K3 w - - 0 1", "g2c6", chess.WHITE)
+    assert not ok
+
+
+def test_bishop_centralized_in_certified_claims():
+    fen = "4k3/8/8/8/8/8/6B1/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("g2d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "bishop_centralized" in tags

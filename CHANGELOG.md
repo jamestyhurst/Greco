@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.67] — 2026-06-19
+
+### Added
+- **`has_bishop_centralized` factgate predicate** (`bishop_centralized` tag) — fires when the mover's bishop moves to one of the four core central squares (d4/d5/e4/e5). Pure event predicate (no set-difference; the destination cannot have been occupied by the moving piece). Reuses existing `_CORE_CENTER` frozenset. Evidence carries `square` and `mover`; commentary emphasises that a central bishop bears on both long diagonals simultaneously. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 603 passed.
+
 ## [0.41.66] — 2026-06-19
 
 ### Added
