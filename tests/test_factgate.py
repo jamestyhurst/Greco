@@ -4061,3 +4061,58 @@ def test_queen_centralization_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_centralization" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_pawn_duo
+# ---------------------------------------------------------------------------
+
+def _pduo(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_pawn_duo(board_before, move, board_after, color)
+
+
+def test_pawn_duo_white_creates_duo_true():
+    # White pawn e3→e4 creates duo with d4 (both on rank 4, adjacent files).
+    ok, ev = _pduo("4k3/8/8/8/3P4/4P3/8/4K3 w - - 0 1", "e3e4", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert "e4" in ev["evidence"] or "d4" in ev["evidence"]
+
+
+def test_pawn_duo_black_creates_duo_true():
+    # Black pawn e6→e5 creates duo with d5 (both on rank 5, adjacent files).
+    ok, ev = _pduo("4k3/8/4p3/3p4/8/8/8/4K3 b - - 0 1", "e6e5", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+
+
+def test_pawn_duo_already_existed_false():
+    # d4+e4 duo already exists before the move; h2→h4 doesn't create a new duo.
+    ok, _ = _pduo("4k3/8/8/8/3PP3/8/7P/4K3 w - - 0 1", "h2h4", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_duo_non_adjacent_files_false():
+    # d4 and h4 are 4 files apart — not adjacent.
+    ok, _ = _pduo("4k3/8/8/8/3P4/8/7P/4K3 w - - 0 1", "h2h4", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_duo_king_move_false():
+    # King move — no pawn moved, no new duo.
+    ok, _ = _pduo("4k3/8/8/8/3P4/4P3/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_duo_in_certified_claims():
+    fen = "4k3/8/8/8/3P4/4P3/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e3e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "pawn_duo" in tags

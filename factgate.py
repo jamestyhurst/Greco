@@ -3260,6 +3260,46 @@ def has_pawn_majority(
     }
 
 
+def has_pawn_duo(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _find_duos(board: chess.Board, color: bool) -> Set[frozenset]:
+        pawn_squares = list(board.pieces(chess.PAWN, color))
+        duos: Set[frozenset] = set()
+        for sq1 in pawn_squares:
+            f1, r1 = chess.square_file(sq1), chess.square_rank(sq1)
+            for sq2 in pawn_squares:
+                f2, r2 = chess.square_file(sq2), chess.square_rank(sq2)
+                if r1 == r2 and abs(f1 - f2) == 1 and sq1 < sq2:
+                    duos.add(frozenset({sq1, sq2}))
+        return duos
+
+    after_duos = _find_duos(board_after, mover_color)
+    if not after_duos:
+        return False, None
+    before_duos = _find_duos(board_before, mover_color)
+    new_duos = after_duos - before_duos
+    if not new_duos:
+        return False, None
+
+    pair = next(iter(new_duos))
+    sq1, sq2 = sorted(pair)
+    names = [chess.square_name(sq1), chess.square_name(sq2)]
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "squares": names,
+        "mover": mover_name,
+        "evidence": (
+            f"{mover_name} forms a pawn duo on {names[0]} and {names[1]} — "
+            f"two connected pawns on the same rank that support each other "
+            f"and control a broad front of squares"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -3334,6 +3374,7 @@ GATED_TAGS = (
     "diagonal_battery",
     "shelter_pawn_capture",
     "queen_centralization",
+    "pawn_duo",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3631,5 +3672,9 @@ def certified_claims(
     qc = _safe(lambda: has_queen_centralization(board_before, move, board_after, mover_color))
     if qc and qc[0]:
         tags.add("queen_centralization")
+
+    pd = _safe(lambda: has_pawn_duo(board_before, move, board_after, mover_color))
+    if pd and pd[0]:
+        tags.add("pawn_duo")
 
     return tags

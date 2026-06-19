@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.40] — 2026-06-19
+
+### Added
+- **`has_pawn_duo` factgate predicate** (`pawn_duo` tag) — fires when a pawn move creates two friendly pawns standing side by side on the same rank with adjacent files, where this specific pairing did not exist before the move. Uses an inner `_find_duos` helper that builds `frozenset` pairs from all same-rank adjacent-file pawn pairs; set-difference of after-duos minus before-duos detects only newly formed duos. Evidence carries `squares` (list of the two square names), `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with mutual-support and territory-control framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 441 passed.
+
 ## [0.41.39] — 2026-06-19
 
 ### Added
