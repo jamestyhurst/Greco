@@ -3610,6 +3610,30 @@ def has_knight_on_fifth(
     )}
 
 
+def has_pawn_on_fifth(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.PAWN:
+        return False, None
+    to_sq = move.to_square
+    target_rank = 4 if mover_color == chess.WHITE else 3  # 0-indexed: rank 5=4, rank 4=3
+    if chess.square_rank(to_sq) != target_rank:
+        return False, None
+    if chess.square_rank(move.from_square) == target_rank:
+        return False, None
+    rank_name = "fifth" if mover_color == chess.WHITE else "fourth"
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    sq_name = chess.square_name(to_sq)
+    return True, {"square": sq_name, "rank": rank_name, "mover": mover_name, "evidence": (
+        f"{mover_name}'s pawn crosses into the opponent's half of the board, "
+        f"arriving on the {rank_name} rank at {sq_name} — "
+        f"the pawn has now staked territory in enemy ground and begins to exert "
+        f"concrete pressure, restricting the opponent's piece mobility and "
+        f"setting the stage for a deeper advance toward promotion"
+    )}
+
+
 def has_bishop_centralized(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4297,6 +4321,7 @@ GATED_TAGS = (
     "knight_on_seventh",
     "knight_on_fifth",
     "bishop_centralized",
+    "pawn_on_fifth",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -4658,6 +4683,10 @@ def certified_claims(
     bisc = _safe(lambda: has_bishop_centralized(board_before, move, board_after, mover_color))
     if bisc and bisc[0]:
         tags.add("bishop_centralized")
+
+    pp5 = _safe(lambda: has_pawn_on_fifth(board_before, move, board_after, mover_color))
+    if pp5 and pp5[0]:
+        tags.add("pawn_on_fifth")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:

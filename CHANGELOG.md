@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.68] — 2026-06-19
+
+### Added
+- **`has_pawn_on_fifth` factgate predicate** (`pawn_on_fifth` tag) — fires when a pawn newly lands on the mover's 5th rank (rank idx 4 for White, idx 3 for Black), by advance or capture, where the pawn was not already on that rank. Continues the pawn-rank series (pawn_on_fifth → pawn_on_sixth → pawn_on_seventh). Evidence carries `square`, `rank` ('fifth'/'fourth', algebraic naming), and `mover`; commentary describes the pawn crossing the midpoint into enemy territory. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 609 passed.
+
 ## [0.41.67] — 2026-06-19
 
 ### Added

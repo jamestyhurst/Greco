@@ -5600,3 +5600,53 @@ def test_bishop_centralized_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "bishop_centralized" in tags
+
+
+# ── has_pawn_on_fifth ─────────────────────────────────────────────────
+def _pp5(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_pawn_on_fifth(bb, mv, ba, col)
+
+
+def test_pawn_on_fifth_white_e4_to_e5_true():
+    ok, ev = _pp5("4k3/8/8/8/4P3/8/8/4K3 w - - 0 1", "e4e5", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+    assert ev["rank"] == "fifth"
+    assert ev["square"] == "e5"
+
+
+def test_pawn_on_fifth_black_d5_to_d4_true():
+    ok, ev = _pp5("4k3/8/8/3p4/8/8/8/4K3 b - - 0 1", "d5d4", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+    assert ev["rank"] == "fourth"
+    assert ev["square"] == "d4"
+
+
+def test_pawn_on_fifth_not_pawn_false():
+    ok, _ = _pp5("4k3/8/8/8/R7/8/8/4K3 w - - 0 1", "a4a5", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_fifth_already_on_fifth_false():
+    ok, _ = _pp5("4k3/8/8/4P3/8/8/8/4K3 w - - 0 1", "e5e6", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_fifth_goes_to_fourth_not_fifth_false():
+    ok, _ = _pp5("4k3/8/8/8/8/4P3/8/4K3 w - - 0 1", "e3e4", chess.WHITE)
+    assert not ok
+
+
+def test_pawn_on_fifth_in_certified_claims():
+    fen = "4k3/8/8/8/4P3/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e4e5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "pawn_on_fifth" in tags
