@@ -3725,6 +3725,38 @@ def has_rook_vs_two_minors(
     }
 
 
+def has_queen_endgame(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _is_queen_endgame(board: chess.Board) -> bool:
+        if not (board.pieces(chess.QUEEN, chess.WHITE) or board.pieces(chess.QUEEN, chess.BLACK)):
+            return False
+        if board.pieces(chess.ROOK, chess.WHITE) or board.pieces(chess.ROOK, chess.BLACK):
+            return False
+        if board.pieces(chess.BISHOP, chess.WHITE) or board.pieces(chess.BISHOP, chess.BLACK):
+            return False
+        if board.pieces(chess.KNIGHT, chess.WHITE) or board.pieces(chess.KNIGHT, chess.BLACK):
+            return False
+        return True
+    if not _is_queen_endgame(board_after):
+        return False, None
+    if _is_queen_endgame(board_before):
+        return False, None
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"The game enters a queen endgame — only kings, queens, and pawns remain; "
+            f"queen endgames are among the most technically demanding: "
+            f"the queens' long-range power and checking ability give the defending side "
+            f"persistent resources for a perpetual check, while the attacking queen must "
+            f"coordinate with its king to convert a material or pawn advantage into a win; "
+            f"precise calculation is essential, and many theoretically won positions "
+            f"are saved by a timely perpetual"
+        ),
+    }
+
+
 def has_rook_on_fifth(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool,
 ) -> Tuple[bool, Optional[dict]]:
@@ -4488,6 +4520,7 @@ GATED_TAGS = (
     "two_rooks_vs_queen",
     "queen_vs_rook_and_minor",
     "rook_vs_two_minors",
+    "queen_endgame",
     "two_bishops_vs_two_knights",
     "pawn_on_sixth",
     "king_centralized",
@@ -4873,6 +4906,10 @@ def certified_claims(
     rvtm = _safe(lambda: has_rook_vs_two_minors(board_before, move, board_after, mover_color))
     if rvtm and rvtm[0]:
         tags.add("rook_vs_two_minors")
+
+    qeg = _safe(lambda: has_queen_endgame(board_before, move, board_after, mover_color))
+    if qeg and qeg[0]:
+        tags.add("queen_endgame")
 
     tbvtk = _safe(lambda: has_two_bishops_vs_two_knights(board_before, move, board_after, mover_color))
     if tbvtk and tbvtk[0]:

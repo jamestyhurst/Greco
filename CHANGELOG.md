@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.74] — 2026-06-19
+
+### Added
+- **`has_queen_endgame` factgate predicate** (`queen_endgame` tag) — fires when a move causes a transition into a queen endgame: after the move, at least one queen remains and no rooks, bishops, or knights are on the board (only kings, queens, and pawns), where this was NOT the case before the move. Set-difference via `_is_queen_endgame()` helper checking for any remaining heavy/minor pieces. Evidence carries `mover`; commentary addresses the perpetual-check drawing resources that make queen endgames technically demanding and calibrates to pawn advancement and king shelter. Complements the existing `rook_endgame`, `bishop_endgame`, `knight_endgame`, `minor_piece_endgame`, and `pawn_endgame` predicates. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 645 passed.
+
 ## [0.41.73] — 2026-06-19
 
 ### Added

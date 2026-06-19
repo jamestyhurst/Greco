@@ -5920,3 +5920,57 @@ def test_rook_vs_two_minors_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
     assert "rook_vs_two_minors" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_queen_endgame
+# ---------------------------------------------------------------------------
+
+def _qeg(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_queen_endgame(bb, mv, ba, col)
+
+
+def test_queen_endgame_captures_last_minor_true():
+    # White Qa1 captures Nb1; after: only queens and kings remain
+    ok, ev = _qeg("3qk3/8/8/8/8/8/8/QN2K3 w - - 0 1", "a1b1", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+
+
+def test_queen_endgame_captures_last_rook_true():
+    # White Qd1 captures Rd8; after: only White queen and kings remain
+    ok, ev = _qeg("3rk3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d8", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+
+
+def test_queen_endgame_rook_still_on_board_false():
+    # White has Q+R; moving the rook still leaves a rook on the board
+    ok, _ = _qeg("3qk3/8/8/8/8/8/8/3QK2R w - - 0 1", "h1h5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_endgame_already_queen_endgame_before_false():
+    # Already only queens and kings; queen move does not create the transition
+    ok, _ = _qeg("3qk3/8/8/8/8/8/8/3QK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_endgame_minor_still_on_board_false():
+    # White has Q+N; queen move does not remove the knight
+    ok, _ = _qeg("3qk3/8/8/8/8/8/8/2NQK3 w - - 0 1", "d1d5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_endgame_in_certified_claims():
+    fen = "3qk3/8/8/8/8/8/8/QN2K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1b1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_endgame" in tags
