@@ -15,6 +15,12 @@ The always-on secrets protocol is imported too:
 
 @secrets-and-api-key-protection.md
 
+The autonomous-development doctrine — how to choose and finish work, and how autonomous
+Sonnet sessions must behave (forged from the 2026-06-19 design grill) — governs every
+session and is imported too:
+
+@AUTONOMOUS_DEVELOPMENT_DOCTRINE.md
+
 Greco doubles as a learning vehicle for James. When you build a feature that exercises a core
 software concept, briefly teach it as you go (a few sentences + where to read more), then carry
 on. Concept-by-concept map: `software-skills-you-can-learn-from-greco.md`.
