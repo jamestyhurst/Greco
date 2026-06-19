@@ -4956,3 +4956,58 @@ def test_knight_endgame_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
     assert "knight_endgame" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_minor_piece_endgame
+# ---------------------------------------------------------------------------
+
+
+def _mpe(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_minor_piece_endgame(board_before, move, board_after, color)
+
+
+def test_minor_piece_endgame_white_bishop_takes_rook_leaving_mixed_true():
+    # White bishop d1 captures Black rook c2 — White bishop + Black knight g8 remain.
+    ok, ev = _mpe("4k1n1/8/8/8/8/8/2r5/3BK3 w - - 0 1", "d1c2", chess.WHITE)
+    assert ok
+    assert ev["mover"] == "White"
+
+
+def test_minor_piece_endgame_black_knight_takes_rook_leaving_mixed_true():
+    # Black knight e4 captures White rook g3 — Black knight + White bishop h1 remain.
+    ok, ev = _mpe("4k3/8/8/8/4n3/6R1/8/4K2B b - - 0 1", "e4g3", chess.BLACK)
+    assert ok
+    assert ev["mover"] == "Black"
+
+
+def test_minor_piece_endgame_already_mixed_minor_false():
+    # Already both knights and bishops present with no heavy pieces — no new event.
+    ok, _ = _mpe("4k1n1/8/8/8/8/8/8/4K2B w - - 0 1", "h1g2", chess.WHITE)
+    assert not ok
+
+
+def test_minor_piece_endgame_bishop_only_endgame_false():
+    # White rook takes Black rook — only bishops remain, no knights; bishop_endgame not minor_piece_endgame.
+    ok, _ = _mpe("4k1br/8/8/8/8/8/8/3BK2R w - - 0 1", "h1h8", chess.WHITE)
+    assert not ok
+
+
+def test_minor_piece_endgame_pawn_endgame_false():
+    # White king captures last rook — no minor pieces remain, just pawns and kings.
+    ok, _ = _mpe("4k3/8/8/8/8/8/2P5/4Kr2 w - - 0 1", "e1f1", chess.WHITE)
+    assert not ok
+
+
+def test_minor_piece_endgame_in_certified_claims():
+    fen = "4k3/8/8/8/4n3/6R1/8/4K2B b - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e4g3")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
+    assert "minor_piece_endgame" in tags

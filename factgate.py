@@ -3564,6 +3564,44 @@ def has_pawn_duo(
     }
 
 
+def has_minor_piece_endgame(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    def _is_mixed_minor_endgame(board: chess.Board) -> bool:
+        for color in [chess.WHITE, chess.BLACK]:
+            for pt in [chess.ROOK, chess.QUEEN]:
+                if board.pieces(pt, color):
+                    return False
+        has_knight = False
+        has_bishop = False
+        for color in [chess.WHITE, chess.BLACK]:
+            if board.pieces(chess.KNIGHT, color):
+                has_knight = True
+            if board.pieces(chess.BISHOP, color):
+                has_bishop = True
+        return has_knight and has_bishop
+
+    if not _is_mixed_minor_endgame(board_after):
+        return False, None
+    if _is_mixed_minor_endgame(board_before):
+        return False, None
+
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "mover": mover_name,
+        "evidence": (
+            f"The position enters a minor-piece endgame — no rooks or queens remain, "
+            f"and both knights and bishops are still on the board; "
+            f"the interplay between colour-bound bishops and colour-leaping knights "
+            f"creates rich imbalances, and pawn structure (open diagonals for bishops, "
+            f"fixed pawns for knights) will determine whose minor piece is the stronger"
+        ),
+    }
+
+
 def has_knight_endgame(
     board_before: chess.Board,
     move: chess.Move,
@@ -3959,6 +3997,7 @@ GATED_TAGS = (
     "passed_pawn_race",
     "seventh_rank_battery",
     "isolated_queen_pawn",
+    "minor_piece_endgame",
     "knight_endgame",
     "bishop_endgame",
     "knight_on_sixth",
@@ -4299,6 +4338,10 @@ def certified_claims(
     iqp = _safe(lambda: has_isolated_queen_pawn(board_before, move, board_after, mover_color))
     if iqp and iqp[0]:
         tags.add("isolated_queen_pawn")
+
+    mpe = _safe(lambda: has_minor_piece_endgame(board_before, move, board_after, mover_color))
+    if mpe and mpe[0]:
+        tags.add("minor_piece_endgame")
 
     keg = _safe(lambda: has_knight_endgame(board_before, move, board_after, mover_color))
     if keg and keg[0]:

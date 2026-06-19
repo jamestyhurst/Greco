@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.56] — 2026-06-19
+
+### Added
+- **`has_minor_piece_endgame` factgate predicate** (`minor_piece_endgame` tag) — fires when this move creates a mixed minor-piece endgame: no rooks or queens remain AND both at least one knight and at least one bishop are present, where this was not the case before. Fills the gap between `bishop_endgame` (pure bishop) and `knight_endgame` (pure knight). Inner `_is_mixed_minor_endgame` checks for absence of heavy pieces then requires has_knight AND has_bishop. Evidence carries `mover` and a ready-to-quote evidence string on colour-bound vs. leaping piece dynamics. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 537 passed.
+
 ## [0.41.55] — 2026-06-19
 
 ### Added
