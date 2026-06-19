@@ -6408,3 +6408,56 @@ def test_two_rooks_vs_minor_pair_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "two_rooks_vs_minor_pair" in tags
 
+
+# ── has_queen_vs_bishop ──────────────────────────────────────────────────────
+
+def _qvb(fen, uci, color):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = b.copy(); ba.push(mv)
+    return F.has_queen_vs_bishop(b, mv, ba, color)
+
+
+def test_queen_vs_bishop_white_queen_true():
+    # Qe4xNd5 captures Black knight → White Q vs Black B
+    ok, d = _qvb("3bk3/8/8/3n4/4Q3/8/8/4K3 w - - 0 1", "e4d5", chess.WHITE)
+    assert ok
+    assert d["queen_side"] == "White"
+    assert d["bishop_side"] == "Black"
+
+
+def test_queen_vs_bishop_black_queen_true():
+    # Qe4xNd5 (Black queen) captures White knight → Black Q vs White B
+    ok, d = _qvb("4k3/8/8/3N4/4q3/8/8/3BK3 b - - 0 1", "e4d5", chess.BLACK)
+    assert ok
+    assert d["queen_side"] == "Black"
+    assert d["bishop_side"] == "White"
+
+
+def test_queen_vs_bishop_minor_side_still_has_knight_false():
+    # Black retains bishop AND knight — not clean Q:B
+    ok, _ = _qvb("3bk3/8/8/3nn3/4Q3/8/8/4K3 w - - 0 1", "e4d5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_bishop_imbalance_pre_existed_false():
+    # Already Q vs B before the move
+    ok, _ = _qvb("3bk3/8/8/8/4Q3/8/8/4K3 w - - 0 1", "e4e5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_bishop_queen_side_has_rook_false():
+    # White has Q+R after capture — not clean Q
+    ok, _ = _qvb("3bk3/8/8/3n4/4Q3/8/8/4KR2 w - - 0 1", "e4d5", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_bishop_in_certified_claims():
+    fen = "3bk3/8/8/3n4/4Q3/8/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e4d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_vs_bishop" in tags
+
