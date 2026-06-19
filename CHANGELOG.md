@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.27] — 2026-06-19
+
+### Added
+- **`is_king_opposition` factgate predicate** (`king_opposition` tag) — king-move predicate certifying that the mover's king reaches direct opposition with the enemy king (same file or rank, exactly one empty square between them; diagonal opposition excluded). Guards on pawn presence since opposition is only strategically significant in pawn endings. Evidence carries `mover`, `mover_king`, `enemy_king`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with pawn-race and escort calibration. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 363 passed.
+
 ## [0.41.26] — 2026-06-19
 
 ### Added

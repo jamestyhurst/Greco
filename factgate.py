@@ -2684,6 +2684,52 @@ def is_queenless_position(
     }
 
 
+def is_king_opposition(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the king move places the mover's king in direct opposition
+    with the enemy king — same file or same rank with exactly one empty square
+    between them (kings two squares apart). Diagonal opposition is not certified.
+    Only fires when pawns exist, since opposition is strategically significant
+    only in pawn endings.
+    evidence keys: mover, mover_king, enemy_king, evidence.
+    """
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.KING:
+        return False, None
+    wk = board_after.king(chess.WHITE)
+    bk = board_after.king(chess.BLACK)
+    if wk is None or bk is None:
+        return False, None
+    df = abs(chess.square_file(wk) - chess.square_file(bk))
+    dr = abs(chess.square_rank(wk) - chess.square_rank(bk))
+    if not ((df == 0 and dr == 2) or (dr == 0 and df == 2)):
+        return False, None
+    all_pawns = (
+        board_after.pieces(chess.PAWN, chess.WHITE)
+        | board_after.pieces(chess.PAWN, chess.BLACK)
+    )
+    if not all_pawns:
+        return False, None
+    enemy_color = not mover_color
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    mk_name = chess.square_name(board_after.king(mover_color))
+    ek_name = chess.square_name(board_after.king(enemy_color))
+    return True, {
+        "mover": mover_name,
+        "mover_king": mk_name,
+        "enemy_king": ek_name,
+        "evidence": (
+            f"{mover_name} seizes the opposition — the kings stand face-to-face "
+            f"on {mk_name} and {ek_name} with one square between them, forcing "
+            f"the opponent's king to give way"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2745,6 +2791,7 @@ GATED_TAGS = (
     "rook_doubled",
     "threefold_repetition",
     "queenless_position",
+    "king_opposition",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2990,5 +3037,9 @@ def certified_claims(
     qls = _safe(lambda: is_queenless_position(board_before, move, board_after, mover_color))
     if qls and qls[0]:
         tags.add("queenless_position")
+
+    ko = _safe(lambda: is_king_opposition(board_before, move, board_after, mover_color))
+    if ko and ko[0]:
+        tags.add("king_opposition")
 
     return tags

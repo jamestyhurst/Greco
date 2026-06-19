@@ -3351,3 +3351,60 @@ def test_queenless_position_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queenless_position" in tags
+
+
+# ── is_king_opposition ──────────────────────────────────────────────────
+
+def _kop(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_king_opposition(board_before, move, board_after, color)
+
+
+def test_king_opposition_file_opposition_true():
+    # White king c4→d4 — direct file opposition with Kd6; black pawn e4 exists.
+    ok, ev = _kop("8/8/3k4/8/2K1p3/8/8/8 w - - 0 1", "c4d4", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_king_opposition_rank_opposition_true():
+    # White king e3→e4 — direct rank opposition with Kg4; black pawn g3 exists.
+    ok, ev = _kop("8/8/8/8/6k1/4K1p1/8/8 w - - 0 1", "e3e4", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_king_opposition_no_pawns_false():
+    # Same file-opposition geometry but no pawns on the board — abstain.
+    ok, _ = _kop("8/8/3k4/8/2K5/8/8/8 w - - 0 1", "c4d4", chess.WHITE)
+    assert not ok
+
+
+def test_king_opposition_no_opposition_false():
+    # King moves but lands in a non-opposition square (file diff 1, rank diff 2).
+    ok, _ = _kop("8/8/8/3k4/8/3K4/3P4/8 w - - 0 1", "d3e3", chess.WHITE)
+    assert not ok
+
+
+def test_king_opposition_not_king_move_false():
+    # Pawn move — piece check vetoes immediately.
+    ok, _ = _kop(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "e2e4",
+        chess.WHITE,
+    )
+    assert not ok
+
+
+def test_king_opposition_in_certified_claims():
+    # White king c4→d4 against Kd6 with pawn — tag in certified_claims.
+    fen = "8/8/3k4/8/2K1p3/8/8/8 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("c4d4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "king_opposition" in tags
