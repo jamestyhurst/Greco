@@ -2207,6 +2207,41 @@ def creates_passer(
 
 
 # --------------------------------------------------------------------------- #
+# Wins the exchange — a minor piece captures a rook.
+# --------------------------------------------------------------------------- #
+def wins_exchange(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move wins the exchange: a minor piece (bishop or knight)
+    captures an enemy rook. The standard net material gain is approximately two pawns
+    (rook ≈ 5, minor ≈ 3), regardless of whether the minor is immediately recaptured.
+    Returns (True, evidence_dict) or (False, None).
+    evidence keys: piece (minor piece name), rook_square, mover (White/Black), evidence.
+    """
+    if not board_before.is_capture(move) or board_before.is_en_passant(move):
+        return False, None
+    moving_piece = board_before.piece_at(move.from_square)
+    if moving_piece is None or moving_piece.piece_type not in (chess.BISHOP, chess.KNIGHT):
+        return False, None
+    captured_piece = board_before.piece_at(move.to_square)
+    if captured_piece is None or captured_piece.piece_type != chess.ROOK:
+        return False, None
+    side = "White" if moving_piece.color == chess.WHITE else "Black"
+    piece_name = chess.piece_name(moving_piece.piece_type)
+    return True, {
+        "piece": piece_name,
+        "rook_square": chess.square_name(move.to_square),
+        "mover": side,
+        "evidence": (
+            f"{side}'s {piece_name} captures the rook on "
+            f"{chess.square_name(move.to_square)}, winning the exchange"
+        ),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
 # Exactly the claim types this gate covers. The system-prompt rule is scoped to
@@ -2250,6 +2285,7 @@ GATED_TAGS = (
     "en_passant",
     "castling",
     "passer_created",
+    "wins_exchange",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2427,5 +2463,9 @@ def certified_claims(
     ps = _safe(lambda: creates_passer(board_before, move, board_after, mover_color))
     if ps and ps[0]:
         tags.add("passer_created")
+
+    we = _safe(lambda: wins_exchange(board_before, move, board_after))
+    if we and we[0]:
+        tags.add("wins_exchange")
 
     return tags

@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.42.0] — 2026-06-18
+
+### Added
+- **`wins_exchange` factgate predicate** (`wins_exchange` tag) — move predicate certifying a minor piece (bishop or knight) captures an enemy rook, winning the exchange (~2-pawn material net). Evidence carries `piece`, `rook_square`, `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt; gates "wins the exchange" phrasing and explicitly scopes out the mirror case (rook for minor). 5 new pure tests; full suite 276 passed.
+
 ## [0.41.9] — 2026-06-18
 
 ### Added

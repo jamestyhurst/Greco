@@ -2491,3 +2491,52 @@ def test_creates_passer_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "passer_created" in tags
+
+
+# ---------------------------------------------------------------------------
+# wins_exchange
+# ---------------------------------------------------------------------------
+def _we(fen, uci):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.wins_exchange(b, mv, after)
+
+
+def test_wins_exchange_bishop_takes_rook():
+    # White bishop on c4 captures Black rook on f7.
+    ok, ev = _we("4k3/5r2/8/8/2B5/8/8/4K3 w - - 0 1", "c4f7")
+    assert ok
+    assert ev["piece"] == "bishop"
+    assert ev["rook_square"] == "f7"
+    assert ev["mover"] == "White"
+
+
+def test_wins_exchange_knight_takes_rook():
+    # White knight on e5 captures Black rook on d7.
+    ok, ev = _we("4k3/3r4/8/4N3/8/8/8/4K3 w - - 0 1", "e5d7")
+    assert ok
+    assert ev["piece"] == "knight"
+    assert ev["rook_square"] == "d7"
+
+
+def test_wins_exchange_false_rook_takes_bishop():
+    # White rook captures Black bishop — this LOSES the exchange; not certified.
+    ok, _ = _we("4k3/b7/8/8/8/8/8/R3K3 w - - 0 1", "a1a7")
+    assert not ok
+
+
+def test_wins_exchange_false_pawn_takes_rook():
+    # Pawn captures a rook — material gain but not the exchange.
+    ok, _ = _we("4k3/8/2r5/3P4/8/8/8/4K3 w - - 0 1", "d5c6")
+    assert not ok
+
+
+def test_wins_exchange_in_certified_claims():
+    board_before = chess.Board("4k3/5r2/8/8/2B5/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("c4f7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "wins_exchange" in tags
