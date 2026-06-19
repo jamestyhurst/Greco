@@ -9,4 +9,4 @@ Pre-1.0 (the 0.x series) means Greco is still evolving; things may change.
 
 Bump this when you cut a new version, and add a matching entry to CHANGELOG.md.
 """
-__version__ = "0.41.96"
+__version__ = "0.41.97"
