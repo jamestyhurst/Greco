@@ -5974,3 +5974,59 @@ def test_queen_endgame_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_endgame" in tags
+
+
+# ---------------------------------------------------------------------------
+# has_rook_vs_bishop
+# ---------------------------------------------------------------------------
+
+def _rvb(fen, uci, col):
+    bb = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = bb.copy()
+    ba.push(mv)
+    return F.has_rook_vs_bishop(bb, mv, ba, col)
+
+
+def test_rook_vs_bishop_white_rook_captures_black_knight_true():
+    # White Re1 captures Black Ne4; after: White has R only, Black has B only
+    ok, ev = _rvb("2bk4/8/8/8/4n3/8/8/4RK2 w - - 0 1", "e1e4", chess.WHITE)
+    assert ok
+    assert ev["rook_side"] == "White"
+    assert ev["bishop_side"] == "Black"
+
+
+def test_rook_vs_bishop_black_rook_captures_white_knight_true():
+    # Black Rb2 captures White Nb1; after: Black has R only, White has B only
+    ok, ev = _rvb("4k3/8/8/8/8/8/1r6/BN2K3 b - - 0 1", "b2b1", chess.BLACK)
+    assert ok
+    assert ev["rook_side"] == "Black"
+    assert ev["bishop_side"] == "White"
+
+
+def test_rook_vs_bishop_extra_minor_on_board_false():
+    # Black still has B+N after Ra5; no 1R:1B imbalance
+    ok, _ = _rvb("2bnk3/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a5", chess.WHITE)
+    assert not ok
+
+
+def test_rook_vs_bishop_imbalance_pre_existed_false():
+    # Already 1R vs 1B before the move
+    ok, _ = _rvb("2bk4/8/8/8/8/8/8/R3K3 w - - 0 1", "a1a5", chess.WHITE)
+    assert not ok
+
+
+def test_rook_vs_bishop_rook_side_also_has_bishop_false():
+    # White has R+B after capturing Black knight — not a clean 1R vs 1B imbalance
+    ok, _ = _rvb("4k3/8/8/8/3n4/8/8/2BRK3 w - - 0 1", "d1d4", chess.WHITE)
+    assert not ok
+
+
+def test_rook_vs_bishop_in_certified_claims():
+    fen = "2bk4/8/8/8/4n3/8/8/4RK2 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e1e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_vs_bishop" in tags

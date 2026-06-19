@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.75] — 2026-06-19
+
+### Added
+- **`has_rook_vs_bishop` factgate predicate** (`rook_vs_bishop` tag) — fires when a move newly creates a clean rook-vs-bishop imbalance: one side has exactly one rook (no queens, no minors), the other has exactly one bishop (no queens, no rooks, no other minors). Set-difference via inner `_state()` returning 'white_rook'/'black_rook'/None. Evidence carries `rook_side`, `bishop_side`, and `mover`; commentary frames the rook's ~2-pawn advantage while noting the bishop's drawing chances in blocked positions. Continues the material-imbalance predicate series. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 651 passed.
+
 ## [0.41.74] — 2026-06-19
 
 ### Added
