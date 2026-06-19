@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.31] — 2026-06-19
+
+### Added
+- **`is_opposite_side_castling` factgate predicate** (`opposite_side_castling` tag) — castling-move predicate certifying that the mover just castled and both kings are now on opposite wings (one at g-file+f-rook, other at c-file+d-rook). Guards on `board.is_castling()`, destination file, and enemy rook-position verification to exclude king-walked-to-c/g positions. Evidence carries `mover`, `mover_side`, `enemy_side`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with pawn-storm and race-attack framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 387 passed.
+
 ## [0.41.30] — 2026-06-19
 
 ### Added

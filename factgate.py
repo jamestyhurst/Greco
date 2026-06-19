@@ -2869,6 +2869,69 @@ def rook_behind_own_passer(
     return False, None
 
 
+def is_opposite_side_castling(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the mover just castled and the resulting position has
+    both kings on opposite wings — one kingside (g-file + f-rook), one
+    queenside (c-file + d-rook). Opposite-side castling sets the stage for
+    mutual pawn storms and racing attacks.
+    evidence keys: mover, mover_side, enemy_side, evidence.
+    """
+    if not board_before.is_castling(move):
+        return False, None
+    to_file = chess.square_file(move.to_square)
+    if to_file == 6:
+        mover_kingside = True
+    elif to_file == 2:
+        mover_kingside = False
+    else:
+        return False, None
+    enemy_color = not mover_color
+    enemy_king_sq = board_after.king(enemy_color)
+    if enemy_king_sq is None:
+        return False, None
+    back_rank = 0 if enemy_color == chess.WHITE else 7
+    if chess.square_rank(enemy_king_sq) != back_rank:
+        return False, None
+    enemy_file = chess.square_file(enemy_king_sq)
+    if enemy_file == 6:
+        # Check f-rook in place to confirm kingside castle
+        f_sq = chess.square(5, back_rank)
+        p = board_after.piece_at(f_sq)
+        if p is None or p.piece_type != chess.ROOK or p.color != enemy_color:
+            return False, None
+        enemy_kingside = True
+    elif enemy_file == 2:
+        # Check d-rook in place to confirm queenside castle
+        d_sq = chess.square(3, back_rank)
+        p = board_after.piece_at(d_sq)
+        if p is None or p.piece_type != chess.ROOK or p.color != enemy_color:
+            return False, None
+        enemy_kingside = False
+    else:
+        return False, None
+    if mover_kingside == enemy_kingside:
+        return False, None  # same-side castling
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    enemy_name = "Black" if mover_color == chess.WHITE else "White"
+    mover_side = "kingside" if mover_kingside else "queenside"
+    enemy_side = "kingside" if enemy_kingside else "queenside"
+    return True, {
+        "mover": mover_name,
+        "mover_side": mover_side,
+        "enemy_side": enemy_side,
+        "evidence": (
+            f"{mover_name} castles {mover_side} while {enemy_name} is on the "
+            f"{enemy_side} — opposite-side castling sets the stage for mutual "
+            f"pawn storms and a race between both attacks"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2934,6 +2997,7 @@ GATED_TAGS = (
     "pawn_lever",
     "connected_passers",
     "rook_behind_passer",
+    "opposite_side_castling",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3195,5 +3259,9 @@ def certified_claims(
     rbp = _safe(lambda: rook_behind_own_passer(board_before, move, board_after, mover_color))
     if rbp and rbp[0]:
         tags.add("rook_behind_passer")
+
+    osc = _safe(lambda: is_opposite_side_castling(board_before, move, board_after, mover_color))
+    if osc and osc[0]:
+        tags.add("opposite_side_castling")
 
     return tags

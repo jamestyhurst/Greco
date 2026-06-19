@@ -3571,3 +3571,56 @@ def test_rook_behind_passer_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_behind_passer" in tags
+
+
+# ── is_opposite_side_castling ──────────────────────────────────────────────
+
+def _osc(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_opposite_side_castling(board_before, move, board_after, color)
+
+
+def test_opposite_castling_white_oo_black_ooo_true():
+    # White castles O-O while black is already castled O-O-O (king c8, rook d8).
+    ok, ev = _osc("2kr4/8/8/8/8/8/8/4K2R w K - 0 1", "e1g1", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_opposite_castling_black_ooo_white_oo_true():
+    # Black castles O-O-O while white is already castled O-O (king g1, rook f1).
+    ok, ev = _osc("r3k3/8/8/8/8/8/8/5RK1 b q - 0 1", "e8c8", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_opposite_castling_same_side_false():
+    # White castles O-O and black is also already castled O-O — same side.
+    ok, _ = _osc("5rk1/8/8/8/8/8/8/4K2R w K - 0 1", "e1g1", chess.WHITE)
+    assert not ok
+
+
+def test_opposite_castling_enemy_not_castled_false():
+    # White castles O-O but black king is still in centre — no opposite castling.
+    ok, _ = _osc("4k3/8/8/8/8/8/8/4K2R w K - 0 1", "e1g1", chess.WHITE)
+    assert not ok
+
+
+def test_opposite_castling_not_castle_move_false():
+    # Rook move — not a castling move.
+    ok, _ = _osc("2kr4/8/8/8/8/8/8/4K2R w K - 0 1", "h1h3", chess.WHITE)
+    assert not ok
+
+
+def test_opposite_castling_in_certified_claims():
+    # White O-O with black already castled O-O-O — tag in certified_claims.
+    fen = "2kr4/8/8/8/8/8/8/4K2R w K - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e1g1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "opposite_side_castling" in tags
