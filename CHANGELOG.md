@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.88] — 2026-06-19
+
+### Added
+- **`has_queen_vs_three_minors` factgate predicate** (`queen_vs_three_minors` tag) — fires when a move newly creates a queen-vs-three-minor-pieces imbalance: one side has exactly one queen (no rooks, no minors), the other has exactly three minor pieces in any B/N combination (no queen, no rooks). Set-difference via inner `_state()` returning 'white_queen'/'black_queen'/None. Evidence carries `queen_side`, `three_minor_side`, and `mover`; commentary notes open vs. closed position dynamics and the contrasting winning methods for each side. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 729 passed.
+
 ## [0.41.87] — 2026-06-19
 
 ### Added
