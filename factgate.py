@@ -1973,6 +1973,39 @@ def creates_open_file(
 
 
 # --------------------------------------------------------------------------- #
+# Half-open file created — the mover loses a pawn from a file but the opponent's
+# pawn remains, giving the mover a half-open file to operate on.
+# --------------------------------------------------------------------------- #
+def creates_half_open_file(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certify that the move gave the mover a new half-open file — the mover no longer
+    has a pawn on it, but the opponent still does. This is the common pattern of a pawn
+    capture that clears one's own pawn from a file while the enemy pawn remains as a
+    target for heavy pieces. Engine-free — pure pawn counting via file_structure().
+    """
+    half_key = "half_open_white" if mover_color == chess.WHITE else "half_open_black"
+    half_before = set(file_structure(board_before)[half_key])
+    half_after = set(file_structure(board_after)[half_key])
+    new_half = sorted(half_after - half_before)
+    if not new_half:
+        return False, None
+
+    side = "White" if mover_color == chess.WHITE else "Black"
+    file_list = ", ".join(f"{f}-file" for f in new_half)
+    return True, {
+        "files": new_half,
+        "evidence": (
+            f"{side}'s move opens the {file_list} as a half-open file "
+            f"— {side} has no pawns there but the opponent does"
+        ),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Desperado — a piece captures material while itself under attack.
 # --------------------------------------------------------------------------- #
 def is_desperado(
@@ -2095,6 +2128,7 @@ GATED_TAGS = (
     "desperado",
     "connected_rooks",
     "file_opened",
+    "half_open_file",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2252,5 +2286,9 @@ def certified_claims(
     fo = _safe(lambda: creates_open_file(board_before, move, board_after, mover_color))
     if fo and fo[0]:
         tags.add("file_opened")
+
+    hof = _safe(lambda: creates_half_open_file(board_before, move, board_after, mover_color))
+    if hof and hof[0]:
+        tags.add("half_open_file")
 
     return tags

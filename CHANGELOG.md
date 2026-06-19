@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.5] — 2026-06-18
+
+### Added
+- **`creates_half_open_file` factgate predicate** (`half_open_file` tag) — move predicate certifying that a pawn capture gives the mover a new half-open file (mover's pawn gone, opponent's pawn remains as a target for heavy pieces). Companion to `file_opened`. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 4 new pure tests; full suite 658 passed.
+
 ## [0.41.4] — 2026-06-18
 
 ### Added

@@ -2261,3 +2261,45 @@ def test_creates_open_file_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "file_opened" in tags
+
+
+# --- creates_half_open_file -------------------------------------------------
+def _half_open(fen, uci, color=chess.WHITE):
+    """Helper: push UCI move and call creates_half_open_file."""
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    after = b.copy()
+    after.push(mv)
+    return F.creates_half_open_file(b, mv, after, color)
+
+
+def test_creates_half_open_file_true_pawn_capture_leaves_enemy_pawn():
+    # White pawn c4 captures Black pawn b5; c-file now has Black pawn on c7 but
+    # no White pawn → half-open for White.
+    ok, ev = _half_open("3k4/2p5/8/1p6/2P5/8/8/4K3 w - - 0 1", "c4b5")
+    assert ok
+    assert "c" in ev["files"]
+
+
+def test_creates_half_open_file_false_full_open():
+    # When the exchange also removes the enemy pawn (creating a fully-open file),
+    # this predicate should NOT fire (file_opened fires instead).
+    # White cxd5, Black pawn was only pawn on d-file → d-file becomes open, not half-open.
+    ok, _ = _half_open("3k4/8/8/3p4/2P1P3/8/8/4K3 w - - 0 1", "c4d5")
+    assert not ok
+
+
+def test_creates_half_open_file_false_quiet_push():
+    # A quiet pawn push does not change half-open file status.
+    ok, _ = _half_open("3k4/2p5/8/8/2P5/8/8/4K3 w - - 0 1", "c4c5")
+    assert not ok
+
+
+def test_creates_half_open_file_in_certified_claims():
+    # White cxb5 leaves Black pawn on c7 → c-file half-open for White → tag fires.
+    board_before = chess.Board("3k4/2p5/8/1p6/2P5/8/8/4K3 w - - 0 1")
+    move = chess.Move.from_uci("c4b5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "half_open_file" in tags
