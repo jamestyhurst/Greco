@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.91] — 2026-06-19
+
+### Added
+- **`has_three_minors_vs_rook` factgate predicate** (`three_minors_vs_rook` tag) — fires when a move newly creates a three-minor-pieces vs. lone-rook imbalance: one side has exactly three minor pieces in any B/N combination (no rooks, no queen), the other has exactly one rook (no queen, no minors). Set-difference via inner `_state()` returning 'white_minors'/'black_minors'/None. Evidence carries `three_minor_side`, `rook_side`, and `mover`; commentary notes the decisive material advantage and coordination requirement. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 747 passed.
+
 ## [0.41.90] — 2026-06-19
 
 ### Added
