@@ -3953,3 +3953,57 @@ def test_diagonal_battery_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "diagonal_battery" in tags
+
+
+# ---------------------------------------------------------------------------
+# is_shelter_pawn_capture
+# ---------------------------------------------------------------------------
+
+def _spc(fen: str, uci: str, color: bool):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_shelter_pawn_capture(board_before, move, board_after, color)
+
+
+def test_shelter_pawn_capture_bishop_takes_h7_near_king_true():
+    # White Bxh7 captures the h-pawn shielding Black's king on g8.
+    ok, ev = _spc("6k1/7p/8/8/8/3B4/8/4K3 w - - 0 1", "d3h7", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_shelter_pawn_capture_queen_takes_g2_near_king_true():
+    # Black Qxg2 captures the g-pawn shielding White's king on h1.
+    ok, ev = _spc("4k3/6q1/8/8/8/8/6P1/7K b - - 0 1", "g7g2", chess.BLACK)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_shelter_pawn_capture_pawn_far_from_king_false():
+    # White rook takes Black's a7 pawn — king is on g8, 6 files away. No shelter pawn.
+    ok, _ = _spc("6k1/p7/8/8/8/8/8/R3K3 w - - 0 1", "a1a7", chess.WHITE)
+    assert not ok
+
+
+def test_shelter_pawn_capture_non_pawn_piece_captured_false():
+    # White captures Black knight on h7 — not a pawn, no shelter pawn event.
+    ok, _ = _spc("6k1/7n/8/8/8/3B4/8/4K3 w - - 0 1", "d3h7", chess.WHITE)
+    assert not ok
+
+
+def test_shelter_pawn_capture_non_capture_move_false():
+    # Bishop advance with no capture — not a shelter pawn capture.
+    ok, _ = _spc("6k1/7p/8/8/8/3B4/8/4K3 w - - 0 1", "d3c4", chess.WHITE)
+    assert not ok
+
+
+def test_shelter_pawn_capture_in_certified_claims():
+    fen = "6k1/7p/8/8/8/3B4/8/4K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d3h7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "shelter_pawn_capture" in tags

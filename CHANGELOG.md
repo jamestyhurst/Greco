@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.38] — 2026-06-19
+
+### Added
+- **`is_shelter_pawn_capture` factgate predicate** (`shelter_pawn_capture` tag) — fires when the mover captures an enemy pawn that is within 1 file and within 2 ranks "in front of" the enemy king, destroying the king's pawn shelter. Guards on `is_capture`, `captured.piece_type == PAWN`, and file/rank proximity checks (directional: for White king checks ranks k_rank to k_rank+2; for Black king k_rank-2 to k_rank). Evidence carries `pawn_sq`, `king_sq`, `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with king-exposure and mating-attack framing. 6 new tests (2 TRUE / 3 FALSE / 1 integration); full suite 429 passed.
+
 ## [0.41.37] — 2026-06-19
 
 ### Added

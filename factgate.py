@@ -2932,6 +2932,50 @@ def is_opposite_side_castling(
     }
 
 
+def is_shelter_pawn_capture(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    if not board_before.is_capture(move):
+        return False, None
+    cap_sq = move.to_square
+    captured = board_before.piece_at(cap_sq)
+    if captured is None or captured.piece_type != chess.PAWN:
+        return False, None
+    enemy_color = not mover_color
+    king_sq = board_after.king(enemy_color)
+    if king_sq is None:
+        return False, None
+    k_file = chess.square_file(king_sq)
+    k_rank = chess.square_rank(king_sq)
+    p_file = chess.square_file(cap_sq)
+    p_rank = chess.square_rank(cap_sq)
+    if abs(p_file - k_file) > 1:
+        return False, None
+    if enemy_color == chess.WHITE:
+        if not (k_rank <= p_rank <= k_rank + 2):
+            return False, None
+    else:
+        if not (k_rank - 2 <= p_rank <= k_rank):
+            return False, None
+    mover_name = "White" if mover_color == chess.WHITE else "Black"
+    enemy_name = "Black" if mover_color == chess.WHITE else "White"
+    pawn_sq_name = chess.square_name(cap_sq)
+    king_sq_name = chess.square_name(king_sq)
+    return True, {
+        "mover": mover_name,
+        "pawn_sq": pawn_sq_name,
+        "king_sq": king_sq_name,
+        "evidence": (
+            f"{mover_name} captures the pawn on {pawn_sq_name} — "
+            f"tearing open the shelter in front of {enemy_name}'s king on {king_sq_name}; "
+            f"the king's cover is compromised and attacking lines may now be forced open"
+        ),
+    }
+
+
 def has_diagonal_battery(
     board_before: chess.Board,
     move: chess.Move,
@@ -3263,6 +3307,7 @@ GATED_TAGS = (
     "undermining",
     "rook_endgame",
     "diagonal_battery",
+    "shelter_pawn_capture",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -3552,5 +3597,9 @@ def certified_claims(
     db = _safe(lambda: has_diagonal_battery(board_before, move, board_after, mover_color))
     if db and db[0]:
         tags.add("diagonal_battery")
+
+    spc = _safe(lambda: is_shelter_pawn_capture(board_before, move, board_after, mover_color))
+    if spc and spc[0]:
+        tags.add("shelter_pawn_capture")
 
     return tags
