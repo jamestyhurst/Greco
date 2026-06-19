@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.23] — 2026-06-19
+
+### Added
+- **`captures_with_check` factgate predicate** (`captures_with_check` tag) — move predicate certifying a move that captures an enemy piece AND gives check simultaneously, forcing the opponent to address the check before recovering material. Excludes en passant (covered by `en_passant`). Evidence carries `captured` (piece name), `square`, `piece` (mover name), and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with composition guidance for `checkmate` and `captures_queen` co-occurrence. 5 new pure tests; full suite 341 passed.
+
 ## [0.41.22] — 2026-06-19
 
 ### Added

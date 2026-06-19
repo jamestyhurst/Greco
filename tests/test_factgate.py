@@ -3122,3 +3122,54 @@ def test_is_royal_fork_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "royal_fork" in tags
+
+
+# --- captures_with_check ------------------------------------------------------
+# Certifies a move that captures an enemy piece AND simultaneously gives check —
+# the opponent must deal with the check before recovering material.
+def _cwc(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.captures_with_check(board_before, move, board_after, color)
+
+
+def test_captures_with_check_knight_true():
+    # White knight e5 captures pawn d7 and simultaneously checks king on f8.
+    # Knight on d7 attacks f8 (Δfile=2, Δrank=1).
+    ok, ev = _cwc("5k2/3p4/8/4N3/8/8/8/5K2 w - - 0 1", "e5d7", chess.WHITE)
+    assert ok
+    assert ev["captured"] == "pawn"
+    assert ev["piece"] == "knight"
+    assert ev["square"] == "d7"
+
+
+def test_captures_with_check_bishop_true():
+    # White bishop c1 captures rook d2; bishop on d2 checks king on h6 via diagonal.
+    ok, ev = _cwc("8/8/7k/8/8/8/3r4/2B1K3 w - - 0 1", "c1d2", chess.WHITE)
+    assert ok
+    assert ev["captured"] == "rook"
+    assert ev["piece"] == "bishop"
+
+
+def test_captures_with_check_capture_no_check_false():
+    # White rook d1 captures rook d2 — material gain, but king on h8 is not in check.
+    ok, _ = _cwc("7k/8/8/8/8/8/3r4/3RK3 w - - 0 1", "d1d2", chess.WHITE)
+    assert not ok
+
+
+def test_captures_with_check_check_no_capture_false():
+    # Knight e5→d7 gives check to f8 but d7 is empty — no capture.
+    ok, _ = _cwc("5k2/8/8/4N3/8/8/8/5K2 w - - 0 1", "e5d7", chess.WHITE)
+    assert not ok
+
+
+def test_captures_with_check_in_certified_claims():
+    # Knight captures pawn with check: certified_claims must include captures_with_check.
+    board_before = chess.Board("5k2/3p4/8/4N3/8/8/8/5K2 w - - 0 1")
+    move = chess.Move.from_uci("e5d7")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "captures_with_check" in tags

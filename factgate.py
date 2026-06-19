@@ -2527,6 +2527,40 @@ def captures_hanging(
     }
 
 
+def captures_with_check(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies a move that captures an enemy piece AND gives check — the
+    opponent must address the check before recovering material. En passant
+    is excluded (covered by the en_passant tag).
+    evidence keys: captured (piece name), square, piece (mover piece name), evidence.
+    """
+    if board_before.is_en_passant(move):
+        return False, None
+    captured = board_before.piece_at(move.to_square)
+    if captured is None or captured.color == mover_color:
+        return False, None
+    if not board_after.is_check():
+        return False, None
+    moving = board_before.piece_at(move.from_square)
+    mover_name = PIECE_NAMES[moving.piece_type] if moving else "piece"
+    captured_name = PIECE_NAMES[captured.piece_type]
+    sq_name = chess.square_name(move.to_square)
+    return True, {
+        "captured": captured_name,
+        "square": sq_name,
+        "piece": mover_name,
+        "evidence": (
+            f"{mover_name.capitalize()} captures the {captured_name} on {sq_name} "
+            f"with check — the opponent must respond to the check before dealing "
+            f"with the material loss"
+        ),
+    }
+
+
 def is_royal_fork(
     board_before: chess.Board,
     move: chess.Move,
@@ -2626,6 +2660,7 @@ GATED_TAGS = (
     "pawn_on_seventh",
     "captures_queen",
     "royal_fork",
+    "captures_with_check",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2855,5 +2890,9 @@ def certified_claims(
     rf = _safe(lambda: is_royal_fork(board_before, move, board_after, mover_color))
     if rf and rf[0]:
         tags.add("royal_fork")
+
+    cwc = _safe(lambda: captures_with_check(board_before, move, board_after, mover_color))
+    if cwc and cwc[0]:
+        tags.add("captures_with_check")
 
     return tags
