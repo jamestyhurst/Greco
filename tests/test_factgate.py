@@ -3173,3 +3173,51 @@ def test_captures_with_check_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "captures_with_check" in tags
+
+
+# --- is_rook_doubled ----------------------------------------------------------
+# Certifies that the moving rook lands on a file that already has a friendly rook,
+# creating doubled rooks — a key coordination milestone.
+def _rd(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_rook_doubled(board_before, move, board_after, color)
+
+
+def test_is_rook_doubled_white_true():
+    # White rook a1→d1: two White rooks now on d-file (other rook on d4).
+    ok, ev = _rd("4k3/8/8/8/3R4/8/8/R3K3 w - - 0 1", "a1d1", chess.WHITE)
+    assert ok
+    assert ev["file"] == "d"
+    assert "doubles" in ev["evidence"].lower()
+
+
+def test_is_rook_doubled_black_true():
+    # Black rook h1→h4: two Black rooks now on h-file (other rook on h6).
+    ok, ev = _rd("4k3/8/7r/8/8/8/8/4K2r b - - 0 1", "h1h4", chess.BLACK)
+    assert ok
+    assert ev["file"] == "h"
+
+
+def test_is_rook_doubled_rook_moves_different_file_false():
+    # White rook a1→b1: lands on b-file, other rook is on d4 — not doubled.
+    ok, _ = _rd("4k3/8/8/8/3R4/8/8/R3K3 w - - 0 1", "a1b1", chess.WHITE)
+    assert not ok
+
+
+def test_is_rook_doubled_queen_not_rook_false():
+    # Queen moves to d1 alongside rook on d4 — but queen is not a rook.
+    ok, _ = _rd("4k3/8/8/8/3R4/8/8/Q3K3 w - - 0 1", "a1d1", chess.WHITE)
+    assert not ok
+
+
+def test_is_rook_doubled_in_certified_claims():
+    # White rook a1→d1 creates doubled rooks: certified_claims must tag it.
+    board_before = chess.Board("4k3/8/8/8/3R4/8/8/R3K3 w - - 0 1")
+    move = chess.Move.from_uci("a1d1")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "rook_doubled" in tags

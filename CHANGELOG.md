@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.24] — 2026-06-19
+
+### Added
+- **`is_rook_doubled` factgate predicate** (`rook_doubled` tag) — move predicate certifying a rook move that places the rook on a file already occupied by a friendly rook, creating doubled rooks. Checks the landing file's rook count in board_after. Evidence carries `file` (letter), `mover`, and a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with open-file composition guidance. 5 new pure tests; full suite 346 passed.
+
 ## [0.41.23] — 2026-06-19
 
 ### Added

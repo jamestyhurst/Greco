@@ -2527,6 +2527,35 @@ def captures_hanging(
     }
 
 
+def is_rook_doubled(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move places a rook on a file already occupied by a
+    friendly rook, creating doubled rooks — a classic coordination milestone.
+    evidence keys: file (letter), mover ('White'/'Black'), evidence.
+    """
+    piece = board_before.piece_at(move.from_square)
+    if piece is None or piece.piece_type != chess.ROOK:
+        return False, None
+    dest_file = chess.square_file(move.to_square)
+    rooks_on_dest = [
+        sq for sq in board_after.pieces(chess.ROOK, mover_color)
+        if chess.square_file(sq) == dest_file
+    ]
+    if len(rooks_on_dest) < 2:
+        return False, None
+    file_letter = "abcdefgh"[dest_file]
+    mover_label = "White" if mover_color == chess.WHITE else "Black"
+    return True, {
+        "file": file_letter,
+        "mover": mover_label,
+        "evidence": f"{mover_label} doubles the rooks on the {file_letter}-file",
+    }
+
+
 def captures_with_check(
     board_before: chess.Board,
     move: chess.Move,
@@ -2661,6 +2690,7 @@ GATED_TAGS = (
     "captures_queen",
     "royal_fork",
     "captures_with_check",
+    "rook_doubled",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2894,5 +2924,9 @@ def certified_claims(
     cwc = _safe(lambda: captures_with_check(board_before, move, board_after, mover_color))
     if cwc and cwc[0]:
         tags.add("captures_with_check")
+
+    rdbl = _safe(lambda: is_rook_doubled(board_before, move, board_after, mover_color))
+    if rdbl and rdbl[0]:
+        tags.add("rook_doubled")
 
     return tags
