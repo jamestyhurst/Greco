@@ -2925,3 +2925,50 @@ def test_knight_centralized_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "knight_centralized" in tags
+
+
+# --- is_checkmate -------------------------------------------------------------
+# FEN: 6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1
+#   White: Rd1, Kg1  |  Black: Kg8, Pf7, Pg7, Ph7
+#   Rd1→d8: rook lands on 8th rank; king has no escape (f8/h8 covered, f7/g7/h7 pawns block).
+def _cm(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_checkmate(board_before, move, board_after, color)
+
+
+def test_checkmate_back_rank_true():
+    # Rd1→d8 delivers back-rank checkmate.
+    ok, ev = _cm("6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1", "d1d8", chess.WHITE)
+    assert ok
+    assert "checkmate" in ev["evidence"].lower()
+
+
+def test_checkmate_king_escapes_false():
+    # Rd1→d8 gives check but Black king escapes to h7 (no h7 pawn).
+    ok, _ = _cm("6k1/5pp1/8/8/8/8/8/3R2K1 w - - 0 1", "d1d8", chess.WHITE)
+    assert not ok
+
+
+def test_checkmate_stalemate_is_not_checkmate_false():
+    # Stalemate is NOT checkmate — opponent has no moves but is not in check.
+    ok, _ = _cm("k7/8/2K5/2Q5/8/8/8/8 w - - 0 1", "c5c7", chess.WHITE)
+    assert not ok
+
+
+def test_checkmate_quiet_move_false():
+    # White king moves quietly — no check, no checkmate.
+    ok, _ = _cm("6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1", "g1f2", chess.WHITE)
+    assert not ok
+
+
+def test_checkmate_in_certified_claims():
+    # Rd8# must produce the checkmate tag in certified_claims.
+    board_before = chess.Board("6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1")
+    move = chess.Move.from_uci("d1d8")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "checkmate" in tags

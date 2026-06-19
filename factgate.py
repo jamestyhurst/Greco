@@ -2296,6 +2296,23 @@ def is_rook_on_seventh(
     }
 
 
+def is_checkmate(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that the move delivers checkmate — the opponent's king is in check
+    and has no legal moves. The game ends immediately.
+    evidence keys: evidence (ready-to-quote string).
+    """
+    if not board_after.is_checkmate():
+        return False, None
+    return True, {
+        "evidence": "Checkmate — the opponent's king is in check with no legal escape",
+    }
+
+
 _CORE_CENTER = frozenset({chess.D4, chess.D5, chess.E4, chess.E5})
 
 
@@ -2512,6 +2529,7 @@ GATED_TAGS = (
     "loses_exchange",
     "pawn_endgame",
     "knight_centralized",
+    "checkmate",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2725,5 +2743,9 @@ def certified_claims(
     kc = _safe(lambda: knight_centralized(board_before, move, board_after, mover_color))
     if kc and kc[0]:
         tags.add("knight_centralized")
+
+    cm = _safe(lambda: is_checkmate(board_before, move, board_after, mover_color))
+    if cm and cm[0]:
+        tags.add("checkmate")
 
     return tags

@@ -7,6 +7,11 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.19] — 2026-06-19
+
+### Added
+- **`is_checkmate` factgate predicate** (`checkmate` tag) — move predicate certifying the move delivers checkmate: the opponent's king is in check with no legal moves and the game ends immediately. Uses `board_after.is_checkmate()`. Evidence carries a ready-to-quote `evidence` string. Wired into `GATED_TAGS`, `certified_claims()`, and narrator system prompt with pattern-naming guidance (back-rank, smothered, etc.) and an explicit "never say checkmate without this tag" rule. 5 new pure tests; full suite 321 passed.
+
 ## [0.41.18] — 2026-06-19
 
 ### Added
