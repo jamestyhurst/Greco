@@ -6249,3 +6249,56 @@ def test_queen_vs_rook_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "queen_vs_rook" in tags
 
+
+# ── has_queen_vs_two_minors ──────────────────────────────────────────────────
+
+def _qvtm(fen, uci, color):
+    b = chess.Board(fen)
+    mv = chess.Move.from_uci(uci)
+    ba = b.copy(); ba.push(mv)
+    return F.has_queen_vs_two_minors(b, mv, ba, color)
+
+
+def test_queen_vs_two_minors_white_queen_true():
+    # Qa1xa4 captures Black rook → White Q vs Black B+N
+    ok, d = _qvtm("4k3/8/8/8/r2b1n2/8/8/Q3K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert ok
+    assert d["queen_side"] == "White"
+    assert d["minor_side"] == "Black"
+
+
+def test_queen_vs_two_minors_black_queen_true():
+    # Qa1xa4 captures White rook → Black Q vs White B+N
+    ok, d = _qvtm("4k3/8/8/8/R2B1N2/8/8/q3K3 b - - 0 1", "a1a4", chess.BLACK)
+    assert ok
+    assert d["queen_side"] == "Black"
+    assert d["minor_side"] == "White"
+
+
+def test_queen_vs_two_minors_queen_also_has_rook_false():
+    # White has Q+R after capture — not clean Q vs 2 minors
+    ok, _ = _qvtm("4k3/8/8/8/r2b1n2/8/8/QR2K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_two_minors_imbalance_pre_existed_false():
+    # Already Q vs 2 minors before the move
+    ok, _ = _qvtm("4k3/8/8/8/3b1n2/8/8/Q3K3 w - - 0 1", "a1a3", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_two_minors_queen_side_has_minor_false():
+    # White has Q+B after capture — not clean Q
+    ok, _ = _qvtm("4k3/8/8/8/r2b1n2/8/8/QB2K3 w - - 0 1", "a1a4", chess.WHITE)
+    assert not ok
+
+
+def test_queen_vs_two_minors_in_certified_claims():
+    fen = "4k3/8/8/8/r2b1n2/8/8/Q3K3 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("a1a4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_vs_two_minors" in tags
+
