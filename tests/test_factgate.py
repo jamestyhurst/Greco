@@ -7192,3 +7192,64 @@ def test_rook_and_minor_vs_minor_pair_in_certified_claims():
     tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
     assert "rook_and_minor_vs_minor_pair" in tags
 
+
+# ---------------------------------------------------------------------------
+# has_queen_and_rook_vs_rook_and_minor
+# ---------------------------------------------------------------------------
+
+def _qrvram(fen, move_uci, mover_color=chess.WHITE):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(move_uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.has_queen_and_rook_vs_rook_and_minor(board_before, move, board_after, mover_color)
+
+
+def test_queen_and_rook_vs_rook_and_minor_white_true():
+    # White Queen captures black knight on d5 → White Q+R vs Black R+B
+    result = _qrvram("1r3k2/8/8/3n4/1b6/8/8/3QK2R w - - 0 1", "d1d5")
+    fired, info = result
+    assert fired
+    assert info["queen_rook_side"] == "White"
+    assert info["rook_minor_side"] == "Black"
+
+
+def test_queen_and_rook_vs_rook_and_minor_black_true():
+    # Black Queen captures white knight on d4 → Black Q+R vs White R+B
+    result = _qrvram("r2q1k2/8/8/8/3N4/8/8/2B1K2R b - - 0 1", "d8d4", chess.BLACK)
+    fired, info = result
+    assert fired
+    assert info["queen_rook_side"] == "Black"
+    assert info["rook_minor_side"] == "White"
+
+
+def test_queen_and_rook_vs_rook_and_minor_queen_rook_side_has_minor_false():
+    # After capture: White has Q+R+N, not clean Q+R — does not fire
+    result = _qrvram("1r3k2/8/8/3n4/1b6/2N5/8/3QK2R w - - 0 1", "d1d5")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_rook_vs_rook_and_minor_imbalance_pre_existed_false():
+    # White already has Q+R vs Black R+B before the move
+    result = _qrvram("1r3k2/8/8/8/1b6/8/8/3QK2R w - - 0 1", "d1d2")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_rook_vs_rook_and_minor_rook_minor_side_has_queen_false():
+    # Black's rook+minor side also has a queen — does not fire
+    result = _qrvram("qr3k2/8/8/3n4/1b6/8/8/3QK2R w - - 0 1", "d1d5")
+    fired, _ = result
+    assert not fired
+
+
+def test_queen_and_rook_vs_rook_and_minor_in_certified_claims():
+    fen = "1r3k2/8/8/3n4/1b6/8/8/3QK2R w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("d1d5")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queen_and_rook_vs_rook_and_minor" in tags
+
