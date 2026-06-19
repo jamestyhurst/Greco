@@ -3294,3 +3294,60 @@ def test_is_threefold_repetition_in_certified_claims():
     board_after.push(move)
     tags = F.certified_claims(board_before, move, board_after, chess.BLACK)
     assert "threefold_repetition" in tags
+
+
+# ── is_queenless_position ──────────────────────────────────────────────────
+
+def _qless(fen, uci, color):
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci(uci)
+    board_after = board_before.copy()
+    board_after.push(move)
+    return F.is_queenless_position(board_before, move, board_after, color)
+
+
+def test_queenless_position_king_captures_lone_queen_true():
+    # Black queen on e2, white king on e1 — king captures the only queen.
+    ok, ev = _qless("4k3/8/8/8/8/8/4q3/4K3 w - - 0 1", "e1e2", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_queenless_position_rook_captures_lone_queen_true():
+    # Black queen on e4, white rook on e1 — rook captures the only queen.
+    ok, ev = _qless("4k3/8/8/8/4q3/8/8/4RK2 w - - 0 1", "e1e4", chess.WHITE)
+    assert ok
+    assert "evidence" in ev
+
+
+def test_queenless_position_queen_remains_false():
+    # Both queens on board; white queen captures black queen but white's queen remains.
+    ok, _ = _qless("4k3/8/3q4/8/8/8/3Q4/4K3 w - - 0 1", "d2d6", chess.WHITE)
+    assert not ok
+
+
+def test_queenless_position_already_queenless_false():
+    # Board has no queens before the move — only fires on the transition.
+    ok, _ = _qless("4k3/8/8/8/8/8/8/4K3 w - - 0 1", "e1d1", chess.WHITE)
+    assert not ok
+
+
+def test_queenless_position_quiet_move_false():
+    # Starting position, quiet pawn move — queens still present after.
+    ok, _ = _qless(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "e2e4",
+        chess.WHITE,
+    )
+    assert not ok
+
+
+def test_queenless_position_in_certified_claims():
+    # Rook captures the lone black queen — tag must appear in certified_claims.
+    fen = "4k3/8/8/8/4q3/8/8/4RK2 w - - 0 1"
+    board_before = chess.Board(fen)
+    move = chess.Move.from_uci("e1e4")
+    board_after = board_before.copy()
+    board_after.push(move)
+    tags = F.certified_claims(board_before, move, board_after, chess.WHITE)
+    assert "queenless_position" in tags

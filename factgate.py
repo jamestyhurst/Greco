@@ -2653,6 +2653,37 @@ def is_royal_fork(
     }
 
 
+def is_queenless_position(
+    board_before: chess.Board,
+    move: chess.Move,
+    board_after: chess.Board,
+    mover_color: bool,
+) -> Tuple[bool, Optional[dict]]:
+    """Certifies that this move removes the last queen from the board, creating
+    a queenless position. Only fires on the move that causes the transition —
+    returns False when the board was already queenless before.
+    evidence keys: evidence.
+    """
+    queens_before = (
+        board_before.pieces(chess.QUEEN, chess.WHITE)
+        | board_before.pieces(chess.QUEEN, chess.BLACK)
+    )
+    if not queens_before:
+        return False, None
+    queens_after = (
+        board_after.pieces(chess.QUEEN, chess.WHITE)
+        | board_after.pieces(chess.QUEEN, chess.BLACK)
+    )
+    if queens_after:
+        return False, None
+    return True, {
+        "evidence": (
+            "The last queen has left the board — the position becomes queenless, "
+            "where the king can become more active and endgame precision matters"
+        ),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # The allow-set builder — THE per-ply gate.
 # --------------------------------------------------------------------------- #
@@ -2713,6 +2744,7 @@ GATED_TAGS = (
     "captures_with_check",
     "rook_doubled",
     "threefold_repetition",
+    "queenless_position",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
@@ -2954,5 +2986,9 @@ def certified_claims(
     tfr = _safe(lambda: is_threefold_repetition(board_before, move, board_after, mover_color))
     if tfr and tfr[0]:
         tags.add("threefold_repetition")
+
+    qls = _safe(lambda: is_queenless_position(board_before, move, board_after, mover_color))
+    if qls and qls[0]:
+        tags.add("queenless_position")
 
     return tags
