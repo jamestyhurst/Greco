@@ -7,6 +7,26 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added — PGN library auto-filing ("Games with Reports")
+- **`outputs.archive_reported_pgn`** — the moment a GUI or CLI report is written, the
+  source PGN is filed from `Documents\Chess Game Files` into its `Games with Reports\`
+  sub-folder. Deliberately conservative: only files sitting directly in the library root
+  ever move; a name collision merges identical bytes or takes a numbered suffix; a filing
+  failure can never sink a finished report. 6 unit tests (`tests/test_archive_pgn.py`).
+  (The CLI hook in `main.py` was committed as part of the chess.com integration commit.)
+- **`tools/file_reported_pgns.py`** — backup sweep for reports the automatic path can't
+  see (web-app reports, reports that predate this feature): matches root PGNs to report
+  folders via `report_basename` plus a legacy no-year folder fallback, previews with
+  `--dry-run`, and never touches multi-game collection files. The initial sweep filed the
+  16 PGNs covering all 14 existing report folders.
+- Library protocol documented in `Documents\Chess Game Files\CLAUDE.md` (outside the repo).
+
+### Changed
+- **`tools/knowledge_ab_test.py`** default output no longer lands next to the PGN under
+  test (it was littering the game library); it now defaults to
+  `Documents\Developer Tools (Greco)\ab-tests\`. The stray `knowledge_ab_*` and
+  `_style_ab_out` folders were relocated there.
+
 ## [0.41.102] — 2026-07-18
 
 ### Added — Chess.com account integration (parity with Lichess)
