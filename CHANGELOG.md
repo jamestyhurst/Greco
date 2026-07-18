@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.102] — 2026-07-18
+
 ### Added — Chess.com account integration (parity with Lichess)
 > The friction fix: Greco is now usable with the games James actually plays, without
 > download/upload. Chess.com's public API is player-scoped (monthly archive files, PGN
