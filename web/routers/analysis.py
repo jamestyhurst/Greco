@@ -207,7 +207,8 @@ async def analyze(
     current_user: Optional[User] = Depends(get_current_user),
     pgn_file: Optional[UploadFile] = File(None),
     pgn_text: str = Form(""),
-    lichess_url: str = Form(""),
+    game_url: str = Form(""),
+    lichess_url: str = Form(""),  # legacy alias for game_url (pre-Chess.com forms)
     use_case: str = Form("companion"),
     side: str = Form("neither"),
     speed: str = Form("normal"),
@@ -272,17 +273,30 @@ async def analyze(
             status_code=400,
         )
 
-    # Resolve the PGN: Lichess URL > file upload > pasted text.
+    # Resolve the PGN: game URL (Lichess or Chess.com) > file upload > pasted text.
     text = ""
-    if (lichess_url or "").strip():
-        try:
-            from importers import load_from_lichess
-            text, _src = load_from_lichess(lichess_url.strip())
-        except Exception as exc:
-            return HTMLResponse(
-                render_error(f"Could not fetch Lichess game: {exc}"),
-                status_code=400,
+    source_url = (game_url or "").strip() or (lichess_url or "").strip()
+    if source_url:
+        from importers import CHESSCOM_URL_RE, load_from_chesscom, load_from_lichess
+        if CHESSCOM_URL_RE.search(source_url):
+            cc_user = (
+                getattr(current_user, "chesscom_username", None) if current_user else None
             )
+            try:
+                text, _src = load_from_chesscom(source_url, username=cc_user)
+            except Exception as exc:
+                return HTMLResponse(
+                    render_error(f"Could not fetch Chess.com game: {exc}"),
+                    status_code=400,
+                )
+        else:
+            try:
+                text, _src = load_from_lichess(source_url)
+            except Exception as exc:
+                return HTMLResponse(
+                    render_error(f"Could not fetch Lichess game: {exc}"),
+                    status_code=400,
+                )
     elif pgn_file is not None and (pgn_file.filename or "").strip():
         raw = await pgn_file.read()
         text = raw.decode("utf-8", errors="replace").strip()
@@ -290,7 +304,10 @@ async def analyze(
         text = (pgn_text or "").strip()
     if not text:
         return HTMLResponse(
-            render_error("Please upload a PGN file, paste PGN text, or enter a Lichess URL."),
+            render_error(
+                "Please upload a PGN file, paste PGN text, or enter a "
+                "Lichess or Chess.com game URL."
+            ),
             status_code=400,
         )
 

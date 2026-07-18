@@ -41,3 +41,26 @@ def test_lichess_game_export_live():
 
     pgn, src = load_from_lichess(f"https://lichess.org/{LICHESS_GAME}")
     assert "[Event" in pgn and LICHESS_GAME in src
+
+
+# James's own account — his games are the whole point of the integration.
+CHESSCOM_USER = "JamesTortoise"
+
+
+def test_chesscom_recent_games_live():
+    from importers import fetch_chesscom_recent_games
+
+    games = fetch_chesscom_recent_games(CHESSCOM_USER, max_games=3)
+    assert games, "expected at least one recent game"
+    assert all(g["pgn"].startswith("[") and g["url"] for g in games)
+
+
+def test_chesscom_game_url_import_live():
+    """End-to-end: take the newest real game's URL and resolve it back to PGN
+    the same way the Analyze button will."""
+    from importers import fetch_chesscom_recent_games, load_from_chesscom
+
+    games = fetch_chesscom_recent_games(CHESSCOM_USER, max_games=1)
+    assert games
+    pgn, src = load_from_chesscom(games[0]["url"], username=CHESSCOM_USER)
+    assert "[Event" in pgn

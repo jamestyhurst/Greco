@@ -20,7 +20,7 @@ from pathlib import Path
 from analyzer import analyze_pgn
 from importers import load_pgn
 from narrator import generate_narrative
-from outputs import assemble_report, markdown_to_html
+from outputs import archive_reported_pgn, assemble_report, markdown_to_html
 from triage import annotate_with_tiers, tier_distribution
 
 
@@ -84,8 +84,14 @@ def main() -> int:
     src = parser.add_mutually_exclusive_group()
     src.add_argument("--pgn-file", type=str, help="Path to a PGN file")
     src.add_argument("--pgn", type=str, help="PGN text passed directly")
-    src.add_argument("--pgn-url", type=str, help="Lichess URL or game ID (chess.com not yet supported)")
-    src.add_argument("--source", type=str, help="Auto-detected source: file path, Lichess URL/ID, or raw PGN text")
+    src.add_argument("--pgn-url", type=str, help="Lichess URL/game ID, or a chess.com game URL (chess.com also needs --chesscom-user)")
+    src.add_argument("--source", type=str, help="Auto-detected source: file path, Lichess or chess.com URL, or raw PGN text")
+    parser.add_argument(
+        "--chesscom-user", type=str, default=None,
+        help="Your Chess.com username — required when the source is a chess.com URL "
+             "(the public API is per-player, so Greco looks the game up in this "
+             "player's recent archives)",
+    )
 
     parser.add_argument(
         "--white-context",
@@ -213,7 +219,7 @@ def main() -> int:
 
     print(BANNER, file=sys.stderr)
 
-    pgn_text, source_desc = load_pgn(source_string)
+    pgn_text, source_desc = load_pgn(source_string, chesscom_username=args.chesscom_user)
     print(f"Loaded PGN from {source_desc}", file=sys.stderr)
 
     # Resolve use_case (interactive prompt if not given).
@@ -326,6 +332,14 @@ def main() -> int:
     if args.format in ("html", "both"):
         html_path = markdown_to_html(md_path, game=game, flipped=flipped_for_black)
         print(f"Wrote HTML report to {html_path}", file=sys.stderr)
+
+    # The game now has a report: file the source PGN from the Chess Game Files
+    # library root into 'Games with Reports' (no-op for URL/text sources and
+    # for files that live anywhere else).
+    if source_path:
+        filed = archive_reported_pgn(source_path)
+        if filed:
+            print(f"Filed the PGN into '{filed.parent.name}'", file=sys.stderr)
 
     return 0
 

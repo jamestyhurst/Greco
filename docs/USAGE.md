@@ -183,6 +183,8 @@ Greco feeds the model engine ground truth so it describes the *actual* position,
 
 ## Roadmap
 
-- Chess.com per-game URL import (currently only Lichess; for Chess.com, download the PGN manually)
+- ~~Chess.com per-game URL import~~ — done: paste a chess.com game URL (needs your
+  Chess.com username saved in your web profile, since the public API is per-player),
+  or link the account in Greco Online's Profile page for a one-click recent-games list
 - Print-friendly stylesheet for the HTML output
 - Batch mode for multiple PGNs in a folder

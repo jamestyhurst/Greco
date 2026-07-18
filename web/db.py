@@ -122,6 +122,15 @@ def update_user_lichess_username(user_id: int, lichess_username: Optional[str]) 
             session.commit()
 
 
+def update_user_chesscom_username(user_id: int, chesscom_username: Optional[str]) -> None:
+    """Set or clear the Chess.com username for a user."""
+    with SessionLocal() as session:
+        user = session.get(User, user_id)
+        if user is not None:
+            user.chesscom_username = chesscom_username or None
+            session.commit()
+
+
 def get_user_password_hash(user_id: int) -> Optional[str]:
     with SessionLocal() as session:
         user = session.get(User, user_id)

@@ -7,6 +7,30 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added — Chess.com account integration (parity with Lichess)
+> The friction fix: Greco is now usable with the games James actually plays, without
+> download/upload. Chess.com's public API is player-scoped (monthly archive files, PGN
+> included inline; no per-game endpoint), so both features below resolve games by walking
+> the linked player's archives newest-first, lazily (`_iter_chesscom_games` generator —
+> older months are never downloaded once a match is found).
+
+- **`importers.py`** — `fetch_chesscom_recent_games()` (normalised recent-games list,
+  variants + PGN-less games skipped), `load_from_chesscom()` (game URL/id → PGN via
+  archive matching; needs the player's username), `CHESSCOM_GAME_URL_RE` (live/daily/old
+  URL shapes), and `load_pgn(..., chesscom_username=)` pass-through. API usernames are
+  lowercased (the API 301-redirects any other casing — caught by the live smoke test,
+  invisible to mocks).
+- **Web profile** — `chesscom_username` field (validated, migration `004`), a
+  `GET /profile/chesscom-games` endpoint, and a second recent-games card with one-click
+  Analyze buttons (shared row renderer for both sites). PGN stays server-side: the button
+  posts the game URL and the server re-fetches — one code path for one-click and pasted URLs.
+- **`POST /analyze`** — unified `game_url` field auto-detects Lichess vs Chess.com
+  (`lichess_url` kept as a working legacy alias); friendly 400 when a chess.com URL
+  arrives with no linked username.
+- Tests: 11 new unit/route tests (fake-client archive walking, early-exit, URL parsing,
+  profile save/validate/fetch routes, analyze dispatch) + 2 live smoke tests against
+  James's real account.
+
 ### Fixed — the Lichess connection now actually works (it never did)
 - **`web/routers/profile.py`** — the recent-games list called
   `lichess.org/api/user/{u}/games`, an endpoint that does not exist (HTTP 404); the

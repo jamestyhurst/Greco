@@ -1,12 +1,12 @@
 """Profile routes — Greco Online Phase 6.
 
 GET  /profile         — view and edit the current user's profile settings.
-POST /profile         — save updated profile settings (Lichess username).
-GET  /profile/lichess-games — JSON: fetch recent Lichess games for the
-                              current user's linked Lichess account.
+POST /profile         — save updated profile settings (Lichess + Chess.com usernames).
+GET  /profile/lichess-games  — JSON: recent Lichess games for the linked account.
+GET  /profile/chesscom-games — JSON: recent Chess.com games for the linked account.
 
-The Lichess username is stored on the User row and used in the My Reports
-page to show recent games available for one-click analysis.
+The linked usernames are stored on the User row; the profile page lists each
+account's recent games with a one-click Analyze button.
 """
 from __future__ import annotations
 
@@ -18,9 +18,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
-from importers import load_from_lichess, _make_http_client
+from importers import fetch_chesscom_recent_games, load_from_lichess, _make_http_client
 from web.auth import require_login
-from web.db import User, update_user_lichess_username
+from web.db import User, update_user_chesscom_username, update_user_lichess_username
 from web.templates import render_profile
 
 router = APIRouter()
@@ -28,6 +28,7 @@ router = APIRouter()
 _log = logging.getLogger("greco.web")
 
 _LICHESS_USERNAME_RE = re.compile(r"^[a-zA-Z0-9_-]{2,30}$")
+_CHESSCOM_USERNAME_RE = re.compile(r"^[a-zA-Z0-9_-]{3,25}$")
 
 
 @router.get("/profile", response_class=HTMLResponse)
@@ -43,16 +44,47 @@ def profile_page(
 def profile_update(
     current_user: User = Depends(require_login),
     lichess_username: str = Form(""),
+    chesscom_username: str = Form(""),
 ) -> HTMLResponse:
     """Save profile settings and redirect back."""
-    username = (lichess_username or "").strip()
-    if username and not _LICHESS_USERNAME_RE.match(username):
+    li_name = (lichess_username or "").strip()
+    if li_name and not _LICHESS_USERNAME_RE.match(li_name):
         raise HTTPException(
             status_code=422,
             detail="Lichess username may only contain letters, digits, _ and -.",
         )
-    update_user_lichess_username(current_user.id, username or None)
+    cc_name = (chesscom_username or "").strip()
+    if cc_name and not _CHESSCOM_USERNAME_RE.match(cc_name):
+        raise HTTPException(
+            status_code=422,
+            detail="Chess.com username may only contain letters, digits, _ and -.",
+        )
+    update_user_lichess_username(current_user.id, li_name or None)
+    update_user_chesscom_username(current_user.id, cc_name or None)
     return RedirectResponse("/profile?saved=1", status_code=303)
+
+
+@router.get("/profile/chesscom-games")
+def chesscom_recent_games(current_user: User = Depends(require_login)) -> JSONResponse:
+    """Return the user's 10 most recent Chess.com games as JSON.
+
+    Requires chesscom_username to be set on the user's profile. The PGN is
+    deliberately NOT included — the Analyze button posts the game URL and the
+    server re-fetches, keeping one code path for pasted URLs and one-click.
+    """
+    cu = getattr(current_user, "chesscom_username", None)
+    if not cu:
+        raise HTTPException(status_code=400, detail="No Chess.com username set in your profile.")
+
+    try:
+        games = fetch_chesscom_recent_games(cu, max_games=10)
+    except Exception as exc:
+        _log.warning("Chess.com games fetch failed for %s: %s", cu, exc)
+        raise HTTPException(status_code=502, detail=f"Could not fetch games from Chess.com: {exc}")
+
+    slim = [{k: g[k] for k in ("id", "url", "white", "black", "result", "time_class")}
+            for g in games]
+    return JSONResponse({"games": slim, "chesscom_username": cu})
 
 
 @router.get("/profile/lichess-games")

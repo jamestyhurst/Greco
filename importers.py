@@ -88,25 +88,115 @@ def load_from_lichess(url_or_id: str) -> Tuple[str, str]:
     return response.text, f"Lichess game {game_id}"
 
 
-def load_from_chesscom(_url: str) -> Tuple[str, str]:
+# Chess.com game URLs carry a numeric id: /game/live/123, /game/daily/123,
+# /live/game/123 (old style), or /game/123.
+CHESSCOM_GAME_URL_RE = re.compile(
+    r"chess\.com/(?:game/(?:live|daily)/|(?:live|daily)/game/|game/)(\d+)",
+    re.IGNORECASE,
+)
+
+CHESSCOM_ARCHIVES_API = "https://api.chess.com/pub/player/{username}/games/archives"
+
+
+def _iter_chesscom_games(client: httpx.Client, username: str, months_to_scan: int):
+    """Yield a player's raw Chess.com game dicts, newest game first.
+
+    Chess.com's public API has no per-game endpoint — games are published in
+    monthly archive files per player. We fetch the archive index once, then
+    walk the newest `months_to_scan` months backwards, yielding lazily so a
+    caller that finds what it wants early never downloads older months.
     """
-    Placeholder. Chess.com does not offer a clean public per-game API by URL,
-    only by player+date via api.chess.com/pub/player/{user}/games/{yyyy}/{mm}.
-    For now, ask the user to download the PGN from chess.com directly.
+    # The API's canonical username form is lowercase; any other casing gets a
+    # 301 redirect, which httpx does not follow by default.
+    resp = client.get(CHESSCOM_ARCHIVES_API.format(username=username.lower()))
+    if resp.status_code == 404:
+        raise ValueError(f"No Chess.com player named {username!r}.")
+    resp.raise_for_status()
+    months = resp.json().get("archives", [])
+    for month_url in reversed(months[-months_to_scan:]):
+        r = client.get(month_url)
+        if r.status_code != 200:
+            continue
+        # Within a month the list is oldest-first; newest-first for callers.
+        for g in reversed(r.json().get("games", [])):
+            yield g
+
+
+def _chesscom_winner(game: dict) -> str:
+    """Normalise Chess.com's per-player result codes to white/black/draw."""
+    if game.get("white", {}).get("result") == "win":
+        return "white"
+    if game.get("black", {}).get("result") == "win":
+        return "black"
+    return "draw"
+
+
+def fetch_chesscom_recent_games(
+    username: str, max_games: int = 10, months_to_scan: int = 3
+) -> list:
+    """Return the player's most recent standard games as normalised dicts.
+
+    Each dict: id, url, white, black, result (white/black/draw), time_class,
+    end_time, pgn. Variants (Chess960 etc.) and PGN-less games are skipped.
     """
-    raise NotImplementedError(
-        "Chess.com URLs aren't yet supported. Use chess.com's 'Share' → "
-        "'Download PGN' button on the game, then pass --pgn-file with the "
-        "downloaded file."
+    games = []
+    with _make_http_client() as client:
+        for g in _iter_chesscom_games(client, username, months_to_scan):
+            if g.get("rules") != "chess" or not g.get("pgn"):
+                continue
+            m = CHESSCOM_GAME_URL_RE.search(g.get("url", ""))
+            games.append({
+                "id": m.group(1) if m else "",
+                "url": g.get("url", ""),
+                "white": g.get("white", {}).get("username", "?"),
+                "black": g.get("black", {}).get("username", "?"),
+                "result": _chesscom_winner(g),
+                "time_class": g.get("time_class", ""),
+                "end_time": g.get("end_time", 0),
+                "pgn": g["pgn"],
+            })
+            if len(games) >= max_games:
+                break
+    return games
+
+
+def load_from_chesscom(
+    url_or_id: str, username: Optional[str] = None, months_to_scan: int = 6
+) -> Tuple[str, str]:
+    """Fetch a Chess.com game's PGN by its URL (or bare numeric id).
+
+    Chess.com's public API is player-scoped (monthly archives), so resolving a
+    game URL requires knowing ONE player in it: we walk `username`'s recent
+    archives newest-first and match on the game id.
+    """
+    m = CHESSCOM_GAME_URL_RE.search(url_or_id)
+    game_id = m.group(1) if m else url_or_id.strip()
+    if not game_id.isdigit():
+        raise ValueError(f"Could not extract a Chess.com game ID from: {url_or_id}")
+    if not username:
+        raise ValueError(
+            "Fetching a Chess.com game needs a Chess.com username to look it up "
+            "under (the public API is per-player). Save yours in your profile, "
+            "or download the PGN from chess.com and upload it instead."
+        )
+
+    with _make_http_client() as client:
+        for g in _iter_chesscom_games(client, username, months_to_scan):
+            gm = CHESSCOM_GAME_URL_RE.search(g.get("url", ""))
+            if gm and gm.group(1) == game_id and g.get("pgn"):
+                return g["pgn"], f"Chess.com game {game_id}"
+    raise ValueError(
+        f"Game {game_id} was not found in {username}'s last "
+        f"{months_to_scan} months of Chess.com archives."
     )
 
 
-def load_pgn(source: str) -> Tuple[str, str]:
+def load_pgn(source: str, chesscom_username: Optional[str] = None) -> Tuple[str, str]:
     """
     Auto-detect the source type:
     - existing file path  → load_from_file
     - lichess.org URL/ID  → load_from_lichess
-    - chess.com URL       → load_from_chesscom (not yet implemented)
+    - chess.com URL       → load_from_chesscom (needs chesscom_username)
     - otherwise           → assume it's raw PGN text
     """
     if not source:
@@ -127,7 +217,7 @@ def load_pgn(source: str) -> Tuple[str, str]:
         if LICHESS_URL_RE.search(stripped):
             return load_from_lichess(source)
         if CHESSCOM_URL_RE.search(stripped):
-            return load_from_chesscom(source)
+            return load_from_chesscom(source, username=chesscom_username)
 
     # Raw PGN text (must contain at least a header or a move).
     if looks_like_pgn:

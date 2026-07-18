@@ -209,6 +209,70 @@ def test_lichess_url_error_returns_400(monkeypatch):
     assert "Lichess" in r.text or "Game not found" in r.text
 
 
+# ---------------------------------------------------------------------------
+# game_url input — Chess.com and Lichess auto-detection
+# ---------------------------------------------------------------------------
+
+def test_chesscom_game_url_fetches_pgn_and_runs_analysis(monkeypatch, tmp_path):
+    """A chess.com URL in game_url routes to load_from_chesscom, passing the
+    logged-in user's linked Chess.com username."""
+    _ready(monkeypatch)
+    captured, seen = {}, {}
+    FAKE_PGN = "[Event \"Live Chess\"]\n1. c4 e5 *"
+
+    import importers as _imp
+
+    def fake_cc(url_or_id, username=None, months_to_scan=6):
+        seen["url"], seen["username"] = url_or_id, username
+        return FAKE_PGN, "chesscom"
+
+    monkeypatch.setattr(_imp, "load_from_chesscom", fake_cc)
+
+    def fake_run(**kw):
+        captured.update(kw)
+        return AnalysisResult(rid=12, base="CC",
+                              out_dir=str(tmp_path), html_path=str(tmp_path / "r.html"))
+
+    monkeypatch.setattr(analysis, "run_analysis", fake_run)
+
+    r = client.post("/analyze",
+                    data={"game_url": "https://www.chess.com/game/live/123"})
+    assert r.status_code == 200
+    assert captured.get("pgn_text") == FAKE_PGN
+    assert seen["url"].endswith("/123")
+
+
+def test_game_url_accepts_lichess_too(monkeypatch, tmp_path):
+    """A lichess URL in the unified game_url field routes to load_from_lichess."""
+    _ready(monkeypatch)
+    captured = {}
+    FAKE_PGN = "[Event \"Lichess\"]\n1. Nf3 *"
+
+    import importers as _imp
+    monkeypatch.setattr(_imp, "load_from_lichess", lambda url_or_id: (FAKE_PGN, "lichess"))
+
+    def fake_run(**kw):
+        captured.update(kw)
+        return AnalysisResult(rid=13, base="L",
+                              out_dir=str(tmp_path), html_path=str(tmp_path / "r.html"))
+
+    monkeypatch.setattr(analysis, "run_analysis", fake_run)
+
+    r = client.post("/analyze", data={"game_url": "https://lichess.org/abcd1234"})
+    assert r.status_code == 200
+    assert captured.get("pgn_text") == FAKE_PGN
+
+
+def test_chesscom_url_without_linked_username_is_400(monkeypatch):
+    """No chesscom_username on the account -> friendly 400, and no network:
+    load_from_chesscom raises before it ever builds an HTTP client."""
+    _ready(monkeypatch)
+    r = client.post("/analyze",
+                    data={"game_url": "https://www.chess.com/game/live/123"})
+    assert r.status_code == 400
+    assert "Chess.com" in r.text
+
+
 def test_lichess_url_takes_priority_over_pgn_text(monkeypatch, tmp_path):
     """lichess_url is preferred over pasted pgn_text when both are submitted."""
     _ready(monkeypatch)

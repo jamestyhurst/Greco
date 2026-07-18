@@ -132,8 +132,8 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
   </div>
   <form class="card" method="post" action="/analyze" enctype="multipart/form-data"
         onsubmit="document.getElementById('overlay').classList.add('show');document.getElementById('go').disabled=true;saveFormState()">
-    <label>Lichess game URL or ID</label>
-    <input type="text" name="lichess_url" placeholder="https://lichess.org/abcd1234 &mdash; or the 8-character game ID">
+    <label>Lichess or Chess.com game URL</label>
+    <input type="text" name="game_url" placeholder="https://lichess.org/abcd1234 &mdash; or https://www.chess.com/game/live/123456789">
     <div class="or">&mdash; or &mdash;</div>
     <label>Upload a PGN file</label>
     <input type="file" name="pgn_file" accept=".pgn,.txt">
@@ -214,7 +214,7 @@ function toggleEssayFields(){
 }
 document.addEventListener('DOMContentLoaded',toggleEssayFields);
 var _FORM_KEY='greco_form_state';
-var _FORM_FIELDS=['lichess_url','use_case','side','speed','model','note','audience_level','recipient','white_context','black_context','pgn_text','essay_question'];
+var _FORM_FIELDS=['game_url','use_case','side','speed','model','note','audience_level','recipient','white_context','black_context','pgn_text','essay_question'];
 function saveFormState(){
   try{
     var vals={};
@@ -637,7 +637,11 @@ _PROFILE = Template("""<!doctype html><html lang="en"><head>
     <input type="text" name="lichess_username"
            value="{{ lichess_username or '' }}"
            placeholder="e.g. DrNykterstein">
-    <p class="hint">Enter your Lichess username to see your recent games on My Reports for one-click analysis.</p>
+    <label>Chess.com username (optional)</label>
+    <input type="text" name="chesscom_username"
+           value="{{ chesscom_username or '' }}"
+           placeholder="e.g. Hikaru">
+    <p class="hint">Link either account (or both) to see your recent games below for one-click analysis.</p>
     <button type="submit">Save profile</button>
   </form>
   {% if lichess_username %}
@@ -645,27 +649,43 @@ _PROFILE = Template("""<!doctype html><html lang="en"><head>
     <b>Recent Lichess games for {{ lichess_username }}</b>
     <div id="games-list"><p class="hint">Loading&hellip;</p></div>
   </div>
+  {% endif %}
+  {% if chesscom_username %}
+  <div class="card" style="margin-top:20px;">
+    <b>Recent Chess.com games for {{ chesscom_username }}</b>
+    <div id="cc-games-list"><p class="hint">Loading&hellip;</p></div>
+  </div>
+  {% endif %}
+  {% if lichess_username or chesscom_username %}
   <script>
-  fetch('/profile/lichess-games')
-    .then(r=>r.ok?r.json():Promise.reject(r))
-    .then(data=>{
-      const el=document.getElementById('games-list');
-      if(!data.games||!data.games.length){el.innerHTML='<p class="hint">No recent games found.</p>';return;}
-      el.innerHTML=data.games.map(g=>`
-        <div class="game-row">
-          <div class="game-players">${g.white} vs ${g.black}</div>
-          <div class="game-meta">${g.speed}</div>
-          <form method="post" action="/analyze" style="margin:0;">
-            <input type="hidden" name="lichess_url" value="${g.lichess_url}">
-            <input type="hidden" name="use_case" value="companion">
-            <input type="hidden" name="side" value="neither">
-            <input type="hidden" name="speed" value="normal">
-            <input type="hidden" name="model" value="">
-            <button type="submit" class="btn go" style="padding:5px 14px;font-size:.8rem;display:inline-block;width:auto;cursor:pointer;margin-top:0;">Analyze</button>
-          </form>
-        </div>`).join('');
-    })
-    .catch(()=>{document.getElementById('games-list').innerHTML='<p class="hint">Could not load games &mdash; check your Lichess username.</p>';});
+  function gameRow(g, meta, url){
+    return `
+      <div class="game-row">
+        <div class="game-players">${g.white} vs ${g.black}</div>
+        <div class="game-meta">${meta}</div>
+        <form method="post" action="/analyze" style="margin:0;">
+          <input type="hidden" name="game_url" value="${url}">
+          <input type="hidden" name="use_case" value="companion">
+          <input type="hidden" name="side" value="neither">
+          <input type="hidden" name="speed" value="normal">
+          <input type="hidden" name="model" value="">
+          <button type="submit" class="btn go" style="padding:5px 14px;font-size:.8rem;display:inline-block;width:auto;cursor:pointer;margin-top:0;">Analyze</button>
+        </form>
+      </div>`;
+  }
+  function loadGames(endpoint, elId, rowFn){
+    const el=document.getElementById(elId);
+    if(!el)return;
+    fetch(endpoint)
+      .then(r=>r.ok?r.json():Promise.reject(r))
+      .then(data=>{
+        if(!data.games||!data.games.length){el.innerHTML='<p class="hint">No recent games found.</p>';return;}
+        el.innerHTML=data.games.map(rowFn).join('');
+      })
+      .catch(()=>{el.innerHTML='<p class="hint">Could not load games &mdash; check the username saved above.</p>';});
+  }
+  loadGames('/profile/lichess-games','games-list',g=>gameRow(g,g.speed,g.lichess_url));
+  loadGames('/profile/chesscom-games','cc-games-list',g=>gameRow(g,g.time_class,g.url));
   </script>
   {% endif %}
   <p class="foot">Greco &middot; v{{ version }}</p>
@@ -753,6 +773,7 @@ def render_profile(user, saved: bool = False) -> str:
         base_css=BASE_CSS, version=__version__,
         username=user.username,
         lichess_username=getattr(user, "lichess_username", None),
+        chesscom_username=getattr(user, "chesscom_username", None),
         saved=saved,
         nav=_make_nav(user),
     )

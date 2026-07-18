@@ -153,6 +153,90 @@ def test_lichess_games_calls_lichess_api_and_returns_json(tmp_db, user, monkeypa
 
 
 # ---------------------------------------------------------------------------
+# Chess.com profile field + GET /profile/chesscom-games
+# ---------------------------------------------------------------------------
+
+def test_post_profile_saves_chesscom_username(tmp_db, user):
+    client = make_client(user)
+    try:
+        r = client.post("/profile", data={"chesscom_username": "JamesTortoise"},
+                        follow_redirects=False)
+        assert r.status_code == 303
+        from web.db import get_user_by_id
+        saved = get_user_by_id(user.id)
+        assert saved.chesscom_username == "JamesTortoise"
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_post_profile_rejects_invalid_chesscom_username(tmp_db, user):
+    client = make_client(user)
+    try:
+        r = client.post("/profile", data={"chesscom_username": "has spaces!"})
+        assert r.status_code == 422
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_chesscom_games_returns_400_when_no_username_set(tmp_db, user):
+    client = make_client(user)
+    try:
+        r = client.get("/profile/chesscom-games")
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_chesscom_games_calls_api_and_returns_json(tmp_db, user, monkeypatch):
+    from web.db import update_user_chesscom_username, get_user_by_id
+    update_user_chesscom_username(user.id, "JamesTortoise")
+    fresh_user = get_user_by_id(user.id)
+
+    import web.routers.profile as profile_mod
+    monkeypatch.setattr(
+        profile_mod, "fetch_chesscom_recent_games",
+        lambda username, max_games=10: [
+            {"id": "123", "url": "https://www.chess.com/game/live/123",
+             "white": "JamesTortoise", "black": "bob", "result": "white",
+             "time_class": "rapid", "end_time": 1750000000,
+             "pgn": '[Event "Live Chess"]\n1. e4 *'},
+        ],
+    )
+    app.dependency_overrides[require_login] = lambda: fresh_user
+    client = TestClient(app, raise_server_exceptions=True)
+    try:
+        r = client.get("/profile/chesscom-games")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["chesscom_username"] == "JamesTortoise"
+        assert len(data["games"]) == 1
+        assert data["games"][0]["id"] == "123"
+        # The PGN stays server-side; the browser posts the game URL back.
+        assert "pgn" not in data["games"][0]
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_chesscom_games_returns_502_on_fetch_error(tmp_db, user, monkeypatch):
+    from web.db import update_user_chesscom_username, get_user_by_id
+    update_user_chesscom_username(user.id, "baduser")
+    fresh_user = get_user_by_id(user.id)
+
+    import web.routers.profile as profile_mod
+    monkeypatch.setattr(
+        profile_mod, "fetch_chesscom_recent_games",
+        lambda username, max_games=10: (_ for _ in ()).throw(RuntimeError("timeout")),
+    )
+    app.dependency_overrides[require_login] = lambda: fresh_user
+    client = TestClient(app, raise_server_exceptions=False)
+    try:
+        r = client.get("/profile/chesscom-games")
+        assert r.status_code == 502
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+# ---------------------------------------------------------------------------
 # _fetch_recent_games — endpoint shape + NDJSON parsing
 # ---------------------------------------------------------------------------
 
