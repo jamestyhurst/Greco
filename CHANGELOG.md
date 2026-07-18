@@ -29,6 +29,14 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [0.41.102] — 2026-07-18
 
+### Added — reported PGNs auto-file into the library's "Games with Reports" folder
+- `outputs.archive_reported_pgn()` — after a report is generated, the source PGN sitting
+  directly in `Documents\Chess Game Files` moves into a `Games with Reports` sub-folder
+  (best-effort, never raises; dedups identical copies; numbers collisions). Wired into the
+  GUI and CLI. `tools/file_reported_pgns.py` backfills historical/web-generated reports
+  (`--dry-run` supported). A/B artifacts now default to `Documents\Developer Tools
+  (Greco)\ab-tests\` instead of landing next to the PGN.
+
 ### Added — Chess.com account integration (parity with Lichess)
 > The friction fix: Greco is now usable with the games James actually plays, without
 > download/upload. Chess.com's public API is player-scoped (monthly archive files, PGN
