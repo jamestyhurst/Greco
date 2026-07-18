@@ -225,7 +225,8 @@ async def analyze(
     if not s.key_ok:
         return HTMLResponse(
             render_error(
-                "API key not set. Open the desktop app's settings once, then reload."
+                "API key not set. Open the desktop app's settings once, then reload.",
+                user=current_user,
             ),
             status_code=400,
         )
@@ -239,12 +240,12 @@ async def analyze(
         question = (essay_question or "").strip()
         if not question:
             return HTMLResponse(
-                render_error("Please enter a chess question for Essay Mode."),
+                render_error("Please enter a chess question for Essay Mode.", user=current_user),
                 status_code=400,
             )
         if len(question) < 10:
             return HTMLResponse(
-                render_error("Your question is too short. Please be more specific."),
+                render_error("Your question is too short. Please be more specific.", user=current_user),
                 status_code=400,
             )
         pgn_for_essay: Optional[str] = None
@@ -262,13 +263,14 @@ async def analyze(
             audience_level=(audience_level or "").strip() or None,
             note=(note or "").strip() or None,
         )
-        return HTMLResponse(render_waiting(job.id, essay_mode=True))
+        return HTMLResponse(render_waiting(job.id, essay_mode=True, user=current_user))
 
     # --- Standard analysis branch (PGN required) ---
     if not s.engine_ok:
         return HTMLResponse(
             render_error(
-                "Stockfish path not set. Open the desktop app's settings once, then reload."
+                "Stockfish path not set. Open the desktop app's settings once, then reload.",
+                user=current_user,
             ),
             status_code=400,
         )
@@ -286,7 +288,7 @@ async def analyze(
                 text, _src = load_from_chesscom(source_url, username=cc_user)
             except Exception as exc:
                 return HTMLResponse(
-                    render_error(f"Could not fetch Chess.com game: {exc}"),
+                    render_error(f"Could not fetch Chess.com game: {exc}", user=current_user),
                     status_code=400,
                 )
         else:
@@ -294,7 +296,7 @@ async def analyze(
                 text, _src = load_from_lichess(source_url)
             except Exception as exc:
                 return HTMLResponse(
-                    render_error(f"Could not fetch Lichess game: {exc}"),
+                    render_error(f"Could not fetch Lichess game: {exc}", user=current_user),
                     status_code=400,
                 )
     elif pgn_file is not None and (pgn_file.filename or "").strip():
@@ -306,7 +308,8 @@ async def analyze(
         return HTMLResponse(
             render_error(
                 "Please upload a PGN file, paste PGN text, or enter a "
-                "Lichess or Chess.com game URL."
+                "Lichess or Chess.com game URL.",
+                user=current_user,
             ),
             status_code=400,
         )
@@ -315,7 +318,7 @@ async def analyze(
     # rather than silently failing in the background task.
     pgn_err = _validate_pgn(text)
     if pgn_err:
-        return HTMLResponse(render_error(pgn_err, detail=_pgn_hint(text)), status_code=400)
+        return HTMLResponse(render_error(pgn_err, detail=_pgn_hint(text), user=current_user), status_code=400)
 
     user_is = side.lower() if side.lower() in ("white", "black") else "neither"
     time_limit = SPEED_LABELS.get(speed, 0.8)
@@ -333,7 +336,7 @@ async def analyze(
         white_context=(white_context or "").strip() or None,
         black_context=(black_context or "").strip() or None,
     )
-    return HTMLResponse(render_waiting(job.id))
+    return HTMLResponse(render_waiting(job.id, user=current_user))
 
 
 @router.get("/job/{job_id}")

@@ -138,8 +138,14 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
   /* The home-page "play -> dwell -> analyze" flow. Time-control chips filter
      the merged Lichess + Chess.com list; Rapid is the doctrine default. The
      user's last choice sticks via localStorage (per-browser persistence — a
-     per-account DB setting would be the upgrade if it should follow logins). */
+     per-account DB setting would be the upgrade if it should follow logins).
+
+     Chip markers are ivory chess pieces, deliberately NOT the icons Lichess /
+     Chess.com use (James: keep Greco's aesthetic distinct). The piece's
+     weight grows with the time control's length — pawn for bullet up to
+     queen for daily; the king stands for All (the whole game). */
   var _TCS=['rapid','blitz','bullet','classical','daily','all'];
+  var _TC_PIECE={bullet:'\\u2659',blitz:'\\u2658',rapid:'\\u2657',classical:'\\u2656',daily:'\\u2655',all:'\\u2654'};
   var _TC_KEY='greco_recent_tc';
   function _tc(){try{var v=localStorage.getItem(_TC_KEY);return _TCS.indexOf(v)>=0?v:'rapid'}catch(e){return 'rapid'}}
   function _setTc(v){try{localStorage.setItem(_TC_KEY,v)}catch(e){} _drawChips(); _loadRecent();}
@@ -147,8 +153,14 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
     var cur=_tc();
     document.getElementById('tc-chips').innerHTML=_TCS.map(function(t){
       var on=(t===cur);
-      return '<button type="button" onclick="_setTc(\\''+t+'\\')" style="margin:0 0 0 6px;width:auto;padding:3px 10px;font-size:.78rem;display:inline-block;cursor:pointer;'+
-             (on?'border:1px solid var(--gold);color:var(--gold);':'opacity:.65;')+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</button>';
+      /* Both states set background AND color explicitly: inheriting the site
+         button style gave gold-on-gold when selected (unreadable). */
+      var style='margin:0 0 0 6px;width:auto;padding:3px 10px;font-size:.78rem;display:inline-block;cursor:pointer;border-radius:12px;'+
+        (on?'background:rgba(0,0,0,.35);border:1px solid var(--gold);color:var(--gold);font-weight:700;'
+           :'background:transparent;border:1px solid rgba(245,237,212,.25);color:rgba(245,237,212,.75);');
+      return '<button type="button" onclick="_setTc(\\''+t+'\\')" style="'+style+'">'+
+             '<span style="font-size:1rem;margin-right:4px;">'+_TC_PIECE[t]+'</span>'+
+             t.charAt(0).toUpperCase()+t.slice(1)+'</button>';
     }).join('');
   }
   function _badge(you){
@@ -156,6 +168,20 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
     if(you==='loss')return '<span style="color:#d9776f;font-weight:bold;margin-right:8px;">L</span>';
     if(you==='draw')return '<span style="color:#999;font-weight:bold;margin-right:8px;">D</span>';
     return '';
+  }
+  /* Select fills the analyze form but does NOT submit — the user keeps full
+     control of mode, model, and depth before launching (James's design
+     decision: prefill, don't railroad). */
+  function selectGame(url, side){
+    var f=document.querySelector('form[action="/analyze"]');
+    var urlField=f.querySelector('[name="game_url"]');
+    urlField.value=url;
+    var sideField=f.querySelector('[name="side"]');
+    if(sideField)sideField.value=side||'neither';
+    f.scrollIntoView({behavior:'smooth',block:'start'});
+    f.style.transition='box-shadow .3s';
+    f.style.boxShadow='0 0 0 2px var(--gold)';
+    setTimeout(function(){f.style.boxShadow='';},1600);
   }
   function _loadRecent(){
     var el=document.getElementById('recent-list');
@@ -167,17 +193,17 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
         if(!data.games||!data.games.length){el.innerHTML=note+'<p class="hint">No recent '+data.tc+' games found.</p>';return;}
         el.innerHTML=note+data.games.map(function(g){
           var site=(g.site==='lichess')?'Lichess':'Chess.com';
-          return '<div class="game-row">'+
-            '<div class="game-players">'+_badge(g.you)+g.white+' vs '+g.black+'</div>'+
-            '<div class="game-meta">'+site+' &middot; '+g.meta+'</div>'+
-            '<form method="post" action="/analyze" style="margin:0;">'+
-              '<input type="hidden" name="game_url" value="'+g.url+'">'+
-              '<input type="hidden" name="use_case" value="companion">'+
-              '<input type="hidden" name="side" value="'+(g.side||'neither')+'">'+
-              '<input type="hidden" name="speed" value="normal">'+
-              '<input type="hidden" name="model" value="">'+
-              '<button type="submit" class="btn go" style="padding:5px 14px;font-size:.8rem;display:inline-block;width:auto;cursor:pointer;margin-top:0;">Analyze</button>'+
-            '</form></div>';
+          var thumb=g.fen?('<img src="/board-thumb?fen='+encodeURIComponent(g.fen)+'&orient='+(g.side==='black'?'black':'white')+'" '+
+            'width="64" height="64" loading="lazy" alt="final position" '+
+            'style="border-radius:4px;flex-shrink:0;margin-right:10px;vertical-align:middle;">'):'';
+          return '<div class="game-row" style="display:flex;align-items:center;">'+thumb+
+            '<div style="flex:1;min-width:0;">'+
+              '<div class="game-players">'+_badge(g.you)+g.white+' vs '+g.black+'</div>'+
+              '<div class="game-meta">'+site+' &middot; '+g.meta+'</div>'+
+            '</div>'+
+            '<button type="button" class="btn" onclick="selectGame(\\''+g.url+'\\',\\''+(g.side||'neither')+'\\')" '+
+              'style="padding:5px 14px;font-size:.8rem;display:inline-block;width:auto;cursor:pointer;margin:0;">Select</button>'+
+          '</div>';
         }).join('');
       })
       .catch(function(){el.innerHTML='<p class="hint">Could not load your recent games.</p>';});
@@ -494,7 +520,27 @@ _WAITING = Template("""<!doctype html><html lang="en"><head>
     if(done) return;
     var elapsed=(Date.now()-startTime)/1000;
     fetch('/job/'+jobId)
-      .then(function(r){return r.json();})
+      .then(function(r){
+        /* Jobs live in the server's memory (Phase 2 design), so a server
+           restart forgets them. Without this check a dead job 404s forever
+           and the page spins silently — tell the user what happened. */
+        if(r.status===404){
+          done=true;
+          var b=document.getElementById('s-banner');
+          b.className='banner warn';b.textContent='This analysis is no longer running';
+          document.getElementById('s-text').style.display='none';
+          document.getElementById('s-move-text').style.display='none';
+          document.getElementById('s-keep-open').style.display='none';
+          setBar(0);
+          var fb=document.getElementById('s-fail-box');
+          fb.style.display='';
+          document.getElementById('s-fail-msg').textContent=
+            'The server was restarted while this analysis was in progress, so the job was lost. '+
+            'Go back to the home page and start it again — your game is still one click away.';
+          throw new Error('job gone');
+        }
+        return r.json();
+      })
       .then(function(d){
         if(d.current_move && d.total_moves){
           var mt=document.getElementById('s-move-text');

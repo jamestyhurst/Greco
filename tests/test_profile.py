@@ -164,12 +164,14 @@ def _link_both(user):
     return get_user_by_id(user.id)
 
 
+_FEN = "5r2/8/8/8/8/4K2k/6p1/3R4 w - - 0 1"
 _LICHESS_ROW = {"id": "abcd1234", "white": "alice123", "black": "bob",
                 "result": "white", "variant": "standard", "speed": "rapid",
-                "lichess_url": "https://lichess.org/abcd1234", "ended": 200}
+                "lichess_url": "https://lichess.org/abcd1234", "ended": 200,
+                "fen": _FEN}
 _CC_ROW = {"id": "9", "url": "https://www.chess.com/game/live/9",
            "white": "carol", "black": "alice123", "result": "black",
-           "time_class": "rapid", "end_time": 300,
+           "time_class": "rapid", "end_time": 300, "fen": _FEN,
            "pgn": '[Event "Live Chess"]\n1. e4 *'}
 
 
@@ -193,6 +195,8 @@ def test_recent_games_merges_sites_newest_first(tmp_db, user, monkeypatch):
         assert cc["side"] == "black" and cc["you"] == "win"
         # alice123 was White on lichess and White won.
         assert li["side"] == "white" and li["you"] == "win"
+        # FENs pass through for the board thumbnails.
+        assert cc["fen"] == _FEN and li["fen"] == _FEN
         assert data["errors"] == []
     finally:
         app.dependency_overrides.pop(require_login, None)
@@ -250,6 +254,32 @@ def test_recent_games_400_when_nothing_linked(tmp_db, user):
     client = make_client(user)
     try:
         assert client.get("/recent-games").status_code == 400
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+# ---------------------------------------------------------------------------
+# GET /board-thumb — SVG thumbnails for game lists
+# ---------------------------------------------------------------------------
+
+def test_board_thumb_renders_cacheable_svg(tmp_db, user):
+    client = make_client(user)
+    try:
+        r = client.get("/board-thumb", params={"fen": _FEN, "orient": "black"})
+        assert r.status_code == 200
+        assert r.headers["content-type"].startswith("image/svg")
+        assert "<svg" in r.text
+        assert "max-age" in r.headers.get("cache-control", "")
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_board_thumb_rejects_invalid_fen(tmp_db, user):
+    """The FEN is untrusted query input — garbage must 422, not crash."""
+    client = make_client(user)
+    try:
+        r = client.get("/board-thumb", params={"fen": "not a position at all"})
+        assert r.status_code == 422
     finally:
         app.dependency_overrides.pop(require_login, None)
 

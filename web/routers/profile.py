@@ -16,7 +16,7 @@ import re
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 
 from importers import fetch_chesscom_recent_games, load_from_lichess, _make_http_client
 from web.auth import require_login
@@ -143,6 +143,7 @@ def recent_games(
                     "meta": g["speed"], "url": g["lichess_url"],
                     "ended": g["ended"],
                     "side": side, "you": _perspective(side, g["result"]),
+                    "fen": g.get("fen", ""),
                 })
         except Exception as exc:
             _log.warning("recent-games: Lichess fetch failed for %s: %s", lu, exc)
@@ -160,6 +161,7 @@ def recent_games(
                     "meta": g["time_class"], "url": g["url"],
                     "ended": g["end_time"],
                     "side": side, "you": _perspective(side, g["result"]),
+                    "fen": g.get("fen", ""),
                 })
         except Exception as exc:
             _log.warning("recent-games: Chess.com fetch failed for %s: %s", cu, exc)
@@ -167,6 +169,41 @@ def recent_games(
 
     games.sort(key=lambda g: g["ended"], reverse=True)
     return JSONResponse({"games": games[:10], "tc": tc, "errors": errors})
+
+
+@router.get("/board-thumb")
+def board_thumb(
+    fen: str,
+    orient: str = "white",
+    current_user: User = Depends(require_login),
+) -> Response:
+    """Render a position as a small SVG board — the game-list thumbnail.
+
+    The FEN is untrusted query input: chess.Board() is the validator (a bad
+    FEN raises → 422, nothing is rendered). `orient=black` flips the board so
+    the viewer's own side sits at the bottom, matching how they experienced
+    the game. Thumbnails for a given position never change, so the response
+    is marked cacheable — the browser fetches each board once, not on every
+    home-page visit.
+    """
+    import chess
+    import chess.svg
+
+    try:
+        board = chess.Board(fen)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid FEN.")
+    svg = chess.svg.board(
+        board,
+        orientation=chess.BLACK if orient == "black" else chess.WHITE,
+        size=140,
+        coordinates=False,
+    )
+    return Response(
+        content=svg,
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "private, max-age=86400"},
+    )
 
 
 @router.get("/profile/chesscom-games")
@@ -236,6 +273,8 @@ def _fetch_recent_games(
         "opening": "false",
         "clocks": "false",
         "evals": "false",
+        # Ask for the final position so game lists can show board thumbnails.
+        "lastFen": "true",
     }
     with _make_http_client() as client:
         resp = client.get(
@@ -266,6 +305,7 @@ def _fetch_recent_games(
                 # Lichess timestamps are epoch MILLIseconds; normalise to epoch
                 # seconds so lists from different sites can be merge-sorted.
                 "ended": int(g.get("lastMoveAt", g.get("createdAt", 0)) or 0) // 1000,
+                "fen": g.get("lastFen", ""),
             })
         except Exception:
             continue

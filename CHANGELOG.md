@@ -7,6 +7,33 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Fixed — first live-use feedback round (James, 2026-07-18)
+- **Nav showed "Sign in" to a signed-in user** during analysis: every
+  `render_waiting`/`render_error` call in `POST /analyze` dropped `current_user`
+  (the result page passed it; the waiting page didn't). All ten calls now pass the user.
+- **Waiting page spun forever on a dead job.** Jobs live in server memory, so a restart
+  forgets them; `/job/{id}` then 404s and the old JS swallowed it silently. The poll now
+  detects the 404, stops, and tells the user the server restarted and to start again.
+  (Diagnosed as the cause of the "stuck" Chess.com analysis — the pipeline itself was
+  verified fine offline: URL → PGN → Stockfish, 44 plies.)
+- **Active time-control chip was unreadable** (inherited the gold button background under
+  gold text). Both chip states now set background AND text colour explicitly.
+
+### Changed — home page polish (design addendum v1.1)
+- **Time-control chips carry ivory chess-piece markers** — deliberately Greco's own
+  language, not Lichess/Chess.com iconography: piece weight grows with the time control
+  (♙ bullet, ♘ blitz, ♗ rapid, ♖ classical, ♕ daily, ♔ all).
+- **Select replaces one-click Analyze** on home-page games: selecting prefills the form
+  (game URL + the side you played) and scrolls to it, but mode/model/depth stay yours to
+  choose before launching (design rule: prefill, don't railroad).
+- **Board thumbnails**: each game row shows its final position as a small SVG board,
+  oriented to the side you played — `GET /board-thumb?fen=` (FEN validated via
+  `chess.Board`, response browser-cacheable). FENs ride along from both sites
+  (Chess.com archives include `fen`; Lichess via `lastFen=true`).
+- Design Concept updated in place (Addendum 2026-07-18, v1.1): the play→dwell→analyze
+  home-page doctrine, Select-don't-railroad, visual identity per game, no-imitation
+  aesthetic rule — and the norm that the concept doc evolves in small increments.
+
 ## [0.41.103] — 2026-07-18
 
 ### Added — recent games on the home page (the play → dwell → analyze flow)

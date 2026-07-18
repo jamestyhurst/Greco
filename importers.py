@@ -161,6 +161,9 @@ def fetch_chesscom_recent_games(
                 "result": _chesscom_winner(g),
                 "time_class": g.get("time_class", ""),
                 "end_time": g.get("end_time", 0),
+                # Final position, provided directly by the archive API — powers
+                # the board thumbnail without parsing the PGN.
+                "fen": g.get("fen", ""),
                 "pgn": g["pgn"],
             })
             if len(games) >= max_games:

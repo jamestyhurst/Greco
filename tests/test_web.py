@@ -209,6 +209,33 @@ def test_lichess_url_error_returns_400(monkeypatch):
     assert "Lichess" in r.text or "Game not found" in r.text
 
 
+def test_waiting_page_shows_logged_in_nav(monkeypatch, tmp_path):
+    """Regression: POST /analyze rendered the waiting page without the user,
+    so a signed-in user saw 'Sign in' in the nav mid-analysis."""
+    _ready(monkeypatch)
+    from web.auth import get_current_user as gcu
+    fake = AnalysisResult(rid=20, base="A vs B",
+                          out_dir=str(tmp_path), html_path=str(tmp_path / "r.html"))
+    monkeypatch.setattr(analysis, "run_analysis", lambda **kw: fake)
+    app.dependency_overrides[gcu] = lambda: _FAKE_USER
+    try:
+        r = client.post("/analyze", data={"pgn_text": "1. e4 e5"})
+        assert r.status_code == 200
+        assert "Sign&nbsp;out" in r.text
+        assert "Sign&nbsp;in" not in r.text
+    finally:
+        app.dependency_overrides.pop(gcu, None)
+
+
+def test_waiting_page_explains_vanished_job():
+    """The waiting page must handle a 404 from /job/{id} (in-memory jobs die
+    with the server) by telling the user instead of spinning forever."""
+    from web.templates import render_waiting
+    html = render_waiting("dead-job-id")
+    assert "r.status===404" in html
+    assert "no longer running" in html
+
+
 # ---------------------------------------------------------------------------
 # game_url input — Chess.com and Lichess auto-detection
 # ---------------------------------------------------------------------------
