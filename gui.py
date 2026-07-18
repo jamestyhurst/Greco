@@ -32,7 +32,15 @@ from importers import load_pgn
 from analyzer import analyze_pgn
 from triage import annotate_with_tiers
 from narrator import generate_narrative
-from outputs import assemble_report, markdown_to_html, report_basename, default_reports_dir, export_shareable_html
+from outputs import (
+    REPORTED_GAMES_DIRNAME,
+    archive_reported_pgn,
+    assemble_report,
+    default_reports_dir,
+    export_shareable_html,
+    markdown_to_html,
+    report_basename,
+)
 import essay_mode as _essay
 from version import __version__
 
@@ -631,12 +639,21 @@ class GrecoGUI:
             html_path = markdown_to_html(
                 md_path, game=game, flipped=(p["user_is"] == "black")
             )
+            # The game now has a report: file the source PGN from the library
+            # root into 'Games with Reports' (no-op for pasted text or for
+            # files picked from anywhere else).
+            pgn_after = p["pgn_path"]
+            if not p.get("pgn_paste"):
+                filed = archive_reported_pgn(p["pgn_path"])
+                if filed:
+                    pgn_after = str(filed)
+                    self.q.put(("status", f"Filed the PGN into '{REPORTED_GAMES_DIRNAME}'"))
             self.q.put(("done", str(html_path)))
             # Developer-only (GRECO_DEV): quietly refill the test pool with a
             # similar game so the developer never runs out of games to test on.
             if os.environ.get("GRECO_DEV"):
                 threading.Thread(target=self._dev_fetch_similar,
-                                 args=(p["pgn_path"],), daemon=True).start()
+                                 args=(pgn_after,), daemon=True).start()
         except Exception as exc:
             self.q.put(("error", f"{exc}\n\n{traceback.format_exc()}"))
 

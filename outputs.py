@@ -161,6 +161,53 @@ def default_reports_dir() -> Path:
         return fallback
 
 
+# Sub-folder of the PGN library where games that already have a report are filed.
+REPORTED_GAMES_DIRNAME = "Games with Reports"
+
+
+def pgn_library_dir() -> Path:
+    r"""The user's canonical PGN library: Documents\Chess Game Files. This is the
+    C: source that sync_pgns.bat mirrors to E:. Auto-filing (below) only ever acts
+    on files sitting directly in this folder."""
+    return Path.home() / "Documents" / "Chess Game Files"
+
+
+def archive_reported_pgn(pgn_path, library_dir: Optional[Path] = None) -> Optional[Path]:
+    r"""File a PGN into '<library>\Games with Reports' after a report was generated.
+
+    Best-effort and deliberately conservative — never raises, so a filing problem
+    can never sink a finished report:
+      * acts only on a file sitting DIRECTLY in the library root (never touches
+        PGNs elsewhere on disk, and never re-files one already in a sub-folder);
+      * on a name collision with an identical archived copy, drops the duplicate;
+      * on a collision with different content, moves under a numbered name.
+
+    Returns the file's new path if it was moved (or already archived as an
+    identical copy), else None.
+    """
+    try:
+        src = Path(pgn_path)
+        root = Path(library_dir) if library_dir else pgn_library_dir()
+        if not src.is_file() or src.parent.resolve() != root.resolve():
+            return None
+        dest_dir = root / REPORTED_GAMES_DIRNAME
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / src.name
+        if dest.exists():
+            if dest.read_bytes() == src.read_bytes():
+                src.unlink()  # exact duplicate of the archived copy
+                return dest
+            stem, suffix = src.stem, src.suffix
+            n = 2
+            while dest.exists():
+                dest = dest_dir / f"{stem} ({n}){suffix}"
+                n += 1
+        src.rename(dest)
+        return dest
+    except OSError:
+        return None
+
+
 def format_move_list(game: GameAnalysis) -> str:
     """Return the game's mainline as '1. e4 e5 2. Nf3 Nc6 ...' wrapped to ~70 cols."""
     tokens: List[str] = []
