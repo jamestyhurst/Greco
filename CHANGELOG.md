@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.104] — 2026-07-18
+
 ### Fixed — first live-use feedback round (James, 2026-07-18)
 - **Nav showed "Sign in" to a signed-in user** during analysis: every
   `render_waiting`/`render_error` call in `POST /analyze` dropped `current_user`
