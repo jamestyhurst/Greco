@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.105] — 2026-07-18
+
 ### Fixed
 - **CI was red on every run**: collecting the web tests died with
   `ModuleNotFoundError: No module named 'itsdangerous'`. Starlette's
