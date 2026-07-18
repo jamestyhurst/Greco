@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.103] — 2026-07-18
+
 ### Added — recent games on the home page (the play → dwell → analyze flow)
 > Design intent (James, 2026-07-18): play a game on either platform, then immediately and
 > smoothly generate a Greco report if you want to dwell on it — savoring a win or recovering
