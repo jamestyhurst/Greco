@@ -14,7 +14,7 @@ holds 100 years on.
 [![Engine](https://img.shields.io/badge/Engine-Stockfish-769656)](https://stockfishchess.org/)
 [![Narration](https://img.shields.io/badge/Narration-Claude-D97757)](https://www.anthropic.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/github/v/tag/jamestyhurst/Greco?label=version&color=orange)](CHANGELOG.md)
 
 </div>
 
@@ -73,9 +73,9 @@ didn't play, the winner becomes a positive role model to emulate and every annot
 with a portable lesson you can carry into your own games.
 
 ### Classical chess literature *(v0.3.0)*
-Greco maintains a curated library of **public-domain chess books** (Capablanca's *Chess
-Fundamentals* is the first; more to follow) and retrieves the most relevant passages at analysis
-time via **SQLite FTS5** full-text search. The retrieval matches the game's engine-detected
+Greco maintains a curated library of **public-domain chess books** — 20 texts and counting,
+from Capablanca's *Chess Fundamentals* onward — and retrieves the most relevant passages at
+analysis time via **SQLite FTS5** full-text search. The retrieval matches the game's engine-detected
 themes (a sacrifice, an endgame, a specific opening). When a retrieved passage genuinely fits the
 position being annotated, the narrator quotes it with attribution — *"As Capablanca writes, …"* —
 embedding timeless principle alongside engine evaluation.
@@ -95,6 +95,10 @@ Claude as structured data, so the prose describes the *actual* position — not 
 - **Recapture precision** — "recapture" only when the opponent just captured on that square
 - **No phantom features** — files called open only when they truly are
 - **Psychology grounded in eval** — "blunder under time pressure" is flagged when the position confirms it
+- **Certified claims** — an Output Fact-Gate (`factgate.py`) of 26 deterministic predicates
+  (pins, skewers, zugzwang, initiative, prophylaxis…) controls which chess claims the narrator
+  may make, and a claim-verification self-test (`factcheck.py` / `tools/verify_report.py`)
+  checks the finished report for contradictions
 
 > **Core principle — *data-back, never prompt-stuff*:** the engine supplies the facts; Claude
 > supplies language and psychology. That division is what keeps Greco honest.
@@ -109,8 +113,9 @@ PGN source → importers → analyzer (Stockfish) → triage → narrator (Claud
                                                    commentary.py ← voice style guide + refs
 ```
 
-The analysis pipeline is shared by every front-end. Two surfaces exist today — a Tkinter desktop
-GUI and a FastAPI localhost web server — and both call the exact same pipeline with no divergence.
+The analysis pipeline is shared by every front-end. Three surfaces exist today — a Tkinter
+desktop GUI, a multi-user FastAPI web app, and an argparse CLI — and all call the exact same
+pipeline with no divergence.
 
 ## Running Greco
 
@@ -122,14 +127,19 @@ Browse to a PGN, pick a voice and speed, click Analyze. The settings panel persi
 Stockfish path, API key, and model choice to `config.json` — no environment variables required
 after the first run.
 
-### Browser (Greco Online — Phase 1)
+### Browser (Greco Online)
 ```powershell
 python -m web.main          # or double-click run_greco_web.bat
 # then open http://127.0.0.1:5000   (interactive API docs at /docs)
 ```
-The full pipeline runs behind a local FastAPI server: upload a PGN in the browser, get the same
-self-contained HTML report. The server reads the same `config.json` the desktop GUI writes, binds
-to `127.0.0.1` only, and keeps the API key server-side. See *Greco Online* below.
+The full pipeline runs behind a local FastAPI server — and it's a real multi-user web app:
+log in, upload a PGN (or paste a Chess.com/Lichess game URL), and the analysis runs as a
+background job with a live status page. Link your Chess.com or Lichess account on the profile
+page and recent games appear with one-click Analyze buttons; an email arrives when a report is
+ready. A phone-friendly dashboard shows your game history, accuracy trend, and CSV export,
+all persisted in a SQLite database (Alembic-migrated, PostgreSQL-ready for hosting). The
+server reads the same `config.json` the desktop GUI writes, binds to `127.0.0.1` only, and
+keeps the API key server-side. See *Greco Online* below.
 
 ### Command line
 ```powershell
@@ -137,7 +147,7 @@ set PYTHONUTF8=1   # needed on Windows when the username path contains non-ASCII
 python main.py --pgn-file "sample-games/Spassky vs Fischer - 1972 WC Game 13 (Alekhine Defense).pgn" --use-case coaching
 ```
 
-📖 Every flag, Lichess import, model selector, and output option is documented in
+📖 Every flag, Chess.com/Lichess import, model selector, and output option is documented in
 [`docs/USAGE.md`](docs/USAGE.md).
 
 **Requirements:** Python 3.11+, free [Stockfish](https://stockfishchess.org/download/) binary,
@@ -150,24 +160,27 @@ and takes under a minute.
 venv\Scripts\python -m pip install -r requirements-dev.txt
 venv\Scripts\python -m pytest
 ```
-The suite (`tests/`) covers the triage rules engine, report naming and the shareable-HTML
-export, the FastAPI routes (engine + API mocked, so it runs offline and free), the
-knowledge-corpus FTS5 retrieval, and the version-bump automation — 26 tests in ~7s. The
-release helper (`scripts/ship.py`) runs them automatically before every push.
+The suite (`tests/`) has grown to nearly 1,300 tests: the triage rules engine, report naming
+and the shareable-HTML export, the FastAPI routes — accounts, jobs, profile, Chess.com/Lichess
+integration (engine + API mocked, so it runs offline and free) — the knowledge-corpus FTS5
+retrieval, the full fact-gate predicate library, and the version-bump automation. A handful of
+opt-in live smoke tests (`GRECO_NETWORK_TESTS=1`) hit the real Chess.com/Lichess APIs. The
+release helper (`scripts/ship.py`) runs the suite automatically before every push.
 
 ## Greco Online — where this is going
 
 Greco is being developed toward a **hosted, multi-user web application** — open it in any
-browser (including a phone), no install. The seven-phase roadmap:
+browser (including a phone), no install. Six of the seven phases are complete; deploying is
+the remaining milestone on the path to v1.0:
 
 | Phase | What ships | Status |
 |---|---|---|
 | **1 — Localhost web** | Full pipeline via browser on your own machine (`web/main.py`, FastAPI + `/docs`) | ✅ done |
-| **2 — Async jobs** | Queued → Analyzing → Done status page; no more page-wait | todo |
-| **3 — Accounts + roles** | Login; per-user game history; admin sees all | todo |
-| **4 — Database** | SQLite → PostgreSQL; persistent, addressable reports | todo |
-| **5 — Phone UI + export** | Responsive layout; accuracy-trend dashboard; CSV/PDF | todo |
-| **6 — Auto-import + notify** | Connect Chess.com/Lichess → auto-analyze new games → email you | todo |
+| **2 — Async jobs** | Queued → Analyzing → Done status page; no more page-wait | ✅ done (v0.11) |
+| **3 — Accounts + roles** | Login; per-user game history; admin sees all | ✅ done (v0.12) |
+| **4 — Database** | SQLite (SQLAlchemy + Alembic migrations); persistent reports; PostgreSQL-ready | ✅ done (v0.13) |
+| **5 — Phone UI + export** | Responsive layout; accuracy-trend dashboard; CSV export | ✅ done (v0.14–v0.15) |
+| **6 — Account import + notify** | Link Chess.com/Lichess → one-click analysis of recent games → email when ready | ✅ done (v0.16; Chess.com v0.41.102) |
 | **7 — Deploy** | Live on Render/Railway with a real domain and HTTPS | todo |
 
 Each phase ships a Greco that is useful on its own. The PGN viewer (formerly backlog #8) shipped
@@ -183,7 +196,8 @@ in v0.3.0.
 | **Corpus RAG** | SQLite FTS5 full-text search over public-domain chess texts |
 | **Replay board** | Self-contained JavaScript, python-chess SVG pieces, no external deps |
 | **Rendering** | `python-chess` SVG boards · `matplotlib` eval graphs |
-| **Front-ends** | Tkinter desktop GUI · FastAPI localhost web server · argparse CLI |
+| **Web data layer** | SQLAlchemy 2.0 + Alembic migrations (SQLite locally, PostgreSQL-ready) |
+| **Front-ends** | Tkinter desktop GUI · multi-user FastAPI web app · argparse CLI |
 | **Output** | Markdown · self-contained HTML (boards, graph, and replay viewer all embedded) |
 
 ## Repository layout
@@ -191,10 +205,13 @@ in v0.3.0.
 ```
 greco/
 ├── importers.py · analyzer.py · triage.py     # analysis pipeline (data-back)
+├── factgate.py · factcheck.py                 # certified-claim gate + report self-test
 ├── narrator.py · outputs.py                   # narration and report assembly
 ├── knowledge.py + knowledge/                  # corpus RAG layer (FTS5 + texts)
 ├── commentary.py + commentary_refs/           # voice style guide + reference transcripts
-├── gui.py · web/ · main.py                    # front-ends (desktop / web / CLI)
+├── gui.py · web/ · main.py                    # front-ends (desktop / multi-user web / CLI)
+├── alembic/    database migrations for the web app
+├── tests/      pytest suite — ~1,300 tests, engine- and API-free by design
 ├── docs/       ARCHITECTURE · USAGE · ROADMAP · product-vs-in-house
 ├── tools/      developer tools (A/B harness, Gutenberg fetcher, style tester)
 ├── sample-games/    example PGNs — famous games + real amateur play
