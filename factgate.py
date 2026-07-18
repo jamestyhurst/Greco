@@ -5627,10 +5627,72 @@ GATED_TAGS = (
     "open_center",
     "rook_on_sixth",
     "tripled_pawns",
+    # --- Human-difficulty labels (Maia; docs/specs/MAIA_INTEGRATION.md §5). Certified
+    #     from the per-ply Maia fact block, not from the board. ---
+    # ⚠️ PENDING_APPROVAL: label definitions and narrator wording not reviewed by James.
+    "engine_move",
+    "humanly_findable",
+    "predictable_human_error",
 )
 # (The `rook_on_open_file` tag certifies a specific rook's standing position — distinct
 # from the packet-level open_files / half_open_for_white / half_open_for_black fields,
 # which state which files are open. This tag gates the piece-level claim.)
+
+
+def human_labels(move_analysis) -> Set[str]:
+    """Certified human-difficulty labels for one ply, read from the Maia fact block
+    (docs/specs/MAIA_INTEGRATION.md §5.2) rather than from the board.
+
+    Returns a SET so `engine_move` and `predictable_human_error` can co-occur (the
+    best move was an engine move AND the player's reply was itself a typical human
+    error). Empty unless Maia actually ran on this ply (`maia_played_rank is not
+    None`) and the player genuinely erred (`cp_loss > 100`) — the gate's "absence
+    is not falsehood" posture. Duck-typed (getattr) so a partial object never
+    raises; a Maia glitch must degrade to "no label", never crash a report.
+    """
+    # ⚠️ PENDING_APPROVAL: label thresholds and narrator wording not reviewed by James.
+    labels: Set[str] = set()
+    rank = getattr(move_analysis, "maia_played_rank", None)
+    if rank is None:
+        return labels  # Maia did not run here — say nothing about human difficulty
+    gap = getattr(move_analysis, "cp_loss", 0) or 0
+    if gap <= 100:
+        return labels  # no real miss to characterize (>1 pawn lost is the floor)
+
+    p_best = getattr(move_analysis, "maia_best_move_p", None)
+    p_played = getattr(move_analysis, "maia_played_p", None)
+    off_list = bool(getattr(move_analysis, "maia_best_move_off_list", False))
+    best_is_recapture = bool(getattr(move_analysis, "best_is_recapture", False))
+
+    # Label A — engine_move: the best move was objectively best but humanly obscure
+    # (a human at this band plays it <10% of the time, or it was off a wide top-K).
+    # Guard: never label an obvious recapture (high p_best) an "engine move".
+    is_obscure = (p_best is not None and p_best < 0.10) or off_list
+    recapture_escape = best_is_recapture and p_best is not None and p_best >= 0.50
+    if is_obscure and not recapture_escape:
+        labels.add("engine_move")
+    # Label B — humanly_findable: mutually exclusive with A by the p_best thresholds
+    # (the 0.10–0.25 band is a deliberate no-label dead zone).
+    elif p_best is not None and p_best >= 0.25:
+        labels.add("humanly_findable")
+
+    # Label C — predictable_human_error: the mistake played was itself a top-3 human move.
+    if p_played is not None and p_played >= 0.20 and rank <= 3:
+        labels.add("predictable_human_error")
+
+    return labels
+
+
+def human_label(move_analysis) -> Optional[str]:
+    """The single primary human-difficulty label for the `MoveAnalysis.human_label`
+    field and the narrator `human` sub-dict: the miss-characterization
+    (`engine_move` / `humanly_findable`) takes precedence over the played-move label.
+    The gate uses `human_labels` (the full set); this is the headline accessor."""
+    labels = human_labels(move_analysis)
+    for primary in ("engine_move", "humanly_findable", "predictable_human_error"):
+        if primary in labels:
+            return primary
+    return None
 
 
 def certified_claims(
@@ -5639,6 +5701,7 @@ def certified_claims(
     board_after: chess.Board,
     mover_color: bool,
     phase: str = "middlegame",
+    move_analysis: object = None,
 ) -> Set[str]:
     """Run every predicate for one ply and return the set of proven claim TAGS — the
     per-ply allow-set. Each predicate self-vetoes cheaply, so a quiet move costs only
@@ -6168,5 +6231,12 @@ def certified_claims(
     tpw = _safe(lambda: has_tripled_pawns(board_before, move, board_after, mover_color))
     if tpw and tpw[0]:
         tags.add("tripled_pawns")
+
+    # Human-difficulty labels (Maia). Read from the MoveAnalysis fact block when one
+    # is supplied; the board-only callers (no move_analysis) simply skip them.
+    if move_analysis is not None:
+        hl = _safe(lambda: human_labels(move_analysis))
+        if hl:
+            tags |= hl
 
     return tags

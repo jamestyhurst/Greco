@@ -7,6 +7,40 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added — Maia integration, Phases 2–5 (human-vs-engine), behind a graceful fallback
+> Priority #3b from `AUTONOMOUS_DEVELOPMENT_DOCTRINE.md` (canon → critic → **Maia +
+> counterfactuals** → deploy). Built offline, TDD, with **no engine binaries required** — the
+> live lc0 wrapper (Phase 1) and analyzer second-pass wiring + cost calibration (Phase 6) wait
+> on the manual lc0 + Maia-weights download (Phase 0). **Not yet a version bump:** the narrator
+> wording is `⚠️ PENDING_APPROVAL` and the feature is not "done" under Law 1 until verified on
+> real engine output. 56 new tests; full suite 1273 passed.
+
+- **`maia.py` (new)** — the engine-free core:
+  - `select_band` / `band_for_mover` — rating-band selection (the deterministic
+    `(elo + 50) // 100` clamp to the trained 1100–1900 bands, avoiding `round()`'s banker's
+    rounding at the .5 boundary), with `clamped` / `defaulted` honesty flags and defensive Elo
+    parsing (absent / `"?"` / malformed → config default).
+  - `find_weight_bands` / `maia_available` — the master availability gate (`maia_ok`): False
+    unless the lc0 binary **and** ≥1 `maia-*.pb.gz` are present, so Maia stays OFF and reports
+    are byte-for-byte today's until Phase 0 lands.
+  - `maia_node_budget` — the §2.1 adaptive node table (forced 0 → critical 800), reading only
+    facts already on `MoveAnalysis` plus the triage tier; duck-typed so it can never crash a report.
+- **`analyzer.py`** — the §3.1 human-comparison block added to `MoveAnalysis` (12 fields:
+  `maia_rating_band`, `maia_top_moves`, `maia_best_move_p`, `maia_played_p`/`_rank`,
+  `maia_line_san`/`_eval_cp`, `human_label`, …), all optional and default-empty.
+- **`factgate.py`** — `human_labels()` (gate set; `engine_move` and `predictable_human_error`
+  may co-occur) + `human_label()` (primary accessor); three new `GATED_TAGS`
+  (`engine_move`, `humanly_findable`, `predictable_human_error`) with the §5.2 thresholds and
+  the obvious-recapture guard; `certified_claims()` gains an optional `move_analysis` param that
+  threads the labels into the allow-set (board-only callers are unaffected). `⚠️ PENDING_APPROVAL`.
+- **`narrator.py`** — `_move_to_dict` emits a `human` sub-dict (tier 1+, beside `certified`) and
+  a `human_line` (tier 2+, beside `variations`), both skip-safe + try/except; three
+  fact-gate narrator rules added for the new labels. `⚠️ PENDING_APPROVAL` (wording).
+- Tests: `tests/test_maia.py` (band clamp + availability + node budget),
+  `tests/test_maia_labels.py` (thresholds, recapture guard, abstention, dead zone,
+  co-occurrence, gate integration), `tests/test_maia_serialization.py` (the human/human_line
+  packets, tier-gating, skip-safety).
+
 ## [0.41.101] — 2026-06-19
 
 ### Changed

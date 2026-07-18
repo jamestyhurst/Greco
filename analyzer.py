@@ -108,6 +108,23 @@ class MoveAnalysis:
     sacrifice_window_invested: float = 0.0  # pawns invested at the window origin (mover's POV)
     # --- PV material trajectory (backlog #23) ---
     pv_material_delta: float = 0.0  # net pawns gained by the side-to-move if they follow best_pv_san
+    # --- Human-comparison block (Maia; docs/specs/MAIA_INTEGRATION.md §3.1). All
+    #     optional and default-empty: a move where Maia was skipped (forced) or
+    #     unavailable (lc0/weights absent) is simply blank, following the same
+    #     truthiness-guard convention every optional field above uses. ---
+    maia_rating_band: Optional[int] = None       # band used for THIS mover (e.g. 1500)
+    maia_rating_clamped: bool = False            # the mover's Elo fell outside Maia's trained range
+    maia_rating_defaulted: bool = False          # no usable PGN Elo; the config default band was used
+    maia_top_moves: List[Dict[str, Any]] = field(default_factory=list)
+                                                 # ranked: [{san, uci, p_maia, p_estimated, cp_maia}], top-K
+    maia_best_move_p: Optional[float] = None     # Maia probability of STOCKFISH'S best move (key signal); None if unknown
+    maia_best_move_off_list: bool = False        # SF best was absent from a wide top-K (p≈0, meaningful)
+    maia_played_p: Optional[float] = None        # Maia probability of the move ACTUALLY played
+    maia_played_rank: Optional[int] = None       # rank of the played move in Maia's list (1 = most human); None if off-list
+    maia_line_san: str = ""                      # numbered SAN of Maia's HUMAN continuation (capped at trustworthy depth)
+    maia_line_eval_cp: Optional[int] = None      # Stockfish eval at the END of the Maia line (White POV)
+    maia_nodes_used: int = 0                     # node budget actually spent (cost logging / transparency)
+    human_label: Optional[str] = None            # certified: 'engine_move' | 'humanly_findable' | 'predictable_human_error' | None
 
 
 @dataclass

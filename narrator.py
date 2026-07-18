@@ -95,6 +95,12 @@ def _make_http_client() -> httpx.Client:
 # James — remove the tag only after he approves the wording.
 # ─────────────────────────────────────────────────────────────────────────────
 _FACTGATE_NARRATOR_RULES: dict[str, str] = {
+    # ⚠️ PENDING_APPROVAL: Maia human-difficulty label wording — not reviewed by James
+    #     (docs/specs/MAIA_INTEGRATION.md §5.3). The three labels are certified by
+    #     factgate.human_labels() from the Maia fact block, gated like every tag here.
+    "engine_move": '''certifies that the player MISSED Stockfish's best move AND that best move was humanly obscure — at this player's rating band a human finds it less than one time in ten, or it fell outside Maia's wide top-K of human candidate moves. Evidence is the Maia probability of the best move and the rating `band` (which may be clamped/defaulted — hedge accordingly). When certified: you MAY frame the missed best move as "an engine move" — objectively best yet the kind of resource a human at this level rarely spots; phrases like "the engine's [move] is the sort of move a human almost never finds," or "objectively best, but an engine move — barely one player in ten at this level would see it" are appropriate. Pair naturally with the actual played move. NEVER call any move an "engine move," "computer move," or "a move only an engine would find" without this tag, and never apply that framing to an obvious recapture or natural developing move (the gate already refuses those cases).''',
+    "humanly_findable": '''certifies that the player missed Stockfish's best move but that best move was human-natural — a player at this rating band finds it at least a quarter of the time. Evidence is the Maia probability of the best move and the `band`. When certified: you MAY tell the player the miss was NOT excusable as engine depth — it was a findable move; phrases like "this one wasn't hidden — a good share of players at your level would have found [move]," or "very much a human move to spot, and worth the regret" are appropriate. This is the deliberate opposite of `engine_move`. NEVER assert that a missed move "should have been found" or "was there to be seen" as a certified judgement without this tag.''',
+    "predictable_human_error": '''certifies that the move actually PLAYED — though a mistake of more than a pawn — was itself among the most common human choices at this band: one of Maia's top-3 human moves, played at least a fifth of the time. The most coaching-relevant label — it separates a freak slip from a systematic, level-typical misjudgement. When certified: frame the error as a natural, predictable one to make at this level and open the teachable pattern; phrases like "this is a very human mistake — it's among the moves most players at your level would choose here," or "the kind of error that repeats until the underlying idea clicks" are appropriate. May co-occur with `engine_move` (the best was an engine move and the reply was a typical human error) — phrase the combination. NEVER characterise a mistake as "typical," "natural," or "the move players at your level routinely make" without this tag.''',
     "knight_on_fifth": '''certifies that the mover's knight newly lands on the mover's 5th rank (rank index 4 for White, rank index 3 for Black), where the knight was NOT already on that rank before the move. Evidence gives `square` (the landing square), `rank` ('fifth' for White / 'fourth' for Black, using algebraic rank names), and `mover`. When certified: name the square and describe the central outpost — on the 5th rank the knight sits in the middle of the board, controls up to eight squares across both flanks, and cannot easily be chased by enemy pawns (which would need to be on the 6th rank to attack it); this is the knight's natural home in the heart of the game, combining positional presence with the threat of springing deeper; phrases like "the knight plants itself on the 5th rank at [square]," "an outpost in the heart of the board," or "the knight controls both flanks from [square]" are appropriate; distinguish from `knight_centralized` (which fires only on d4/d5/e4/e5 — the four core squares) and `knight_on_sixth` (one rank further in); a knight on d5 or e5 could fire both `knight_on_fifth` and `knight_centralized` on the same move — acknowledge both if so. Never write that a knight "has established itself on the fifth rank" as a certified claim without this tag.''',
     "bishop_centralized": '''certifies that the mover's bishop moved to one of the four core central squares — d4, d5, e4, or e5. Evidence gives `square` (the landing square) and `mover`. When certified: name the square and describe the geometric power — from a core central square a bishop simultaneously bears on both long diagonals that span the board, maximising its range and reach on every sector; in open positions this is an ideal post; note if the diagonal is aimed at the enemy king's position; phrases like "the bishop centralises to [square]," "stakes a claim on the core of the board," or "from [square] the bishop commands both diagonals" are appropriate. A bishop on d4/d5/e4/e5 may also fire `knight_on_fifth` if a knight is also placed there (impossible on the same square, but possible on the same move in different contexts) — distinguish the pieces clearly. If both `bishop_centralized` and `bishop_long_diagonal` fire on the same move, note both the central post and the specific long diagonal. Never write that a bishop "is centralised" or "occupies a core central square" without this tag — the `knight_centralized` tag covers knights on the same squares; this tag fires only when a bishop moves to one of the four core squares.''',
     "pawn_on_fifth": '''certifies that a pawn newly lands on the mover's 5th rank (rank index 4 for White, rank index 3 for Black), by advance or capture, where the pawn was NOT already on that rank. Evidence gives `square` (the landing square), `rank` ('fifth' for White / 'fourth' for Black, algebraic naming), and `mover`. When certified: name the square and describe the significance of crossing the midpoint — the pawn has entered enemy territory for the first time; from the 5th rank it begins to restrict the opponent's piece mobility, can become a passed pawn or lever, and sets the stage for a deeper advance; frame it as the start of a pawn campaign rather than an endpoint; phrases like "the pawn strides into the opponent's half at [square]," "reaches the fifth rank — now in enemy ground," or "a territorial claim in the opponent's half" are appropriate; calibrate the tone to the pawn type: a central pawn on the 5th is more impactful than a wing pawn (the `pawn_on_sixth` tag covers the next deeper advance). Never write that a pawn "has crossed the midpoint" or "is in enemy territory" as a certified claim without this tag.''',
@@ -619,9 +625,42 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
                 chess.Board(move.fen_after),
                 move.side == "White",
                 move.phase,
+                move_analysis=move,   # adds Maia human-difficulty labels when present
             )
             if tags:
                 d["certified"] = sorted(tags)
+        except Exception:
+            pass
+
+        # Human-comparison block (Maia; spec §3.3) — the human analog of `certified`:
+        # what a player at this rating band would likely have played. Skip-safe (only
+        # when Maia actually ran) and wrapped so a glitch omits the block, never
+        # crashes a report — identical posture to the `certified` emission above.
+        try:
+            if move.maia_top_moves:
+                from factgate import human_label as _human_label
+
+                human: Dict[str, object] = {
+                    "band": move.maia_rating_band,
+                    "top": [
+                        {"san": m.get("san"), "p": m.get("p_maia")}
+                        for m in move.maia_top_moves[:3]
+                    ],
+                }
+                if move.maia_best_move_p is not None:
+                    human["best_move_p"] = move.maia_best_move_p
+                if move.maia_played_p is not None:
+                    human["played_p"] = move.maia_played_p
+                if move.maia_played_rank is not None:
+                    human["played_rank"] = move.maia_played_rank
+                if move.maia_rating_clamped:
+                    human["band_clamped"] = True
+                if move.maia_rating_defaulted:
+                    human["band_defaulted"] = True
+                _label = move.human_label or _human_label(move)
+                if _label:
+                    human["label"] = _label
+                d["human"] = human
         except Exception:
             pass
 
@@ -813,6 +852,18 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
                 variations.append({"type": "alternative", "line": alt["pv_numbered"]})
         if variations:
             d["variations"] = variations
+        # Human continuation line (Maia; spec §3.3) — the multi-ply human-vs-engine
+        # contrast, emitted only on deep-analysis moves (tier 2+) so tier-1 payloads
+        # stay lean. maia_line_san is produced via pv_to_numbered_san at population
+        # time, so an illegal Maia move can never reach prose.
+        try:
+            if move.maia_line_san:
+                human_line: Dict[str, object] = {"line": move.maia_line_san}
+                if move.maia_line_eval_cp is not None:
+                    human_line["eval"] = _format_eval(move.maia_line_eval_cp, None)
+                d["human_line"] = human_line
+        except Exception:
+            pass
         # Tell the model whether the engine's best move is a capture vs recapture
         # so it describes the alternative accurately.
         if "capture" in move.best_move_san or "x" in move.best_move_san:
