@@ -7,6 +7,20 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Fixed — the Lichess connection now actually works (it never did)
+- **`web/routers/profile.py`** — the recent-games list called
+  `lichess.org/api/user/{u}/games`, an endpoint that does not exist (HTTP 404); the
+  documented shape is **`/api/games/user/{u}`**. The feature shipped green in Phase 6
+  because every route test mocks `_fetch_recent_games` — nothing ever exercised the URL.
+  Now pinned by a request-capturing unit test and by opt-in live smoke tests
+  (`tests/test_live_network.py`, run with `GRECO_NETWORK_TESTS=1`), per Doctrine Law 1.
+- **`httpclient.py` (new)** — single shared OS-native-TLS httpx client factory
+  (truststore first, manual Windows-store fallback, Greco User-Agent).
+  `narrator._make_http_client` and `importers._make_http_client` now delegate to it.
+  Root cause fixed: the TLS workaround lived in two copies and only narrator's got the
+  truststore fix after the Python 3.14 upgrade, so every Lichess fetch (URL import AND
+  recent games) died with `CERTIFICATE_VERIFY_FAILED` on this machine.
+
 ### Added — Maia integration, Phases 2–5 (human-vs-engine), behind a graceful fallback
 > Priority #3b from `AUTONOMOUS_DEVELOPMENT_DOCTRINE.md` (canon → critic → **Maia +
 > counterfactuals** → deploy). Built offline, TDD, with **no engine binaries required** — the

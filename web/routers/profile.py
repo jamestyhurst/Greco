@@ -10,6 +10,7 @@ page to show recent games available for one-click analysis.
 """
 from __future__ import annotations
 
+import json
 import logging
 import re
 from typing import Optional
@@ -75,9 +76,14 @@ def lichess_recent_games(current_user: User = Depends(require_login)) -> JSONRes
     return JSONResponse({"games": games, "lichess_username": lu})
 
 
+# The documented games-export endpoint (https://lichess.org/api#tag/Games).
+# NOTE the shape: /api/games/user/{u} — NOT /api/user/{u}/games, which 404s.
+LICHESS_GAMES_API = "https://lichess.org/api/games/user/{username}"
+
+
 def _fetch_recent_games(username: str, max_games: int = 10) -> list:
     """Fetch recent games from the Lichess NDJSON API."""
-    url = f"https://lichess.org/api/user/{username}/games"
+    url = LICHESS_GAMES_API.format(username=username)
     params = {
         "max": str(max_games),
         "perfType": "bullet,blitz,rapid,classical",
@@ -99,7 +105,6 @@ def _fetch_recent_games(username: str, max_games: int = 10) -> list:
         if not line.strip():
             continue
         try:
-            import json
             g = json.loads(line)
             players = g.get("players", {})
             white = players.get("white", {}).get("user", {}).get("name", "?")

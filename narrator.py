@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import json
 import os
-import ssl
 from typing import Dict, List, Optional
 
 import chess
@@ -15,6 +14,7 @@ import httpx
 from anthropic import Anthropic
 
 from analyzer import GameAnalysis, MoveAnalysis, MATE_SCORE
+from httpclient import make_http_client
 from openings import identify_opening
 
 
@@ -38,52 +38,9 @@ def _piece_placement(fen: str) -> str:
 
 
 def _make_http_client() -> httpx.Client:
-    """
-    Build an httpx client that verifies TLS using the operating system's NATIVE
-    trust store, via the `truststore` package.
-
-    Why this matters here: this machine's network re-signs HTTPS through a
-    corporate/AV middlebox whose CA lives in the Windows certificate store but
-    has its Basic Constraints extension not marked "critical". OpenSSL 3.x (which
-    ships with Python 3.11+ — so our Python 3.14 venv) rejects that cert as
-    malformed, while Windows' own verifier (SChannel) accepts it. The old Python
-    3.8 build used an OpenSSL that also tolerated it, which is why this only broke
-    after the interpreter upgrade. `truststore` delegates verification to SChannel
-    on Windows (and to the native store on macOS/Linux), so the chain validates
-    exactly as the OS would — the correct, secure fix, and one that also works
-    unchanged on a clean cloud host where there is no interception.
-
-    Fallback: if `truststore` isn't installed, build a context from certifi plus
-    whatever Windows roots load cleanly (the pre-upgrade behaviour).
-    """
-    timeout = httpx.Timeout(600.0)
-    try:
-        import truststore
-
-        ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        return httpx.Client(verify=ctx, timeout=timeout)
-    except Exception:
-        pass  # fall back to the manual context below
-
-    ctx = ssl.create_default_context()
-    try:
-        ctx.load_default_certs()  # pulls Windows / macOS / Linux system roots
-        if hasattr(ssl, "enum_certificates"):  # Windows only
-            for store_name in ("ROOT", "CA"):
-                try:
-                    for cert, encoding, _trust in ssl.enum_certificates(store_name):
-                        if encoding == "x509_asn":
-                            try:
-                                ctx.load_verify_locations(
-                                    cadata=ssl.DER_cert_to_PEM_cert(cert)
-                                )
-                            except ssl.SSLError:
-                                pass
-                except (OSError, FileNotFoundError):
-                    pass
-    except Exception:
-        pass
-    return httpx.Client(verify=ctx, timeout=timeout)
+    """OS-native-TLS client (see httpclient.py). Long timeout: narration calls
+    to the Anthropic API can legitimately run for minutes on deep reports."""
+    return make_http_client(timeout_seconds=600.0)
 
 
 

@@ -8,11 +8,12 @@ Each loader returns (pgn_text, human_readable_source_description).
 from __future__ import annotations
 
 import re
-import ssl
 from pathlib import Path
 from typing import Optional, Tuple
 
 import httpx
+
+from httpclient import make_http_client
 
 
 LICHESS_URL_RE = re.compile(
@@ -23,23 +24,8 @@ CHESSCOM_URL_RE = re.compile(r"(?:https?://)?(?:www\.)?chess\.com/", re.IGNORECA
 
 
 def _make_http_client() -> httpx.Client:
-    """Same Windows-cert-trusting client used elsewhere in Greco."""
-    ctx = ssl.create_default_context()
-    ctx.load_default_certs()
-    if hasattr(ssl, "enum_certificates"):
-        for store_name in ("ROOT", "CA"):
-            try:
-                for cert, encoding, _trust in ssl.enum_certificates(store_name):
-                    if encoding == "x509_asn":
-                        try:
-                            ctx.load_verify_locations(
-                                cadata=ssl.DER_cert_to_PEM_cert(cert)
-                            )
-                        except ssl.SSLError:
-                            pass
-            except (OSError, FileNotFoundError):
-                pass
-    return httpx.Client(verify=ctx, timeout=httpx.Timeout(30.0))
+    """OS-native-TLS client (see httpclient.py); short timeout for PGN fetches."""
+    return make_http_client(timeout_seconds=30.0)
 
 
 def load_from_file(path: Path) -> Tuple[str, str]:

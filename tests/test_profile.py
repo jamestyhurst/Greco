@@ -152,6 +152,65 @@ def test_lichess_games_calls_lichess_api_and_returns_json(tmp_db, user, monkeypa
         app.dependency_overrides.pop(require_login, None)
 
 
+# ---------------------------------------------------------------------------
+# _fetch_recent_games — endpoint shape + NDJSON parsing
+# ---------------------------------------------------------------------------
+
+class _FakeResponse:
+    def __init__(self, text: str):
+        self.text = text
+
+    def raise_for_status(self):
+        pass
+
+
+class _FakeClient:
+    """Stands in for the httpx client; records every request it receives."""
+
+    def __init__(self, text: str, calls: list):
+        self._text = text
+        self._calls = calls
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def get(self, url, headers=None, params=None):
+        self._calls.append({"url": url, "headers": headers, "params": params})
+        return _FakeResponse(self._text)
+
+
+_NDJSON = (
+    '{"id":"abcd1234","variant":"standard","speed":"blitz","winner":"black",'
+    '"players":{"white":{"user":{"name":"alice123"}},"black":{"user":{"name":"bob"}}}}\n'
+    '{"id":"efgh5678","variant":"standard","speed":"rapid",'
+    '"players":{"white":{"user":{"name":"carol"}},"black":{"user":{"name":"alice123"}}}}\n'
+)
+
+
+def test_fetch_recent_games_uses_documented_lichess_endpoint(monkeypatch):
+    """Regression: the endpoint is /api/games/user/{u}. The /api/user/{u}/games
+    shape originally shipped in Phase 6 does not exist on Lichess (HTTP 404),
+    and the route-level tests mock _fetch_recent_games so they could never
+    catch it. This test pins the real URL and the NDJSON parsing together."""
+    import web.routers.profile as profile_mod
+    calls: list = []
+    monkeypatch.setattr(
+        profile_mod, "_make_http_client", lambda: _FakeClient(_NDJSON, calls)
+    )
+    games = profile_mod._fetch_recent_games("alice123", max_games=2)
+
+    assert calls[0]["url"] == "https://lichess.org/api/games/user/alice123"
+    assert calls[0]["headers"]["Accept"] == "application/x-ndjson"
+    assert calls[0]["params"]["max"] == "2"
+    assert [g["id"] for g in games] == ["abcd1234", "efgh5678"]
+    assert games[0]["result"] == "black"   # explicit winner field
+    assert games[1]["result"] == "draw"    # no winner key -> draw
+    assert games[0]["lichess_url"] == "https://lichess.org/abcd1234"
+
+
 def test_lichess_games_returns_502_on_fetch_error(tmp_db, user, monkeypatch):
     from web.db import update_user_lichess_username, get_user_by_id
     update_user_lichess_username(user.id, "baduser")
