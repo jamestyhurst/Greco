@@ -371,7 +371,11 @@ def main() -> int:
         ("A_no_books",   dict(with_knowledge=False), "baseline — knowledge corpus OFF"),
         ("B_with_books", dict(with_knowledge=True),  "knowledge corpus ON (public-domain books)"),
     ]
-    out = Path(args.out) if args.out else (Path(args.pgn).resolve().parent / "knowledge_ab_out")
+    # Default output goes to the developer-tools area, NEVER next to the PGN —
+    # A/B artifacts must not clutter the user's game library (Chess Game Files).
+    out = Path(args.out) if args.out else (
+        Path.home() / "Documents" / "Developer Tools (Greco)" / "ab-tests" / "knowledge_ab_out"
+    )
     out.mkdir(parents=True, exist_ok=True)
 
     packet_path = _generate_ply_packet(game, tiers, out)

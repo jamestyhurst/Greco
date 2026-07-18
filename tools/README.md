@@ -7,7 +7,8 @@ web layer.
 
 | Script | Purpose |
 |---|---|
-| `knowledge_ab_test.py` | A/B test whether the public-domain knowledge corpus changes (and improves) the narrator's output. Generates two full reports (corpus OFF vs ON) plus a quick-diff `C_spotlight.md`. |
+| `knowledge_ab_test.py` | A/B test whether the public-domain knowledge corpus changes (and improves) the narrator's output. Generates two full reports (corpus OFF vs ON) plus a quick-diff `C_spotlight.md`. Output defaults to `Documents\Developer Tools (Greco)\ab-tests\` — A/B artifacts never go next to the PGN or into the game library. |
+| `file_reported_pgns.py` | Backup protocol for the PGN library: moves any PGN in `Documents\Chess Game Files` whose report already exists into the `Games with Reports` sub-folder (the GUI/CLI do this automatically at report time; this sweep covers web-generated and historical reports). `--dry-run` previews. |
 | `find_games.py` | Download PGNs from Chess.com or PGN Mentor, filtered by time class / result / opening. |
 | `fetch_gutenberg.py` | Download a Gutenberg book, strip boilerplate, and deposit it into `knowledge/` for corpus acquisition. |
 
