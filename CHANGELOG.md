@@ -7,7 +7,7 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
-## [0.41.105] — 2026-07-18
+## [0.41.106] — 2026-07-18
 
 ### Fixed — the web analysis was unwatchable: waiting-page JS was dead on arrival
 - **Root cause of every "stuck at Queued" report:** the waiting page's script contained
