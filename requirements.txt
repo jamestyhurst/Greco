@@ -17,6 +17,8 @@ jinja2>=3.1
 # Greco Web — auth + database ORM
 bcrypt>=4.0           # password hashing for user accounts (used directly, not via passlib)
 starlette>=0.36       # SessionMiddleware (transitive via fastapi, listed for clarity)
+itsdangerous>=2.1     # session-cookie signing — SessionMiddleware needs it, but it is an
+                      # OPTIONAL starlette extra (starlette[full]), so it must be listed here
 sqlalchemy>=2.0       # ORM layer; SQLite locally, PostgreSQL on Render (Phase 7)
 alembic>=1.13         # schema migrations
 psycopg2-binary>=2.9  # PostgreSQL driver (Phase 7 deploy on Render)

@@ -7,6 +7,16 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Fixed
+- **CI was red on every run**: collecting the web tests died with
+  `ModuleNotFoundError: No module named 'itsdangerous'`. Starlette's
+  `SessionMiddleware` (signed session cookies, `web/main.py`) needs
+  `itsdangerous`, but it is an *optional* Starlette extra (`starlette[full]`),
+  so the CI runner never installed it — it worked locally only because the
+  laptop venv happened to have it. Now pinned in `requirements.txt`
+  (`itsdangerous>=2.1`). Audit of every third-party import in the app and test
+  suite found no other transitively-assumed package.
+
 ## [0.41.104] — 2026-07-18
 
 ### Fixed — first live-use feedback round (James, 2026-07-18)
