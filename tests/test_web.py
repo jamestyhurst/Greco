@@ -236,6 +236,48 @@ def test_waiting_page_explains_vanished_job():
     assert "no longer running" in html
 
 
+def _extract_scripts(html: str):
+    return re.findall(r"<script>(.*?)</script>", html, flags=re.S)
+
+
+def test_rendered_js_has_no_newline_inside_string_literals():
+    """Regression for the bug that froze every web analysis at 'Queued':
+    the templates are NON-raw Python strings, so a '\\n' typed with a single
+    backslash inside the embedded JS becomes a real newline in the served
+    page — splitting a JS string literal across lines, a SyntaxError that
+    silently kills the whole script (browsers don't run half a script).
+
+    Python can't run JS, so this checks the failure's fingerprint: any line
+    of rendered script whose single-quoted strings don't close by line end.
+    """
+    from types import SimpleNamespace
+    from web.config import Settings
+    from web.templates import render_home, render_waiting
+
+    user = SimpleNamespace(username="u", lichess_username="u",
+                           chesscom_username="u", is_admin=False, role="user")
+    pages = {
+        "waiting": render_waiting("jid", user=user),
+        "home": render_home(
+            Settings(engine="sf", model="m", engine_ok=True, key_ok=True),
+            user=user,
+        ),
+    }
+    for name, html in pages.items():
+        for script in _extract_scripts(html):
+            # Comments may legitimately contain apostrophes — drop them first.
+            script = re.sub(r"/\*.*?\*/", "", script, flags=re.S)
+            for lineno, line in enumerate(script.splitlines(), start=1):
+                # Strip escaped quotes, then require an even number of bare
+                # single quotes on the line (JS strings must close same-line).
+                bare = line.replace("\\\\", "").replace("\\'", "")
+                assert bare.count("'") % 2 == 0, (
+                    f"{name} page, rendered script line {lineno}: a "
+                    f"single-quoted JS string never closes on its own line "
+                    f"(escaped newline leak?): {line!r}"
+                )
+
+
 # ---------------------------------------------------------------------------
 # game_url input — Chess.com and Lichess auto-detection
 # ---------------------------------------------------------------------------

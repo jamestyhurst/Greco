@@ -75,6 +75,17 @@ pre{white-space:pre-wrap;background:var(--wine-dark);color:var(--ivory);padding:
 .result-note{font-size:.85rem;color:var(--muted);margin:0 0 16px;}
 .preview-toggle{background:none;border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-family:inherit;margin-top:8px;width:auto;}
 .preview-toggle:hover{background:rgba(0,0,0,.05);}
+/* Game lists (home + profile). Rows get breathing room and a hairline
+   separator so board thumbnails don't visually bleed into each other. */
+.game-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);}
+.game-row:last-child{border-bottom:0;}
+.game-thumb{border:1px solid var(--line);border-radius:4px;background:#fffdf6;flex-shrink:0;}
+/* Time-control chips live on a parchment card: both states need colours
+   chosen for a LIGHT background (ivory-on-ivory is invisible). */
+.tc-chip{margin:0 0 0 6px;width:auto;padding:3px 10px;font-size:.78rem;display:inline-block;cursor:pointer;border-radius:12px;font-family:inherit;}
+.tc-chip.on{background:var(--wine);border:1px solid var(--gold);color:var(--gold);font-weight:700;}
+.tc-chip.off{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:400;}
+.tc-chip.off:hover{border-color:var(--gold);color:var(--ink);}
 """
 
 
@@ -152,13 +163,10 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
   function _drawChips(){
     var cur=_tc();
     document.getElementById('tc-chips').innerHTML=_TCS.map(function(t){
-      var on=(t===cur);
-      /* Both states set background AND color explicitly: inheriting the site
-         button style gave gold-on-gold when selected (unreadable). */
-      var style='margin:0 0 0 6px;width:auto;padding:3px 10px;font-size:.78rem;display:inline-block;cursor:pointer;border-radius:12px;'+
-        (on?'background:rgba(0,0,0,.35);border:1px solid var(--gold);color:var(--gold);font-weight:700;'
-           :'background:transparent;border:1px solid rgba(245,237,212,.25);color:rgba(245,237,212,.75);');
-      return '<button type="button" onclick="_setTc(\\''+t+'\\')" style="'+style+'">'+
+      /* Styling lives in BASE_CSS (.tc-chip.on / .tc-chip.off), tuned for the
+         parchment card background — not inline, so there is exactly one place
+         to fix contrast next time the palette shifts. */
+      return '<button type="button" class="tc-chip '+(t===cur?'on':'off')+'" onclick="_setTc(\\''+t+'\\')">'+
              '<span style="font-size:1rem;margin-right:4px;">'+_TC_PIECE[t]+'</span>'+
              t.charAt(0).toUpperCase()+t.slice(1)+'</button>';
     }).join('');
@@ -193,10 +201,9 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
         if(!data.games||!data.games.length){el.innerHTML=note+'<p class="hint">No recent '+data.tc+' games found.</p>';return;}
         el.innerHTML=note+data.games.map(function(g){
           var site=(g.site==='lichess')?'Lichess':'Chess.com';
-          var thumb=g.fen?('<img src="/board-thumb?fen='+encodeURIComponent(g.fen)+'&orient='+(g.side==='black'?'black':'white')+'" '+
-            'width="64" height="64" loading="lazy" alt="final position" '+
-            'style="border-radius:4px;flex-shrink:0;margin-right:10px;vertical-align:middle;">'):'';
-          return '<div class="game-row" style="display:flex;align-items:center;">'+thumb+
+          var thumb=g.fen?('<img class="game-thumb" src="/board-thumb?fen='+encodeURIComponent(g.fen)+'&orient='+(g.side==='black'?'black':'white')+'" '+
+            'width="64" height="64" loading="lazy" alt="final position">'):'';
+          return '<div class="game-row">'+thumb+
             '<div style="flex:1;min-width:0;">'+
               '<div class="game-players">'+_badge(g.you)+g.white+' vs '+g.black+'</div>'+
               '<div class="game-meta">'+site+' &middot; '+g.meta+'</div>'+
@@ -512,7 +519,12 @@ _WAITING = Template("""<!doctype html><html lang="en"><head>
 
   function appendLog(lines){
     var box=document.getElementById('s-log');
-    lines.forEach(function(l){box.textContent+='\n'+l;});
+    /* NB: this template is a non-raw Python string, so a single backslash-n
+       here would become a REAL newline in the served page — splitting the JS
+       string literal across two lines, a SyntaxError that silently killed
+       this entire script (the page froze at "Queued" forever, no polling).
+       The double backslash survives Python and reaches the browser as \n. */
+    lines.forEach(function(l){box.textContent+='\\n'+l;});
     box.scrollTop=box.scrollHeight;
   }
 

@@ -9,6 +9,26 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [0.41.105] — 2026-07-18
 
+### Fixed — the web analysis was unwatchable: waiting-page JS was dead on arrival
+- **Root cause of every "stuck at Queued" report:** the waiting page's script contained
+  `'\n'` inside a NON-raw Python template string, so Python turned it into a real newline
+  in the served page — splitting a JS string literal across two lines. That one
+  SyntaxError killed the entire script: no polling, no progress, no redirect, forever
+  "Queued". The backend was fine all along (verified by raw-HTTP polling: a live web job
+  ran Stockfish → Claude → done, report id 3). Fixed with `'\\n'`; verified in a real
+  browser (the new 404 handling now fires, proving the script executes).
+- New regression test compiles the fingerprint out of rendered pages: no rendered script
+  line may leave a single-quoted JS string unclosed (the escape-leak signature). Python
+  can't parse JS, so tests check the failure shape; the browser check closed the loop.
+- **Inactive time-control chips were invisible** — styled for a dark background but they
+  sit on the parchment card. Chip styling moved to BASE_CSS (`.tc-chip.on/.off`) with
+  colours chosen for light ground: wine/gold when active, muted-brown outline otherwise.
+- **Game rows bled into each other** — `.game-row` was an unstyled class. Now: flex row
+  with gap, padding, and a hairline separator (none after the last row); thumbnails get
+  a `.game-thumb` border so ivory board edges don't merge with the card.
+
+## [0.41.105] — 2026-07-18
+
 ### Fixed
 - **CI was red on every run**: collecting the web tests died with
   `ModuleNotFoundError: No module named 'itsdangerous'`. Starlette's
