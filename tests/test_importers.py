@@ -144,6 +144,23 @@ def test_fetch_chesscom_recent_games_newest_first(monkeypatch):
     assert games[0]["time_class"] == "rapid"
 
 
+def test_fetch_chesscom_recent_games_time_class_filter(monkeypatch):
+    """time_class narrows while walking, so max_games counts matching games."""
+    _wire(monkeypatch, {
+        ARCHIVES_URL: _FakeResp(200, {"archives": [MONTH_JUN]}),
+        MONTH_JUN: _FakeResp(200, {"games": [
+            dict(_game(1), time_class="blitz"),
+            _game(2),                              # rapid (the default in _game)
+            dict(_game(3), time_class="bullet"),
+            _game(4),
+        ]}),
+    })
+    from importers import fetch_chesscom_recent_games
+    games = fetch_chesscom_recent_games("alice", max_games=10, time_class="rapid")
+    assert [g["id"] for g in games] == ["4", "2"]
+    assert all(g["time_class"] == "rapid" for g in games)
+
+
 def test_load_from_chesscom_matches_game_and_stops_early(monkeypatch):
     fake = _wire(monkeypatch, {
         ARCHIVES_URL: _FakeResp(200, {"archives": [MONTH_MAY, MONTH_JUN]}),

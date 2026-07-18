@@ -132,17 +132,25 @@ def _chesscom_winner(game: dict) -> str:
 
 
 def fetch_chesscom_recent_games(
-    username: str, max_games: int = 10, months_to_scan: int = 3
+    username: str,
+    max_games: int = 10,
+    months_to_scan: int = 3,
+    time_class: Optional[str] = None,
 ) -> list:
     """Return the player's most recent standard games as normalised dicts.
 
     Each dict: id, url, white, black, result (white/black/draw), time_class,
     end_time, pgn. Variants (Chess960 etc.) and PGN-less games are skipped.
+    `time_class` optionally narrows to one Chess.com speed ("rapid", "blitz",
+    "bullet", "daily") — filtering happens while walking, so max_games means
+    "N games OF THIS SPEED", not "N games, some filtered away".
     """
     games = []
     with _make_http_client() as client:
         for g in _iter_chesscom_games(client, username, months_to_scan):
             if g.get("rules") != "chess" or not g.get("pgn"):
+                continue
+            if time_class and g.get("time_class") != time_class:
                 continue
             m = CHESSCOM_GAME_URL_RE.search(g.get("url", ""))
             games.append({

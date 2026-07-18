@@ -153,6 +153,108 @@ def test_lichess_games_calls_lichess_api_and_returns_json(tmp_db, user, monkeypa
 
 
 # ---------------------------------------------------------------------------
+# GET /recent-games — the merged home-page list
+# ---------------------------------------------------------------------------
+
+def _link_both(user):
+    from web.db import (get_user_by_id, update_user_chesscom_username,
+                        update_user_lichess_username)
+    update_user_lichess_username(user.id, "alice123")
+    update_user_chesscom_username(user.id, "alice123")
+    return get_user_by_id(user.id)
+
+
+_LICHESS_ROW = {"id": "abcd1234", "white": "alice123", "black": "bob",
+                "result": "white", "variant": "standard", "speed": "rapid",
+                "lichess_url": "https://lichess.org/abcd1234", "ended": 200}
+_CC_ROW = {"id": "9", "url": "https://www.chess.com/game/live/9",
+           "white": "carol", "black": "alice123", "result": "black",
+           "time_class": "rapid", "end_time": 300,
+           "pgn": '[Event "Live Chess"]\n1. e4 *'}
+
+
+def test_recent_games_merges_sites_newest_first(tmp_db, user, monkeypatch):
+    fresh = _link_both(user)
+    import web.routers.profile as profile_mod
+    monkeypatch.setattr(profile_mod, "_fetch_recent_games",
+                        lambda u, max_games=10, perf_types="": [_LICHESS_ROW])
+    monkeypatch.setattr(profile_mod, "fetch_chesscom_recent_games",
+                        lambda u, max_games=10, time_class=None: [_CC_ROW])
+    app.dependency_overrides[require_login] = lambda: fresh
+    client = TestClient(app, raise_server_exceptions=True)
+    try:
+        r = client.get("/recent-games?tc=rapid")
+        assert r.status_code == 200
+        data = r.json()
+        # Chess.com game ended later (300 > 200) so it comes first.
+        assert [g["site"] for g in data["games"]] == ["chesscom", "lichess"]
+        cc, li = data["games"]
+        # alice123 was Black on chess.com and Black won -> a win, played black.
+        assert cc["side"] == "black" and cc["you"] == "win"
+        # alice123 was White on lichess and White won.
+        assert li["side"] == "white" and li["you"] == "win"
+        assert data["errors"] == []
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_recent_games_survives_one_site_failing(tmp_db, user, monkeypatch):
+    fresh = _link_both(user)
+    import web.routers.profile as profile_mod
+    monkeypatch.setattr(
+        profile_mod, "_fetch_recent_games",
+        lambda u, max_games=10, perf_types="": (_ for _ in ()).throw(RuntimeError("down")),
+    )
+    monkeypatch.setattr(profile_mod, "fetch_chesscom_recent_games",
+                        lambda u, max_games=10, time_class=None: [_CC_ROW])
+    app.dependency_overrides[require_login] = lambda: fresh
+    client = TestClient(app, raise_server_exceptions=True)
+    try:
+        r = client.get("/recent-games")
+        assert r.status_code == 200
+        data = r.json()
+        assert [g["site"] for g in data["games"]] == ["chesscom"]
+        assert data["errors"] == ["Lichess"]
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_recent_games_defaults_to_rapid_and_validates_tc(tmp_db, user, monkeypatch):
+    fresh = _link_both(user)
+    import web.routers.profile as profile_mod
+    seen = {}
+
+    def fake_lichess(u, max_games=10, perf_types=""):
+        seen["perf_types"] = perf_types
+        return []
+
+    def fake_cc(u, max_games=10, time_class=None):
+        seen["time_class"] = time_class
+        return []
+
+    monkeypatch.setattr(profile_mod, "_fetch_recent_games", fake_lichess)
+    monkeypatch.setattr(profile_mod, "fetch_chesscom_recent_games", fake_cc)
+    app.dependency_overrides[require_login] = lambda: fresh
+    client = TestClient(app, raise_server_exceptions=True)
+    try:
+        r = client.get("/recent-games")          # no tc -> Rapid doctrine
+        assert r.status_code == 200
+        assert r.json()["tc"] == "rapid"
+        assert seen == {"perf_types": "rapid", "time_class": "rapid"}
+        assert client.get("/recent-games?tc=hyperbullet").status_code == 422
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+def test_recent_games_400_when_nothing_linked(tmp_db, user):
+    client = make_client(user)
+    try:
+        assert client.get("/recent-games").status_code == 400
+    finally:
+        app.dependency_overrides.pop(require_login, None)
+
+
+# ---------------------------------------------------------------------------
 # Chess.com profile field + GET /profile/chesscom-games
 # ---------------------------------------------------------------------------
 

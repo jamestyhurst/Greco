@@ -7,6 +7,27 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added — recent games on the home page (the play → dwell → analyze flow)
+> Design intent (James, 2026-07-18): play a game on either platform, then immediately and
+> smoothly generate a Greco report if you want to dwell on it — savoring a win or recovering
+> from a loss. Rapid is the main time control by default.
+
+- **`GET /recent-games?tc=`** — merged Lichess + Chess.com recent games for the logged-in
+  user's linked accounts, newest first. Each site fetched independently: one site failing
+  yields a partial list plus an `errors` field, never an empty page. Rows carry `side`
+  (colour the user played) and `you` (win/loss/draw from the user's chair).
+- **Home page** — "Your recent games" card above the analyze form: time-control chips
+  (Rapid default, remembered per browser via localStorage), W/L/D badge per game, site +
+  speed label, and a one-click Analyze that pre-fills `side` with the colour the user
+  actually played (first-person narration out of the box). Logged-in-but-unlinked users get
+  a pointer to Profile; guests see the normal landing page.
+- Speed filters threaded through both fetchers: Lichess `perfType` (daily = their
+  "correspondence") and a `time_class` filter in `fetch_chesscom_recent_games` that counts
+  `max_games` AFTER filtering. Lichess rows now carry `ended` (epoch seconds, normalised
+  from Lichess's milliseconds) so cross-site merge-sorting is possible.
+- Local web sessions now survive server restarts (`web_secret_key` added to the local
+  gitignored config).
+
 ### Added — PGN library auto-filing ("Games with Reports")
 - **`outputs.archive_reported_pgn`** — the moment a GUI or CLI report is written, the
   source PGN is filed from `Documents\Chess Game Files` into its `Games with Reports\`

@@ -126,6 +126,68 @@ _HOME = Template("""<!doctype html><html lang="en"><head>
       {% if not key_ok %}<br>&bull; Anthropic API key missing.{% endif %}
     </div>
   {% endif %}
+{% if user and (lichess_username or chesscom_username) %}
+  <div class="card" id="recent-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <b>Your recent games</b>
+      <span id="tc-chips"></span>
+    </div>
+    <div id="recent-list" style="margin-top:10px;"><p class="hint">Loading&hellip;</p></div>
+  </div>
+  <script>
+  /* The home-page "play -> dwell -> analyze" flow. Time-control chips filter
+     the merged Lichess + Chess.com list; Rapid is the doctrine default. The
+     user's last choice sticks via localStorage (per-browser persistence — a
+     per-account DB setting would be the upgrade if it should follow logins). */
+  var _TCS=['rapid','blitz','bullet','classical','daily','all'];
+  var _TC_KEY='greco_recent_tc';
+  function _tc(){try{var v=localStorage.getItem(_TC_KEY);return _TCS.indexOf(v)>=0?v:'rapid'}catch(e){return 'rapid'}}
+  function _setTc(v){try{localStorage.setItem(_TC_KEY,v)}catch(e){} _drawChips(); _loadRecent();}
+  function _drawChips(){
+    var cur=_tc();
+    document.getElementById('tc-chips').innerHTML=_TCS.map(function(t){
+      var on=(t===cur);
+      return '<button type="button" onclick="_setTc(\\''+t+'\\')" style="margin:0 0 0 6px;width:auto;padding:3px 10px;font-size:.78rem;display:inline-block;cursor:pointer;'+
+             (on?'border:1px solid var(--gold);color:var(--gold);':'opacity:.65;')+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</button>';
+    }).join('');
+  }
+  function _badge(you){
+    if(you==='win')return '<span style="color:#7fbf7f;font-weight:bold;margin-right:8px;">W</span>';
+    if(you==='loss')return '<span style="color:#d9776f;font-weight:bold;margin-right:8px;">L</span>';
+    if(you==='draw')return '<span style="color:#999;font-weight:bold;margin-right:8px;">D</span>';
+    return '';
+  }
+  function _loadRecent(){
+    var el=document.getElementById('recent-list');
+    el.innerHTML='<p class="hint">Loading&hellip;</p>';
+    fetch('/recent-games?tc='+_tc())
+      .then(function(r){return r.ok?r.json():Promise.reject(r)})
+      .then(function(data){
+        var note=(data.errors&&data.errors.length)?'<p class="hint">Could not reach: '+data.errors.join(', ')+'</p>':'';
+        if(!data.games||!data.games.length){el.innerHTML=note+'<p class="hint">No recent '+data.tc+' games found.</p>';return;}
+        el.innerHTML=note+data.games.map(function(g){
+          var site=(g.site==='lichess')?'Lichess':'Chess.com';
+          return '<div class="game-row">'+
+            '<div class="game-players">'+_badge(g.you)+g.white+' vs '+g.black+'</div>'+
+            '<div class="game-meta">'+site+' &middot; '+g.meta+'</div>'+
+            '<form method="post" action="/analyze" style="margin:0;">'+
+              '<input type="hidden" name="game_url" value="'+g.url+'">'+
+              '<input type="hidden" name="use_case" value="companion">'+
+              '<input type="hidden" name="side" value="'+(g.side||'neither')+'">'+
+              '<input type="hidden" name="speed" value="normal">'+
+              '<input type="hidden" name="model" value="">'+
+              '<button type="submit" class="btn go" style="padding:5px 14px;font-size:.8rem;display:inline-block;width:auto;cursor:pointer;margin-top:0;">Analyze</button>'+
+            '</form></div>';
+        }).join('');
+      })
+      .catch(function(){el.innerHTML='<p class="hint">Could not load your recent games.</p>';});
+  }
+  document.addEventListener('DOMContentLoaded',function(){_drawChips();_loadRecent();});
+  </script>
+{% elif user %}
+  <p class="hint" style="margin:4px 0 12px;">Link your Lichess or Chess.com account in
+    <a href="/profile" style="color:var(--gold);">Profile</a> to see your recent games here for one-click analysis.</p>
+{% endif %}
   <div id="s-restore-banner" class="banner ok" style="display:none;">
     Your previous inputs have been restored.
     <button type="button" onclick="document.getElementById('s-restore-banner').style.display='none'" style="margin:0;width:auto;padding:2px 10px;font-size:.82rem;display:inline-block;vertical-align:middle;margin-left:8px;">Dismiss</button>
@@ -702,6 +764,8 @@ def render_home(s: Settings, user=None) -> str:
         engine_ok=s.engine_ok, key_ok=s.key_ok, model=s.model,
         use_cases=USE_CASES, models=MODELS,
         user=user,
+        lichess_username=getattr(user, "lichess_username", None),
+        chesscom_username=getattr(user, "chesscom_username", None),
         nav=_make_nav(user),
     )
 
