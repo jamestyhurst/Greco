@@ -7,6 +7,58 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### From James's 2026-07-18 report critique (mpena06 game) — accuracy fixes
+- **An offered trade is no longer a "sound sacrifice"** — `detect_sacrifice` measured
+  material one ply after the opponent's best reply, so 9. a3 inviting ...Bxc3+ bxc3 read
+  as "White sacrifices a knight" (the report literally said so). The check now settles
+  the exchange (the mover's least-valuable-attacker recapture) before measuring; a true
+  sacrifice (Bxh7+ Kxh7 — no recapture) still fires. (critique item 9)
+- **New `best_attacks` ground truth for the ENGINE'S preferred move** — the played move
+  already carried `attacks`, but engine alternatives had nothing to check against, which
+  is how "**10...f6** was better, striking at your centre" got written about a pawn push
+  that attacks nothing. The analyzer now computes what the best move would actually
+  attack (pawns included), emitted even when EMPTY so "attacks nothing" is affirmative
+  data; the narrator is instructed to describe preparation, not phantom strikes. (item 11)
+- **Garbled book quotes can no longer be featured** — the corrupted 1883 tournament-table
+  fragment ("12, 8!, 13, 152, 15}, … = 123 —14 0 …") passed the featured-quote
+  cleanliness guard and was reproduced verbatim, introduced "for flavour". The guard now
+  rejects digit-dense tokens, braces, and score-table debris, and requires at least one
+  query-word of thematic overlap (an irrelevant aside is worse than no quote); the
+  narrator gets a matching quality gate: no garbled quotes, no fourth-wall quote intros,
+  featured passages included. (item 6)
+- **Narrator rules (all tagged ⚠️ PENDING_APPROVAL for James's wording review):**
+  diagram-first ordering (see the board, then read the commentary — item 8); every
+  discussed move named in bold SAN, never only by allusion (9A); trade vs. sacrifice
+  language (9B); no doubled/isolated-pawn claims unverified by data, in-game or
+  hypothetical (9C); no time-control/rating restatement when the reader played the game
+  (5A); bare SAN for club-level readers, longform only for beginners (5B); the
+  psychology-versus-optimal three-beat shape (7, 10); contextualize unnatural engine
+  suggestions and say when they only correct earlier errors (11); infer the plan from
+  follow-up moves before calling anything "aimless" (11); name the concrete move an
+  engine prophylaxis prevents (12); "battery" restricted to its approved-glossary
+  meaning — pieces only, never pawns (13); reflexive-reply/zwischenzug pattern (14, 15);
+  fork threats require an under-defended target square (16); piece-role reasoning and
+  latent threats (18); pin-as-lever exploitation (19).
+
+### Added — PGN viewer upgrades from the same critique
+- **Move sounds** (item 2): lichess-style audio feedback on move navigation — distinct
+  synth cues for move / capture / check / mate, WebAudio-generated so the report HTML
+  stays fully self-contained (no audio assets). Mute toggle button (🔊/🔇) persists via
+  localStorage.
+- **Game-result marker** (item 3): the move list and viewer now end with e.g.
+  "1-0 · resignation" (data-backed: '#' proves mate, else the PGN Termination tag, else
+  the resignation default), and the final ply shows a result badge. The report header's
+  Result row and the reference move list get the same "(resignation)" suffix.
+- **Steppable engine lines** (item 4B): clicking a move in a "Better:"/"Then:" line now
+  focuses that variation — ←/→ walk its plies, Esc (or ← past its first move) returns to
+  the game.
+- **Parenthetical variation notation** (item 4C): engine lines render with real move
+  numbers inside parentheses — "(15. dxc6 Bxc6 16. Nbd4)" — like an annotated score.
+- Interactive board editor (item 4A) is specced into the backlog (ROADMAP #39) — needs a
+  client-side legality layer first.
+- 30 regression tests in `tests/test_report_critique_fixes.py` lock all of this in.
+  (Critique item 1 — the stuck web loading screen — was fixed earlier today in 0.41.106.)
+
 ## [0.41.106] — 2026-07-18
 
 ### Fixed — the web analysis was unwatchable: waiting-page JS was dead on arrival
