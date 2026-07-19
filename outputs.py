@@ -208,8 +208,49 @@ def archive_reported_pgn(pgn_path, library_dir: Optional[Path] = None) -> Option
         return None
 
 
+# How a game ended, as a short human label. Keyed on substrings of the PGN
+# `Termination` tag (Chess.com writes "X won by resignation" / "won on time" /
+# "game abandoned"; Lichess writes "Normal" / "Time forfeit").
+_TERMINATION_PATTERNS = [
+    ("resign", "resignation"),
+    ("time", "on time"),
+    ("abandon", "abandonment"),
+    ("stalemate", "stalemate"),
+    ("agree", "agreement"),
+    ("repetition", "repetition"),
+    ("insufficient", "insufficient material"),
+    ("50", "fifty-move rule"),
+]
+
+
+def termination_reason(headers: dict, final_san: str = "") -> str:
+    """Short, data-backed reason the game ended: 'checkmate', 'resignation',
+    'on time', 'draw', … or '' when unknowable.
+
+    A '#' on the final move proves mate; otherwise the Termination tag decides;
+    a decisive result with no usable tag defaults to 'resignation' (the same
+    rule the narrator follows); a bare draw is just 'draw'. This is what lets
+    the move list and PGN viewer mark non-checkmate endings visibly (James's
+    2026-07-18 critique, item 3)."""
+    if (final_san or "").endswith("#"):
+        return "checkmate"
+    term = (headers.get("Termination") or "").lower()
+    for needle, label in _TERMINATION_PATTERNS:
+        if needle in term:
+            return label
+    result = headers.get("Result", "")
+    if result in ("1-0", "0-1"):
+        return "resignation"
+    if result == "1/2-1/2":
+        return "draw"
+    return ""
+
+
 def format_move_list(game: GameAnalysis) -> str:
-    """Return the game's mainline as '1. e4 e5 2. Nf3 Nc6 ...' wrapped to ~70 cols."""
+    """Return the game's mainline as '1. e4 e5 2. Nf3 Nc6 ...' wrapped to ~70 cols.
+    Ends with the result plus, for non-checkmate finishes, the reason in
+    parentheses — '44. Kf5 1-0 (resignation)' — so a reader scanning the moves
+    sees at once that the game did not end in mate."""
     tokens: List[str] = []
     for move in game.moves:
         if move.side == "White":
@@ -219,6 +260,11 @@ def format_move_list(game: GameAnalysis) -> str:
             tokens.append(move.san)
     if game.result and game.result != "*":
         tokens.append(game.result)
+        reason = termination_reason(
+            game.headers, game.moves[-1].san if game.moves else ""
+        )
+        if reason and reason != "checkmate":
+            tokens.append(f"({reason})")
 
     # Word-wrap to ~70 columns.
     lines: List[str] = []
@@ -254,7 +300,14 @@ def build_header(game: GameAnalysis) -> str:
     metadata_rows = []
     for key in ("White", "Black", "Result", "ECO", "Opening"):
         if h.get(key) and h[key] != "?":
-            metadata_rows.append(f"- **{key}:** {esc(h[key])}")
+            value = str(h[key])
+            if key == "Result":
+                # Show HOW it ended next to the score ("1-0 (resignation)") so a
+                # non-checkmate finish is visible at a glance.
+                reason = termination_reason(h, game.moves[-1].san if game.moves else "")
+                if reason:
+                    value = f"{value} ({reason})"
+            metadata_rows.append(f"- **{key}:** {esc(value)}")
     if h.get("TimeControl") and h["TimeControl"] != "?":
         metadata_rows.append(f"- **TimeControl:** {esc(_humanize_time_control(h['TimeControl']))}")
     if h.get("WhiteElo"):
@@ -1054,6 +1107,35 @@ _VIEWER_JS = r"""
   var movesEl  = document.getElementById('gv-moves');
   var varsEl   = document.getElementById('gv-vars');
 
+  /* --- Move sounds (lichess/chess.com-style feedback), synthesized via WebAudio
+     so the HTML stays self-contained — no audio assets to ship or inline. The
+     AudioContext is created lazily inside a user-gesture handler (click/keydown),
+     which satisfies browser autoplay policies. Mute preference persists. --- */
+  var audioCtx = null;
+  var muted = false;
+  try{ muted = localStorage.getItem('greco_viewer_muted') === '1'; }catch(e){}
+  function beep(freq, dur, wave, vol){
+    if(muted) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = wave || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.1, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+  function moveSound(pl){
+    if(!pl){ beep(240, .05, 'sine', .05); return; }  /* back to the start position */
+    var san = pl.san || '';
+    if(san.indexOf('#') !== -1){ beep(660, .16, 'sine', .12); beep(880, .3, 'sine', .1); }
+    else if(san.indexOf('+') !== -1){ beep(760, .12, 'triangle', .1); }
+    else if(san.indexOf('x') !== -1){ beep(320, .09, 'square', .08); }
+    else { beep(520, .06, 'sine', .09); }
+  }
+
   function sqXY(file, rank){
     var col  = flip ? 7 - file : file;
     var srow = flip ? rank : 7 - rank;
@@ -1118,7 +1200,11 @@ _VIEWER_JS = r"""
     var pl = PLIES[idx];
     if(idx === 0){ statusEl.innerHTML = '<span class="gv-movelabel">Start position</span>'; return; }
     var ev = pl.ev ? '<span class="gv-eval">'+pl.ev+'</span>' : '';
-    statusEl.innerHTML = '<span class="gv-movelabel">'+moveLabel(pl)+'</span> '+ev+' '+badge(pl);
+    var fin = '';
+    if(idx === PLIES.length - 1 && DATA.result && DATA.result !== '*'){
+      fin = ' <span class="gv-badge gv-result-badge">'+DATA.result+(DATA.term ? ' · '+DATA.term : '')+'</span>';
+    }
+    statusEl.innerHTML = '<span class="gv-movelabel">'+moveLabel(pl)+'</span> '+ev+' '+badge(pl)+fin;
   }
   function buildMoves(){
     var html = '';
@@ -1130,6 +1216,11 @@ _VIEWER_JS = r"""
       else if(pl.cls === 'mistake')    cls += ' gv-mv-mistake';
       else if(pl.cls === 'inaccuracy') cls += ' gv-mv-inaccuracy';
       html += '<span class="'+cls+'" data-idx="'+i+'">'+pl.san+'</span> ';
+    }
+    /* Result marker: make a non-checkmate ending visible right in the move
+       order — '1-0 · resignation' — the way printed game scores do. */
+    if(DATA.result && DATA.result !== '*'){
+      html += '<span class="gv-result" title="How the game ended">'+DATA.result+(DATA.term ? ' · '+DATA.term : '')+'</span>';
     }
     movesEl.innerHTML = html;
     movesEl.addEventListener('click', function(e){
@@ -1145,9 +1236,38 @@ _VIEWER_JS = r"""
       if(cur){ cur.classList.add('active'); cur.scrollIntoView({block: 'nearest'}); }
     }
   }
+  /* --- Variation stepping: clicking a move in an engine line focuses that line;
+     arrow keys then walk ITS plies instead of the game's. Stepping left past the
+     line's first move (or pressing Esc) returns to the game position. --- */
+  var varMode = null;  /* {v: variation row index, p: ply index within it} */
+  function currentVars(){ var pl = PLIES[idx]; return (pl && pl.vars) ? pl.vars : []; }
+  function markVarActive(){
+    var prev = varsEl.querySelector('.gv-var-peek');
+    if(prev) prev.classList.remove('gv-var-peek');
+    if(varMode){
+      var sel = varsEl.querySelector('.gv-var-move[data-v="'+varMode.v+'"][data-p="'+varMode.p+'"]');
+      if(sel) sel.classList.add('gv-var-peek');
+    }
+  }
+  function enterVar(v, p){
+    var vars = currentVars();
+    if(!vars[v] || !vars[v].plies || !vars[v].plies[p]) return;
+    varMode = {v: v, p: p};
+    var vp = vars[v].plies[p];
+    renderBoard(vp.fen, vp.uci);
+    moveSound(vp);
+    markVarActive();
+  }
+  function exitVar(){
+    varMode = null;
+    var pl = PLIES[idx];
+    renderBoard(pl.fen, pl.uci);
+    markVarActive();
+  }
   function showVars(i){
     if(!varsEl) return;
     varsEl.innerHTML = '';
+    varMode = null;
     var pl = PLIES[i];
     if(!pl || !pl.vars || !pl.vars.length) return;
     for(var v = 0; v < pl.vars.length; v++){
@@ -1159,47 +1279,66 @@ _VIEWER_JS = r"""
       lbl.className = 'gv-vars-label';
       lbl.textContent = vr.tp === 'best' ? 'Better:' : 'Then:';
       row.appendChild(lbl);
+      /* Parenthetical notation, like an annotated game score: (15. dxc6 Bxc6 16. Nbd4) */
+      row.appendChild(document.createTextNode(' ('));
       for(var p = 0; p < vr.plies.length; p++){
-        (function(sp, fen, uci){
-          sp.addEventListener('click', function(){
-            renderBoard(fen, uci);
-            var prev = varsEl.querySelector('.gv-var-peek');
-            if(prev) prev.classList.remove('gv-var-peek');
-            sp.classList.add('gv-var-peek');
-          });
-        })(
-          (function(san){
-            var sp = document.createElement('span');
-            sp.className = 'gv-var-move';
-            sp.textContent = san;
-            sp.title = 'Peek at this position — press ←/→ to return to game';
-            row.appendChild(sp);
-            return sp;
-          })(vr.plies[p].san),
-          vr.plies[p].fen,
-          vr.plies[p].uci
-        );
+        (function(v2, p2, vp){
+          var sp = document.createElement('span');
+          sp.className = 'gv-var-move';
+          sp.textContent = (vp.lbl || '') + vp.san;
+          sp.setAttribute('data-v', v2);
+          sp.setAttribute('data-p', p2);
+          sp.title = 'Step into this line — ←/→ walk it, Esc returns to the game';
+          sp.addEventListener('click', function(){ enterVar(v2, p2); });
+          row.appendChild(sp);
+        })(v, p, vr.plies[p]);
       }
+      row.appendChild(document.createTextNode(')'));
       varsEl.appendChild(row);
     }
   }
   function go(i){
+    var prev = idx;
     idx = Math.max(0, Math.min(PLIES.length - 1, i));
     var pl = PLIES[idx];
     renderBoard(pl.fen, pl.uci);
     updateStatus();
     highlightMove();
     showVars(idx);
+    if(idx !== prev){ moveSound(idx > 0 ? PLIES[idx] : null); }
   }
   document.getElementById('gv-start').onclick = function(){ go(0); };
   document.getElementById('gv-prev').onclick  = function(){ go(idx - 1); };
   document.getElementById('gv-next').onclick  = function(){ go(idx + 1); };
   document.getElementById('gv-end').onclick   = function(){ go(PLIES.length - 1); };
   document.getElementById('gv-flip').onclick  = function(){ flip = !flip; renderBoard(PLIES[idx].fen, PLIES[idx].uci); };
+  var sndBtn = document.getElementById('gv-sound');
+  function syncSoundBtn(){ if(sndBtn) sndBtn.textContent = muted ? '🔇' : '🔊'; }
+  if(sndBtn){
+    sndBtn.onclick = function(){
+      muted = !muted;
+      try{ localStorage.setItem('greco_viewer_muted', muted ? '1' : '0'); }catch(e){}
+      syncSoundBtn();
+      if(!muted) beep(520, .06, 'sine', .09);  /* audible confirmation */
+    };
+    syncSoundBtn();
+  }
   document.addEventListener('keydown', function(e){
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target && e.target.tagName || '')) return;
-    if(e.key === 'ArrowLeft'){ go(idx - 1); e.preventDefault(); }
-    else if(e.key === 'ArrowRight'){ go(idx + 1); e.preventDefault(); }
+    if(e.key === 'ArrowLeft'){
+      if(varMode){ if(varMode.p > 0){ enterVar(varMode.v, varMode.p - 1); } else { exitVar(); } }
+      else { go(idx - 1); }
+      e.preventDefault();
+    }
+    else if(e.key === 'ArrowRight'){
+      if(varMode){
+        var vr = currentVars()[varMode.v];
+        if(vr){ enterVar(varMode.v, Math.min(varMode.p + 1, vr.plies.length - 1)); }
+      }
+      else { go(idx + 1); }
+      e.preventDefault();
+    }
+    else if(e.key === 'Escape'){ if(varMode){ exitVar(); e.preventDefault(); } }
     else if(e.key === 'Home'){ go(0); }
     else if(e.key === 'End'){ go(PLIES.length - 1); }
   });
@@ -1282,17 +1421,24 @@ _VIEWER_CSS = """
         font-family: 'Helvetica Neue', Arial, sans-serif; }
     .gv-var-move:hover { background: #e8dcb8; }
     .gv-var-peek { background: #cdd16a !important; border-color: #b8bc4a !important; }
+    .gv-result { display: inline-block; margin-left: 0.3rem; padding: 0.02rem 0.45rem;
+        border-radius: 3px; background: #efe6c8; border: 1px solid #d9c7a0;
+        color: #5E151D; font-weight: 600; white-space: nowrap; }
+    .gv-result-badge { background: #7A1C26; }
     @media print { .gv-controls, .gv-hint, .gv-vars { display: none; } .gv-moves { max-height: none; } }
 """
 
 
 def _pv_to_fen_plies(fen_start: str, pv_san_numbered: str) -> list:
-    """Parse a numbered-SAN variation string into per-ply {san, fen, uci} dicts.
+    """Parse a numbered-SAN variation string into per-ply {san, fen, uci, lbl} dicts.
 
     The input format is what pv_to_numbered_san() produces: '25. g5 exg5 26. fxg5'
     or '24...Kg7 25. g5'. Move numbers are stripped, then each SAN is applied to a
-    copy of the board starting at fen_start. Returns [] on any parse error so the
-    viewer degrades gracefully when a variation can't be decoded.
+    copy of the board starting at fen_start. `lbl` is the display move-number
+    prefix rebuilt from the replay board ('25. ' for White, '24... ' for a line's
+    first Black move, '' otherwise) so the viewer can render variations in proper
+    parenthetical notation. Returns [] on any parse error so the viewer degrades
+    gracefully when a variation can't be decoded.
     """
     clean = re.sub(r'\d+\.{1,3}\s*', '', pv_san_numbered or '').strip()
     sans = clean.split() if clean else []
@@ -1301,11 +1447,21 @@ def _pv_to_fen_plies(fen_start: str, pv_san_numbered: str) -> list:
     try:
         board = chess.Board(fen_start)
         result = []
+        first = True
         for san in sans:
+            num = board.fullmove_number
+            white_to_move = board.turn == chess.WHITE
             move = board.parse_san(san)
             uci = move.uci()
             board.push(move)
-            result.append({"san": san, "fen": board.fen(), "uci": uci})
+            if white_to_move:
+                lbl = f"{num}. "
+            elif first:
+                lbl = f"{num}... "
+            else:
+                lbl = ""
+            result.append({"san": san, "fen": board.fen(), "uci": uci, "lbl": lbl})
+            first = False
         return result
     except Exception:
         return []
@@ -1346,7 +1502,15 @@ def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
             d["vars"] = move_vars
         plies.append(d)
 
-    payload = json.dumps({"flip": bool(flipped), "plies": plies}, ensure_ascii=True)
+    # Result + termination reason so the viewer can mark how the game ended
+    # ('1-0 · resignation') right in the move list and on the final ply.
+    headers = getattr(game, "headers", {}) or {}
+    result = (getattr(game, "result", "") or headers.get("Result", "") or "").strip()
+    term = termination_reason(headers, game.moves[-1].san if game.moves else "")
+    payload = json.dumps(
+        {"flip": bool(flipped), "plies": plies, "result": result, "term": term},
+        ensure_ascii=True,
+    )
     # Defensive: never let a value end the <script> block early.
     payload = payload.replace("</", "<\\/")
 
@@ -1361,13 +1525,15 @@ def build_pgn_viewer(game: GameAnalysis, flipped: bool = False) -> str:
 <button id="gv-next" type="button" title="Next (Right arrow)">&#9654;</button>
 <button id="gv-end" type="button" title="End (End)">&#9197;</button>
 <button id="gv-flip" type="button" title="Flip board">&#8645; Flip</button>
+<button id="gv-sound" type="button" title="Toggle move sounds">&#128266;</button>
 </div>
 <div id="gv-status" class="gv-status"></div>
 <div id="gv-vars" class="gv-vars"></div>
 </div>
 <div id="gv-moves" class="gv-moves"></div>
 </div>
-<p class="gv-hint">Click any move, use the buttons, or press &larr; / &rarr; (Home / End to jump).</p>
+<p class="gv-hint">Click any move, use the buttons, or press &larr; / &rarr; (Home / End to jump).
+Click a move in an engine line (&ldquo;Better:&rdquo; / &ldquo;Then:&rdquo;) to step into it &mdash; &larr; / &rarr; then walk that line, and Esc (or &larr; past its first move) returns to the game.</p>
 <script type="application/json" id="greco-viewer-data">{payload}</script>
 <script>{_VIEWER_JS}</script>
 </section>
