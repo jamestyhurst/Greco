@@ -1062,6 +1062,24 @@ def detect_allowed_pawn_fork(board_after: chess.Board, mover_color: bool) -> Opt
             continue  # a pure push fork; capture-forks are rarer and noisier
         after = probe.copy()
         after.push(mv)
+        # A "fork" on a square the forked side can simply capture on is not a real
+        # threat (James's 2026-07-18 critique, item 16: e6-e7 was reported as a
+        # queen+rook fork while the d8-queen guarded e7 — the pawn would just be
+        # taken; "White would have to somehow support the e7 square to make e6-e7
+        # a real pawn-fork threat"). Require the landing square to be safe: either
+        # no enemy piece defends it, or the pawn is supported so any piece capture
+        # loses material — and never claim it when an enemy PAWN guards the square
+        # (pawn takes pawn refutes the fork for free even when it is supported).
+        defenders = after.attackers(mover_color, mv.to_square)
+        if defenders:
+            supporters = after.attackers(not mover_color, mv.to_square)
+            if not supporters:
+                continue
+            if any(
+                (d := after.piece_at(s)) is not None and d.piece_type == chess.PAWN
+                for s in defenders
+            ):
+                continue
         targets = []
         for sq in after.attacks(mv.to_square):
             pc = after.piece_at(sq)

@@ -112,6 +112,39 @@ def test_best_attacks_absent_below_tier_two():
 
 
 # --------------------------------------------------------------------------
+# Item 16 — a "pawn fork" on a defended, unsupported square is not a threat.
+# --------------------------------------------------------------------------
+
+def test_defended_unsupported_fork_square_is_suppressed():
+    # The exact game position: JamesTortoise vs. mpena06 after 17...Bd6. The old
+    # detector reported "allows e7, a pawn fork hitting the queen on d8 and the
+    # rook on f8" — but the d8-queen (and the d6-bishop) guard e7 and nothing of
+    # White's supports it, so e7 would simply be captured.
+    from analyzer import detect_allowed_pawn_fork
+    board = chess.Board()
+    for san in ["Nf3", "d5", "c4", "Nf6", "cxd5", "Nxd5", "e4", "Nb6",
+                "Nc3", "e6", "d4", "Bb4", "Be3", "O-O", "Bd3", "Nc6",
+                "a3", "Be7", "O-O", "Nd7", "Qc2", "b6", "Nb5", "Bb7",
+                "Rfd1", "a6", "d5", "Nc5", "Nc3", "Nxd3", "Rxd3", "Na7",
+                "dxe6", "Bd6"]:
+        board.push_san(san)
+    result = detect_allowed_pawn_fork(board, chess.BLACK)
+    assert result is None or "e7" not in result, (
+        "e7 is guarded by the d8-queen and unsupported — not a real fork threat"
+    )
+
+
+def test_supported_fork_still_detected():
+    # The canonical real fork: Black rook on f4 + bishop on h4 invite g3. The
+    # h4-bishop technically guards g3, but the push is supported by the f2/h2
+    # pawns, so ...Bxg3 loses material — the fork is genuine and must survive.
+    from analyzer import detect_allowed_pawn_fork
+    board = chess.Board("6k1/8/8/8/5r1b/8/5PPP/6K1 w - - 0 1")
+    result = detect_allowed_pawn_fork(board, chess.BLACK)
+    assert result is not None and "g3" in result
+
+
+# --------------------------------------------------------------------------
 # Item 6 — the garbled 1883 fragment must never survive the quote guard.
 # --------------------------------------------------------------------------
 

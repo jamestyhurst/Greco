@@ -103,11 +103,28 @@ def test_allowed_pawn_fork_detected_when_legal():
     b.set_piece_at(chess.E4, chess.Piece(chess.PAWN, chess.BLACK))   # ...e3 forks
     b.set_piece_at(chess.D2, chess.Piece(chess.ROOK, chess.WHITE))   # mover target
     b.set_piece_at(chess.F2, chess.Piece(chess.BISHOP, chess.WHITE)) # mover target
+    # The f2-bishop guards e3, so the fork needs a supporter to be real (the
+    # 2026-07-18 defended-square gate): the f4-pawn backs the push, making
+    # Bxe3 a losing capture. Without it, ...e3 would just hang the pawn.
+    b.set_piece_at(chess.F4, chess.Piece(chess.PAWN, chess.BLACK))
     b.set_piece_at(chess.C6, chess.Piece(chess.KING, chess.BLACK))
     b.set_piece_at(chess.H1, chess.Piece(chess.KING, chess.WHITE))
     b.turn = chess.BLACK
     desc = detect_allowed_pawn_fork(b, chess.WHITE)
     assert desc and "e3" in desc and "rook" in desc and "bishop" in desc
+
+
+def test_allowed_pawn_fork_suppressed_when_square_defended_unsupported():
+    # Same geometry WITHOUT the supporter: the f2-bishop simply takes the pawn
+    # on e3, so no fork threat exists (James's 2026-07-18 critique, item 16).
+    b = chess.Board(None)
+    b.set_piece_at(chess.E4, chess.Piece(chess.PAWN, chess.BLACK))
+    b.set_piece_at(chess.D2, chess.Piece(chess.ROOK, chess.WHITE))
+    b.set_piece_at(chess.F2, chess.Piece(chess.BISHOP, chess.WHITE))
+    b.set_piece_at(chess.C6, chess.Piece(chess.KING, chess.BLACK))
+    b.set_piece_at(chess.H1, chess.Piece(chess.KING, chess.WHITE))
+    b.turn = chess.BLACK
+    assert detect_allowed_pawn_fork(b, chess.WHITE) is None
 
 
 def test_allowed_pawn_fork_excludes_illegal_push():
@@ -117,6 +134,7 @@ def test_allowed_pawn_fork_excludes_illegal_push():
     b.set_piece_at(chess.E4, chess.Piece(chess.PAWN, chess.BLACK))
     b.set_piece_at(chess.D2, chess.Piece(chess.ROOK, chess.WHITE))
     b.set_piece_at(chess.F2, chess.Piece(chess.BISHOP, chess.WHITE))
+    b.set_piece_at(chess.F4, chess.Piece(chess.PAWN, chess.BLACK))  # supporter, so only the pin suppresses
     b.set_piece_at(chess.C6, chess.Piece(chess.KING, chess.BLACK))
     b.set_piece_at(chess.G2, chess.Piece(chess.BISHOP, chess.WHITE))  # pins the e4-pawn
     b.set_piece_at(chess.H1, chess.Piece(chess.KING, chess.WHITE))

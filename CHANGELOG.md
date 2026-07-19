@@ -19,6 +19,14 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
   that attacks nothing. The analyzer now computes what the best move would actually
   attack (pawns included), emitted even when EMPTY so "attacks nothing" is affirmative
   data; the narrator is instructed to describe preparation, not phantom strikes. (item 11)
+- **A "pawn fork" on a defended, unsupported square is no longer reported** — the
+  regenerated verification report repeated the item-16 error ("18. e7 would fork the
+  queen and rook" while the d8-queen guards e7), which traced to `detect_allowed_pawn_fork`
+  never checking the landing square's safety. The detector now requires the square to be
+  undefended, or the push to be supported (and never claims it against a pawn defender).
+  Regression-tested on the exact mpena06 position after 17...Bd6; the old canonical test
+  position turned out to encode a fake fork (its "forked" f2-bishop guarded e3) and was
+  corrected to a supported one.
 - **Garbled book quotes can no longer be featured** — the corrupted 1883 tournament-table
   fragment ("12, 8!, 13, 152, 15}, … = 123 —14 0 …") passed the featured-quote
   cleanliness guard and was reproduced verbatim, introduced "for flavour". The guard now
