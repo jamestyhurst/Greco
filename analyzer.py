@@ -82,6 +82,7 @@ class MoveAnalysis:
     half_open_black: List[str] = field(default_factory=list)   # files where Black has no pawn but White does
     double_attack: Optional[str] = None        # ground-truth fork/double-attack created by the move played
     best_move_double_attack: Optional[str] = None  # same, for the engine's preferred move
+    best_move_attacks: List[str] = field(default_factory=list)  # enemy pieces/pawns the ENGINE'S move would attack (so alt-move commentary can't invent "strikes at the centre")
     is_sacrifice: bool = False                 # a SOUND sacrifice: invests material via a good move, eval still favors the mover
     is_brilliant: bool = False                 # a substantial sound sacrifice played as the best/near-best move (Chess.com "!!"-style)
     sacrifice_invested: float = 0.0            # pawns of material given up, from the mover's POV
@@ -1095,13 +1096,22 @@ def detect_sacrifice(
 ):
     """
     Detect a SOUND sacrifice. Three conditions:
-      1. The mover nets material DOWN (>= 1.5 pawns) after the opponent's best
-         reply — they genuinely gave something up.
+      1. The mover nets material DOWN (>= 1.5 pawns) after the exchange SETTLES —
+         the opponent's best reply plus the mover's natural recapture, if one
+         exists — so they genuinely gave something up.
       2. The engine still clearly favors the mover afterward (eval gate) — so it
          is sound, not a blunder.
       3. The move is also a GOOD move (low cp_loss) — so we don't mislabel a
          sloppy move that merely stayed winning (because the mover was already up
          a lot) as a "sacrifice." A true sac is a deliberate, correct choice.
+
+    Why the recapture step matters (James's 2026-07-18 critique, item 9): measuring
+    material right after the opponent's capture reads an OFFERED TRADE as a
+    sacrifice. E.g. 9. a3 inviting ...Bxc3+ bxc3 — one ply after ...Bxc3+ White is
+    "down a knight," so the old check flagged a3 as a *sound knight sacrifice*; the
+    immediate bxc3 recapture restores the balance and reveals a fair bishop-for-
+    knight exchange. A true sacrifice (Bxh7+ Kxh7) has no recapture, so it still
+    measures as invested material.
 
     cp_loss is used only as a "not a mistake" gate, kept loose (<=90) so that a
     brilliancy that is the engine's top move (cp_loss ~0) always passes while a
@@ -1114,7 +1124,21 @@ def detect_sacrifice(
     if opp_best_reply is not None:
         probe = board_after.copy()
         try:
+            reply_was_capture = probe.is_capture(opp_best_reply)
+            reply_square = opp_best_reply.to_square
             probe.push(opp_best_reply)
+            if reply_was_capture:
+                # Settle the exchange: recapture on that square with the least
+                # valuable attacker (the standard human/exchange assumption).
+                recaptures = [
+                    m for m in probe.legal_moves
+                    if m.to_square == reply_square and probe.is_capture(m)
+                ]
+                if recaptures:
+                    def _attacker_value(m: chess.Move) -> float:
+                        pc = probe.piece_at(m.from_square)
+                        return PIECE_VALUES.get(pc.piece_type, 0.0) if pc else 0.0
+                    probe.push(min(recaptures, key=_attacker_value))
             mat_after_reply_white = material_balance(probe)
         except Exception:
             mat_after_reply_white = material_balance(board_after)
@@ -1447,14 +1471,33 @@ def analyze_pgn(
 
             # Ground-truth double attack the engine's preferred move would create.
             best_move_double_attack = None
+            # And the plain attack list for that move — what it would ACTUALLY hit.
+            # Pawns are included as targets here (unlike attacks_pieces) because the
+            # classic hallucination for engine alternatives is "…f6 strikes at the
+            # centre" when the pawn push touches no enemy pawn at all (James's
+            # 2026-07-18 critique, item 11): an empty list is affirmative evidence
+            # the engine's move attacks nothing right now.
+            best_move_attacks: List[str] = []
             try:
                 probe = board.copy()
                 probe.push(best_move)
                 best_move_double_attack = detect_double_attack(
                     probe, best_move.to_square, side_color
                 )
+                if probe.piece_at(best_move.to_square) is not None:
+                    for asq in probe.attacks(best_move.to_square):
+                        pc = probe.piece_at(asq)
+                        if (
+                            pc is not None
+                            and pc.color != side_color
+                            and pc.piece_type in (chess.PAWN, chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN)
+                        ):
+                            best_move_attacks.append(
+                                f"{PIECE_NAMES[pc.piece_type]} on {chess.square_name(asq)}"
+                            )
             except Exception:
                 best_move_double_attack = None
+                best_move_attacks = []
 
             # Whether the engine's best move is itself a recapture (so the narrator
             # describes alternatives like dxe4 accurately — capture vs. recapture).
@@ -1670,6 +1713,7 @@ def analyze_pgn(
                     half_open_black=files["half_open_black"],
                     double_attack=double_attack,
                     best_move_double_attack=best_move_double_attack,
+                    best_move_attacks=best_move_attacks,
                     is_sacrifice=is_sacrifice,
                     is_brilliant=is_brilliant,
                     sacrifice_invested=sac_invested,
