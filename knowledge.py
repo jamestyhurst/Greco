@@ -853,18 +853,35 @@ def _best_quotable_sentence(text: str, query_words: Sequence[str]) -> str:
     awkward one (the design's "avoid awkward forced quotes" guard)."""
     raw = re.split(r"(?<=[.!?])\s+", (text or "").strip())
     query_set = {w.lower() for w in query_words if len(w) > 3}
-    best, best_score = "", -1
+    best, best_score = "", 0
     for sentence in raw:
         s = sentence.strip().strip('"').strip()
-        wc = len(s.split())
+        tokens = s.split()
+        wc = len(tokens)
         if wc < 8 or wc > 32:
             continue
         if _DANGLING_START_RE.match(s):
             continue
         if _MOVE_NUM_RE.search(s) or "[" in s or "]" in s or '"' in s:
             continue  # skip notation, artifacts, and interior quotes (malformed when re-quoted)
+        # OCR-garble guard (James's 2026-07-18 critique, item 6: a corrupted fragment
+        # of 1883 tournament-table typesetting — "12, 8!, 13, 152, 15}, … = 123 —14 0" —
+        # reached a report verbatim as the featured quote). Scanned public-domain books
+        # carry stray tables, scores, and page debris; real quotable prose has almost
+        # no digits. Reject any candidate dominated by number-bearing tokens or
+        # carrying table/score artifacts.
+        if "{" in s or "}" in s:
+            continue
+        digit_tokens = sum(1 for t in tokens if any(ch.isdigit() for ch in t))
+        if digit_tokens >= 3 or digit_tokens / wc > 0.2:
+            continue
+        if re.search(r"=\s*\d|\d\s*=|[—–-]\s*\d+\s+\d|\d\s*[—–]", s):
+            continue  # score-table debris: "= 123", "—14 0", etc.
         words = re.findall(r"[a-z']+", s.lower())
         score = sum(1 for w in words if w in query_set)
+        # A featured quote must actually OVERLAP the game's themes: `best_score`
+        # starts at 0, so a sentence with zero query-word overlap can never win —
+        # an irrelevant aside is worse than no quote at all.
         if score > best_score:
             best, best_score = s, score
     return best
