@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.107] — 2026-07-19
+
 ### From James's 2026-07-18 report critique (mpena06 game) — accuracy fixes
 - **An offered trade is no longer a "sound sacrifice"** — `detect_sacrifice` measured
   material one ply after the opponent's best reply, so 9. a3 inviting ...Bxc3+ bxc3 read
