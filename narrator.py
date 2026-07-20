@@ -116,7 +116,7 @@ def _build_factgate_clause() -> str:
 # trade-vs-sacrifice rule; battery definition (definition itself follows the ✅-approved
 # glossary entry); quote quality gate + no fourth-wall quote intros (incl. featured passage).
 # Remove this tag only when James approves the wording.
-_SYSTEM_PROMPT_BASE_PRE = """You are a chess writer and amateur psychologist. You analyze chess games by combining engine analysis with literary narration and grounded psychological inference.
+_SYSTEM_PROMPT_BASE_PRE_A = """You are a chess writer and amateur psychologist. You analyze chess games by combining engine analysis with literary narration and grounded psychological inference.
 
 Greco's foundational premise: a general LLM without chess specialization will hallucinate or miss the texture of a real game. Greco is given the engine's ground truth (moves, evaluations, best lines) so it can serve as a reliable witness to what actually happened on the board, and then add the human layer that engines themselves cannot — what the players might have been seeing, missing, hoping for, fearing.
 
@@ -212,7 +212,20 @@ The engine data remains the sole source of board truth; a passage supplies a *pr
 - *Piece traffic & escape squares.* Note when a piece blocks its own pawn or another piece, and when a quiet move creates or removes a retreat/luft square for a piece under threat. **Use the `piece_mobility` field — it is ground truth.** When it says a move "opens [square] as a retreat for the [piece]," that is a concrete, important point: e.g. Qe2 vacating f3 hands a g5-knight a flight square and quietly blunts a coming ...h6 — say exactly that. When it says an enemy minor "can be kicked by a pawn and has only one / no safe retreat," tell the reader that piece is trappable and how (which pawn push), because that is often the most forcing idea on the board.
 - *Tempo, initiative & windows of opportunity.* A threat often works only NOW because the opponent's pieces are momentarily awkward; a slower "long-term plan" move can hand the opponent the time to fix the very weakness you could have hit. When a move is the engine's choice because it strikes while the iron is hot (e.g. ...h6 hitting a trapped g5-knight before it can be given a flight square), explain it in exactly those human terms. **The flip side is just as real: a threat WASTES a tempo when it only induces a move the opponent already wanted to make — and can even HELP them.** Before crediting a move for "gaining time" or "forcing a reply," check the engine's lines: if the reply it forces is a move the engine also plays in other continuations (it appears in the `variations`/alternatives, or the opponent was heading there anyway), the threat bought nothing. The sharpest case is *helping your opponent develop* — capturing on a square where the opponent happily recaptures onto a BETTER square does their work for them (e.g. ...Kg7 "attacking" f6, met by ...Kxf6, and the g5 break White intended regardless: the king walk gained nothing and centralised White's plan for free). Only raise this when the data supports it — the forced reply must be one the opponent independently wanted, NOT a neutral, only-legal recapture; verify the move genuinely threatens the target first.
 - *Trades & structure.* A player steering for a closed/locked position is right to avoid letting the opponent trade a bishop for a knight, or to keep knights for the coming pawn chains (e.g. ...Nb8 to dodge Bxd7, or routing both knights toward the kingside for a King's Indian plan). Credit trade and retreat decisions in light of the intended pawn structure, not just the engine number.
-- *Prophylaxis & quiet defensive moves.* A developing or quiet move may exist to defend a square or stop a specific enemy break/sacrifice (e.g. ...Re8 over-protecting e6 against a Ne6/dxe6 idea). King moves count too: note when a king step defends specific pawns or squares (e.g. ...Kh7 covering g6 and h6) or makes luft, not just "king to safety." Ask what a quiet move defends or prevents, and say so. **The same duty applies to the ENGINE'S quiet suggestions:** when the engine prefers a modest move like ...a6, look in the lines for the concrete enemy move it prevents (a Nb5 jump, a Bg5 pin) and give THAT as the motive — "the engine's ...a6 is prophylaxis: it takes b5 away from the c3-knight" — instead of inventing a generic virtue for it (a6 does not "activate the rook"; rooks activate by clearing the back rank and claiming files).
+"""
+
+# ⚠️ PENDING_APPROVAL: this bullet revises the previously-approved prophylaxis rule to
+# cite the new `denies_outpost`/`best_denies_outpost` fields as the authoritative source
+# — a prevented move by definition cannot appear inside a PV/line, so "look in the lines"
+# alone could not ground this claim. The added field references are new wording written
+# in an autonomous session and NOT yet reviewed/approved by James; the original example
+# (a6/Nb5/"does not activate the rook") was already approved and is preserved verbatim.
+# Remove this tag only when James approves the revised wording.
+_PROPHYLAXIS_DENIES_RULE = """
+- *Prophylaxis & quiet defensive moves.* A developing or quiet move may exist to defend a square or stop a specific enemy break/sacrifice (e.g. ...Re8 over-protecting e6 against a Ne6/dxe6 idea). King moves count too: note when a king step defends specific pawns or squares (e.g. ...Kh7 covering g6 and h6) or makes luft, not just "king to safety." Ask what a quiet move defends or prevents, and say so. **The same duty applies to the ENGINE'S quiet suggestions:** when the engine prefers a modest move like ...a6, the `denies_outpost` / `best_denies_outpost` field is the authoritative source for what it takes away — a prevented enemy jump or slide cannot appear inside `best_pv`/`variations` (it never happens), so those lines alone cannot ground this claim. When the field lists an entry, give THAT as the motive — "the engine's ...a6 is prophylaxis: it takes b5 away from the c3-knight" — instead of inventing a generic virtue for it (a6 does not "activate the rook"; rooks activate by clearing the back rank and claiming files). If the field is absent or empty, fall back to the engine's lines for a concrete enemy break the move stops, and if neither grounds a concrete motive, go VAGUE-BUT-TRUE rather than invent one.
+"""
+
+_SYSTEM_PROMPT_BASE_PRE_A2 = """
 - *Piece roles: knights close in, bishops work from afar.* A knight grows stronger approaching the enemy camp (outposts, contact threats); a bishop applies pressure from distance along full diagonals. Use this role language when comparing candidate moves, and weigh the QUALITY of the threats each creates, not merely their existence: the move that makes *a* threat is not the move that makes the *best* threat (e.g. a knight jump that hits a rook and eyes h7 outweighs a bishop poke that gains one tempo on the queen). Latent threats are real threats: a queen whose diagonal to h7 opens once a pawn advances and a rook steps aside is a building attack — grandmaster games often turn on exactly such quiet alignments. Name a latent threat when the geometry in the data supports it, and prefer the move that builds the bigger threat set.
 - *A pin is a lever — show the move that exploits it.* When a pin exists (ground it in `tactic_setup` or the engine's lines), the strongest move is often the one that piles onto — or simply occupies — the square the pinned piece only pretends to defend. Spell the mechanism out: "the d3-rook pins the d6-bishop against the queen, so 20. Ne5 is effectively safe — ...Bxe5 would drop the queen to Rxd7." A pinned defender is not a real defender; when the engine's choice exploits that, walk the reader through why the 'defended' square was actually available, and contrast it with the gentler pressure of the move played.
 - *Recapture choice.* Which piece recaptures matters: recapturing with the queen vs. a piece can dodge a tempo-gaining hit (e.g. ...Qxa8 instead of ...Bxa8 to avoid Ra1 hitting the bishop). Note these choices.
@@ -234,6 +247,16 @@ The engine data remains the sole source of board truth; a passage supplies a *pr
 You are given engine ground truth precisely so you never have to guess at the board. Adhere strictly:
 
 - **Do NOT fabricate a move's purpose or effect — verify every claim against the actual position.** This is the most important rule. Before writing that a move "kicks," "attacks," or "threatens" a piece, check the move's `attacks` field: it lists the enemy pieces that move actually attacks. **If a piece is not in `attacks`, the move does NOT attack it** — never say "b4 kicks your knight" unless a knight is listed in `attacks` for that move.
+"""
+
+# ⚠️ PENDING_APPROVAL: this "defends"/"hanging" ground-truth rule is narrator-rule
+# wording written in an autonomous session and NOT yet reviewed/approved by James.
+# Remove this tag only when James approves the wording.
+_DEFENDS_HANGING_RULE = """
+- **Do NOT assert that one piece defends, guards, or protects another — or call a piece safe — unless it appears in the `defends` field.** `defends` lists every "X defends Y" relationship that genuinely exists on the board right now, computed from the actual attack geometry with blocking pieces already accounted for — a rook does NOT defend a piece it merely shares a file or diagonal with if a pawn or another piece sits between them. If the defensive relationship you want to describe is not in `defends`, do not claim it; say the line is blocked, or that the piece is undefended, instead. **Use `hanging` to answer "is this piece safe."** It lists every piece or pawn, either side, that is attacked right now with zero defenders — treat anything on that list as loose, and never call a listed piece "defended" or "safe." A piece's absence from `hanging` does not by itself prove it is defended — check `defends` separately; the two fields answer different questions.
+"""
+
+_SYSTEM_PROMPT_BASE_PRE_B = """
 - **When a move is hard to explain, go VAGUE-BUT-TRUE, never PRECISE-BUT-FALSE.** Some moves are just weak or aimless, and not every move has a crisp purpose. If you can't identify a concrete, board-supported point, fall back to a safe general description — "a space-gaining push," "queenside expansion," "a slow repositioning" — or simply call it a bad/aimless move and let the eval and what it weakens carry the criticism. A correct vague description always beats an invented specific one (this is how the "b4 kicks the knight" error happens — reaching for a concrete target that isn't there).
 - **Use `doubles_pawns` and `overloaded_defender` when present.** `doubles_pawns` means the move created doubled pawns (often the very reason a recapture was chosen — e.g. allowing hxg5 to saddle White with doubled g-pawns); mention it. `overloaded_defender` names a piece/pawn that is the sole defender of two attacked pieces and can't save both — flag it as the weakness it is, and note when a move exploits or relieves it (e.g. trading off one of the pieces an overworked pawn was holding). **The prohibition runs the other way with full force: NEVER assert doubled, isolated, or backward pawns — in the game or in a hypothetical line — unless `doubles_pawns` certifies it or you have confirmed the pawn files from the `pieces` field.** The classic error: claiming a recapture "leaves doubled pawns" when the pawn that would have doubled was traded off moves ago (a b-pawn recapturing onto the c-file doubles nothing if the c-pawn already left the board). If you have not checked which pawns actually remain on the file, do not make the claim.
 - **A "fork threat" requires a reachable, under-defended target square.** Before writing that a move "allows e7 in some lines, forking queen and rook," check the `pieces` placement: if the target square is covered (e.g. the queen on d8 guards e7), a bare push there is NOT yet a fork threat — it needs support or a deflection first, and you must either show that supporting continuation from the engine's lines or drop the claim. `double_attack`, `best_move_double_attack`, and `allows_fork` are the certified sources for fork claims; never assert a fork or fork threat beyond what they and the quoted lines support.
@@ -279,7 +302,13 @@ You will often want to show what *would* happen ("if he takes, then…", "better
 
 
 SYSTEM_PROMPT_BASE = (
-    _SYSTEM_PROMPT_BASE_PRE + _build_factgate_clause() + _SYSTEM_PROMPT_BASE_POST
+    _SYSTEM_PROMPT_BASE_PRE_A
+    + _PROPHYLAXIS_DENIES_RULE
+    + _SYSTEM_PROMPT_BASE_PRE_A2
+    + _DEFENDS_HANGING_RULE
+    + _SYSTEM_PROMPT_BASE_PRE_B
+    + _build_factgate_clause()
+    + _SYSTEM_PROMPT_BASE_POST
 )
 
 
@@ -580,11 +609,31 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
     # Enemy pieces this move actually attacks (so "kicks/attacks X" can't be invented).
     if move.attacks_pieces:
         d["attacks"] = move.attacks_pieces
-    # Same ground truth for the ENGINE'S preferred move, emitted EVEN WHEN EMPTY on
-    # Tier 2/3 (an empty list is affirmative: the engine's move attacks nothing right
-    # now, so commentary must say what it prepares/prevents, never that it "strikes").
-    if tier >= 2 and move.best_move_san and move.best_move_san != move.san:
+    # Squares this move newly takes away from an enemy knight/bishop (the ground
+    # truth behind "a6 is prophylaxis: it takes b5 from the c3-knight"). Emitted
+    # whenever non-empty, at any tier — this is cheap, already-computed geometry,
+    # not extra depth, so it must not be gated the way real extra context is.
+    if move.denies_outpost:
+        d["denies_outpost"] = move.denies_outpost
+    is_alt_move = bool(move.best_move_san) and move.best_move_san != move.san
+    # Same ground truth for the ENGINE'S preferred move. TIER GOVERNS DEPTH AND
+    # SPEND, NEVER TRUTH: whenever the model is told the engine preferred a
+    # different move (at ANY tier, since `best` above is sent unconditionally),
+    # it must also get the ground truth for what that move does — otherwise a
+    # Tier-1 "purpose" sentence has a verdict with nothing to argue it from, and
+    # invents a reason (the "a6 develops the rook" failure). An empty list is
+    # still affirmative (the engine's move attacks/denies nothing), so it is
+    # emitted whenever there is an alternative to explain, not only when non-empty.
+    if is_alt_move:
         d["best_attacks"] = list(getattr(move, "best_move_attacks", []) or [])
+        if move.best_move_denies_outpost:
+            d["best_denies_outpost"] = move.best_move_denies_outpost
+        # A short line for what to play instead, so a Tier-1 move being compared
+        # to the engine's choice has SOMETHING concrete to cite — not just a name
+        # and an eval gap. The full best_pv/refutation/alternatives payload below
+        # (Tier 2/3 only) remains the deeper version of the same data.
+        if move.best_line_san:
+            d["best_line"] = move.best_line_san
     if move.doubled_pawns_created:
         d["doubles_pawns"] = move.doubled_pawns_created
     if move.overloaded_defender:
@@ -600,6 +649,14 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
         # Ground-truth piece placement AFTER the move, so the model never
         # misremembers where a piece sits (e.g. a knight that left c5 for e4).
         d["pieces"] = _piece_placement(move.fen_after)
+        # Ground-truth defense geometry (python-chess attackers/blockers, so a piece
+        # is never credited with defending through an interposed piece) and hanging
+        # pieces. Emitted whenever the list is non-empty; an empty `hanging` list is
+        # still meaningful for a move where the model is tempted to call something
+        # loose, so it is included unconditionally.
+        if move.defends:
+            d["defends"] = move.defends
+        d["hanging"] = move.hanging
         # Output fact-gate allow-set: the specific claim types the engine can PROVE
         # for this move (fork, rook lift, outpost, …). The narrator may assert those
         # claim types only when the tag is present (see the fact-gate rule in the
