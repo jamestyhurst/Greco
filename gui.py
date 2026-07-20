@@ -208,7 +208,7 @@ class GrecoGUI:
         Rendering the piece big (Segoe UI Symbol has clean, well-spaced chess glyphs)
         keeps the pawn/knight/rook clearly readable instead of compressing them to a
         blob the way an 11px header glyph did."""
-        lf = ttk.LabelFrame(parent, padding=8)
+        lf = ttk.LabelFrame(parent, padding=6)
         head = ttk.Frame(lf)
         ttk.Label(head, text=glyph, font=("Segoe UI Symbol", 18),
                   foreground=self.IVORY).pack(side="left")
@@ -224,8 +224,7 @@ class GrecoGUI:
         self._last_html = None   # path of the most recent report (for the buttons)
         self._last_dir = None
         root.title(f"Greco {__version__} — Chess Game Analyzer")
-        root.geometry("760x700")
-        root.minsize(640, 600)
+        root.minsize(640, 600)  # height is computed from the content at the end of __init__
         self._apply_theme()
         try:
             root.iconbitmap(default=str(ICON_PATH))  # king logo on the title bar + taskbar
@@ -234,17 +233,28 @@ class GrecoGUI:
 
         cfg = load_config()
 
-        pad = {"padx": 8, "pady": 4}
+        pad = {"padx": 8, "pady": 3}
         main = ttk.Frame(root, padding=10)
         main.pack(fill="both", expand=True)
 
-        ttk.Label(main, text="♚  Greco", font=("Gabriola", 30),
-                  foreground=self.IVORY).pack(anchor="w")
+        # Title + tagline share one row — vertical space is the scarce resource
+        # (the full form + action bar must fit a 125%-scaled laptop screen).
+        header = ttk.Frame(main)
+        header.pack(fill="x", pady=(0, 4))
+        ttk.Label(header, text="♚  Greco", font=("Gabriola", 30),
+                  foreground=self.IVORY).pack(side="left")
         ttk.Label(
-            main,
+            header,
             text="Engine evaluation + AI narration for any chess game.",
             foreground="#D8C9A0", font=("Constantia", 11, "italic"),
-        ).pack(anchor="w", pady=(0, 8))
+        ).pack(side="left", anchor="s", padx=(12, 0), pady=(0, 14))
+
+        # Action bar (Analyze / progress / status / report buttons), pinned to the
+        # bottom edge. Packed side="bottom" BEFORE the content sections: pack gives
+        # space in packing order, so when the window is too short it is the log and
+        # the sections that give way — the buttons can never be clipped off-screen.
+        bottom = ttk.Frame(main)
+        bottom.pack(side="bottom", fill="x")
 
         # --- Game input ---
         game_box = self._section(main, "♟", "Game")
@@ -256,7 +266,7 @@ class GrecoGUI:
         ttk.Entry(row, textvariable=self.pgn_var).pack(side="left", fill="x", expand=True, padx=6)
         ttk.Button(row, text="Browse…", command=self._browse_pgn).pack(side="left")
         ttk.Label(game_box, text="or paste PGN text:", foreground="#8a7a5c").pack(anchor="w", pady=(8, 2))
-        self.pgn_text_box = tk.Text(game_box, height=5, wrap="none",
+        self.pgn_text_box = tk.Text(game_box, height=3, wrap="none",
                                     font=("Consolas", 9), bg="#fffdf6", fg="#3A2A1A",
                                     relief="solid", borderwidth=1)
         self.pgn_text_box.pack(fill="x", pady=(0, 4))
@@ -285,13 +295,13 @@ class GrecoGUI:
         self.usecase_var.trace_add("write", lambda *_: self._toggle_essay_ui())
 
         noterow = ttk.Frame(opt)
-        noterow.pack(fill="x", pady=(6, 0))
+        noterow.pack(fill="x", pady=(3, 0))
         ttk.Label(noterow, text="Note (optional):").pack(side="left")
         self.note_var = tk.StringVar()
         ttk.Entry(noterow, textvariable=self.note_var).pack(side="left", fill="x", expand=True, padx=6)
 
         ctxrow1 = ttk.Frame(opt)
-        ctxrow1.pack(fill="x", pady=(4, 0))
+        ctxrow1.pack(fill="x", pady=(2, 0))
         ttk.Label(ctxrow1, text="Audience level:").pack(side="left")
         self.audience_var = tk.StringVar(value=AUDIENCE_LEVELS[0])
         ttk.Combobox(ctxrow1, textvariable=self.audience_var, values=AUDIENCE_LEVELS,
@@ -301,7 +311,7 @@ class GrecoGUI:
         ttk.Entry(ctxrow1, textvariable=self.recipient_var).pack(side="left", fill="x", expand=True, padx=6)
 
         ctxrow2 = ttk.Frame(opt)
-        ctxrow2.pack(fill="x", pady=(4, 0))
+        ctxrow2.pack(fill="x", pady=(2, 0))
         ttk.Label(ctxrow2, text="White context:").pack(side="left")
         self.white_ctx_var = tk.StringVar()
         ttk.Entry(ctxrow2, textvariable=self.white_ctx_var).pack(side="left", fill="x", expand=True, padx=6)
@@ -316,7 +326,7 @@ class GrecoGUI:
         LW = 16  # label column width (chars) — keeps entry fields aligned
 
         erow = ttk.Frame(adv)
-        erow.pack(fill="x", pady=2)
+        erow.pack(fill="x", pady=1)
         ttk.Label(erow, text="Stockfish path:", width=LW, anchor="w").pack(side="left")
         self.engine_var = tk.StringVar(
             value=cfg.get("stockfish_path") or os.environ.get("STOCKFISH_PATH", "")
@@ -325,7 +335,7 @@ class GrecoGUI:
         ttk.Button(erow, text="Browse…", command=self._browse_engine).pack(side="left")
 
         krow = ttk.Frame(adv)
-        krow.pack(fill="x", pady=2)
+        krow.pack(fill="x", pady=1)
         ttk.Label(krow, text="Anthropic API key:", width=LW, anchor="w").pack(side="left")
         self.key_var = tk.StringVar(
             value=cfg.get("api_key") or os.environ.get("ANTHROPIC_API_KEY", "")
@@ -333,7 +343,7 @@ class GrecoGUI:
         ttk.Entry(krow, textvariable=self.key_var, show="•").pack(side="left", fill="x", expand=True, padx=6)
 
         mrow = ttk.Frame(adv)
-        mrow.pack(fill="x", pady=2)
+        mrow.pack(fill="x", pady=1)
         ttk.Label(mrow, text="Model:", width=LW, anchor="w").pack(side="left")
         self.model_var = tk.StringVar(value=cfg.get("model", MODELS[0]))
         ttk.Combobox(
@@ -341,7 +351,7 @@ class GrecoGUI:
         ).pack(side="left", padx=6)
 
         rrow = ttk.Frame(adv)
-        rrow.pack(fill="x", pady=2)
+        rrow.pack(fill="x", pady=1)
         ttk.Label(rrow, text="Reports folder:", width=LW, anchor="w").pack(side="left")
         self.reports_var = tk.StringVar(
             value=cfg.get("reports_dir") or os.environ.get("GRECO_REPORTS_DIR", "")
@@ -350,14 +360,14 @@ class GrecoGUI:
         ttk.Button(rrow, text="Browse…", command=self._browse_reports).pack(side="left")
 
         prow = ttk.Frame(adv)
-        prow.pack(fill="x", pady=2)
+        prow.pack(fill="x", pady=1)
         ttk.Label(prow, text="Pick PGNs from:", width=LW, anchor="w").pack(side="left")
         self.pgn_dir_var = tk.StringVar(value=cfg.get("pgn_dir") or default_pgn_dir())
         ttk.Entry(prow, textvariable=self.pgn_dir_var).pack(side="left", fill="x", expand=True, padx=6)
         ttk.Button(prow, text="Browse…", command=self._browse_pgn_dir).pack(side="left")
 
         # --- Run ---
-        runrow = ttk.Frame(main)
+        runrow = ttk.Frame(bottom)
         runrow.pack(fill="x", **pad)
         self.analyze_btn = ttk.Button(runrow, text="Analyze game", command=self._on_analyze,
                                       style="Primary.TButton")
@@ -365,10 +375,10 @@ class GrecoGUI:
         self.progress = ttk.Progressbar(runrow, mode="determinate", length=260)
         self.progress.pack(side="left", padx=12, fill="x", expand=True)
         self.status_var = tk.StringVar(value="Ready.")
-        ttk.Label(main, textvariable=self.status_var, foreground=self.GOLD).pack(anchor="w", padx=8)
+        ttk.Label(bottom, textvariable=self.status_var, foreground=self.GOLD).pack(anchor="w", padx=8)
 
         # --- Post-run actions (enabled once a report has been produced) ---
-        actionrow = ttk.Frame(main)
+        actionrow = ttk.Frame(bottom)
         actionrow.pack(fill="x", **pad)
         self.open_report_btn = ttk.Button(
             actionrow, text="Open report", command=self._open_report, state="disabled"
@@ -386,7 +396,7 @@ class GrecoGUI:
 
         # --- Log / live narrative ---
         self.log = scrolledtext.ScrolledText(
-            main, height=14, wrap="word", font=("Constantia", 11),
+            main, height=5, wrap="word", font=("Constantia", 11),
             bg=self.PARCH, fg=self.INK, insertbackground=self.INK,
             selectbackground=self.WINE, selectforeground=self.IVORY,
             relief="solid", borderwidth=1,
@@ -394,6 +404,14 @@ class GrecoGUI:
         self.log.pack(fill="both", expand=True, padx=8, pady=(4, 8))
         self.log.configure(state="disabled")
         self._toggle_essay_ui()  # set initial visibility (hidden by default)
+
+        # Size the window to what the content actually needs, capped to the screen
+        # (a fixed height silently clipped the action bar once the form grew taller
+        # than the window — laptop screens at 125% scaling have only ~860px to give).
+        root.update_idletasks()
+        req_h = main.winfo_reqheight()
+        max_h = root.winfo_screenheight() - 90  # leave room for taskbar + title bar
+        root.geometry(f"760x{max(600, min(req_h, max_h))}")
 
     # ---------- input helpers ----------
     def _browse_pgn(self):

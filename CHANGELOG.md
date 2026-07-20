@@ -7,6 +7,27 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Fixed
+- **The desktop GUI's Analyze button is back.** The Tkinter window was fixed at
+  760x700 while the form kept growing; when the paste-PGN box landed (2026-06-18,
+  e9905e7) the content overflowed the window and Tk's packer silently unmapped
+  everything packed after the Setup section — the Analyze button, status line,
+  report buttons, and live-narrative log. Three-part fix: the action bar is now
+  packed `side="bottom"` *before* the content sections, so when vertical space
+  runs short the log and sections give way but the buttons can never be clipped
+  again; the window sizes itself to the content at startup, capped to the screen
+  (a 125%-scaled 1080p laptop display only has ~774px of usable height); and the
+  header row plus paddings were tightened so the whole form fits on that screen
+  (title and tagline share a row, paste box 5→3 lines). On small screens the log
+  is the first thing to yield — it reappears when the window has room. Locked in
+  by `tests/test_gui_layout.py`, which builds the real window and asserts the
+  action bar is visible at launch size and at the 640x600 minimum.
+
+## [0.41.108] — 2026-07-19
+
+*(Released as v0.41.108 by the 2026-07-19 ingestion session; the entry below was
+left under [Unreleased] at release time and filed here afterwards.)*
+
 ### Mud-proof PGN ingestion (from the 2026-07-19 resilience investigation)
 Empirical 40-case matrix (`Developer Tools (Greco)\pgn-resilience\`) showed the parser
 forgives most handwriting sins but fails three ways: encoding crashes, SILENT truncation
