@@ -215,14 +215,15 @@ The engine data remains the sole source of board truth; a passage supplies a *pr
 """
 
 # ⚠️ PENDING_APPROVAL: this bullet revises the previously-approved prophylaxis rule to
-# cite the new `denies_outpost`/`best_denies_outpost` fields as the authoritative source
+# cite the new `denies_squares`/`best_denies_squares` fields as the authoritative source
 # — a prevented move by definition cannot appear inside a PV/line, so "look in the lines"
-# alone could not ground this claim. The added field references are new wording written
-# in an autonomous session and NOT yet reviewed/approved by James; the original example
-# (a6/Nb5/"does not activate the rook") was already approved and is preserved verbatim.
-# Remove this tag only when James approves the revised wording.
+# alone could not ground this claim. The added field references and the outpost/prophylaxis
+# disambiguation sentence are new wording written in an autonomous session and NOT yet
+# reviewed/approved by James; the original example (a6/Nb5/"does not activate the rook")
+# was already approved and is preserved verbatim. Remove this tag only when James approves
+# the revised wording.
 _PROPHYLAXIS_DENIES_RULE = """
-- *Prophylaxis & quiet defensive moves.* A developing or quiet move may exist to defend a square or stop a specific enemy break/sacrifice (e.g. ...Re8 over-protecting e6 against a Ne6/dxe6 idea). King moves count too: note when a king step defends specific pawns or squares (e.g. ...Kh7 covering g6 and h6) or makes luft, not just "king to safety." Ask what a quiet move defends or prevents, and say so. **The same duty applies to the ENGINE'S quiet suggestions:** when the engine prefers a modest move like ...a6, the `denies_outpost` / `best_denies_outpost` field is the authoritative source for what it takes away — a prevented enemy jump or slide cannot appear inside `best_pv`/`variations` (it never happens), so those lines alone cannot ground this claim. When the field lists an entry, give THAT as the motive — "the engine's ...a6 is prophylaxis: it takes b5 away from the c3-knight" — instead of inventing a generic virtue for it (a6 does not "activate the rook"; rooks activate by clearing the back rank and claiming files). If the field is absent or empty, fall back to the engine's lines for a concrete enemy break the move stops, and if neither grounds a concrete motive, go VAGUE-BUT-TRUE rather than invent one.
+- *Prophylaxis & quiet defensive moves.* A developing or quiet move may exist to defend a square or stop a specific enemy break/sacrifice (e.g. ...Re8 over-protecting e6 against a Ne6/dxe6 idea). King moves count too: note when a king step defends specific pawns or squares (e.g. ...Kh7 covering g6 and h6) or makes luft, not just "king to safety." Ask what a quiet move defends or prevents, and say so. **The same duty applies to the ENGINE'S quiet suggestions:** when the engine prefers a modest move like ...a6, the `denies_squares` / `best_denies_squares` field is the authoritative source for what it takes away — a prevented enemy jump or slide cannot appear inside `best_pv`/`variations` (it never happens), so those lines alone cannot ground this claim. When the field lists an entry, give THAT as the motive — "the engine's ...a6 is prophylaxis: it takes b5 away from the c3-knight" — instead of inventing a generic virtue for it (a6 does not "activate the rook"; rooks activate by clearing the back rank and claiming files). Describe what `denies_squares`/`best_denies_squares` reports in plain terms — "takes the square away from," "denies the knight/bishop that landing spot," "controls b5 so the knight can't settle there" — the way a real commentator would; do **not** call it an "outpost" or use any outpost language. **"Outpost" is a different, precise, structural claim** (a square that is pawn-DEFENDED and can never be challenged by an enemy pawn — see the `outpost` certified tag) and may be used **only** when `outpost` appears in `certified` for that move; these two fields do not certify it and a square they name may not even qualify (an enemy pawn could still be free to challenge it later). If the field is absent or empty, fall back to the engine's lines for a concrete enemy break the move stops, and if neither grounds a concrete motive, go VAGUE-BUT-TRUE rather than invent one.
 """
 
 _SYSTEM_PROMPT_BASE_PRE_A2 = """
@@ -613,8 +614,11 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
     # truth behind "a6 is prophylaxis: it takes b5 from the c3-knight"). Emitted
     # whenever non-empty, at any tier — this is cheap, already-computed geometry,
     # not extra depth, so it must not be gated the way real extra context is.
-    if move.denies_outpost:
-        d["denies_outpost"] = move.denies_outpost
+    # NOT the certified `outpost` claim — plain one-move square control, not a
+    # pawn-structure permanence test. Never let this field's name or contents
+    # imply the word "outpost" in prose (see compute_denied_squares docstring).
+    if move.denies_squares:
+        d["denies_squares"] = move.denies_squares
     is_alt_move = bool(move.best_move_san) and move.best_move_san != move.san
     # Same ground truth for the ENGINE'S preferred move. TIER GOVERNS DEPTH AND
     # SPEND, NEVER TRUTH: whenever the model is told the engine preferred a
@@ -626,8 +630,8 @@ def _move_to_dict(move: MoveAnalysis, tier: int, diagrammed: bool = False) -> Di
     # emitted whenever there is an alternative to explain, not only when non-empty.
     if is_alt_move:
         d["best_attacks"] = list(getattr(move, "best_move_attacks", []) or [])
-        if move.best_move_denies_outpost:
-            d["best_denies_outpost"] = move.best_move_denies_outpost
+        if move.best_move_denies_squares:
+            d["best_denies_squares"] = move.best_move_denies_squares
         # A short line for what to play instead, so a Tier-1 move being compared
         # to the engine's choice has SOMETHING concrete to cite — not just a name
         # and an eval gap. The full best_pv/refutation/alternatives payload below

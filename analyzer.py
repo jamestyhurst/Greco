@@ -97,8 +97,8 @@ class MoveAnalysis:
     attacks_pieces: List[str] = field(default_factory=list)  # enemy pieces the moved piece actually attacks (so the model can't invent "kicks the knight")
     defends: List[str] = field(default_factory=list)  # ground-truth "X defends Y" pairs on the board after this move (python-chess geometry, blockers included — so the model can't invent a defense through an interposed piece)
     hanging: List[str] = field(default_factory=list)  # pieces/pawns (either color) attacked and with zero defenders right now
-    denies_outpost: List[str] = field(default_factory=list)  # this PLAYED move newly denies a knight/bishop outpost square (e.g. "a6 takes b5 from the c3-knight")
-    best_move_denies_outpost: List[str] = field(default_factory=list)  # same, for the ENGINE'S preferred move — the "why" behind a quiet engine suggestion like ...a6
+    denies_squares: List[str] = field(default_factory=list)  # this PLAYED move newly denies a knight/bishop a landing square (e.g. "a6 takes b5 from the c3-knight") — plain square control, NOT the certified `outpost` claim (see compute_denied_squares docstring)
+    best_move_denies_squares: List[str] = field(default_factory=list)  # same, for the ENGINE'S preferred move — the "why" behind a quiet engine suggestion like ...a6
     doubled_pawns_created: Optional[str] = None  # this move newly doubled someone's pawns
     overloaded_defender: Optional[str] = None    # an overworked sole-defender on the board after this move
     still_winning: bool = False                # mover was decisively winning both before and after (so a slow move isn't a "mistake")
@@ -1091,7 +1091,7 @@ def compute_piece_relationships(board: chess.Board) -> Tuple[List[str], List[str
     return defends, hanging
 
 
-def compute_denied_outposts(
+def compute_denied_squares(
     board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool
 ) -> List[str]:
     """
@@ -1101,11 +1101,21 @@ def compute_denied_outposts(
     attacks b5 and that a knight on c3 reaches b5 in one hop; no engine line is
     needed to see it, so this must not depend on how deep the engine looked.
 
+    NOT the outpost predicate. "Outpost" is a reserved, precisely-defined term in
+    this codebase (factgate.is_outpost / knowledge/terminology glossary, approved
+    2026-06-15): a square that is pawn-DEFENDED and permanently pawn-UNCHALLENGEABLE.
+    This function tests neither condition — it is one-move square control, nothing
+    structural or permanent. Do not call this an "outpost" fact anywhere (field
+    name, docstring, or narrator prose): a square this move denies may never have
+    qualified as a true outpost even if occupied (e.g. an enemy pawn on an adjacent
+    file could still one day challenge it), which is precisely the failure mode
+    this naming boundary exists to prevent.
+
     Only pawn moves are checked (the classic prophylactic-push pattern). A square
     counts as newly denied only if it was vacant and uncovered by the mover's side
     before this move (so the enemy piece's landing was genuinely available) and is
     now attacked by the pawn that just moved. Returns human-readable strings; an
-    empty list is affirmative — this move denies no outpost.
+    empty list is affirmative — this move denies no enemy piece a square.
     """
     denied: List[str] = []
     piece = board_after.piece_at(move.to_square)
@@ -1665,7 +1675,7 @@ def analyze_pgn(
             # 2026-07-18 critique, item 11): an empty list is affirmative evidence
             # the engine's move attacks nothing right now.
             best_move_attacks: List[str] = []
-            best_move_denies_outpost: List[str] = []
+            best_move_denies_squares: List[str] = []
             try:
                 probe = board.copy()
                 probe.push(best_move)
@@ -1683,13 +1693,13 @@ def analyze_pgn(
                             best_move_attacks.append(
                                 f"{PIECE_NAMES[pc.piece_type]} on {chess.square_name(asq)}"
                             )
-                best_move_denies_outpost = compute_denied_outposts(
+                best_move_denies_squares = compute_denied_squares(
                     board, best_move, probe, side_color
                 )
             except Exception:
                 best_move_double_attack = None
                 best_move_attacks = []
-                best_move_denies_outpost = []
+                best_move_denies_squares = []
 
             # Whether the engine's best move is itself a recapture (so the narrator
             # describes alternatives like dxe4 accurately — capture vs. recapture).
@@ -1858,7 +1868,7 @@ def analyze_pgn(
             doubled_created = detect_doubled_pawns_created(board_before_snapshot, board)
             overloaded = detect_overloaded_defender(board)
             defends, hanging = compute_piece_relationships(board)
-            denies_outpost = compute_denied_outposts(board_before_snapshot, move, board, side_color)
+            denies_squares = compute_denied_squares(board_before_snapshot, move, board, side_color)
             # Unsound / "intimidation" sacrifice: gave up >=2 points via a capture or
             # check, but the engine does NOT favor the mover afterward.
             is_unsound_sacrifice = (
@@ -1919,8 +1929,8 @@ def analyze_pgn(
                     attacks_pieces=attacks_pieces,
                     defends=defends,
                     hanging=hanging,
-                    denies_outpost=denies_outpost,
-                    best_move_denies_outpost=best_move_denies_outpost,
+                    denies_squares=denies_squares,
+                    best_move_denies_squares=best_move_denies_squares,
                     doubled_pawns_created=doubled_created,
                     overloaded_defender=overloaded,
                     still_winning=still_winning,
