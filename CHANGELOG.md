@@ -7,6 +7,30 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Mud-proof PGN ingestion (from the 2026-07-19 resilience investigation)
+Empirical 40-case matrix (`Developer Tools (Greco)\pgn-resilience\`) showed the parser
+forgives most handwriting sins but fails three ways: encoding crashes, SILENT truncation
+on bad movetext, and silent header data loss (the real-world `_ vs. _` report). All fixed
+at the shared pipeline layer, so CLI, GUI, and web benefit equally:
+- **Encoding ladder in `load_from_file`** — UTF-16 (Notepad "Unicode") and Windows-1252
+  (legacy exports with accented names) now load instead of crashing; UTF-8 BOMs stripped.
+- **`sanitize_pgn` pre-parse repair** (importers.py) — en/em-dashes (`O–O` from Word
+  autocorrect), curly quotes, ellipsis characters, NBSP/zero-width chars, and chess
+  figurines normalized; malformed tag lines (`[White"Rafay"]`, `[White Rafay]`, unclosed
+  quotes, indented tags) rebuilt canonically — each of these previously lost the player
+  names with zero errors, or made the whole game invisible.
+- **`parse_pgn_game` gate in analyzer.py** — python-chess never fails on a bad move; it
+  logs to `game.errors` and keeps only the moves before it, letting Greco confidently
+  narrate a fragment. The gate now raises a transcriber-grade error instead: how far the
+  game parsed, and for ambiguous scoresheet moves the exact candidates ("write Nbc3 or
+  Nec3"). Variant games (Chess960 etc.) are refused with an honest message; Lichess
+  "From Position" games still pass.
+- **Result reconciliation** — a checkmate on the final board now outranks a wrong or
+  missing `Result` tag (tags are typed; mate is math).
+- **TimeControl fix** — FIDE session controls (`40/7200:3600`) no longer classified as
+  "Daily"; correspondence (`1/86400`) still is.
+- 18 regression tests (`tests/test_pgn_resilience.py`), each born from a failing matrix row.
+
 ## [0.41.107] — 2026-07-19
 
 ### From James's 2026-07-18 report critique (mpena06 game) — accuracy fixes

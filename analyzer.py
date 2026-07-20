@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import io
 import os
+import re
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -18,6 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import chess
 import chess.engine
 import chess.pgn
+
+from importers import sanitize_pgn
 
 
 def open_engine(engine_path: str, retries: int = 3, timeout: float = 20.0):
@@ -1327,6 +1330,88 @@ def piece_mobility_notes(
     return notes[:3]  # keep it focused
 
 
+# python-chess reports movetext failures as "illegal san: 'Nd2' in <FEN>..."
+# or "ambiguous san: ...". We pull the move and position back out so the
+# error we raise tells a scoresheet transcriber exactly what to fix.
+_PARSE_ERROR_RE = re.compile(
+    r"(?:illegal|ambiguous|invalid) san: '([^']+)' in ([^ ]+(?: [^ ]+){5})"
+)
+_SAN_PIECE_LETTERS = {"K": chess.KING, "Q": chess.QUEEN, "R": chess.ROOK,
+                      "B": chess.BISHOP, "N": chess.KNIGHT}
+
+
+def _explain_parse_error(err_text: str) -> str:
+    """Turn python-chess's terse parse error into actionable advice."""
+    m = _PARSE_ERROR_RE.search(err_text)
+    if not m:
+        return err_text
+    san, fen = m.group(1), m.group(2)
+    try:
+        board = chess.Board(fen)
+    except ValueError:
+        return err_text
+    piece = _SAN_PIECE_LETTERS.get(san[:1], chess.PAWN)
+    squares = re.findall(r"[a-h][1-8]", san)  # last square in a SAN = destination
+    mover = "White" if board.turn == chess.WHITE else "Black"
+    candidates = []
+    if squares:
+        target = chess.parse_square(squares[-1])
+        candidates = sorted({
+            board.san(mv) for mv in board.legal_moves
+            if mv.to_square == target and board.piece_type_at(mv.from_square) == piece
+        })
+    if len(candidates) > 1:
+        return (f"'{san}' is ambiguous for {mover} here — more than one "
+                f"{chess.piece_name(piece)} can reach that square. "
+                f"Write one of: {', '.join(candidates)}.")
+    if len(candidates) == 1:
+        return (f"'{san}' did not parse, but {candidates[0]} is legal for {mover} — "
+                f"check for a stray character stuck to the move.")
+    return (f"'{san}' is not a legal move for {mover} in this position — likely a "
+            f"transcription error on this move or an earlier one. "
+            f"Re-check the score from a few moves back.")
+
+
+def parse_pgn_game(pgn_text: str) -> chess.pgn.Game:
+    """Sanitize and parse PGN text, refusing to hand back a silently broken game.
+
+    This is the single parse gate for every front-end (CLI, GUI, web). It
+    exists because python-chess never *fails* on a bad move — it logs the
+    problem to ``game.errors`` and quietly keeps only the moves before it,
+    which would let Greco spend an hour confidently narrating a fragment.
+    """
+    game = chess.pgn.read_game(io.StringIO(sanitize_pgn(pgn_text)))
+    if game is None:
+        raise ValueError("Could not parse PGN")
+
+    variant = game.headers.get("Variant", "").strip().lower()
+    if variant and variant not in ("standard", "from position"):
+        raise ValueError(
+            f"This is a {game.headers['Variant']} game. Greco analyzes standard "
+            f"chess only — under variant rules every engine fact would be wrong."
+        )
+
+    if game.errors:
+        plies = len(list(game.mainline_moves()))
+        moves_seen = (plies + 1) // 2
+        detail = _explain_parse_error(str(game.errors[0]))
+        raise ValueError(
+            f"The moves stop making sense after move {moves_seen} "
+            f"({plies} half-moves parsed cleanly) — everything after would be "
+            f"invisible to analysis. {detail}"
+        )
+
+    # Result reconciliation, data-back style: a checkmate on the final board
+    # outranks whatever the Result tag claims (tags are typed; mate is math).
+    final_board = game.end().board()
+    if final_board.is_checkmate():
+        truth = "0-1" if final_board.turn == chess.WHITE else "1-0"
+        if game.headers.get("Result") != truth:
+            game.headers["Result"] = truth
+
+    return game
+
+
 def analyze_pgn(
     pgn_text: str,
     engine_path: str,
@@ -1338,9 +1423,7 @@ def analyze_pgn(
     progress_cb=None,
 ) -> GameAnalysis:
     """Run Stockfish over every position in the PGN and return a structured analysis."""
-    game = chess.pgn.read_game(io.StringIO(pgn_text))
-    if game is None:
-        raise ValueError("Could not parse PGN")
+    game = parse_pgn_game(pgn_text)
 
     headers = dict(game.headers)
     moves_list: List[chess.Move] = list(game.mainline_moves())

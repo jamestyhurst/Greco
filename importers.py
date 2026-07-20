@@ -29,8 +29,59 @@ def _make_http_client() -> httpx.Client:
 
 
 def load_from_file(path: Path) -> Tuple[str, str]:
-    text = path.read_text(encoding="utf-8")
+    raw = path.read_bytes()
+    # Encoding ladder: a PGN arrives however some other tool felt like saving
+    # it. UTF-16 announces itself with a byte-order mark; utf-8-sig handles
+    # plain UTF-8 and swallows a UTF-8 BOM; cp1252 is the legacy-Windows
+    # fallback that can decode any byte, so an accented name from an old
+    # export never crashes the load.
+    if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        text = raw.decode("utf-16")
+    else:
+        try:
+            text = raw.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            text = raw.decode("cp1252")
     return text, f"file: {path}"
+
+
+# --- PGN text sanitation (the "dropped in the mud" layer) --------------------
+# Word processors and hand-editing leave grit the PGN parser chokes on
+# SILENTLY: en-dashes inside "O–O", curly quotes, indented or misquoted tag
+# lines (which lose the player names with zero errors — the "_ vs. _" report
+# failure). sanitize_pgn() scrubs all of it before parsing. Character fixes
+# apply to the whole text; structural repairs only to lines that look like
+# tag pairs. Idempotent: sanitizing clean text changes nothing.
+
+_CHAR_FIXES = str.maketrans({
+    "–": "-", "—": "-", "−": "-",                # en/em/minus dash → hyphen
+    "‘": "'", "’": "'", "“": '"', "”": '"',      # curly quotes → straight
+    # Invisible troublemakers, written as escapes so they stay
+    # visible in diffs: no-break space, zero-width space, BOM.
+    " ": " ", "​": "", "﻿": "",
+    "♔": "K", "♕": "Q", "♖": "R", "♗": "B", "♘": "N", "♙": "",
+    "♚": "K", "♛": "Q", "♜": "R", "♝": "B", "♞": "N", "♟": "",
+})
+
+# One tag-pair line, tolerantly: optional indentation, optional/missing/
+# unclosed quotes, stray inner spacing. Group 1 = tag name, group 2 = value.
+_TAG_LINE_RE = re.compile(r'^\s*\[\s*([A-Za-z]\w*)\s*"?(.*?)"?\s*\]\s*$')
+
+
+def sanitize_pgn(text: str) -> str:
+    """Normalize word-processor artifacts and repair malformed tag lines."""
+    text = text.replace("…", "...").translate(_CHAR_FIXES)
+    fixed_lines = []
+    for line in text.splitlines():
+        m = _TAG_LINE_RE.match(line)
+        if m:
+            # Rebuild the tag pair in canonical form: dedented, one space,
+            # straight quotes. Repairs [White"Rafay"], [White Rafay],
+            # [White "Rafay], and '   [White "Rafay"]' in one move.
+            fixed_lines.append(f'[{m.group(1)} "{m.group(2)}"]')
+        else:
+            fixed_lines.append(line)
+    return "\n".join(fixed_lines) + ("\n" if text.endswith("\n") else "")
 
 
 def parse_players_from_filename(path) -> Tuple[Optional[str], Optional[str]]:

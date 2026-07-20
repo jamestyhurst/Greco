@@ -76,8 +76,14 @@ def time_control_category(tc: str) -> str:
     """
     if not tc or tc in ("?", "-"):
         return ""
-    if "/" in tc:  # correspondence, e.g. "1/259200"
-        return "Daily"
+    if "/" in tc:
+        # Two very different controls share this shape: correspondence
+        # "1/259200" (ONE move per N seconds → Daily) and FIDE classical
+        # "40/7200:3600" (40 moves in 2 hours → an OTB session).
+        m = re.match(r"(\d+)/(\d+)", tc)
+        if not m:
+            return ""
+        return "Daily" if int(m.group(1)) == 1 else "Classical"
     try:
         if "+" in tc:
             base_s, inc_s = tc.split("+", 1)
