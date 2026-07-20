@@ -7,6 +7,41 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+### Added
+- **Ground-truth defense/attack geometry (`analyzer.compute_piece_relationships`).**
+  New `defends` and `hanging` fields on every move, computed from python-chess's
+  attacker bitboards (blockers already accounted for) — closes a real reported bug
+  where the narrator claimed a rook defended a bishop with a pawn sitting between
+  them on the same rank. `defends` lists every genuine "X defends Y" relationship
+  on the board after the move (non-pawn, non-king defended pieces); `hanging` lists
+  every attacked, undefended piece or pawn for either side. New narrator whitelist
+  rule (tagged `PENDING_APPROVAL`) forbids asserting a defense or calling a piece
+  safe unless the data backs it. 16 new tests (`tests/test_piece_relationships.py`).
+- **Ground-truth "denies a square" geometry (`analyzer.compute_denied_squares`).**
+  Detects when a pawn move newly controls a vacant square an enemy knight or bishop
+  could otherwise have jumped/slid to (e.g. "...a6 takes b5 away from the c3-knight")
+  — engine-free, pure board geometry. New `denies_squares` (played move) and
+  `best_move_denies_squares` (engine's preferred move) fields; the existing
+  prophylaxis narrator rule is revised (tagged `PENDING_APPROVAL`) to cite this field
+  as authoritative, since a prevented move by definition cannot appear inside a PV.
+  16 new tests (`tests/test_denies_squares.py`).
+  **Naming correction (same day, before merge):** this shipped for a few hours as
+  `compute_denied_outposts`/`denies_outpost`, misusing the reserved, already
+  James-approved `outpost` term (factgate.is_outpost — pawn-DEFENDED *and*
+  permanently pawn-UNCHALLENGEABLE) for a mechanism that tests neither condition.
+  Renamed throughout, and the prompt rule now explicitly forbids "outpost" language
+  for this field, reserving the word for the real `outpost` certified tag.
+- **Tier no longer gates truth, only depth.** `best_attacks` (what the engine's
+  preferred move actually attacks) and a new lean `best_line` (what to play instead)
+  now reach the narrator whenever an alternative move is being discussed, at any
+  tier — previously both were withheld below Tier 2 even though the verdict
+  (`best`) is sent at every tier unconditionally, which left Tier-1 "why is this
+  better" prose with nothing to argue from and produced invented reasons (e.g.
+  "a6 develops the rook"). The full Tier-2/3 payload (`best_pv`, `variations`,
+  multi-PV `alternatives`, `human_line`) is unchanged — this only moves the minimum
+  grounding needed for correctness, not the deeper-discussion content tier still
+  budgets for.
+
 ## [0.41.109] — 2026-07-19
 
 ### Fixed

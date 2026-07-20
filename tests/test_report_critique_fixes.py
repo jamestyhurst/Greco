@@ -106,9 +106,15 @@ def test_best_attacks_absent_when_best_equals_played():
     assert "best_attacks" not in d
 
 
-def test_best_attacks_absent_below_tier_two():
+def test_best_attacks_present_at_tier_one_too():
+    # BREAKING CHANGE (2026-07-20 tier/truth decoupling): `best_attacks` used to be
+    # withheld below Tier 2, so a Tier-1 "purpose" sentence had the engine's verdict
+    # (`best`, sent at every tier) with no ground truth to argue it from — the exact
+    # shape of the "a6 develops the rook" invention. `best` travels at every tier, so
+    # the ground truth for what the alternative move does must too. This replaces the
+    # old absent-below-tier-two assertion, which locked in the bug being fixed here.
     d = _mv(tier=1, best_move_attacks=["pawn on d5"])
-    assert "best_attacks" not in d
+    assert d["best_attacks"] == ["pawn on d5"]
 
 
 # --------------------------------------------------------------------------

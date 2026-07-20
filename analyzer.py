@@ -95,6 +95,10 @@ class MoveAnalysis:
     least_active_piece: Optional[str] = None   # the mover's most passive minor piece, if stuck
     tactic_setup: Optional[str] = None         # a pin/skewer the mover has lined up (king+queen on a rook's line)
     attacks_pieces: List[str] = field(default_factory=list)  # enemy pieces the moved piece actually attacks (so the model can't invent "kicks the knight")
+    defends: List[str] = field(default_factory=list)  # ground-truth "X defends Y" pairs on the board after this move (python-chess geometry, blockers included — so the model can't invent a defense through an interposed piece)
+    hanging: List[str] = field(default_factory=list)  # pieces/pawns (either color) attacked and with zero defenders right now
+    denies_squares: List[str] = field(default_factory=list)  # this PLAYED move newly denies a knight/bishop a landing square (e.g. "a6 takes b5 from the c3-knight") — plain square control, NOT the certified `outpost` claim (see compute_denied_squares docstring)
+    best_move_denies_squares: List[str] = field(default_factory=list)  # same, for the ENGINE'S preferred move — the "why" behind a quiet engine suggestion like ...a6
     doubled_pawns_created: Optional[str] = None  # this move newly doubled someone's pawns
     overloaded_defender: Optional[str] = None    # an overworked sole-defender on the board after this move
     still_winning: bool = False                # mover was decisively winning both before and after (so a slow move isn't a "mistake")
@@ -1042,6 +1046,98 @@ def detect_overloaded_defender_full(board: chess.Board) -> Optional[dict]:
     return None
 
 
+def compute_piece_relationships(board: chess.Board) -> Tuple[List[str], List[str]]:
+    """
+    Whole-board defense and hanging-piece geometry, computed once per move from
+    python-chess attacker/defender bitboards (which already account for blocking
+    pieces on the line, ray, or diagonal — a rook does NOT defend through an
+    interposed pawn). This is the ground truth the narrator must consult before
+    asserting that one piece defends, guards, or protects another, or that a piece
+    is safe: python-chess knows the geometry; the model must not guess it.
+
+    Returns (defends, hanging):
+      - defends: "<Piece> on <sq> defends <piece> on <sq>" for every piece (of
+        either color, any type including pawns) that currently guards a NON-PAWN,
+        NON-KING piece. Pawn-chain internals are already covered by the doubled/
+        isolated/backward-pawn fields, and king-guarding relationships are covered
+        by the castling/luft/back-rank-weakness fields, so both are left out here
+        to keep this list to the piece-level defense claims that were actually
+        going wrong. This is pure attack-pattern geometry, not a tactical verdict:
+        a listed defender may still be pinned (check `tactic_setup`/the certified
+        pin tags separately before calling a defense "real").
+      - hanging: "<White|Black> <piece> on <sq>" for every non-king piece (pieces
+        and pawns) that is attacked by the opponent and has zero defenders of its
+        own color right now.
+    """
+    defends: List[str] = []
+    hanging: List[str] = []
+    for sq, piece in board.piece_map().items():
+        color = piece.color
+        enemy = not color
+        if piece.piece_type != chess.KING:
+            if board.is_attacked_by(enemy, sq) and not board.is_attacked_by(color, sq):
+                side = "White" if color == chess.WHITE else "Black"
+                hanging.append(f"{side} {PIECE_NAMES[piece.piece_type]} on {chess.square_name(sq)}")
+        if piece.piece_type in (chess.PAWN, chess.KING):
+            continue  # defended-pawn / defended-king claims are covered by other fields, not here
+        for dsq in board.attackers(color, sq):
+            dpiece = board.piece_at(dsq)
+            if dpiece is None:
+                continue
+            defends.append(
+                f"{PIECE_NAMES[dpiece.piece_type].capitalize()} on {chess.square_name(dsq)} "
+                f"defends {PIECE_NAMES[piece.piece_type]} on {chess.square_name(sq)}"
+            )
+    return defends, hanging
+
+
+def compute_denied_squares(
+    board_before: chess.Board, move: chess.Move, board_after: chess.Board, mover_color: bool
+) -> List[str]:
+    """
+    Pure geometric fact: does this PAWN move newly cover a vacant square that an
+    enemy knight or bishop could otherwise have jumped or slid to? This is the data
+    behind "...a6 takes b5 away from the c3-knight" — python-chess already knows a6
+    attacks b5 and that a knight on c3 reaches b5 in one hop; no engine line is
+    needed to see it, so this must not depend on how deep the engine looked.
+
+    NOT the outpost predicate. "Outpost" is a reserved, precisely-defined term in
+    this codebase (factgate.is_outpost / knowledge/terminology glossary, approved
+    2026-06-15): a square that is pawn-DEFENDED and permanently pawn-UNCHALLENGEABLE.
+    This function tests neither condition — it is one-move square control, nothing
+    structural or permanent. Do not call this an "outpost" fact anywhere (field
+    name, docstring, or narrator prose): a square this move denies may never have
+    qualified as a true outpost even if occupied (e.g. an enemy pawn on an adjacent
+    file could still one day challenge it), which is precisely the failure mode
+    this naming boundary exists to prevent.
+
+    Only pawn moves are checked (the classic prophylactic-push pattern). A square
+    counts as newly denied only if it was vacant and uncovered by the mover's side
+    before this move (so the enemy piece's landing was genuinely available) and is
+    now attacked by the pawn that just moved. Returns human-readable strings; an
+    empty list is affirmative — this move denies no enemy piece a square.
+    """
+    denied: List[str] = []
+    piece = board_after.piece_at(move.to_square)
+    if piece is None or piece.piece_type != chess.PAWN:
+        return denied
+    enemy = not mover_color
+    for sq in board_after.attacks(move.to_square):
+        if board_before.piece_at(sq) is not None:
+            continue  # not a vacant landing square
+        if board_before.is_attacked_by(mover_color, sq):
+            continue  # already covered before this move — not newly denied
+        for rsq in board_before.attackers(enemy, sq):
+            rpiece = board_before.piece_at(rsq)
+            if rpiece is None or rpiece.piece_type not in (chess.KNIGHT, chess.BISHOP):
+                continue
+            denied.append(
+                f"{chess.square_name(move.to_square)} newly controls {chess.square_name(sq)}, "
+                f"taking it away from the {PIECE_NAMES[rpiece.piece_type]} on {chess.square_name(rsq)}"
+            )
+    return denied
+
+
 def detect_allowed_pawn_fork(board_after: chess.Board, mover_color: bool) -> Optional[str]:
     """
     After the mover's move, can the OPPONENT play a pawn push that forks two of
@@ -1579,6 +1675,7 @@ def analyze_pgn(
             # 2026-07-18 critique, item 11): an empty list is affirmative evidence
             # the engine's move attacks nothing right now.
             best_move_attacks: List[str] = []
+            best_move_denies_squares: List[str] = []
             try:
                 probe = board.copy()
                 probe.push(best_move)
@@ -1596,9 +1693,13 @@ def analyze_pgn(
                             best_move_attacks.append(
                                 f"{PIECE_NAMES[pc.piece_type]} on {chess.square_name(asq)}"
                             )
+                best_move_denies_squares = compute_denied_squares(
+                    board, best_move, probe, side_color
+                )
             except Exception:
                 best_move_double_attack = None
                 best_move_attacks = []
+                best_move_denies_squares = []
 
             # Whether the engine's best move is itself a recapture (so the narrator
             # describes alternatives like dxe4 accurately — capture vs. recapture).
@@ -1766,6 +1867,8 @@ def analyze_pgn(
                         )
             doubled_created = detect_doubled_pawns_created(board_before_snapshot, board)
             overloaded = detect_overloaded_defender(board)
+            defends, hanging = compute_piece_relationships(board)
+            denies_squares = compute_denied_squares(board_before_snapshot, move, board, side_color)
             # Unsound / "intimidation" sacrifice: gave up >=2 points via a capture or
             # check, but the engine does NOT favor the mover afterward.
             is_unsound_sacrifice = (
@@ -1824,6 +1927,10 @@ def analyze_pgn(
                     least_active_piece=least_active,
                     tactic_setup=tactic_setup,
                     attacks_pieces=attacks_pieces,
+                    defends=defends,
+                    hanging=hanging,
+                    denies_squares=denies_squares,
+                    best_move_denies_squares=best_move_denies_squares,
                     doubled_pawns_created=doubled_created,
                     overloaded_defender=overloaded,
                     still_winning=still_winning,
