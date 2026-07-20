@@ -7,6 +7,8 @@ pre-1.0 (the `0.x` series), features and layout may still change between version
 
 ## [Unreleased]
 
+## [0.41.109] — 2026-07-19
+
 ### Fixed
 - **The desktop GUI's Analyze button is back.** The Tkinter window was fixed at
   760x700 while the form kept growing; when the paste-PGN box landed (2026-06-18,
